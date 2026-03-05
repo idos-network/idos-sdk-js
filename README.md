@@ -40,9 +40,13 @@ const provider = new ethers.BrowserProvider(window.ethereum);
 await provider.send("eth_requestAccounts", []);
 const signer = await provider.getSigner();
 
-// Initialize the SDK
+// Initialize the SDK (enclave is rendered as a full-screen iframe + modal)
 let idOSClient = createIDOSClient({
-  enclaveOptions: { container: "#idOS-container" },
+  enclaveOptions: {
+    // URL of your deployed idOS Enclave app (e.g. https://enclave.yourapp.com)
+    // or the default hosted enclave: https://enclave.idos.network
+    url: "https://enclave.idos.network",
+  },
 });
 idOSClient = await idOSClient.withUserSigner(signer);
 

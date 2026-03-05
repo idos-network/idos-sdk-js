@@ -80,7 +80,8 @@ import { createIDOSClient, type idOSClient } from "@idos-network/client";
 
 const idOSClient = createIDOSClient({
   enclaveOptions: {
-    container: "#idOS-enclave",
+   // Uses default hosted enclave: https://enclave.idos.network
++  // Or specify your own: url: "https://enclave.yourapp.com"
   },
 });
 ```

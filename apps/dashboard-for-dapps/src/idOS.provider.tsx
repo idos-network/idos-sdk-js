@@ -14,7 +14,6 @@ import { projectId, useEthersSigner, wagmiConfig } from "@/wagmi.config";
 const _idOSClient = createIDOSClient({
   nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
   enclaveOptions: {
-    container: "#idOS-enclave",
     url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
   },
 });

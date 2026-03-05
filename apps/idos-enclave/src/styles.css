@@ -3,6 +3,48 @@
 
 @custom-variant dark (&:is(.dark *));
 
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Ensure proper iframe behavior */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+html.dark,
+html.dark body,
+html.dark #app {
+  color-scheme: dark;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* Smooth animations for modal appearance */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
 :root {
   --background: oklch(98.5% 0 0);
   --foreground: oklch(14.5% 0 0);

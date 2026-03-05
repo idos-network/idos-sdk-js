@@ -1,7 +1,7 @@
 import { keyDerivation } from "@idos-network/utils/encryption";
 import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
-import { CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
+import { CheckIcon, CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import nacl from "tweetnacl";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
@@ -19,17 +19,20 @@ function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
     <div class="flex flex-col gap-1">
       <TextField
         id="idos-password-input"
-        autoFocus
         type="password"
         required={true}
         value={password.value}
         onInput={(e) => {
           password.value = (e.target as HTMLInputElement).value;
+          // Clear error as soon as the user starts typing again
+          if (hasError) {
+            hasError.value = false;
+          }
         }}
         {...props}
       />
       {hasError?.value ? (
-        <p class="tex-sm text-left font-semibold text-red-500">Invalid password.</p>
+        <p class="h-4 text-left font-semibold text-red-500 text-sm">Invalid password.</p>
       ) : null}
     </div>
   );
@@ -95,6 +98,8 @@ export default function PasswordForm({
   const duration = useSignal(7);
   const hasError = useSignal(false);
   const isLoading = useSignal(false);
+  const fatalError = useSignal(false);
+  const understand = useSignal(true);
 
   async function derivePublicKeyFromPassword(password: string) {
     const salt = userId;
@@ -103,33 +108,100 @@ export default function PasswordForm({
       throw new Error("Salt is invalid, please try again.");
     }
 
+    console.log("[idOS Enclave] Deriving key", {
+      userId: salt,
+      passwordLength: password.length,
+    });
+
     const secretKey = await keyDerivation(password, salt);
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-    return encode(keyPair.publicKey);
+    const derived = encode(keyPair.publicKey);
+    return derived;
   }
 
   const onSubmit = async (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    isLoading.value = true;
 
-    if (encryptionPublicKey) {
-      const derivedPK = await derivePublicKeyFromPassword(password.value);
-      if (derivedPK !== encryptionPublicKey) {
+    if (mode === "new" && !understand.value) {
+      return;
+    }
+
+    isLoading.value = true;
+    fatalError.value = false;
+
+    try {
+      // Check if encryptionPublicKey is missing or empty when verification is required
+      const isEncryptionPublicKeyEmpty =
+        !encryptionPublicKey || encryptionPublicKey.trim().length === 0;
+
+      // If mode indicates an existing account (not "new"), verification is required
+      const requiresVerification = mode !== "new";
+
+      if (requiresVerification && isEncryptionPublicKeyEmpty) {
+        console.error(
+          "[idOS Enclave] encryptionPublicKey is missing or empty but verification is required",
+          {
+            mode,
+            encryptionPublicKey,
+          },
+        );
         hasError.value = true;
         isLoading.value = false;
         return;
       }
+
+      if (encryptionPublicKey && !isEncryptionPublicKeyEmpty) {
+        console.log("[idOS Enclave] Submitting password form", {
+          mode,
+          hasEncryptionPublicKey: !!encryptionPublicKey,
+        });
+
+        let derivedPK: string;
+        try {
+          derivedPK = await derivePublicKeyFromPassword(password.value);
+        } catch (error) {
+          console.error("[idOS Enclave] Error during key derivation", error);
+          hasError.value = true;
+          isLoading.value = false;
+          return;
+        }
+
+        console.log("[idOS Enclave] Comparing keys", {
+          derivedPK,
+          encryptionPublicKey,
+          match: derivedPK === encryptionPublicKey,
+        });
+
+        if (derivedPK !== encryptionPublicKey) {
+          hasError.value = true;
+          isLoading.value = false;
+          return;
+        }
+      }
+
+      hasError.value = false;
+
+      // Keep onSuccess isolated so the outer catch can skip password-error UI for handler failures.
+      try {
+        onSuccess({
+          encryptionPasswordStore: "user",
+          password: password.value,
+          duration: duration.value,
+        });
+      } catch (error) {
+        console.error("[idOS Enclave] onSuccess handler error", error);
+        fatalError.value = true;
+        throw error;
+      }
+    } catch (error) {
+      if (!fatalError.value) {
+        console.error("[idOS Enclave] Unexpected error in password submit", error);
+        hasError.value = true;
+      }
+      // Only clear loading state on error; on success the dialog will close
+      isLoading.value = false;
     }
-
-    hasError.value = false;
-    isLoading.value = false;
-
-    onSuccess({
-      encryptionPasswordStore: "user",
-      password: password.value,
-      duration: duration.value,
-    });
   };
 
   const showPassword = useSignal(false);
@@ -156,7 +228,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute top-6 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -183,11 +255,34 @@ export default function PasswordForm({
             </div>
           </div>
 
+          <div class="mt-6">
+            <label
+              class="flex cursor-pointer select-none items-center gap-3"
+              for="understand-checkbox"
+            >
+              <input
+                id="understand-checkbox"
+                type="checkbox"
+                class="peer sr-only"
+                checked={understand.value}
+                onInput={(e) => {
+                  understand.value = (e.target as HTMLInputElement).checked;
+                }}
+              />
+              <span class="flex size-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition-colors peer-checked:border-[#00FFB9] peer-checked:bg-[#00FFB9] [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
+                <CheckIcon class="size-7 text-black" strokeWidth={3} />
+              </span>
+              <span class="text-muted-foreground text-sm leading-snug">
+                I understand that idOS cannot reset or recover my password if I lose it.
+              </span>
+            </label>
+          </div>
+
           <div class="flex items-center justify-between gap-3">
             <Button type="button" variant="secondary" onClick={onCancel} class="flex-1">
               Back
             </Button>
-            <Button type="submit" class="flex-1">
+            <Button type="submit" class="flex-1" disabled={!understand.value || isLoading.value}>
               Continue
             </Button>
           </div>
@@ -196,12 +291,7 @@ export default function PasswordForm({
         <>
           <Heading>Unlock your idOS key</Heading>
 
-          <Paragraph>Please enter your idOS password below:</Paragraph>
-
           <div class="flex flex-col gap-4">
-            <label htmlFor="idos-password-input" class="font-medium text-foreground text-sm">
-              Password
-            </label>
             <div class="relative">
               <PasswordField
                 id="idos-password-input"
@@ -212,7 +302,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute top-6 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
