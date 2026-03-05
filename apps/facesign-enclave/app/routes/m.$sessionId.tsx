@@ -21,12 +21,14 @@ export async function loader({ params }: Route.LoaderArgs) {
   return { sessionId: session.id };
 }
 
-type PageState = "ready" | "scanning" | "submitting" | "success" | "error";
+type PageState = "ready" | "scanning" | "submitting" | "success" | "error" | "confirmNewUser";
 
 export default function MobileHandoff() {
   const { sessionId } = useLoaderData<typeof loader>();
   const [state, setState] = useState<PageState>("ready");
   const [error, setError] = useState<string | null>(null);
+  const [newUserToken, setNewUserToken] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const initialized = useRef(false);
 
   const submitToken = useCallback(
@@ -47,6 +49,27 @@ export default function MobileHandoff() {
     [sessionId],
   );
 
+  const handleCreate = useCallback(async () => {
+    if (isCreating) return;
+    if (!newUserToken) {
+      setError("No new user token");
+      setState("error");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const { userAttestmentToken } = await confirmNewUser(newUserToken);
+      await submitToken(userAttestmentToken);
+    } catch (e) {
+      console.error("[MobileHandoff] handleCreate error:", e);
+      setError(e instanceof Error ? e.message : "An unexpected error occurred");
+      setState("error");
+    } finally {
+      setIsCreating(false);
+    }
+  }, [newUserToken, submitToken, isCreating]);
+
   const startScan = useCallback(async () => {
     if (initialized.current) return;
     initialized.current = true;
@@ -66,8 +89,8 @@ export default function MobileHandoff() {
           if (attestationToken) {
             await submitToken(attestationToken);
           } else if (newUserConfirmationToken) {
-            const { userAttestmentToken } = await confirmNewUser(newUserConfirmationToken);
-            await submitToken(userAttestmentToken);
+            setState("confirmNewUser");
+            setNewUserToken(newUserConfirmationToken);
           } else {
             throw new Error("Unexpected state: no token received");
           }
@@ -121,6 +144,35 @@ export default function MobileHandoff() {
         <div className="flex flex-col items-center gap-4 text-center">
           <Spinner className="size-8" />
           <p className="text-muted-foreground text-sm">Submitting verification...</p>
+        </div>
+      )}
+
+      {state === "confirmNewUser" && (
+        <div className="flex flex-col items-center gap-4 text-center">
+          <h1 className="font-semibold text-xl">No FaceSign profile found</h1>
+          <p className="text-muted-foreground text-sm">
+            If we couldn't log you in with FaceSign, you're likely not enrolled yet. Let's create
+            your idOS Profile and turn on Login with FaceSign.
+          </p>
+          <div className="flex w-full flex-col gap-2">
+            <Button onClick={() => window.location.reload()}>I have an account! Try Again</Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={handleCreate}
+              disabled={isCreating}
+            >
+              {isCreating ? (
+                <>
+                  <Spinner className="size-5" />
+                  Creating...
+                </>
+              ) : (
+                "Create FaceSign Account"
+              )}
+            </Button>
+          </div>
         </div>
       )}
 
