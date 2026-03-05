@@ -54,10 +54,10 @@ export class XrplCredentialsCreate {
   readonly #wallet: Wallet;
   readonly #xrpl: typeof import("xrpl");
 
-  constructor(nodeUrl: string, seed: string, xrpl: typeof import("xrpl")) {
+  constructor(nodeUrl: string, wallet: Wallet, xrpl: typeof import("xrpl")) {
     this.#xrpl = xrpl;
+    this.#wallet = wallet;
     this.#client = new this.#xrpl.Client(nodeUrl);
-    this.#wallet = this.#xrpl.Wallet.fromSeed(seed);
   }
 
   /**
@@ -66,7 +66,7 @@ export class XrplCredentialsCreate {
    * @param nodeUrl - The WebSocket URL of the XRPL node to connect to
    * @param seed  - The XRPL wallet seed to use for signing transactions
    */
-  static async init(nodeUrl: string, seed: string): Promise<XrplCredentialsCreate> {
+  static async init(nodeUrl: string, wallet: Wallet): Promise<XrplCredentialsCreate> {
     let xrpl: typeof import("xrpl");
 
     try {
@@ -77,7 +77,7 @@ export class XrplCredentialsCreate {
       );
     }
 
-    return new XrplCredentialsCreate(nodeUrl, seed, xrpl);
+    return new XrplCredentialsCreate(nodeUrl, wallet, xrpl);
   }
 
   /**

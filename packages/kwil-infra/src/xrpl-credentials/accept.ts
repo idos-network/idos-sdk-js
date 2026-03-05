@@ -115,7 +115,7 @@ export async function CopyCredentialAcceptPayload(
     ({ decodeAccountID } = await import("xrpl"));
   } catch {
     throw new Error(
-      'Missing optional peer dependency "xrpl". Install it to use Xumm public-key extraction.',
+      'Missing optional peer dependency "xrpl". Install it to use CopyCredentialAcceptPayload.',
     );
   }
 

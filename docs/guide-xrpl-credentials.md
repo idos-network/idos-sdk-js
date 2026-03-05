@@ -26,7 +26,7 @@ class XrplCredentialsCreate {
    * @param nodeUrl - The WebSocket URL of the XRPL node to connect to
    * @param seed  - The XRPL wallet seed to use for signing transactions
    */
-  static async init(nodeUrl: string, seed: string): Promise<XrplCredentialsCreate>;
+  static async init(nodeUrl: string, wallet: Wallet): Promise<XrplCredentialsCreate>;
 
   /**
    * Creates a credential on the XRPL that reflects an idOS original credential.
