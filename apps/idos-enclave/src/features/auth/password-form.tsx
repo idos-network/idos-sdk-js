@@ -99,6 +99,7 @@ export default function PasswordForm({
   const hasError = useSignal(false);
   const isLoading = useSignal(false);
   const fatalError = useSignal(false);
+  const understand = useSignal(true);
 
   async function derivePublicKeyFromPassword(password: string) {
     const salt = userId;
@@ -121,12 +122,18 @@ export default function PasswordForm({
   const onSubmit = async (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (mode === "new" && !understand.value) {
+      return;
+    }
+
     isLoading.value = true;
+    fatalError.value = false;
 
     try {
       // Check if encryptionPublicKey is missing or empty when verification is required
       const isEncryptionPublicKeyEmpty =
-        !encryptionPublicKey || encryptionPublicKey === "" || encryptionPublicKey.trim() === "";
+        !encryptionPublicKey || encryptionPublicKey.trim().length === 0;
 
       // If mode indicates an existing account (not "new"), verification is required
       const requiresVerification = mode !== "new";
@@ -175,7 +182,7 @@ export default function PasswordForm({
 
       hasError.value = false;
 
-      // Call onSuccess in its own try-catch to distinguish errors from password validation
+      // Keep onSuccess isolated so the outer catch can skip password-error UI for handler failures.
       try {
         onSuccess({
           encryptionPasswordStore: "user",
@@ -185,13 +192,9 @@ export default function PasswordForm({
       } catch (error) {
         console.error("[idOS Enclave] onSuccess handler error", error);
         fatalError.value = true;
-        isLoading.value = false;
-        // Rethrow to prevent the outer catch from treating this as a password error
         throw error;
       }
     } catch (error) {
-      // Only catch unexpected errors from password validation logic
-      // Errors from onSuccess are already handled above and rethrown
       if (!fatalError.value) {
         console.error("[idOS Enclave] Unexpected error in password submit", error);
         hasError.value = true;
@@ -257,7 +260,15 @@ export default function PasswordForm({
               class="flex cursor-pointer select-none items-center gap-3"
               for="understand-checkbox"
             >
-              <input id="understand-checkbox" type="checkbox" class="peer sr-only" checked />
+              <input
+                id="understand-checkbox"
+                type="checkbox"
+                class="peer sr-only"
+                checked={understand.value}
+                onInput={(e) => {
+                  understand.value = (e.target as HTMLInputElement).checked;
+                }}
+              />
               <span class="flex size-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition-colors peer-checked:border-[#00FFB9] peer-checked:bg-[#00FFB9] [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
                 <CheckIcon class="size-7 text-black" strokeWidth={3} />
               </span>
@@ -271,7 +282,7 @@ export default function PasswordForm({
             <Button type="button" variant="secondary" onClick={onCancel} class="flex-1">
               Back
             </Button>
-            <Button type="submit" class="flex-1">
+            <Button type="submit" class="flex-1" disabled={!understand.value || isLoading.value}>
               Continue
             </Button>
           </div>
