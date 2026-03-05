@@ -28,6 +28,7 @@ export default function MobileHandoff() {
   const [state, setState] = useState<PageState>("ready");
   const [error, setError] = useState<string | null>(null);
   const [newUserToken, setNewUserToken] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const initialized = useRef(false);
 
   const submitToken = useCallback(
@@ -49,13 +50,25 @@ export default function MobileHandoff() {
   );
 
   const handleCreate = useCallback(async () => {
+    if (isCreating) return;
     if (!newUserToken) {
-      throw new Error("No new user token");
+      setError("No new user token");
+      setState("error");
+      return;
     }
 
-    const { userAttestmentToken } = await confirmNewUser(newUserToken);
-    await submitToken(userAttestmentToken);
-  }, [newUserToken, submitToken]);
+    setIsCreating(true);
+    try {
+      const { userAttestmentToken } = await confirmNewUser(newUserToken);
+      await submitToken(userAttestmentToken);
+    } catch (e) {
+      console.error("[MobileHandoff] handleCreate error:", e);
+      setError(e instanceof Error ? e.message : "An unexpected error occurred");
+      setState("error");
+    } finally {
+      setIsCreating(false);
+    }
+  }, [newUserToken, submitToken, isCreating]);
 
   const startScan = useCallback(async () => {
     if (initialized.current) return;
@@ -143,8 +156,21 @@ export default function MobileHandoff() {
           </p>
           <div className="flex w-full flex-col gap-2">
             <Button onClick={() => window.location.reload()}>I have an account! Try Again</Button>
-            <Button variant="outline" size="lg" className="w-full" onClick={handleCreate}>
-              Create FaceSign Account
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={handleCreate}
+              disabled={isCreating}
+            >
+              {isCreating ? (
+                <>
+                  <Spinner className="size-5" />
+                  Creating...
+                </>
+              ) : (
+                "Create FaceSign Account"
+              )}
             </Button>
           </div>
         </div>
