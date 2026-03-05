@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import Bowser from "bowser";
+import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
 import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
 import { sessionStorage } from "@/lib/sessions.server";
@@ -36,10 +38,19 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const { isKeyAvailable, setMnemonic } = useKeyStorageContext();
   const { revalidate } = useRevalidator();
-
   const redirect = searchParams.get("redirect") ?? "/wallet";
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
-  // TODO: We are missing immediate redirect to "/scan" if this is already a mobile session.
+  useEffect(() => {
+    // Let's redirect on mobile devices directly to scan page
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    const isMobile = browser.getPlatformType(true) === "mobile";
+    setIsMobile(isMobile);
+
+    if (isMobile) {
+      navigate(`/scan?redirect=${encodeURIComponent(redirect)}`);
+    }
+  }, []);
 
   useEffect(() => {
     if (isKeyAvailable) {
@@ -65,7 +76,13 @@ export default function Login() {
     }
   }, [session]);
 
-  console.log(`https://${window.location.host}/m/${session?.id}`);
+  if (isMobile === null || isMobile === true) {
+    return (
+      <div className="flex h-svh items-center justify-center bg-background">
+        <Spinner className="size-8" />
+      </div>
+    );
+  }
 
   return (
     <div role="dialog" className="fixed inset-0 flex items-center justify-center bg-background p-6">

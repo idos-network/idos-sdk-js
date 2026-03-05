@@ -12,6 +12,7 @@ betanet
 biomejs
 Blockhash
 Borsh
+bowser
 CCPA
 ciphertext
 codegen
