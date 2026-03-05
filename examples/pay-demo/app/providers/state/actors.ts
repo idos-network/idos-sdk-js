@@ -35,7 +35,6 @@ export const actors = {
     }: {
       input: { client: Context["loggedInClient"]; credentialId: Context["credentialId"] };
     }) => {
-      console.log("input", input);
       if (!input.client) {
         throw new Error("Client not found");
       }

@@ -1,6 +1,7 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { useEffect, useState } from "react";
 import { EVMConnector } from "./components/evm";
+import { FaceSignConnector } from "./components/facesign";
 import { NearConnector } from "./components/near";
 import { StellarConnector, stellarKit } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
@@ -35,6 +36,7 @@ function WalletConnector() {
 
   return (
     <>
+      {showWallet("FaceSign") && <FaceSignConnector />}
       {showWallet("EVM") && <EVMConnector />}
       {showWallet("NEAR") && <NearConnector />}
       {showWallet("XRPL") && <XRPLConnector />}
@@ -152,9 +154,13 @@ export function App() {
   }
 
   return (
-    <div className="grid h-full place-content-center">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col items-stretch justify-center gap-4">
+    <div className="grid h-full place-content-center p-5">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+          <img alt="idOS" src="/logo.svg" width={136} height={44} />
+          <span className="font-bold text-lg text-neutral-50">Wallet Connector</span>
+        </div>
+        <div className="flex min-w-80 flex-col items-stretch justify-center gap-4">
           <WalletConnector />
         </div>
       </div>

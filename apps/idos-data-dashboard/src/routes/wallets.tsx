@@ -1,37 +1,20 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
-import { createFileRoute } from "@tanstack/react-router";
-import { useSelector } from "@xstate/react";
 import { useState } from "react";
+import { FacesignBanner } from "@/components/facesign/facesign-banner";
 import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
-import { WalletsError } from "@/components/wallets/wallets-error";
-import { WalletsPending } from "@/components/wallets/wallets-pending";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
-import { useFetchWallets, walletsQueryOptions } from "@/lib/queries/wallets";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useFetchWallets } from "@/lib/queries/wallets";
+import { useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
-
-export const Route = createFileRoute("/wallets")({
-  component: Wallets,
-  staticData: { breadcrumb: "Wallets" },
-  pendingComponent: WalletsPending,
-  errorComponent: WalletsError,
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      "add-wallet": search["add-wallet"],
-      callbackUrl: search.callbackUrl,
-      publicKey: search.publicKey,
-    };
-  },
-  loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(walletsQueryOptions()),
-});
 
 function WalletsList() {
   const { data: wallets } = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [walletsToDelete, setWalletsToDelete] = useState<idOSWallet[]>([]);
-  const address = useSelector(dashboardActor, selectWalletAddress);
+  const address = useSelector(selectWalletAddress);
 
   const handleDelete = (walletAddress: string) => {
     const toDelete = wallets[walletAddress];
@@ -58,6 +41,7 @@ function WalletsList() {
           <li key={walletAddress} className="list-none">
             <WalletCard
               address={walletAddress}
+              walletType={wallets[walletAddress]?.[0]?.wallet_type}
               onDelete={handleDelete}
               isDisabled={address?.toLowerCase() === walletAddress.toLowerCase()}
             />
@@ -69,7 +53,14 @@ function WalletsList() {
   );
 }
 
-function Wallets() {
+const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
+
+export default function Wallets() {
+  const { data: wallets } = useFetchWallets();
+  const hasFacesignWallet = Object.values(wallets).some((group) =>
+    group?.some((w) => w.wallet_type === "FaceSign"),
+  );
+
   return (
     <div className="flex flex-1 flex-col items-stretch gap-5">
       <div className="flex h-14 items-center justify-between rounded-xl bg-card p-5 lg:h-20">
@@ -78,6 +69,7 @@ function Wallets() {
           <AddWalletButton />
         </div>
       </div>
+      {hasFacesignEnclave && !hasFacesignWallet && <FacesignBanner />}
       <WalletsList />
     </div>
   );

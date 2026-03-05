@@ -13,11 +13,17 @@ export const selectIsLoading = (snapshot: DashboardSnapshot): boolean =>
 export const selectIsDisconnected = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("disconnected") || snapshot.matches("connecting");
 
+export const selectIsConnectingFaceSign = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("connecting") && snapshot.context.walletType === "FaceSign";
+
+export const selectIsCreatingFacesignProfile = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("creatingFacesignProfile");
+
 export const selectIsLoggedIn = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("loggedIn");
 
 export const selectHasAccount = (snapshot: DashboardSnapshot): boolean =>
-  snapshot.matches("loggedIn") && snapshot.context.idOSClient.state === "logged-in";
+  snapshot.matches("loggedIn") && snapshot.context.idOSClient?.state === "logged-in";
 
 export const selectIsNoProfile = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("noProfile");
@@ -35,7 +41,7 @@ export const selectWalletType = (snapshot: DashboardSnapshot): WalletType | null
 
 export const selectLoggedInClient = (snapshot: DashboardSnapshot): idOSClientLoggedIn | null => {
   const client = snapshot.context.idOSClient;
-  if (client.state === "logged-in") {
+  if (client && client.state === "logged-in") {
     return client;
   }
 

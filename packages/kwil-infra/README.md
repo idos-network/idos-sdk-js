@@ -35,7 +35,7 @@ Some features require optional peer dependencies:
 - `@wagmi/core` (EVM)
 - `near-api-js`, `@near-wallet-selector/core` (NEAR)
 - `@stellar/stellar-sdk` (Stellar)
-- `ripple-keypairs` (XRPL)
+- `ripple-keypairs`, `xrpl` (XRPL)
 
 ## Create a Kwil client
 

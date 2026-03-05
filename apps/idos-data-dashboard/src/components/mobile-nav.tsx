@@ -1,7 +1,12 @@
-import { Link } from "@tanstack/react-router";
 import { ExternalLinkIcon, XIcon } from "lucide-react";
+import { Link } from "react-router";
+import {
+  ConnectedWallet,
+  DisconnectButton,
+  FooterNavLinks,
+  MainNavLinks,
+} from "@/layouts/dashboard";
 import { cn } from "@/lib/utils";
-import { ConnectedWallet, DisconnectButton, FooterNavLinks, MainNavLinks } from "./layout";
 import { Button, buttonVariants } from "./ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui/drawer";
 

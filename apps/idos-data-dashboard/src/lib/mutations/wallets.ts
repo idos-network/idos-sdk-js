@@ -2,7 +2,7 @@ import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
-import { useIDOS } from "@/core/idOS";
+import { useIDOSClient } from "@/hooks/idOS";
 
 export const createWalletParamsFactory = ({
   address,
@@ -49,7 +49,7 @@ export const createWallet = async (
 };
 
 export function useAddWalletMutation() {
-  const idOSClient = useIDOS();
+  const idOSClient = useIDOSClient();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -84,7 +84,7 @@ export function useAddWalletMutation() {
 }
 
 export function useDeleteWalletMutation() {
-  const idOSClient = useIDOS();
+  const idOSClient = useIDOSClient();
   const queryClient = useQueryClient();
 
   return useMutation<void, DefaultError, idOSWallet[]>({

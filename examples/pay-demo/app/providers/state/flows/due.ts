@@ -96,6 +96,7 @@ export const flow = {
         },
         onError: {
           target: "error",
+          actions: ["setErrorMessage"],
         },
       },
     },

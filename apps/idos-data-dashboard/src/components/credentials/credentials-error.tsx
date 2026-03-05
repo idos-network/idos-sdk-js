@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "react-router";
 import { ErrorCard } from "@/components/error-card";
 
 interface CredentialsErrorProps {
@@ -8,12 +8,12 @@ interface CredentialsErrorProps {
 
 export function CredentialsError({ reset }: CredentialsErrorProps) {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleRetry = () => {
     queryClient.removeQueries({ queryKey: ["credentials"] });
     reset?.();
-    router.invalidate();
+    navigate("/");
   };
 
   return (

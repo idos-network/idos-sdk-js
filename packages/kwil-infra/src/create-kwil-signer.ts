@@ -10,6 +10,7 @@ import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
 import type { WalletType } from "./actions";
 import type { KwilActionClient } from "./create-kwil-client";
+import { FaceSignSignerProvider } from "./facesign/facesign-signer";
 import {
   createNearWalletKwilSigner,
   implicitAddressFromPublicKey,
@@ -20,12 +21,18 @@ import { createXrpKwilSigner } from "./xrp/signer";
 import { getXrpPublicKey, looksLikeXrpWallet } from "./xrp/utils";
 
 export { KwilSigner } from "@idos-network/kwil-js";
-export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner | StellarWallet;
 
 export interface StellarWallet {
   getAddress(): Promise<{ address: string }>;
   signMessage(message: string): Promise<{ signedMessage: string }>;
 }
+export type Wallet =
+  | EthersWallet
+  | JsonRpcSigner
+  | NearWallet
+  | CustomKwilSigner
+  | StellarWallet
+  | FaceSignSignerProvider;
 
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
@@ -249,6 +256,31 @@ export async function createClientKwilSigner(
       "XRPL",
     ];
   }
+
+  if (isCustomKwilSigner(wallet) || wallet instanceof FaceSignSignerProvider) {
+    const storedAddress = await store.get<string>("signer-address");
+
+    if (storedAddress !== wallet.publicAddress) {
+      store.set("signer-address", wallet.publicAddress);
+      try {
+        await kwilClient.client.auth.logoutKGW();
+      } catch (error) {
+        console.log("error logoutKGW", error);
+      }
+    }
+
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => wallet.signMessage(msg),
+        wallet.publicAddress,
+        "ed25519",
+      ),
+      wallet.publicAddress,
+      wallet.publicKey,
+      wallet.walletType as WalletType,
+    ];
+  }
+
   if (isStellarWallet(wallet)) {
     const { address } = await wallet.getAddress();
     const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
@@ -262,24 +294,6 @@ export async function createClientKwilSigner(
       "sep53",
     );
     return [kwilSigner, address, publicKey, "Stellar"];
-  }
-  if (isCustomKwilSigner(wallet)) {
-    try {
-      await kwilClient.client.auth.logoutKGW();
-    } catch (error) {
-      console.log("error logoutKGW", error);
-    }
-
-    return [
-      new KwilSigner(
-        async (msg: Uint8Array) => wallet.signMessage(msg),
-        wallet.publicAddress,
-        "ed25519",
-      ),
-      wallet.publicAddress,
-      wallet.publicKey,
-      wallet.walletType as WalletType,
-    ];
   }
 
   // Force the check that `signer` is `never`.

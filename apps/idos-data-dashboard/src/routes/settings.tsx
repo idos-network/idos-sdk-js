@@ -1,14 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { FileLockIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useIDOS } from "@/core/idOS";
-
-export const Route = createFileRoute("/settings")({
-  component: Settings,
-  staticData: { breadcrumb: "Settings" },
-});
+import { useIDOSClient } from "@/hooks/idOS";
 
 function waitForDismiss(signal: AbortSignal) {
   return new Promise<never>((_resolve, reject) => {
@@ -20,8 +14,8 @@ function waitForDismiss(signal: AbortSignal) {
   });
 }
 
-function Settings() {
-  const idOSClient = useIDOS();
+export default function Settings() {
+  const idOSClient = useIDOSClient();
   const [isBackingUp, setIsBackingUp] = useState(false);
 
   const handleBackup = async () => {

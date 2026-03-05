@@ -3,11 +3,14 @@ import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon
 import { useEffect, useState } from "react"
 
 function useTheme(): "dark" | "light" {
-  const [theme, setTheme] = useState<"dark" | "light">(() =>
-    document.documentElement.classList.contains("dark") ? "dark" : "light"
-  );
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof document === "undefined") return "light";
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  });
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
+
     const observer = new MutationObserver(() => {
       setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
     });
