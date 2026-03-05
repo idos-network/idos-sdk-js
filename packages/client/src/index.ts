@@ -3,7 +3,11 @@ import {
   matchLevelOrHigher,
   recordFilter,
 } from "@idos-network/credentials/utils";
-import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/enclave";
+import type {
+  BaseProvider,
+  EncryptionPasswordStore,
+  PublicEncryptionProfile,
+} from "@idos-network/enclave";
 import {
   createClientKwilSigner,
   createWebKwilClient,
@@ -149,10 +153,13 @@ export class idOSClientIdle {
       const originalSigner = signer;
       signer = {
         signMessage: async (message: string) => {
-          const signature = await signNearMessage(originalSigner as any, message);
-          return { signedMessage: signature } as any;
+          const signature = await signNearMessage(
+            originalSigner as Parameters<typeof signNearMessage>[0],
+            message,
+          );
+          return { signedMessage: signature } as { signedMessage: string };
         },
-      } as any;
+      } as unknown as Wallet;
     }
 
     return new idOSClientWithUserSigner(
@@ -213,14 +220,17 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     );
   }
 
-  async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
+  async createUserEncryptionProfile(
+    userId: string,
+    forceEncryptionPasswordStore?: EncryptionPasswordStore,
+  ): Promise<PublicEncryptionProfile> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
       userId,
       walletAddress: this.walletIdentifier,
       walletPublicKey: this.walletPublicKey,
       walletType: this.walletType,
-      encryptionPasswordStore: undefined,
+      encryptionPasswordStore: forceEncryptionPasswordStore,
       expectedUserEncryptionPublicKey: undefined,
     });
 
@@ -338,7 +348,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(credential.encryptor_public_key),
     );
 
-    return plaintext as any;
+    return utf8Decode(plaintext);
   }
 
   async createCredentialCopy(

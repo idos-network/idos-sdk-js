@@ -1,161 +1,61 @@
 import { assign } from "xstate";
+import type { UserItem } from "./../store.server";
+import { actions as credentialActions } from "./flows/credentials";
+import { actions as dueActions } from "./flows/due";
+// Import actions from all flows
+import { actions as idosActions } from "./flows/idos";
+import { actions as kycActions } from "./flows/kyc";
+import { actions as transakActions } from "./flows/transak";
+import { type Context, emptyContext } from "./types";
 
 export const actions = {
+  // Core actions
   configure: assign({
     walletAddress: ({ event }) => event.address,
     provider: ({ event }) => event.provider,
   }),
 
-  reset: assign({
-    walletAddress: null,
-    provider: null,
-    kycType: null,
-    kycUrl: null,
-    client: null,
-    profile: null,
-    loggedInClient: null,
-    sharableToken: null,
-    credential: null,
-    sharedCredential: null,
-    krakenDAG: null,
-    findCredentialAttempts: 0,
-    errorMessage: null,
-    noahUrl: null,
-    hifiTosUrl: null,
-    hifiTosId: null,
-    hifiUrl: null,
-    hifiKycStatus: null,
-    getHifiKycStatusAttempts: 0,
-    onRampAccount: null,
-    moneriumCode: null,
-    moneriumProfileStatus: null,
-    moneriumProfileIbans: null,
-    transakTokenData: null,
-    transakWidgetUrl: null,
-    checkCredentialStatusAttempts: 0,
-    dueTokenData: null,
-    dueTosLinks: null,
-    dueTosToken: null,
-    dueKycLink: null,
-    dueKycAttempts: 0,
-    dueKycDone: false,
+  reset: assign({ ...emptyContext }),
+
+  setCurrentUser: assign(({ event }: { event: { output: UserItem } }) => {
+    return {
+      // Generic stuff
+      walletAddress: event.output.address,
+      userId: event.output.idOSUserId ?? null,
+
+      // Shared credential stuff
+      credentialId: event.output.sharedKyc?.originalId ?? null,
+      sharedCredentialId: event.output.sharedKyc?.sharedId ?? null,
+
+      // Due stuff
+      dueTosAccepted: event.output.due?.tosAccepted,
+      dueKycStatus: event.output.due?.kycStatus,
+      dueKycLink: event.output.due?.kycLink ?? null,
+      dueAccountId: event.output.due?.accountId ?? null,
+    } satisfies Partial<Context>;
   }),
 
-  setClient: assign({
-    client: ({ event }) => event.output,
-  }),
-
-  setKycUrl: assign({
-    kycUrl: ({ event }) => event.output,
-  }),
-
-  setLoggedInClient: assign({
-    loggedInClient: ({ event }) => event.output,
-  }),
-
-  setCredential: assign({
-    credential: ({ event }) => event.output,
-  }),
-
-  incrementFindCredentialAttempts: assign({
-    findCredentialAttempts: ({ context }) => context.findCredentialAttempts + 1,
-  }),
-
-  setSharedCredential: assign({
-    sharedCredential: ({ event }) => event.output ?? null,
+  setErrorMessage: assign({
+    errorMessage: ({ event }) => {
+      console.log("setErrorMessage");
+      console.log("event", event);
+      return event.error?.message ?? null;
+    },
   }),
 
   setSharableToken: assign({
     sharableToken: ({ event }) => event.output,
   }),
 
-  setErrorMessage: assign({
-    errorMessage: ({ event }) => event.error?.message,
+  // Generic actions
+  setRelayAG: assign({
+    relayAG: ({ event }) => event.output ?? null,
   }),
 
-  setNoahUrl: assign({
-    noahUrl: ({ event }) => event.output,
-  }),
-
-  setHifiTosUrl: assign({
-    hifiTosUrl: ({ event }) => event.output,
-  }),
-
-  setHifiTosId: assign({
-    hifiTosId: ({ event }) => event.signedAgreementId,
-  }),
-
-  setHifiUrl: assign({
-    hifiUrl: ({ event }) => event.output,
-  }),
-
-  setHifiKycStatus: assign({
-    hifiKycStatus: ({ event }) => event.output,
-  }),
-
-  incrementGetHifiKycStatusAttempts: assign({
-    getHifiKycStatusAttempts: ({ context }) => context.getHifiKycStatusAttempts + 1,
-  }),
-
-  setOnRampAccount: assign({
-    onRampAccount: ({ event }) => event.output,
-  }),
-
-  setKycType: assign({
-    kycType: ({ event }) => event.kycType,
-  }),
-
-  setKrakenDAG: assign({
-    krakenDAG: ({ event }) => event.output ?? null,
-  }),
-
-  setMoneriumAuthUrl: assign({
-    moneriumAuthUrl: ({ event }) => event.output,
-  }),
-
-  setMoneriumCode: assign({
-    moneriumCode: ({ event }) => event.code,
-  }),
-
-  setMoneriumProfileStatus: assign({
-    moneriumProfileStatus: ({ event }) => event.output.status,
-  }),
-
-  setMoneriumProfileIbans: assign({
-    moneriumProfileIbans: ({ event }) => event.output.ibans,
-  }),
-
-  setTransakTokenData: assign({
-    transakTokenData: ({ event }) => event.output,
-  }),
-
-  setDueTokenData: assign({
-    dueTokenData: ({ event }) => event.output,
-  }),
-
-  setDueAccount: assign({
-    dueTosLinks: ({ event }) => event.output?.tos.documentLinks,
-    dueTosToken: ({ event }) => event.output?.tos.token,
-    dueKycDone: ({ event }) => event.output?.kyc?.status === "passed",
-  }),
-
-  setDueKycDone: assign({
-    dueKycDone: () => true,
-  }),
-
-  setTransakWidgetUrl: assign({
-    transakWidgetUrl: ({ event }) => event.output,
-  }),
-
-  setDueKycLink: assign({
-    dueKycLink: ({ event }) => event.output?.link,
-  }),
-
-  incrementDueKycAttempts: assign({
-    dueKycAttempts: ({ context }) => context.dueKycAttempts + 1,
-  }),
-
-  incrementCheckCredentialStatusAttempts: assign({
-    checkCredentialStatusAttempts: ({ context }) => context.checkCredentialStatusAttempts + 1,
-  }),
+  // Flow-specific actions
+  ...idosActions,
+  ...credentialActions,
+  ...kycActions,
+  ...dueActions,
+  ...transakActions,
 };

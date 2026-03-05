@@ -12,8 +12,8 @@ export default function Send() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Send Funds</h2>
-          <p className="text-sm text-muted-foreground">Choose how you would like to send money.</p>
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Send Funds</h2>
+          <p className="text-muted-foreground text-sm">Choose how you would like to send money.</p>
         </div>
       </div>
 
@@ -27,7 +27,7 @@ export default function Send() {
             <CardDescription>Transfer digital assets to another wallet address.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center text-sm font-medium text-info-foreground">
+            <div className="flex items-center font-medium text-info-foreground text-sm">
               Continue <ArrowRight className="ml-1 h-4 w-4" />
             </div>
           </CardContent>
@@ -42,7 +42,7 @@ export default function Send() {
             <CardDescription>Withdraw funds directly to a bank account via Noah.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center text-sm font-medium text-success-foreground">
+            <div className="flex items-center font-medium text-sm text-success-foreground">
               Continue <ArrowRight className="ml-1 h-4 w-4" />
             </div>
           </CardContent>

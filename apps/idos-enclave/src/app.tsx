@@ -54,13 +54,13 @@ function Layout({ children, onClose }: LayoutProps) {
   }, [onClose]);
 
   return (
-    <dialog ref={dialogRef} className="m-0 p-0 border-none bg-transparent">
+    <dialog ref={dialogRef} className="m-0 border-none bg-transparent p-0">
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="relative flex flex-col gap-6 w-full max-w-[380px] bg-zinc-900 p-6 border border-zinc-700 rounded-xl shadow-2xl animate-slideIn">
+        <div className="relative flex w-full max-w-[380px] animate-slideIn flex-col gap-6 rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
           <button
             type="button"
             aria-label="Close idOS enclave"
-            className="absolute right-4 top-4 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md p-1 size-8 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-muted-foreground focus:ring-offset-2 focus:ring-offset-background"
+            className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-muted-foreground focus:ring-offset-2 focus:ring-offset-background"
             onClick={onClose}
           >
             <XIcon className="size-5" />
@@ -220,8 +220,8 @@ export function App({ enclave }: AppProps) {
     if (!hasUserActivated.value) {
       return (
         <Layout onClose={onCancel}>
-          <div className="flex flex-col gap-4 items-center text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-muted-foreground text-sm">
               {origin.value
                 ? `A request from ${origin.value} needs your approval.`
                 : "A request needs your approval."}
@@ -252,8 +252,8 @@ export function App({ enclave }: AppProps) {
     if (!hasUserActivated.value) {
       return (
         <Layout onClose={onCancel}>
-          <div className="flex flex-col gap-4 items-center text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-muted-foreground text-sm">
               Back up your idOS key so you don&apos;t lose access to your data.
             </p>
             <Button
@@ -287,8 +287,8 @@ export function App({ enclave }: AppProps) {
 
     return (
       <Layout onClose={onCancel}>
-        <div className="flex flex-col gap-4 items-center text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-muted-foreground text-sm">
             {isNew ? "Create your idOS key to continue." : "Unlock your idOS key to continue."}
           </p>
           <Button

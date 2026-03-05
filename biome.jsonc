@@ -14,7 +14,6 @@
       "!**/*.gen.ts",
       "!**/*/ui/**/*.tsx",
       "!**/*/*.js",
-      "!**/*/.next/**/*",
       "!**/.react-router/**/*",
       "!**/.cache-synpress/**/*",
       "!packages/enclave/src/mpc/**/*.ts",
@@ -31,7 +30,7 @@
     "rules": {
       "recommended": true,
       "nursery": {
-        "useSortedClasses": "off"
+        "useSortedClasses": "error"
       },
       "correctness": {
         "noUnusedImports": "error"
@@ -61,6 +60,14 @@
     "lineWidth": 100,
     "lineEnding": "lf",
     "includes": ["**", "!**/.react-router/**/*", "!**/build/**/*"]
+  },
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "attributePosition": "auto",
+      "bracketSameLine": false,
+      "whitespaceSensitivity": "css"
+    }
   },
   "javascript": {
     "formatter": {

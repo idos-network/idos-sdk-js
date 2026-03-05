@@ -1,16 +1,25 @@
-import { type Credential, idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+import {
+  type Credential,
+  idOSConsumer as idOSConsumerClass,
+  type idOSCredential,
+} from "@idos-network/consumer";
+import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
 import nacl from "tweetnacl";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
-export async function getCredentialShared(credentialId: string, inserterId?: string) {
-  const idOSConsumer = await idOSConsumerClass.init({
+export async function initIdOSConsumer() {
+  return await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     consumerSigner: nacl.sign.keyPair.fromSecretKey(
       Buffer.from(SERVER_ENV.IDOS_CONSUMER_SIGNER, "base64"),
     ),
     recipientEncryptionPrivateKey: SERVER_ENV.IDOS_RECIPIENT_ENC_PRIVATE_KEY,
   });
+}
+
+export async function getCredentialShared(credentialId: string, inserterId?: string) {
+  const idOSConsumer = await initIdOSConsumer();
 
   const grants = await idOSConsumer.getAccessGrantsForCredential(credentialId);
 
@@ -43,4 +52,20 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   }
 
   return data;
+}
+
+export async function getUsableCredentialByUser(
+  userId: string,
+): Promise<Omit<idOSCredential, "content"> | undefined> {
+  const idOSConsumer = await initIdOSConsumer();
+
+  const credentials = await idOSConsumer.getCredentialsSharedByUser(userId);
+
+  const { base, addons } = parseLevel(COMMON_ENV.KRAKEN_LEVEL.replace("+idos", ""));
+
+  const credential = highestMatchingCredential(credentials, base, {
+    addons,
+  });
+
+  return credential;
 }

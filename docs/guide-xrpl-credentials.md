@@ -26,7 +26,7 @@ class XrplCredentialsCreate {
    * @param nodeUrl - The WebSocket URL of the XRPL node to connect to
    * @param seed  - The XRPL wallet seed to use for signing transactions
    */
-  constructor(nodeUrl: string, seed: string);
+  static async init(nodeUrl: string, wallet: Wallet): Promise<XrplCredentialsCreate>;
 
   /**
    * Creates a credential on the XRPL that reflects an idOS original credential.
@@ -62,10 +62,10 @@ class XrplCredentialsCreate {
 import { Wallet } from "xrpl";
 import {
     XrplCredentialsCreate,
-} from "@idos-network/utils/xrpl-credentials";
+} from "@idos-network/kwil-infra/xrpl-credentials";
 
 const wallet = Wallet.fromSeed("s...");
-const xrplService = new XrplCredentialsCreate("wss://s.devnet.rippletest.net:51233", wallet);
+const xrplService = await XrplCredentialsCreate.init("wss://s.devnet.rippletest.net:51233", wallet);
 
 // Create original Credential
 await xrplService.createCredentialForOriginal({
@@ -73,7 +73,6 @@ await xrplService.createCredentialForOriginal({
   credType: "KYC",
   userAddress: "r..."
 });
-
 
 const result = await xrplService.createCredentialForCopy({
   credId: "...uuid...",
@@ -143,7 +142,7 @@ import { Xumm } from "xumm";
 import {
     OriginalCredentialAcceptPayload,
     CopyCredentialAcceptPayload,
-} from "@idos-network/utils/xrpl-credentials";
+} from "@idos-network/kwil-infra/xrpl-credentials";
 
 const xumm = new Xumm("Xaman API Key");
 await xumm.authorize();

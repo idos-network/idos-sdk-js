@@ -1,6 +1,5 @@
 import type * as GemWalletAPI from "@gemwallet/api";
 import type * as GemWallet from "@gemwallet/api";
-import { decode } from "xrpl";
 import type { Xumm } from "xumm";
 export type WalletName = "XAMAN" | "GEM";
 
@@ -57,8 +56,28 @@ export function signXummTx(xummInstance: Xumm, payload: Record<string, unknown>)
 export async function getXummPublicKey(wallet: Xumm): Promise<string | undefined> {
   const payload = createXummPayload("Sign request from idOS");
   const txHash = await signXummTx(wallet, payload);
-  const decodedTx = decode(txHash);
-  return decodedTx.SigningPubKey as string;
+
+  let decode: typeof import("xrpl").decode;
+  try {
+    ({ decode } = await import("xrpl"));
+  } catch {
+    throw new Error(
+      'Missing optional peer dependency "xrpl". Install it to use Xumm public-key extraction.',
+    );
+  }
+
+  let decodedTx: { SigningPubKey?: string };
+  try {
+    decodedTx = decode(txHash);
+  } catch {
+    throw new Error("Failed to decode Xumm transaction payload.");
+  }
+
+  if (!decodedTx.SigningPubKey) {
+    throw new Error("SigningPubKey not found in decoded Xumm transaction.");
+  }
+
+  return decodedTx.SigningPubKey;
 }
 
 export function signGemWalletTx(

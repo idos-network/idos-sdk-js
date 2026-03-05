@@ -65,7 +65,7 @@ export function TransferStatusTracker({
   const isTerminal = status === "completed" || status === "failed";
 
   return (
-    <Card className="mx-auto max-w-2xl shadow-sm gap-5">
+    <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader className="items-center text-center">
         <div
           className={`mb-2 flex h-14 w-14 items-center justify-center rounded-full ${config.bgClass}`}
@@ -73,7 +73,7 @@ export function TransferStatusTracker({
           <Icon className={`h-7 w-7 ${config.iconClass}`} />
         </div>
         <CardTitle>{config.title}</CardTitle>
-        <p className="text-sm text-muted-foreground">{config.description}</p>
+        <p className="text-muted-foreground text-sm">{config.description}</p>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3">

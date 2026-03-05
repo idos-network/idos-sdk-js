@@ -32,7 +32,7 @@ function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
         {...props}
       />
       {hasError?.value ? (
-        <p class="text-sm text-left font-semibold text-red-500 h-4">Invalid password.</p>
+        <p class="h-4 text-left font-semibold text-red-500 text-sm">Invalid password.</p>
       ) : null}
     </div>
   );
@@ -225,7 +225,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute right-2 top-6 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute top-6 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -257,11 +257,11 @@ export default function PasswordForm({
               class="flex cursor-pointer select-none items-center gap-3"
               for="understand-checkbox"
             >
-              <input id="understand-checkbox" type="checkbox" class="sr-only peer" checked />
+              <input id="understand-checkbox" type="checkbox" class="peer sr-only" checked />
               <span class="flex size-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition-colors peer-checked:border-[#00FFB9] peer-checked:bg-[#00FFB9] [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
                 <CheckIcon class="size-7 text-black" strokeWidth={3} />
               </span>
-              <span class="text-sm text-muted-foreground leading-snug">
+              <span class="text-muted-foreground text-sm leading-snug">
                 I understand that idOS cannot reset or recover my password if I lose it.
               </span>
             </label>
@@ -269,7 +269,7 @@ export default function PasswordForm({
 
           <div class="flex items-center justify-between gap-3">
             <Button type="button" variant="secondary" onClick={onCancel} class="flex-1">
-              Cancel
+              Back
             </Button>
             <Button type="submit" class="flex-1">
               Continue
@@ -291,7 +291,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute right-2 top-6 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute top-6 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -306,7 +306,7 @@ export default function PasswordForm({
             <DurationField duration={duration} />
           </div>
 
-          <p class="text-muted-foreground text-sm text-center">
+          <p class="text-center text-muted-foreground text-sm">
             Make sure to store it securely — you’ll need it to view or share your data later.
           </p>
 

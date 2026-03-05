@@ -1,0 +1,13 @@
+const SOURCE_CURRENCY = "USDC";
+const DESTINATION_CURRENCY = "EUR";
+
+const DEMO_FX_RATE = 0.9245;
+const DEMO_SOURCE_FEE = 0.25;
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+};
+
+export { SOURCE_CURRENCY, DESTINATION_CURRENCY, DEMO_FX_RATE, DEMO_SOURCE_FEE, CURRENCY_SYMBOLS };

@@ -11,7 +11,7 @@ export function DueKyc({ kycUrl }: DueKycProps) {
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning-foreground">
           <ScanFace className="h-5 w-5" />
         </div>
-        <h3 className="text-lg font-semibold leading-none text-foreground">
+        <h3 className="font-semibold text-foreground text-lg leading-none">
           Identity Verification
         </h3>
       </div>

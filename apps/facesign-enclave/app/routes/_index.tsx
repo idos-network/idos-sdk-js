@@ -1,0 +1,10 @@
+import { Spinner } from "@/components/ui/spinner";
+
+export default function Index() {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background p-6">
+      <Spinner className="size-8" />
+      <p className="text-center text-muted-foreground text-sm">Waiting for requests...</p>
+    </div>
+  );
+}

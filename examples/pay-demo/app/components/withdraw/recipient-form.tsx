@@ -73,12 +73,13 @@ interface RecipientFormProps {
 
 export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProps) {
   const [accountType, setAccountType] = useState<"individual" | "business">("individual");
-  const [firstName, setFirstName] = useState("Julian");
-  const [lastName, setLastName] = useState("Leitoff");
+  const [firstName, setFirstName] = useState("");
+  /* cspell:disable-next-line */
+  const [lastName, setLastName] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [email, setEmail] = useState("julian@idos.network");
-  const [country, setCountry] = useState("DE");
-  const [iban, setIban] = useState("DE89 3704 0044 0532 0130 00");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [iban, setIban] = useState("");
 
   const isValid =
     accountType === "individual"
@@ -102,7 +103,7 @@ export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProp
   };
 
   return (
-    <Card className="mx-auto max-w-2xl shadow-sm gap-5">
+    <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
         <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-info-foreground">
           <Landmark className="h-6 w-6" />
@@ -124,14 +125,14 @@ export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProp
               className="flex cursor-pointer items-center gap-2"
             >
               <Radio id="account-type-individual" value="individual" />
-              <span className="text-sm text-foreground">Individual</span>
+              <span className="text-foreground text-sm">Individual</span>
             </label>
             <label
               htmlFor="account-type-business"
               className="flex cursor-pointer items-center gap-2"
             >
               <Radio id="account-type-business" value="business" />
-              <span className="text-sm text-foreground">Business</span>
+              <span className="text-foreground text-sm">Business</span>
             </label>
           </RadioGroup>
         </fieldset>

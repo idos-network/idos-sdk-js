@@ -20,24 +20,12 @@ export function meta(_args: Route.MetaArgs) {
   return [{ title: "NeoFinance | idOS Demo" }];
 }
 
-const loadingMessages: Record<string, string> = {
-  findCredential: "Finding credential...",
-  requestAccessGrant: "Requesting access grant...",
-  waitForCredential: "Waiting for credential verification...",
-  login: "Logging in...",
-  error: "An error occurred",
-  requestKrakenDAG: "Requesting access grant for KYC provider...",
-  createToken: "Creating a sharable token for provider...",
-  checkCredentialStatus: "Waiting for KYC approval from Transak...",
-  waitForCredentialStatus: "Waiting for KYC approval from Transak...",
-  fetchWidgetUrl: "Loading Transak widget...",
-};
-
 export default function AddFunds() {
   const { address } = useUser();
   const { send } = MachineContext.useActorRef();
 
   const state = MachineContext.useSelector((s) => s.value);
+  const meta = MachineContext.useSelector((s) => s.getMeta());
   const provider = MachineContext.useSelector((s) => s.context.provider);
   const kycUrl = MachineContext.useSelector((s) => s.context.kycUrl);
   const transakWidgetUrl = MachineContext.useSelector((s) => s.context.transakWidgetUrl);
@@ -59,11 +47,11 @@ export default function AddFunds() {
 
       // Transak iframe messages
       if (message?.data?.event_id === "TRANSAK_ORDER_SUCCESSFUL") {
-        send({ type: "revokeAccessGrant" });
+        // send({ type: "revokeAccessGrant" });
       }
 
       if (message?.data?.event_id === "TRANSAK_WIDGET_CLOSE") {
-        send({ type: "revokeAccessGrant" });
+        // send({ type: "revokeAccessGrant" });
       }
     },
     [send],
@@ -81,19 +69,19 @@ export default function AddFunds() {
 
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
-    if (state === "chooseKYCType") {
+    if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "chooseType") {
       send({ type: "startKYC", kycType: "persona" });
     }
   }, [state, send]);
 
   // --- KYC iframe ---
-  if (state === "waitForKYC" && kycUrl) {
+  if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "waitForKYC" && kycUrl) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your identity verification</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <p className="text-muted-foreground text-sm">Complete your identity verification</p>
           </div>
         </div>
 
@@ -117,13 +105,19 @@ export default function AddFunds() {
   }
 
   // --- Transak widget ---
-  if (state === "dataOrTokenFetched" && transakWidgetUrl && provider === "transak") {
+  if (
+    typeof state === "object" &&
+    "transakFlow" in state &&
+    state.transakFlow === "transakWidgetUrlFetched" &&
+    transakWidgetUrl &&
+    provider === "transak"
+  ) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your purchase</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <p className="text-muted-foreground text-sm">Complete your purchase</p>
           </div>
         </div>
 
@@ -146,28 +140,21 @@ export default function AddFunds() {
   }
 
   // --- Loading / intermediate states ---
-  const stateKey = state as string;
-
-  // Handle createSharableToken sub-states
-  // @ts-expect-error Missing substates?
-  const subState = state.createSharableToken as string | undefined;
-
-  const message = loadingMessages[stateKey] ?? (subState ? loadingMessages[subState] : null);
-
+  const message = Object.values(meta)[0]?.description ?? null;
   if (message) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Processing your request</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <p className="text-muted-foreground text-sm">Processing your request</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-20">
           <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p className="text-sm text-muted-foreground">{message}</p>
-          {errorMessage && <p className="mt-2 text-sm text-destructive">{errorMessage}</p>}
+          <p className="text-muted-foreground text-sm">{message}</p>
+          {errorMessage && <p className="mt-2 text-destructive text-sm">{errorMessage}</p>}
         </div>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
@@ -180,8 +167,8 @@ export default function AddFunds() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+          <p className="text-muted-foreground text-sm">
             Buy crypto with your credit card or bank transfer
           </p>
         </div>
@@ -217,19 +204,19 @@ export default function AddFunds() {
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card shadow-sm overflow-hidden p-1">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border bg-card p-1 shadow-sm">
                   <CreditCard className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
                   <div className="font-medium text-foreground">Transak</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     Global cards &amp; bank transfers
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-medium text-foreground">&asymp; 100 USDC</div>
-                <div className="text-xs font-medium text-success-foreground">Best rate</div>
+                <div className="font-medium text-success-foreground text-xs">Best rate</div>
               </div>
             </div>
           </div>

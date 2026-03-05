@@ -17,8 +17,8 @@ export default function Receive() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Receive Crypto</h2>
-          <p className="text-sm text-muted-foreground">Share your address to receive funds</p>
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Receive Crypto</h2>
+          <p className="text-muted-foreground text-sm">Share your address to receive funds</p>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ export default function Receive() {
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-md bg-card shadow-md">
-                    <div className="text-lg font-bold text-foreground">N</div>
+                    <div className="font-bold text-foreground text-lg">N</div>
                   </div>
                 </div>
               </div>
@@ -52,7 +52,7 @@ export default function Receive() {
               <Input
                 readOnly
                 value={ADDRESS}
-                className="bg-muted/50 font-mono text-xs text-muted-foreground"
+                className="bg-muted/50 font-mono text-muted-foreground text-xs"
               />
             </div>
 

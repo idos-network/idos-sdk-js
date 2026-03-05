@@ -60,7 +60,7 @@ export function DueQuestionnaire({ onSubmit, isLoading = false }: DueQuestionnai
   };
 
   return (
-    <Card className="mx-auto max-w-2xl shadow-sm gap-5">
+    <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
         <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-info-foreground">
           <ClipboardList className="h-6 w-6" />
@@ -77,10 +77,10 @@ export function DueQuestionnaire({ onSubmit, isLoading = false }: DueQuestionnai
             {index > 0 && <Separator className="mb-4" />}
             <fieldset disabled={isLoading} className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <legend className="text-sm font-medium leading-tight text-foreground">
+                <legend className="font-medium text-foreground text-sm leading-tight">
                   {declaration.label}
                 </legend>
-                <p className="text-xs leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   {declaration.description}
                 </p>
               </div>
@@ -94,14 +94,14 @@ export function DueQuestionnaire({ onSubmit, isLoading = false }: DueQuestionnai
                   className="flex cursor-pointer items-center gap-2"
                 >
                   <Radio id={`${declaration.id}-no`} value="false" />
-                  <span className="text-sm text-foreground">No</span>
+                  <span className="text-foreground text-sm">No</span>
                 </label>
                 <label
                   htmlFor={`${declaration.id}-yes`}
                   className="flex cursor-pointer items-center gap-2"
                 >
                   <Radio id={`${declaration.id}-yes`} value="true" />
-                  <span className="text-sm text-foreground">Yes</span>
+                  <span className="text-foreground text-sm">Yes</span>
                 </label>
               </RadioGroup>
             </fieldset>

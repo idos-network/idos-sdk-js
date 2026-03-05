@@ -1,6 +1,7 @@
 import { redirect } from "react-router";
 import { SiweMessage } from "siwe";
 import { sessionStorage } from "~/providers/sessions.server";
+import { getUserItem, setUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/auth";
 
 // Create a new user session
@@ -35,6 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     isAuthenticated: false,
   };
 
+  // @ts-expect-error - this is fine, since user is not yet authenticated
   session.set("user", user);
 
   return new Response(JSON.stringify({ user }), {
@@ -81,10 +83,21 @@ export async function action({ request }: Route.ActionArgs) {
       throw new Error("Invalid signature");
     }
 
+    const userItem = await getUserItem(user.address);
+
+    // Set user item in persistent storage
+    await setUserItem({
+      id: crypto.randomUUID(),
+      address: user.address,
+      ...(userItem ?? {}), // Update user item with new message and signature, fine to overwrite ids etc.
+      message: message.prepareMessage(),
+      signature,
+      lastSignedIn: new Date().toISOString(),
+    });
+
     // Update session with authenticated status
     session.set("user", {
       ...user,
-      signature,
       isAuthenticated: true,
     });
 
@@ -94,6 +107,7 @@ export async function action({ request }: Route.ActionArgs) {
       },
     });
   } catch (_error) {
+    console.error(_error);
     throw new Error("Signature verification failed");
   }
 }

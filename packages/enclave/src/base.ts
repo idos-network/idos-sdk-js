@@ -27,7 +27,9 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    */
   setSigner(signer: {
     signTypedData?: (domain: string, types: string[], value: string) => Promise<string>;
+    // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
     signMessage?: (message: string) => Promise<any>;
+    // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
     signer?: (message: string) => Promise<any>;
   }): void {
     if (signer.signTypedData) {
@@ -66,12 +68,17 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     // Handle different signing methods based on wallet type
     if (this._signMethodType === "signTypedData") {
       // EVM wallets: use all 3 arguments
-      signature = await (
-        this._signMethod as (domain: any, types: any, value: any) => Promise<string>
-      )(domain, types, value);
+      signature =
+        await // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
+        (this._signMethod as (domain: any, types: any, value: any) => Promise<string>)(
+          domain,
+          types,
+          value,
+        );
     } else if (this._signMethodType === "signMessage" || this._signMethodType === "signer") {
       // XRPL/NEAR/Stellar/FaceSign wallets: use only the value as message
       const messageString = JSON.stringify(value);
+      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
       const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
 
       // Extract signature from response object
@@ -222,6 +229,10 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         content: "", // Content should never leave the enclave!!!
       }));
     }
+
+    // We need to be sure first that we have the encryption profile
+    // otherwise we can end up with a lot of signatures for each credential
+    await this.ensureUserEncryptionProfile();
 
     const decrypted = await Promise.all(
       credentials.map(async (credential: idOSCredential) => {

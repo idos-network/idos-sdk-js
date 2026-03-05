@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FaceSign Enclave – iframe test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="m-0 h-screen overflow-hidden font-sans antialiased">
+    <div
+      class="bar fixed left-0 right-0 top-0 z-10 flex items-center gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3"
+    >
+      <h1 class="m-0 text-sm font-semibold text-gray-900">FaceSign Enclave – iframe test</h1>
+      <div class="controls flex flex-wrap items-center gap-2">
+        <label for="page" class="flex items-center gap-1.5 text-sm text-gray-700">Page:</label>
+        <select
+          id="page"
+          aria-label="Iframe page"
+          class="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-colors focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400/30 hover:border-gray-400"
+        >
+          <option value="/">Home</option>
+          <option value="/login">Login</option>
+        </select>
+        <label for="device" class="flex items-center gap-1.5 text-sm text-gray-700">Device:</label>
+        <select
+          id="device"
+          aria-label="Viewport size"
+          class="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-colors focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400/30 hover:border-gray-400"
+        >
+          <option value="375">Mobile (375px)</option>
+          <option value="768">Tablet (768px)</option>
+          <option value="1280">Desktop (1280px)</option>
+          <option value="1920">Large (1920px)</option>
+          <option value="full" selected>Full width</option>
+        </select>
+        <button
+          type="button"
+          id="session-proposal"
+          class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-800 shadow-sm ring-1 ring-blue-900/10 transition-all hover:border-blue-300 hover:bg-blue-100 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98]"
+        >
+          Send session proposal
+        </button>
+        <button
+          type="button"
+          id="sign-proposal"
+          class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 shadow-sm ring-1 ring-emerald-900/10 transition-all hover:border-emerald-300 hover:bg-emerald-100 hover:shadow focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 active:scale-[0.98]"
+        >
+          Send sign proposal
+        </button>
+        <button
+          type="button"
+          id="clear-storage"
+          title="Clear localStorage, sessionStorage, IndexedDB, cookies"
+          class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 shadow-sm ring-1 ring-amber-900/10 transition-all hover:border-amber-300 hover:bg-amber-100 hover:shadow focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 active:scale-[0.98]"
+        >
+          Clear all storage
+        </button>
+      </div>
+    </div>
+    <div
+      class="iframe-wrap pt-16 flex h-screen min-h-0 w-full max-w-full justify-center transition-[max-width] duration-200 ease-out"
+      id="iframe-wrap"
+    >
+      <iframe
+        id="enclave"
+        src="/"
+        title="FaceSign Enclave"
+        class="block h-full w-full border-0"
+      ></iframe>
+    </div>
+    <div
+      class="responses fixed bottom-4 right-4 z-10 flex max-h-40 w-96 flex-col gap-1 rounded-lg border border-gray-200 bg-gray-50/95 p-2 shadow-lg backdrop-blur-sm"
+    >
+      <small class="shrink-0 text-xs font-medium text-gray-500">Responses</small>
+      <pre
+        id="log"
+        class="m-0 min-h-0 flex-1 overflow-auto rounded bg-gray-100 p-2 text-[11px] leading-tight text-gray-800"
+      >(none yet)</pre>
+    </div>
+
+    <script>
+    const iframe = document.getElementById("enclave");
+    const wrap = document.getElementById("iframe-wrap");
+    const deviceSelect = document.getElementById("device");
+
+    function setViewportSize() {
+      const val = deviceSelect.value;
+      if (val === "full") {
+        wrap.style.maxWidth = "none";
+      } else {
+        wrap.style.maxWidth = `${val}px`;
+      }
+    }
+    deviceSelect.addEventListener("change", setViewportSize);
+    setViewportSize();
+
+    const pageSelect = document.getElementById("page");
+    function setPage() {
+      const path = pageSelect.value;
+      iframe.src = path === "/login" ? `${path}?redirect=/wallet` : path;
+    }
+    pageSelect.addEventListener("change", setPage);
+
+    document.getElementById("clear-storage").addEventListener("click", async () => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if (indexedDB.databases) {
+          const dbs = await indexedDB.databases();
+          for (const db of dbs) {
+            if (db.name) indexedDB.deleteDatabase(db.name);
+          }
+        } else {
+          indexedDB.deleteDatabase("keysDB");
+        }
+        document.cookie.split(";").forEach((c) => {
+          const name = c.replace(/^\s*|\s*$/g, "").split("=")[0];
+          // biome-ignore lint/suspicious/noDocumentCookie: clearing cookies; Cookie Store API not universally supported
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        });
+        log("Cleared storage; reloading iframe.");
+        setPage();
+      } catch (e) {
+        log(`Clear storage error: ${e?.message ?? String(e)}`);
+      }
+    });
+
+    const logEl = document.getElementById("log");
+    const logLines = [];
+
+    function log(msg) {
+      logLines.push(`${new Date().toISOString().slice(11, 19)} ${msg}`);
+      if (logLines.length > 20) logLines.shift();
+      logEl.textContent = logLines.join("\n");
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "facesign_ready") {
+        log("Enclave sent facesign_ready");
+      } else if (event.data?.type === "session_proposal_response") {
+        log(`session_proposal_response: ${JSON.stringify(event.data.data)}`);
+      } else if (event.data?.type === "sign_proposal_response") {
+        log(`sign_proposal_response: ${JSON.stringify(event.data.data)}`);
+      }
+    });
+
+    let sessionId = 1;
+    document.getElementById("session-proposal").addEventListener("click", () => {
+      iframe.contentWindow.postMessage(
+        {
+          type: "session_proposal",
+          data: {
+            id: sessionId++,
+            metadata: {
+              name: "Test App",
+              description: "Request access to your FaceSign key (dev test)",
+            },
+          },
+        },
+        "*",
+      );
+      log("Sent session_proposal");
+    });
+
+    let signId = 1;
+    document.getElementById("sign-proposal").addEventListener("click", () => {
+      const payload = new TextEncoder().encode("Hello, sign this message.");
+      iframe.contentWindow.postMessage(
+        {
+          type: "sign_proposal",
+          data: {
+            id: signId++,
+            data: Array.from(new Uint8Array(payload)),
+            metadata: {
+              name: "Test App",
+              description: "Request signature (dev test)",
+            },
+          },
+        },
+        "*",
+      );
+      log("Sent sign_proposal");
+    });
+    </script>
+  </body>
+</html>

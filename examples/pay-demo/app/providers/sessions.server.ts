@@ -18,9 +18,6 @@ export interface Session {
   moneriumCodeVerifier?: string;
   moneriumProfileId?: string;
   moneriumToken?: string;
-
-  // Due
-  dueAccountId?: string;
 }
 
 export const sessionStorage = createCookieSessionStorage<Session>({

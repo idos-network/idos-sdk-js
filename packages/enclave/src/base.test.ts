@@ -2,12 +2,21 @@ import type { idOSCredential } from "@idos-network/credentials/types";
 import { base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it, vi } from "vitest";
 import { BaseProvider } from "./base.js";
+import type { PublicEncryptionProfile } from "./types.js";
 
 type TestOptions = { userId?: string };
 
 class TestProvider extends BaseProvider<TestOptions> {
   async decrypt(message: Uint8Array): Promise<Uint8Array> {
     return message;
+  }
+
+  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
+    return {
+      userId: crypto.randomUUID(),
+      userEncryptionPublicKey: base64Encode(new Uint8Array([1, 2, 3])),
+      encryptionPasswordStore: "user",
+    };
   }
 }
 

@@ -60,7 +60,6 @@ function decryptContent(
           message: base64Encode(message),
           nonce: base64Encode(nonce),
           senderEncryptionPublicKey: base64Encode(senderEncryptionPublicKey),
-          recipientEncryptionSecretKey: base64Encode(recipientEncryptionSecretKey),
         },
         null,
         2,

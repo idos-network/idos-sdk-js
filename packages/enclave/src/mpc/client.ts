@@ -146,7 +146,8 @@ export class Client {
   }
 
   public uploadRequest(blindedShares: Buffer[]): UploadSignatureMessage {
-    console.log("UPLOADING TO MPC");
+    console.log({ mpc: "uploading to MPC", walletType: this.walletType, address: this.signerAddress, publicKey: this.signerPublicKey });
+
     var address = "";
     switch (this.walletType) {
       case "EVM":
@@ -216,11 +217,13 @@ export class Client {
       shares.push(engineClient.downloadAndDecrypt(id, downloadRequest, signature, secretKey));
     }
     const secretShares = await Promise.all(shares);
+
     console.log({ secretSharesDownloadStatuses: secretShares.map((item) => item.status) });
 
     if (secretShares.every((item) => item.status === "404")) {
       return { status: "not-stored", secret: undefined };
     }
+
     var secret: Buffer;
     try {
       secret = this.factory

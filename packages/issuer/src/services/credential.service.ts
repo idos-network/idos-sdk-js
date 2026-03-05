@@ -3,10 +3,12 @@ import type { KwilActionClient } from "@idos-network/kwil-infra";
 import {
   type CreateCredentialsByDwgInput,
   createCredentialsByDwg,
+  dwgMessage,
   type EditPublicNotesAsIssuerInput,
   editPublicNotesAsIssuer,
   getCredentialShared,
   getSiblingCredentialId,
+  type idOSDelegatedWriteGrant,
 } from "@idos-network/kwil-infra/actions";
 import {
   base64Decode,
@@ -69,12 +71,6 @@ export class CredentialService {
     this.#encryptionSecretKey = encryptionSecretKey;
   }
 
-  #buildInsertableIDOSCredential(args: BuildInsertableIDOSCredentialArgs): InsertableIDOSCredential;
-
-  #buildInsertableIDOSCredential(
-    args: Omit<BuildInsertableIDOSCredentialArgs, "userId">,
-  ): Omit<InsertableIDOSCredential, "user_id">;
-
   #buildInsertableIDOSCredential({
     userId,
     publicNotes,
@@ -117,6 +113,10 @@ export class CredentialService {
       (entity as T & { id: string }).id = crypto.randomUUID();
     }
     return entity as T & { id: string };
+  }
+
+  async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+    return dwgMessage(this.#kwilClient, params).then((res) => res.message);
   }
 
   async createCredentialByDelegatedWriteGrant(

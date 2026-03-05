@@ -13,8 +13,8 @@ export function FlowSuccess({ title = "Success", message }: FlowSuccessProps) {
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10">
           <CheckCircle2 className="h-7 w-7 text-success-foreground" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        {message && <p className="max-w-sm text-sm text-muted-foreground">{message}</p>}
+        <h3 className="font-semibold text-foreground text-lg">{title}</h3>
+        {message && <p className="max-w-sm text-muted-foreground text-sm">{message}</p>}
       </CardContent>
     </Card>
   );
