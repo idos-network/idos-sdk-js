@@ -59,14 +59,6 @@ export default function AppLayout() {
     );
   }
 
-  if (isCreatingFacesignProfile) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-6" />
-      </div>
-    );
-  }
-
   if (isDisconnected) {
     return <ConnectWallet />;
   }
