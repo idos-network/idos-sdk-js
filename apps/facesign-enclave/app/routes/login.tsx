@@ -1,3 +1,4 @@
+import Bowser from "bowser";
 import { useEffect } from "react";
 import QRCode from "react-qr-code";
 import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
@@ -36,10 +37,17 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const { isKeyAvailable, setMnemonic } = useKeyStorageContext();
   const { revalidate } = useRevalidator();
-
   const redirect = searchParams.get("redirect") ?? "/wallet";
 
-  // TODO: We are missing immediate redirect to "/scan" if this is already a mobile session.
+  useEffect(() => {
+    // Let's redirect on mobile devices directly to scan page
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    const isMobile = browser.getPlatformType(true) === "mobile";
+
+    if (isMobile) {
+      navigate(`/scan?redirect=${encodeURIComponent(redirect)}`);
+    }
+  }, []);
 
   useEffect(() => {
     if (isKeyAvailable) {
@@ -64,8 +72,6 @@ export default function Login() {
       });
     }
   }, [session]);
-
-  console.log(`https://${window.location.host}/m/${session?.id}`);
 
   return (
     <div role="dialog" className="fixed inset-0 flex items-center justify-center bg-background p-6">
