@@ -1,5 +1,5 @@
 import { LogOutIcon, SmilePlusIcon } from "lucide-react";
-import { Outlet, useNavigation } from "react-router";
+import { Outlet } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
@@ -27,8 +27,6 @@ export default function AppLayout() {
   const error = useSelector(selectError);
   const idOSClient = useSelector(selectLoggedInClient);
   const walletType = useSelector(selectWalletType);
-  const navigation = useNavigation();
-  const isNavigating = Boolean(navigation.location);
 
   if (isError) {
     return (
@@ -53,15 +51,7 @@ export default function AppLayout() {
     );
   }
 
-  if (isLoading || isNavigating || isConnectingFaceSign || isCreatingFacesignProfile) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-6" />
-      </div>
-    );
-  }
-
-  if (isCreatingFacesignProfile) {
+  if (isLoading || isConnectingFaceSign || isCreatingFacesignProfile) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
