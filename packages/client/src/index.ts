@@ -66,6 +66,8 @@ import invariant from "tiny-invariant";
 import { IframeEnclave } from "./enclave/iframe-enclave";
 export { IframeEnclave };
 
+const ED25519_SIGNATURE_LENGTH = 64;
+
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
@@ -188,6 +190,13 @@ export class idOSClientIdle {
                   "Using initial base64Decode result. This will be passed to hexEncode.",
               );
             }
+          }
+
+          // Strict length check: Ed25519 signatures must be exactly 64 bytes
+          if (signatureBytes.length !== ED25519_SIGNATURE_LENGTH) {
+            throw new Error(
+              `Invalid Ed25519 signature length: expected 64 bytes, got ${signatureBytes.length} bytes`,
+            );
           }
 
           return hexEncode(signatureBytes);
