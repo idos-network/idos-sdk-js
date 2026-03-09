@@ -2,6 +2,7 @@ import {
   ArchiveIcon,
   ArrowUpRightFromSquare,
   CircleDollarSignIcon,
+  ClockIcon,
   CogIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
@@ -20,7 +21,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
 import { useActorRef, useSelector } from "@/machines/provider";
@@ -104,29 +104,53 @@ const externalLinkClasses = "flex items-center gap-5 rounded-xl px-6 py-3 hover:
 
 export function MainNavLinks() {
   return (
-    <ul className="flex flex-col gap-1.5">
-      <li>
-        <ListItemLink to="/">
-          <KeyRoundIcon size={24} strokeWidth="1.5" />
-          <span>Credentials</span>
-        </ListItemLink>
-      </li>
-      <li>
-        <ListItemLink to="/wallets">
-          <Wallet2Icon size={24} strokeWidth="1.5" />
-          <span>Wallets</span>
-        </ListItemLink>
-      </li>
-      {COMMON_ENV.DEV ? (
+    <div className="flex flex-col gap-5">
+      <ul className="flex flex-col gap-1.5">
         <li>
-          <a href="#/" className={externalLinkClasses} target="_blank" rel="noopener noreferrer">
-            <CircleDollarSignIcon size={24} strokeWidth="1.5" />
-            <span>Staking</span>
-            <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-          </a>
+          <ListItemLink to="/">
+            <KeyRoundIcon size={24} strokeWidth="1.5" />
+            <span>Credentials</span>
+          </ListItemLink>
         </li>
-      ) : null}
-    </ul>
+        <li>
+          <ListItemLink to="/wallets">
+            <Wallet2Icon size={24} strokeWidth="1.5" />
+            <span>Wallets</span>
+          </ListItemLink>
+        </li>
+      </ul>
+      <div>
+        <h3 className="mb-1.5 px-6 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+          Earn idOS
+        </h3>
+        <ul className="flex flex-col gap-1.5">
+          <li>
+            <a
+              href="https://earn.idos.network/staking"
+              className={externalLinkClasses}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <CircleDollarSignIcon size={24} strokeWidth="1.5" />
+              <span>Staking</span>
+              <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://earn.idos.network/claiming"
+              className={externalLinkClasses}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ClockIcon size={24} strokeWidth="1.5" />
+              <span>Vesting</span>
+              <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   );
 }
 
