@@ -121,12 +121,12 @@ export function MainNavLinks() {
       </ul>
       <div>
         <h3 className="mb-1.5 px-6 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-          Earn idOS
+          idOS Portal
         </h3>
         <ul className="flex flex-col gap-1.5">
           <li>
             <a
-              href="https://earn.idos.network/staking"
+              href="https://portal.idos.network/staking"
               className={externalLinkClasses}
               target="_blank"
               rel="noopener noreferrer"
@@ -138,7 +138,7 @@ export function MainNavLinks() {
           </li>
           <li>
             <a
-              href="https://earn.idos.network/claiming"
+              href="https://portal.idos.network/claiming"
               className={externalLinkClasses}
               target="_blank"
               rel="noopener noreferrer"
