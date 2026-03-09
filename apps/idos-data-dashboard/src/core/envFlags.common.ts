@@ -29,7 +29,7 @@ function buildEnv(): CommonEnv {
 
     return commonEnvSchema.parse({
       ...envWithoutPrefix,
-       DEV: envWithoutPrefix.NODE_ENV === "development" || envWithoutPrefix.DEV,
+      DEV: envWithoutPrefix.NODE_ENV === "development" || envWithoutPrefix.DEV,
     });
   } catch (error: unknown) {
     console.error("Warning: invalid client env vars!");
