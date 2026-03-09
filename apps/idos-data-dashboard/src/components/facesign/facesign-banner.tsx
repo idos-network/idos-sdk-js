@@ -7,7 +7,6 @@ import { hexEncode } from "@idos-network/utils/codecs";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { createFaceSignProvider } from "@/lib/facesign";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 import { FacesignDialog } from "./facesign-dialog";
@@ -145,12 +144,6 @@ export function FacesignBanner() {
         onContinue={handleContinue}
         isLoading={isLoading}
       />
-      {isLoading && (
-        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-4 bg-background">
-          <Spinner className="size-8" />
-          <p className="text-center text-muted-foreground text-sm">Loading</p>
-        </div>
-      )}
     </>
   );
 }
