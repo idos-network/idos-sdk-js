@@ -203,6 +203,14 @@ export async function createServerKwilSigner(
   })(signer);
 }
 
+async function stellarSign(msg: string | Uint8Array, wallet: StellarWallet): Promise<Uint8Array> {
+  const msgToSign = typeof msg !== "string" ? Buffer.from(msg).toString("utf8") : msg;
+  const result = await wallet.signMessage(msgToSign);
+  // FreighterModule (stellar-wallets-kit) returns the signature base64-encoded.
+  // Decode once to get the raw 64-byte ed25519 signature.
+  return Buffer.from(result.signedMessage, "base64");
+}
+
 export async function createClientKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
@@ -285,11 +293,7 @@ export async function createClientKwilSigner(
     const { address } = await wallet.getAddress();
     const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
     const kwilSigner = new KwilSigner(
-      async (msg: string | Uint8Array): Promise<Uint8Array> => {
-        const msgToSign = typeof msg !== "string" ? Buffer.from(msg).toString("utf8") : msg;
-        const result = await wallet.signMessage(msgToSign);
-        return Buffer.from(result.signedMessage, "base64");
-      },
+      (msg: string | Uint8Array) => stellarSign(msg, wallet as StellarWallet),
       Buffer.from(address).toString("hex"),
       "sep53",
     );
