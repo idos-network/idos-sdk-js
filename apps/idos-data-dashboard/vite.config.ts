@@ -54,6 +54,10 @@ export default defineConfig(async (config) => {
   }
 
   return {
+    ssr: {
+      // Stellar/Freighter are browser-only (extension API); avoid bundling in SSR to prevent getAddress export errors in Node
+      external: ["@creit.tech/stellar-wallets-kit", "@stellar/freighter-api"],
+    },
     build: {
       target: "esnext",
       rollupOptions: {
