@@ -165,6 +165,7 @@ export const dashboardMachine = setup({
   },
   guards: {
     hasPersistedWallet: () => getPersistedWallet() !== null,
+    isClient: () => typeof window !== "undefined",
   },
   actions: {
     persistWalletToStorage: ({ context }) => {
@@ -195,7 +196,10 @@ export const dashboardMachine = setup({
   },
   states: {
     idle: {
-      always: [{ target: "reconnecting", guard: "hasPersistedWallet" }, { target: "disconnected" }],
+      always: [
+        { target: "reconnecting", guard: "hasPersistedWallet" },
+        { target: "disconnected", guard: "isClient" },
+      ],
     },
 
     disconnected: {
