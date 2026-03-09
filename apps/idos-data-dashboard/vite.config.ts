@@ -106,6 +106,7 @@ export default defineConfig(async (config) => {
     },
 
     resolve: {
+      dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
