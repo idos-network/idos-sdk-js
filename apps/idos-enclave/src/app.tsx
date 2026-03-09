@@ -42,11 +42,9 @@ function Layout({ children, onClose }: LayoutProps) {
     };
 
     dialog.addEventListener("cancel", handleCancel);
-    dialog.addEventListener("close", handleCancel);
 
     return () => {
       dialog.removeEventListener("cancel", handleCancel);
-      dialog.removeEventListener("close", handleCancel);
       if (dialog.open) {
         dialog.close();
       }
@@ -305,8 +303,8 @@ export function App({ enclave }: AppProps) {
     );
   }
 
-  // Only render Auth component if we have an active intent
-  if (currentIntent.value) {
+  // Only render Auth component if we have an active intent and userId
+  if (currentIntent.value && userId.value) {
     return (
       <Layout onClose={onCancel}>
         <Auth

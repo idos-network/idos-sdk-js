@@ -4,7 +4,7 @@ import { Enclave } from "./lib/enclave";
 import "./styles.css";
 
 const enclaveWindow = window.self;
-const hasParentWindow = enclaveWindow !== window.top;
+const hasParentWindow = window.top != null && enclaveWindow !== window.top;
 
 // If the enclave is accessed directly (not inside an iframe), redirect to the main idOS site.
 if (!hasParentWindow) {

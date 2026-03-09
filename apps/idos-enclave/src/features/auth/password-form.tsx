@@ -151,7 +151,7 @@ export default function PasswordForm({
         return;
       }
 
-      if (encryptionPublicKey && !isEncryptionPublicKeyEmpty) {
+      if (!isEncryptionPublicKeyEmpty) {
         console.log("[idOS Enclave] Submitting password form", {
           mode,
           hasEncryptionPublicKey: !!encryptionPublicKey,

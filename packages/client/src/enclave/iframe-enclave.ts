@@ -21,6 +21,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   private iframe: HTMLIFrameElement;
   private hostUrl: URL;
   private bound = false;
+  private boundOnMessage?: (message: MessageEvent) => Promise<void>;
   private observer?: MutationObserver | null = null;
 
   constructor(options: IframeEnclaveOptions) {
@@ -215,7 +216,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     // biome-ignore lint/suspicious/noAssignInExpressions: it's on purpose
     while ((existingIframe = document.getElementById(this.iframe.id))) {
       console.log("reinstalling idOS iframe...");
-      document.body.removeChild(existingIframe);
+      existingIframe.remove();
     }
 
     // Watch for aria-hidden being set externally and override it when visible
@@ -251,6 +252,10 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   destroy(): void {
+    if (this.boundOnMessage) {
+      window.removeEventListener("message", this.boundOnMessage);
+      this.bound = false;
+    }
     this.observer?.disconnect();
     this.iframe.remove();
   }
@@ -305,7 +310,10 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private bindMessageListener(): void {
-    if (!this.bound) window.addEventListener("message", this.onMessage.bind(this));
+    if (!this.bound) {
+      this.boundOnMessage = this.onMessage.bind(this);
+      window.addEventListener("message", this.boundOnMessage);
+    }
     this.bound = true;
   }
 
@@ -324,7 +332,16 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
         return;
       } catch (error) {
         console.error(error);
-        await this.requestToEnclave("signTypedDataResponse", JSON.stringify(error));
+        const serializableError = {
+          name: error instanceof Error ? error.name : "Error",
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          code:
+            error && typeof error === "object" && "code" in error
+              ? (error as { code?: unknown }).code
+              : undefined,
+        };
+        await this.requestToEnclave("signTypedDataResponse", JSON.stringify(serializableError));
         return;
       }
     }
