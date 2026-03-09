@@ -89,7 +89,6 @@ export const actors = {
   createClient: fromPromise(async () => {
     const config = createIDOSClient({
       enclaveOptions: {
-        container: "#idOS-enclave",
         url: "https://enclave.playground.idos.network/",
       },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,

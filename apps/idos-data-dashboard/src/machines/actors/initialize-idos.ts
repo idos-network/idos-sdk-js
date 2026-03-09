@@ -21,7 +21,6 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
       config = new idOSClientConfiguration({
         nodeUrl: COMMON_ENV.IDOS_NODE_URL,
         enclaveOptions: {
-          container: "#idOS-enclave",
           url: COMMON_ENV.IDOS_ENCLAVE_URL,
         },
       });
