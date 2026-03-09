@@ -167,26 +167,23 @@ export class idOSClientIdle {
         signMessage: (message: string) => Promise<{ signedMessage: string }>;
       };
       signer = {
-        // MPC engine expects Stellar signatures in hex form.
+        // MPC engine expects Stellar signatures in hex form, exactly 64 bytes (Ed25519).
         signer: async (message: string) => {
           const result = await originalSigner.signMessage(message);
           let signatureBytes = base64Decode(result.signedMessage);
 
           // Some Stellar wallets return a base64-encoded string as bytes; normalize it.
           if (signatureBytes.length > 64) {
-            const originalSignatureBytes = signatureBytes;
-            const originalSignatureBytesLength = signatureBytes.length;
             try {
-              signatureBytes = base64Decode(utf8Decode(signatureBytes));
-            } catch (error) {
-              // Keep initial decode if fallback fails.
-              console.warn(
-                "Fallback decode failed for signatureBytes: base64Decode(utf8Decode(signatureBytes)) failed. " +
-                  `Original signatureBytes length: ${originalSignatureBytesLength}, ` +
-                  `Original signatureBytes value: ${hexEncode(originalSignatureBytes)}, ` +
-                  `Error: ${error instanceof Error ? error.message : String(error)}. ` +
-                  "Using initial base64Decode result. This will be passed to hexEncode.",
-              );
+              const decoded = base64Decode(utf8Decode(signatureBytes));
+              if (decoded.length <= 64) signatureBytes = decoded;
+            } catch {
+              // Fallback: ignore
+            }
+            // Backend expects exactly 64 bytes (Ed25519). If wallet returned more (e.g. 88),
+            // take the first 64 bytes so we don't get "invalid Stellar signature length: expected 64 bytes, got 88".
+            if (signatureBytes.length > 64) {
+              signatureBytes = signatureBytes.slice(0, 64);
             }
           }
 
