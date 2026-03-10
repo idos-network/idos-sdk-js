@@ -82,6 +82,7 @@ onramp
 onramps
 OSAPI
 OSDAG
+oxfmt
 partialize
 partisia
 partisiablockchain
