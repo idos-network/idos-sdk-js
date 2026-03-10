@@ -27,7 +27,7 @@ jobs:
 
       - run: pnpm install
 
-      - run: turbo run quality
+      - run: pnpm turbo run quality
 
   cspell:
     runs-on: ubuntu-latest
