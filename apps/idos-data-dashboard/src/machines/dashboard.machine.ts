@@ -81,6 +81,13 @@ export type ReconnectWalletOutput = {
 
 const STORAGE_KEY = "dashboard-wallet";
 
+const normalizeWalletType = (walletType: unknown): WalletType | null => {
+  if (walletType === "stellar") {
+    return "Stellar";
+  }
+  return WALLET_TYPES.includes(walletType as WalletType) ? (walletType as WalletType) : null;
+};
+
 function getPersistedWallet(): {
   walletType: WalletType;
   walletAddress: string;
@@ -97,11 +104,14 @@ function getPersistedWallet(): {
       parsed !== null &&
       typeof parsed.walletAddress === "string" &&
       typeof parsed.walletPublicKey === "string" &&
-      typeof parsed.walletType === "string" &&
-      WALLET_TYPES.includes(parsed.walletType)
+      typeof parsed.walletType === "string"
     ) {
+      const walletType = normalizeWalletType(parsed.walletType);
+      if (!walletType) {
+        return null;
+      }
       return {
-        walletType: parsed.walletType as WalletType,
+        walletType,
         walletAddress: parsed.walletAddress,
         walletPublicKey: parsed.walletPublicKey,
       };

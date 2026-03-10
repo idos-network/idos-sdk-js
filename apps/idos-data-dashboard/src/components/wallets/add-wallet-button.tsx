@@ -10,9 +10,18 @@ import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+import { useActorRef } from "@/machines/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
-  const entries = COMMON_ENV.EMBEDDED_WALLET_APP_URLS.split(",")
+  const appUrls = COMMON_ENV.EMBEDDED_WALLET_APP_URLS;
+  invariant(
+    typeof appUrls === "string" && appUrls.trim().length > 0,
+    "VITE_EMBEDDED_WALLET_APP_URLS is not set",
+  );
+
+  const entries = appUrls
+    .split(",")
     .map((s: string) => s.trim())
     .filter(Boolean);
   const allowedOrigins: string[] = [];
@@ -45,6 +54,7 @@ interface AddWalletButtonProps {
 }
 
 export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
+  const actorRef = useActorRef();
   const [walletPayload, setWalletPayload] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
@@ -154,8 +164,18 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;
 
+    // If the dashboard is connected via Stellar, pass the address so the
+    // embedded wallet can ensure the user switches back before closing.
+    const popupUrl = new URL(EMBEDDED_WALLET_CONFIG.popupUrl);
+    const snapshot = actorRef.getSnapshot();
+    const currentWalletType = selectWalletType(snapshot);
+    const currentWalletAddress = selectWalletAddress(snapshot);
+    if (currentWalletType === "Stellar" && currentWalletAddress) {
+      popupUrl.searchParams.set("stellar_address", currentWalletAddress);
+    }
+
     const popup = window.open(
-      EMBEDDED_WALLET_CONFIG.popupUrl,
+      popupUrl.toString(),
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );

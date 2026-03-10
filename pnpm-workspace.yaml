@@ -48,8 +48,8 @@ catalogs:
   stellar:
     "@stellar/stellar-sdk": "^13.3.0"
     "@stellar/stellar-base": "^13.1.0"
-    "@creit.tech/stellar-wallets-kit": "^1.7.5"
-    "@stellar/freighter-api": "^4.1.0"
+    "@creit.tech/stellar-wallets-kit": "1.9.5"
+    "@stellar/freighter-api": "5.0.0"
 
   xrp:
     "xrpl": "^4.3.0"
