@@ -1,9 +1,12 @@
 import { KeyRoundIcon, XIcon } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useFetchGrants } from "@/lib/queries/credentials";
-import { safeParse } from "./shared";
+
 import type { idOSCredentialWithShares } from "./types";
+
+import { safeParse } from "./shared";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -52,7 +55,7 @@ export function CredentialCard({
   });
 
   return (
-    <div className="flex flex-col gap-12 rounded-xl bg-card p-5">
+    <div className="bg-card flex flex-col gap-12 rounded-xl p-5">
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-6">
         {meta.map(([key, value]) => (
           <div key={key} className="flex flex-col gap-2">

@@ -1,4 +1,5 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
+
 import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
 
 export type WalletPayload = {

@@ -5,6 +5,7 @@ import {
   WalletNetwork,
   xBullModule,
 } from "@creit.tech/stellar-wallets-kit";
+
 import { COMMON_ENV } from "./envFlags.common";
 
 const stellarKit: StellarWalletsKit = new StellarWalletsKit({

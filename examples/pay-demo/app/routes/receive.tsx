@@ -1,4 +1,5 @@
 import { Copy, QrCode } from "lucide-react";
+
 import type { Route } from "./+types/receive";
 
 export function meta(_args: Route.MetaArgs) {
@@ -17,7 +18,7 @@ export default function Receive() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bold text-2xl text-foreground tracking-tight">Receive Crypto</h2>
+          <h2 className="text-foreground text-2xl font-bold tracking-tight">Receive Crypto</h2>
           <p className="text-muted-foreground text-sm">Share your address to receive funds</p>
         </div>
       </div>
@@ -29,17 +30,17 @@ export default function Receive() {
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="flex justify-center">
-            <div className="flex h-64 w-64 items-center justify-center rounded-xl border border-border bg-card p-4 shadow-sm">
-              <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-primary">
-                <QrCode className="h-32 w-32 text-primary-foreground opacity-20" />
+            <div className="border-border bg-card flex h-64 w-64 items-center justify-center rounded-xl border p-4 shadow-sm">
+              <div className="bg-primary relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg">
+                <QrCode className="text-primary-foreground h-32 w-32 opacity-20" />
                 <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 gap-1 opacity-10">
                   {Array.from({ length: 36 }).map((_, i) => (
-                    <div key={`qr-cell-${i}`} className="rounded-[1px] bg-primary-foreground" />
+                    <div key={`qr-cell-${i}`} className="bg-primary-foreground rounded-[1px]" />
                   ))}
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-md bg-card shadow-md">
-                    <div className="font-bold text-foreground text-lg">N</div>
+                  <div className="bg-card flex h-12 w-12 items-center justify-center rounded-md shadow-md">
+                    <div className="text-foreground text-lg font-bold">N</div>
                   </div>
                 </div>
               </div>
@@ -52,7 +53,7 @@ export default function Receive() {
               <Input
                 readOnly
                 value={ADDRESS}
-                className="bg-muted/50 font-mono text-muted-foreground text-xs"
+                className="bg-muted/50 text-muted-foreground font-mono text-xs"
               />
             </div>
 

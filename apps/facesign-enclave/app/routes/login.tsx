@@ -2,12 +2,14 @@ import Bowser from "bowser";
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
 import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
 import { sessionStorage } from "@/lib/sessions.server";
 import { useKeyStorageContext } from "@/providers/key.provider";
+
 import type { Route } from "./+types/login";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -78,17 +80,17 @@ export default function Login() {
 
   if (isMobile === null || isMobile === true) {
     return (
-      <div className="flex h-svh items-center justify-center bg-background">
+      <div className="bg-background flex h-svh items-center justify-center">
         <Spinner className="size-8" />
       </div>
     );
   }
 
   return (
-    <div role="dialog" className="fixed inset-0 flex items-center justify-center bg-background p-6">
+    <div role="dialog" className="bg-background fixed inset-0 flex items-center justify-center p-6">
       {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for backdrop dismiss */}
       <div
-        className="relative flex w-full max-w-sm flex-col gap-5 rounded-xl bg-card p-6 shadow-xl"
+        className="bg-card relative flex w-full max-w-sm flex-col gap-5 rounded-xl p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center">
@@ -102,10 +104,10 @@ export default function Login() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h1 className="text-center font-medium text-base">
+          <h1 className="text-center text-base font-medium">
             Scan QR code with your phone to open idOS FaceSign on mobile
           </h1>
-          <p className="text-center text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-center text-sm">
             Scan the QR code with your smartphone to continue the face scan and verification on your
             mobile.
           </p>

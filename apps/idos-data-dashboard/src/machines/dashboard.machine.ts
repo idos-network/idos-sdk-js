@@ -1,6 +1,7 @@
 import type { idOSClient, idOSClientWithUserSigner } from "@idos-network/client";
-import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import type { WalletSelector } from "@near-wallet-selector/core";
+
+import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import { assign, fromPromise, setup } from "xstate";
 
 export interface DashboardContext {

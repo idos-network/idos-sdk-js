@@ -1,7 +1,32 @@
 {
   "name": "@idos-network/consumer",
-  "description": "idOS Consumer JavaScript SDK for server environments",
   "version": "1.0.0-rc.1.2",
+  "description": "idOS Consumer JavaScript SDK for server environments",
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "publint": "pnpx publint --strict",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
@@ -14,30 +39,5 @@
   },
   "engines": {
     "node": ">=22.19.0"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    }
-  },
-  "files": [
-    "dist/**/*",
-    "src/**/*"
-  ],
-  "homepage": "https://idos.network",
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown --watch",
-    "publint": "pnpx publint --strict",
-    "typecheck": "tsc --noEmit"
-  },
-  "type": "module",
-  "types": "./dist/index.d.ts"
+  }
 }

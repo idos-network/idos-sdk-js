@@ -1,5 +1,6 @@
 import { FileText, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -29,7 +30,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
   return (
     <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success-foreground">
+        <div className="bg-success/10 text-success-foreground mb-2 flex h-12 w-12 items-center justify-center rounded-full">
           <ShieldCheck className="h-6 w-6" />
         </div>
         <CardTitle>Terms of Service</CardTitle>
@@ -37,15 +38,15 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <ScrollArea className="h-64 rounded-lg border border-border bg-muted/30 p-4">
-          <div className="flex flex-col gap-4 pr-3 text-muted-foreground text-sm">
+        <ScrollArea className="border-border bg-muted/30 h-64 rounded-lg border p-4">
+          <div className="text-muted-foreground flex flex-col gap-4 pr-3 text-sm">
             <p>
               By using Due's services, you agree to the following terms and conditions governing the
               use of our payment platform, including fund transfers to bank accounts.
             </p>
 
             <div className="flex flex-col gap-2">
-              <h4 className="font-medium text-foreground">1. Account Usage</h4>
+              <h4 className="text-foreground font-medium">1. Account Usage</h4>
               <p>
                 You agree to provide accurate and complete information during account setup. You are
                 responsible for maintaining the security of your account credentials and for all
@@ -54,7 +55,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
             </div>
 
             <div className="flex flex-col gap-2">
-              <h4 className="font-medium text-foreground">2. Fund Transfers</h4>
+              <h4 className="text-foreground font-medium">2. Fund Transfers</h4>
               <p>
                 Due facilitates the transfer of funds from digital assets to traditional bank
                 accounts. Transfer times, fees, and availability may vary depending on your region
@@ -64,7 +65,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
             </div>
 
             <div className="flex flex-col gap-2">
-              <h4 className="font-medium text-foreground">3. KYC and Compliance</h4>
+              <h4 className="text-foreground font-medium">3. KYC and Compliance</h4>
               <p>
                 You consent to identity verification procedures as required by applicable
                 regulations. Due may share your verification data with regulated partners to
@@ -74,7 +75,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
             </div>
 
             <div className="flex flex-col gap-2">
-              <h4 className="font-medium text-foreground">4. Privacy Policy</h4>
+              <h4 className="text-foreground font-medium">4. Privacy Policy</h4>
               <p>
                 Your personal data is handled in accordance with Due's Privacy Policy. We collect
                 and process only the data necessary to provide our services and comply with legal
@@ -83,7 +84,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
             </div>
 
             <div className="flex flex-col gap-2">
-              <h4 className="font-medium text-foreground">5. Limitation of Liability</h4>
+              <h4 className="text-foreground font-medium">5. Limitation of Liability</h4>
               <p>
                 Due shall not be liable for any indirect, incidental, or consequential damages
                 arising from your use of the platform. Our total liability is limited to the fees
@@ -101,7 +102,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
                   href={tosUrl ?? DEFAULT_TOS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-info-foreground underline underline-offset-2"
+                  className="text-info-foreground font-medium underline underline-offset-2"
                 >
                   Terms of Service
                 </a>{" "}
@@ -110,7 +111,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
                   href={privacyPolicyUrl ?? DEFAULT_PRIVACY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-info-foreground underline underline-offset-2"
+                  className="text-info-foreground font-medium underline underline-offset-2"
                 >
                   Privacy Policy
                 </a>
@@ -133,14 +134,14 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
           />
           <label
             htmlFor="due-tos-accept"
-            className="cursor-pointer text-muted-foreground text-sm leading-tight"
+            className="text-muted-foreground cursor-pointer text-sm leading-tight"
           >
             I have read and agree to Due's{" "}
-            <span className="font-medium text-foreground underline underline-offset-2">
+            <span className="text-foreground font-medium underline underline-offset-2">
               Terms of Service
             </span>{" "}
             and{" "}
-            <span className="font-medium text-foreground underline underline-offset-2">
+            <span className="text-foreground font-medium underline underline-offset-2">
               Privacy Policy
             </span>
           </label>

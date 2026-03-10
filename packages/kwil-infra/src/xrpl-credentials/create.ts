@@ -1,5 +1,6 @@
-import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import type { Client, TxResponse, Wallet } from "xrpl";
+
+import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 
 /**
  * Parameters for creating an original credential on XRPL

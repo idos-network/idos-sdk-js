@@ -24,7 +24,10 @@ import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption"
 const sender = nacl.box.keyPair();
 const receiver = nacl.box.keyPair();
 
-const derivedKey = await keyDerivation("SuperSecretPassword!", "9f51b3b2-4cbe-4c2b-8ea3-0b0c1b2f1a11");
+const derivedKey = await keyDerivation(
+  "SuperSecretPassword!",
+  "9f51b3b2-4cbe-4c2b-8ea3-0b0c1b2f1a11",
+);
 const message = new TextEncoder().encode("hello");
 
 const { content, encryptorPublicKey } = encrypt(message, sender.publicKey, receiver.publicKey);
@@ -44,7 +47,6 @@ await store.set("secret", new Uint8Array([1, 2, 3]));
 const secret = await store.get<Uint8Array>("secret");
 
 await store.setRememberDuration(7); // days
-
 ```
 
 ## Cryptography

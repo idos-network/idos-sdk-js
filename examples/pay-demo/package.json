@@ -1,6 +1,14 @@
 {
   "name": "pay-demo",
   "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run typecheck && react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@idos-network/client": "workspace:*",
@@ -54,13 +62,5 @@
     "vite-plugin-mkcert": "^1.17.9",
     "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4"
-  },
-  "private": true,
-  "scripts": {
-    "build": "pnpm run typecheck && react-router build",
-    "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
-  },
-  "type": "module"
+  }
 }

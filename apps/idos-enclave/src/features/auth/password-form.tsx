@@ -3,11 +3,13 @@ import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import { CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import nacl from "tweetnacl";
+
+import type { UIMode } from "@/types";
+
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
-import type { UIMode } from "@/types";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
@@ -42,14 +44,14 @@ interface DurationFieldProps {
 function DurationField({ duration }: DurationFieldProps) {
   return (
     <div className="flex justify-between gap-5">
-      <p className="text-left font-medium text-sm">Remember for:</p>
+      <p className="text-left text-sm font-medium">Remember for:</p>
       <div class="flex items-center gap-x-6">
         <label className="flex cursor-pointer items-center gap-x-2">
           <input
             type="radio"
             name="duration"
             value="7"
-            class="form-radio cursor-pointer text-primary focus:ring-primary/50"
+            class="form-radio text-primary focus:ring-primary/50 cursor-pointer"
             checked={duration.value === 7}
             onInput={() => {
               duration.value = 7;
@@ -62,7 +64,7 @@ function DurationField({ duration }: DurationFieldProps) {
             type="radio"
             name="duration"
             value="30"
-            class="form-radio cursor-pointer text-primary focus:ring-primary/50"
+            class="form-radio text-primary focus:ring-primary/50 cursor-pointer"
             checked={duration.value === 30}
             onInput={() => {
               duration.value = 30;
@@ -143,7 +145,7 @@ export default function PasswordForm({
           <Paragraph>Create a password for encrypting and decrypting your idOS data.</Paragraph>
 
           <div class="flex flex-col gap-4">
-            <label htmlFor="idos-password-input" class="font-medium text-foreground text-sm">
+            <label htmlFor="idos-password-input" class="text-foreground text-sm font-medium">
               New password
             </label>
             <div class="relative">
@@ -156,7 +158,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="bg-muted absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -171,7 +173,7 @@ export default function PasswordForm({
             <DurationField duration={duration} />
           </div>
 
-          <div class="rounded-xl bg-muted p-4">
+          <div class="bg-muted rounded-xl p-4">
             <div class="flex gap-4">
               <span class="text-red-500">
                 <CircleAlertIcon size={32} />
@@ -199,7 +201,7 @@ export default function PasswordForm({
           <Paragraph>Please enter your idOS password below:</Paragraph>
 
           <div class="flex flex-col gap-4">
-            <label htmlFor="idos-password-input" class="font-medium text-foreground text-sm">
+            <label htmlFor="idos-password-input" class="text-foreground text-sm font-medium">
               Password
             </label>
             <div class="relative">
@@ -212,7 +214,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="bg-muted absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -227,7 +229,7 @@ export default function PasswordForm({
             <DurationField duration={duration} />
           </div>
 
-          <p class="text-center text-muted-foreground text-sm">
+          <p class="text-muted-foreground text-center text-sm">
             Make sure to store it securely — you’ll need it to view or share your data later.
           </p>
 

@@ -1,6 +1,7 @@
 import { userContext } from "~/middlewares/auth.server";
 import { confirmTos } from "~/providers/due.server";
 import { setUserItem } from "~/providers/store.server";
+
 import type { Route } from "./+types/tos";
 
 export async function action({ request, context }: Route.ActionArgs) {

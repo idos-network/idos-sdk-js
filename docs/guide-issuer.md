@@ -2,15 +2,16 @@
 
 ## Required reading
 
-* [idOS System Overview](README.md)
-* [The idOS Enclave](enclave.md)
+- [idOS System Overview](README.md)
+- [The idOS Enclave](enclave.md)
 
 ## SDK feature overview
 
 The primary features provided by the Issuer SDK are:
-* checking if your user has an idOS profile, and create one otherwise;
-* transforming IDV results into idOS credentials;
-* implementing a [Passporting-compliant](passporting.md) onboarding flow.
+
+- checking if your user has an idOS profile, and create one otherwise;
+- transforming IDV results into idOS credentials;
+- implementing a [Passporting-compliant](passporting.md) onboarding flow.
 
 ## Getting started: what you'll need
 
@@ -18,7 +19,7 @@ The primary features provided by the Issuer SDK are:
 
 See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulatory-approach) for more context, and discuss with your compliance officer:
 
-* whether you’re going to be using [Passporting](passporting.md).
+- whether you’re going to be using [Passporting](passporting.md).
 
 ### Signature and encryption keys
 
@@ -27,10 +28,11 @@ See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulat
 > Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
 
 You'll need:
-  - `encryptionSecretKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to encrypt the credentials you issue to your users
-    - see [Encryption](encryption.md) for more information
-  - `signingKeyPair`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
-    - see [Signatures](signatures.md) for more information
+
+- `encryptionSecretKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to encrypt the credentials you issue to your users
+  - see [Encryption](encryption.md) for more information
+- `signingKeyPair`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
+  - see [Signatures](signatures.md) for more information
 
 You'll also need a `multibaseSigningKeyPair`, which will be used to sign the W3C VCs you issue. If you're unfamiliar with how to generate one, you can use the following example:
 
@@ -38,7 +40,7 @@ You'll also need a `multibaseSigningKeyPair`, which will be used to sign the W3C
 import { Ed25519VerificationKey2020 } from "https://esm.sh/@digitalcredentials/ed25519-verification-key-2020";
 
 const key = await Ed25519VerificationKey2020.generate();
-console.log(key.privateKeyMultibase);  // -> z...  (multibase, multicodec-prefixed)
+console.log(key.privateKeyMultibase); // -> z...  (multibase, multicodec-prefixed)
 console.log(key.publicKeyMultibase);
 ```
 
@@ -61,8 +63,9 @@ Your backend (private server) is where you’ll:
 ### Our Issuer SDK
 
 Get our NPM packages
-* https://www.npmjs.com/package/@idos-network/client
-* https://www.npmjs.com/package/@idos-network/issuer
+
+- https://www.npmjs.com/package/@idos-network/client
+- https://www.npmjs.com/package/@idos-network/issuer
 
 and their dependencies with pnpm (or your package manager of choice)
 
@@ -123,6 +126,7 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 If they don't have a profile, you must create one for them. This procedure can only be done by a Permissioned Issuer. If you're interested in being one: securely generate an `ed25516` signing key, grab its public key in hex, and get in touch with us at engineering@idos.network.
 
 To create a user profile in idOS, you need:
+
 1. **A wallet address** associated with the user.
 2. **A public encryption key** derived from either a password chosen by the user in the idOS enclave app.
 
@@ -139,7 +143,7 @@ const userId = crypto.randomUUID();
 // e.g. session.user.update({ userId });
 
 // Return it to the front-end to be used in the next step
-return { userId }
+return { userId };
 ```
 
 ##### Step 2: Getting the user's signing and encryption public keys
@@ -163,6 +167,7 @@ const ownershipProofSignature = await ethereum.request({
 ```
 
 ##### Step 3: Creating a User Profile
+
 Once the public key is derived, you can create the user profile in idOS by passing it to the `createUser` function alongside with user id and the wallet the user's going to use to drive their idOS profile.
 
 ```javascript
@@ -201,9 +206,10 @@ idOSClient = await idOSClient.withUserSigner(signer);
 ```typescript
 const credentials: IdosCredential[] = await idOSClient.getAllCredentials();
 
-credentials.filter(c =>
-  c.issuer_auth_public_key === signingKeyPair.publicKey
-  && JSON.parse(c.public_notes).type === "super-kyc"
+credentials.filter(
+  (c) =>
+    c.issuer_auth_public_key === signingKeyPair.publicKey &&
+    JSON.parse(c.public_notes).type === "super-kyc",
 );
 ```
 
@@ -262,7 +268,7 @@ const credentialFields = {
   level: "human",
   issued: new Date(),
   approvedAt: new Date(),
-}
+};
 
 const credentialSubject = {
   id: `uuid:${id}`,
@@ -288,14 +294,14 @@ const credentialSubject = {
   residentialAddressProofFile: Buffer.from("SOME_IMAGE"),
   residentialAddressProofCategory: "UTILITY_BILL",
   residentialAddressProofDateOfIssue: new Date(),
-}
+};
 
 const issuer = {
   id: `${issuer}/keys/1`,
   controller: `${issuer}/issuers/1`,
   publicKeyMultibase: multibaseSigningKeyPair.publicKey,
   privateKeyMultibase: multibaseSigningKeyPair.privateKey,
-}
+};
 
 const credential = await idOSIssuer.buildCredential(
   credentialFields,
@@ -317,7 +323,7 @@ const credentialsPublicNotes = {
   level: "human",
   status: "approved",
   issuer: "MyIssuer",
-}
+};
 
 const credentialContent = JSON.stringify(credential);
 
@@ -327,21 +333,18 @@ const credentialPayload = {
   plaintextContent: Utf8Codec.encode(credentialContent),
   recipientEncryptionPublicKey: Utf8Codec.encode(userEncryptionPublicKey),
   publicNotes: JSON.stringify(credentialsPublicNotes),
-}
+};
 
-await idOSIssuer.createCredentialByDelegatedWriteGrant(
-  credentialPayload,
-  {
-    id: delegatedWriteGrant.id,
-    ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
-    consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
-    issuerPublicKey: delegatedWriteGrant.issuer_public_key,
-    accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
-    notUsableBefore: delegatedWriteGrant.not_usable_before,
-    notUsableAfter: delegatedWriteGrant.not_usable_after,
-    signature,
- },
-);
+await idOSIssuer.createCredentialByDelegatedWriteGrant(credentialPayload, {
+  id: delegatedWriteGrant.id,
+  ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
+  consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
+  issuerPublicKey: delegatedWriteGrant.issuer_public_key,
+  accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
+  notUsableBefore: delegatedWriteGrant.not_usable_before,
+  notUsableAfter: delegatedWriteGrant.not_usable_after,
+  signature,
+});
 ```
 
 This will create a credential for the user in the idOS and a copy for you.

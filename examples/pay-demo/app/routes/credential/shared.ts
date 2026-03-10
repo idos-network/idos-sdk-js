@@ -1,6 +1,7 @@
 import { authMiddleware, userContext } from "~/middlewares/auth.server";
 import { getUsableCredentialByUser } from "~/providers/idos.server";
 import { setUserItem } from "~/providers/store.server";
+
 import type { Route } from "./+types/shared";
 
 export const middleware = [authMiddleware];

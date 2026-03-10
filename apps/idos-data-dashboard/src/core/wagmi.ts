@@ -1,6 +1,6 @@
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import {
   cookieStorage,
   createStorage,
@@ -8,6 +8,7 @@ import {
   type GetAccountReturnType,
   getAccount,
 } from "@wagmi/core";
+
 import { COMMON_ENV } from "./envFlags.common";
 
 export const projectId = COMMON_ENV.WALLET_CONNECT_PROJECT_ID;

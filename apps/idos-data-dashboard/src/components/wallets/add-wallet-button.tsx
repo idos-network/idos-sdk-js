@@ -7,6 +7,7 @@ import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
+
 import { Button } from "@/components/ui/button";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";

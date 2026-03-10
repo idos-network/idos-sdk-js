@@ -1,8 +1,11 @@
 import type { WalletSelector } from "@near-wallet-selector/core";
+
 import { reconnect } from "@wagmi/core";
 import { fromPromise } from "xstate";
+
 import { getEvmAccount, wagmiConfig } from "@/core/wagmi";
 import { createFaceSignProvider } from "@/lib/facesign";
+
 import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.machine";
 
 export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(

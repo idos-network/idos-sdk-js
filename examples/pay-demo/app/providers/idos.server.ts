@@ -5,6 +5,7 @@ import {
 } from "@idos-network/consumer";
 import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
 import nacl from "tweetnacl";
+
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 

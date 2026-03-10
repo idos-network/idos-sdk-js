@@ -1,13 +1,21 @@
 {
   "name": "data-dashboard",
   "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run typecheck && react-router build",
+    "dev": "react-router dev",
+    "start": "NODE_ENV=production react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@creit.tech/stellar-wallets-kit": "^1.7.5",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
-    "@idos-network/issuer": "workspace:*",
     "@idos-network/credentials": "workspace:*",
+    "@idos-network/issuer": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@near-wallet-selector/core": "catalog:near",
@@ -67,13 +75,5 @@
     "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^1.6.0"
-  },
-  "private": true,
-  "scripts": {
-    "build": "pnpm run typecheck && react-router build",
-    "dev": "react-router dev",
-    "start": "NODE_ENV=production react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
-  },
-  "type": "module"
+  }
 }

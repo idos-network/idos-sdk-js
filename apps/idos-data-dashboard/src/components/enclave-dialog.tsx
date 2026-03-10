@@ -1,5 +1,6 @@
 import { XIcon } from "lucide-react";
 import { useCallback, useRef } from "react";
+
 import { Button } from "@/components/ui/button";
 
 export function EnclaveDialog() {
@@ -58,12 +59,12 @@ export function EnclaveDialog() {
         if (e.target === dialogRef.current) handleClose();
       }}
     >
-      <div className="relative row-start-2 grid max-h-[90vh] w-full max-w-sm gap-6 overflow-auto rounded-xl bg-card p-5 text-card-foreground text-sm outline-none ring-1 ring-foreground/10 max-sm:max-h-[calc(100vh-3rem)] max-sm:max-w-none max-sm:rounded-b-none">
-        <div data-slot="dialog-header" className="flex flex-col gap-4 font-medium text-xl">
+      <div className="bg-card text-card-foreground ring-foreground/10 relative row-start-2 grid max-h-[90vh] w-full max-w-sm gap-6 overflow-auto rounded-xl p-5 text-sm ring-1 outline-none max-sm:max-h-[calc(100vh-3rem)] max-sm:max-w-none max-sm:rounded-b-none">
+        <div data-slot="dialog-header" className="flex flex-col gap-4 text-xl font-medium">
           <h2
             id="enclave-dialog-title"
             data-slot="dialog-title"
-            className="font-medium text-accent-foreground text-base leading-none"
+            className="text-accent-foreground text-base leading-none font-medium"
           >
             Access your idOS data
           </h2>
@@ -79,7 +80,7 @@ export function EnclaveDialog() {
         <Button
           data-slot="dialog-close"
           variant="ghost"
-          className="absolute top-2 right-2 text-accent-foreground"
+          className="text-accent-foreground absolute top-2 right-2"
           size="icon-lg"
           onClick={handleClose}
         >

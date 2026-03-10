@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
@@ -77,22 +78,22 @@ export function TransferStatusTracker({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3">
-        <div className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4">
+        <div className="bg-muted/50 flex flex-col gap-2 rounded-lg p-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Amount sent</span>
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {source.amount} {source.currency}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Amount received</span>
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {destination.amount} {destination.currency}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Recipient</span>
-            <span className="font-medium text-foreground">{recipientName}</span>
+            <span className="text-foreground font-medium">{recipientName}</span>
           </div>
         </div>
       </CardContent>

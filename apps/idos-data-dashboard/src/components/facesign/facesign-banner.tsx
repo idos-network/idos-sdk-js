@@ -1,4 +1,5 @@
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
+
 import {
   verifySignature,
   type WalletSignature,
@@ -6,9 +7,11 @@ import {
 import { hexEncode } from "@idos-network/utils/codecs";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { createFaceSignProvider } from "@/lib/facesign";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+
 import { FacesignDialog } from "./facesign-dialog";
 
 const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profile";
@@ -108,7 +111,7 @@ export function FacesignBanner() {
 
   return (
     <>
-      <div className="relative flex min-h-[120px] items-center gap-6 overflow-hidden rounded-xl border border-border bg-card p-5 lg:gap-10">
+      <div className="border-border bg-card relative flex min-h-[120px] items-center gap-6 overflow-hidden rounded-xl border p-5 lg:gap-10">
         <img
           src="/facesign-logo-light.svg"
           alt="idOS FaceSign"

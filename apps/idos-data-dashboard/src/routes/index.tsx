@@ -1,6 +1,8 @@
 import { lazy, Suspense, useState } from "react";
-import { CredentialCard } from "@/components/credentials/credential-card";
+
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
+
+import { CredentialCard } from "@/components/credentials/credential-card";
 import { useFetchCredentials } from "@/lib/queries/credentials";
 
 const CredentialDetails = lazy(() =>
@@ -68,8 +70,8 @@ function CredentialsList() {
 export default function Credentials() {
   return (
     <div className="flex flex-1 flex-col items-stretch gap-5">
-      <div className="flex h-14 items-center justify-between rounded-xl bg-card p-5 lg:h-20">
-        <h1 className="block font-bold text-2xl lg:text-3xl">Credentials</h1>
+      <div className="bg-card flex h-14 items-center justify-between rounded-xl p-5 lg:h-20">
+        <h1 className="block text-2xl font-bold lg:text-3xl">Credentials</h1>
       </div>
       <CredentialsList />
     </div>

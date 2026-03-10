@@ -1,9 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.0/schema.json",
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": { "enabled": false },
   "vcs": {
     "enabled": true,
-    "clientKind": "git"
+    "clientKind": "git",
   },
   "files": {
     "includes": [
@@ -21,19 +21,17 @@
       "!**/.turbo/**/*",
       "!**/playwright-report/**/*",
       "!**/facesign-enclave/src/assets/facetec/**/*",
-      "!**/facesign-enclave/public/facetec/**/*"
+      "!**/facesign-enclave/public/facetec/**/*",
     ],
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
   },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
-      "nursery": {
-        "useSortedClasses": "error"
-      },
+      "nursery": {},
       "correctness": {
-        "noUnusedImports": "error"
+        "noUnusedImports": "error",
       },
       "style": {
         "noParameterAssign": "error",
@@ -45,34 +43,14 @@
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "noUselessElse": "error"
+        "noUselessElse": "error",
       },
       "a11y": {
-        "noSvgWithoutTitle": "off"
-      }
-    }
+        "noSvgWithoutTitle": "off",
+      },
+    },
   },
   "formatter": {
-    "enabled": true,
-    "formatWithErrors": false,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 100,
-    "lineEnding": "lf",
-    "includes": ["**", "!**/.react-router/**/*", "!**/build/**/*"]
+    "enabled": false,
   },
-  "html": {
-    "formatter": {
-      "enabled": true,
-      "attributePosition": "auto",
-      "bracketSameLine": false,
-      "whitespaceSensitivity": "css"
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "trailingCommas": "all",
-      "semicolons": "always"
-    }
-  }
 }

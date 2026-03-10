@@ -1,5 +1,4 @@
 import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
-import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
 import type {
   AvailableIssuerType,
   IDDocumentType,
@@ -7,6 +6,9 @@ import type {
   VerifiableCredential,
   VerifiableCredentialSubject,
 } from "@idos-network/credentials/types";
+import type { KwilSigner } from "@idos-network/kwil-js";
+
+import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
 import {
   createNodeKwilClient,
   createServerKwilSigner,
@@ -27,7 +29,6 @@ import {
   type idOSPassportingPeer,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
-import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function CredentialCardSkeleton() {
   return (
-    <div className="flex flex-col gap-12 rounded-xl bg-card p-5">
+    <div className="bg-card flex flex-col gap-12 rounded-xl p-5">
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-6">
         {Array.from({ length: 5 }, (_, i) => (
           <div key={i} className="flex flex-col gap-2">

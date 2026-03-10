@@ -1,5 +1,7 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
+
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useIDOSClient } from "@/hooks/idOS";
 
 export function useDeleteCredentialMutation() {

@@ -1,6 +1,7 @@
 import { hexEncode } from "@idos-network/utils/codecs";
 import { createContext, use, useCallback, useEffect, useMemo, useState } from "react";
 import nacl from "tweetnacl";
+
 import { Spinner } from "@/components/ui/spinner";
 import { checkKeyAvailability, getKeyPair, storeMnemonic } from "@/lib/keys";
 

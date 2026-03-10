@@ -1,4 +1,5 @@
 import type { EncryptionPasswordStore } from "@idos-network/kwil-infra/actions";
+
 import {
   base64Codec,
   base64Encode,
@@ -12,9 +13,7 @@ import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption"
 import { LocalStorageStore, type PipeCodecArgs, type Store } from "@idos-network/utils/store";
 import { syncScrypt } from "scrypt-js";
 import nacl from "tweetnacl";
-import { BaseProvider } from "./base";
-import { STORAGE_KEYS } from "./keys";
-import { Client as MPCClient } from "./mpc/client";
+
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
@@ -30,6 +29,10 @@ import type {
   PrivateEncryptionProfile,
   PublicEncryptionProfile,
 } from "./types";
+
+import { BaseProvider } from "./base";
+import { STORAGE_KEYS } from "./keys";
+import { Client as MPCClient } from "./mpc/client";
 
 export interface LocalEnclaveOptions extends EnclaveOptions {
   store?: Store;

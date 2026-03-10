@@ -4,7 +4,6 @@ The idOS is a decentralized identity system that enables secure storage, verific
 
 Note that idOS is (currently) a permissioned network. While it's (almost) fully open-source, only authorized operators can participate in it. This ensures that consequences (economical, legal, or as appropriate) can be pursued for ill-behaving nodes, ensuring that all node operators are well-incentivized to protect users' privacy and data sovereignty.
 
-
 > 🚧 Will change soon 🚧
 >
 > That `(almost)` will disappear soon. We're in the process of preparing some repositories to become public.
@@ -82,19 +81,18 @@ erDiagram
 
 - **User**:
   The central identity entity in the system, representing a unique person or organization. Users control their profiles through their blockchain wallets and manage how their data is shared.
-
   - **User Profile**:
-  This is an informal, nebulous, term to refer generally to all the information a user controls.
+    This is an informal, nebulous, term to refer generally to all the information a user controls.
 
 - **Wallet**:
   Blockchain wallets that authenticate a user. A user can link multiple wallets across different chains (EVM, NEAR, XRPL, Stellar) to their idOS profile to provide flexible authentication options.
 
 - **Credential**:
   Verified claims or attestations about a user. Notable fields are:
-    - **User**: The individual to whom this credential was issued and whose information the credential verifies.
-    - **Public Notes**: Readable metadata that is visible to any platform where the user logs in to idOS. Issuers can update these notes, for example, to reflect the credential's revocation status.
-    - **Encrypted Content**: The credential's core data, securely encrypted so that only the user and explicitly authorized parties can access it.
-    - **Issuer Address**: The public key of the issuer's signer, which issued and signed the credential to ensure its authenticity and integrity.
+  - **User**: The individual to whom this credential was issued and whose information the credential verifies.
+  - **Public Notes**: Readable metadata that is visible to any platform where the user logs in to idOS. Issuers can update these notes, for example, to reflect the credential's revocation status.
+  - **Encrypted Content**: The credential's core data, securely encrypted so that only the user and explicitly authorized parties can access it.
+  - **Issuer Address**: The public key of the issuer's signer, which issued and signed the credential to ensure its authenticity and integrity.
 
   An unintuitive aspect of credentials is that they're encrypted specifically for one recipient. To share credential data, the user (or their authorized delegate) must retrieve their encrypted credential, decrypt it using their keys, re-encrypt it for the new recipient, and store this as a new credential that references the original using **SharedCredential**. This process ensures end-to-end encryption while enabling controlled sharing.
 
@@ -133,7 +131,6 @@ While Issuers and Consumers are key actors in the system, they are primarily rep
   Whoever transmits the dWG to idOS also needs to provide the original and copy credentials' fields (including the encrypted content). Check the schema for more details.
 
   dWGs can only be used once.
-
 
 - **Delegated Access Grants**:
 
@@ -179,7 +176,6 @@ These are other parties that bear influence in the system, even though they're n
 
 - **idOS Storage Network Nodes**:
   These nodes form the backbone of the idOS system, providing decentralized storage and retrieval of user data. They are built on [Kwil](https://www.kwil.com/), a decentralized database platform, and include idOS-specific extensions to support the system's unique requirements. These nodes operate according to a predefined schema, ensuring data consistency and integrity. Deployed behind a KGW controlled by the idOS Association, node operators talk to each other through AWS VPC peering. We're also open to supporting WireGuard/Tailscale.
-
   - **Relevant repos**:
     - <https://github.com/idos-network/idos-kwild> (🚧 not yet public 🚧)
     - <https://github.com/idos-network/idos-schema>
@@ -189,7 +185,6 @@ These are other parties that bear influence in the system, even though they're n
 
 - **KGW (Kwil GateWay)**:
   A load balancer and RPC gateway that sits in front of all idOS Storage Network Nodes. It also holds access cookies, which make it possible for logged in users to not have to sign every read request to the nodes.
-
   - **Relevant repos**:
     - <https://github.com/idos-network/kgw> (🚧 not yet public 🚧): idOS's kgw Docker image
 
@@ -203,7 +198,6 @@ These are other parties that bear influence in the system, even though they're n
 
 - **User Dashboard**:
   A user-facing interface that allows users to manage their idOS profiles. Users can view their credentials, manage access grants, and add or remove controlling wallets.
-
   - **Relevant repo folder**:
     - [apps/idos-data-dashboard](../apps/idos-data-dashboard/)
   - **Deployments**:
@@ -218,7 +212,6 @@ These are other parties that bear influence in the system, even though they're n
   > There's no such thing as an Enclave for dApps. You will be asked for your password. This application is provided as a complimentary service, not as something to be used seriously.
   >
   > Please consider deploying your own copy of this application in an environment that enforces user safety and prevents accidental data leaks.
-
   - **Relevant repo folder**:
     - [apps/dashboard-for-dapps](../apps/dashboard-for-dapps/)
   - **Deployments**:
@@ -239,7 +232,6 @@ These are other parties that bear influence in the system, even though they're n
   This is branded generally as "Neobank". It's meant to demonstrate how a neobank that's using a credit card partner (ACME Card Provider) can share credentials using idOS.
 
   Note that its KYC process accepts anything resembling an official document and doesn't force the face to match with what's on the document.
-
   - **Relevant repo folder**:
     - [examples/pay-demo](../examples/pay-demo/)
   - **Deployments**:
@@ -250,5 +242,6 @@ These are other parties that bear influence in the system, even though they're n
 See the [Long Tour](./long-tour.md) for a thorough end-to-end walkthrough.
 
 If you're looking for actor-specific guides, take a look at:
+
 - [Consumer guide](guide-consumer.md)
 - [Issuer guide](guide-issuer.md)

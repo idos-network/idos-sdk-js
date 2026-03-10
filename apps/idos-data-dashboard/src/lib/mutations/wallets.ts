@@ -1,7 +1,9 @@
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
+
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
+
 import { useIDOSClient } from "@/hooks/idOS";
 
 export const createWalletParamsFactory = ({

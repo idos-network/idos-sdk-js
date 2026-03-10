@@ -4,7 +4,9 @@ import type {
   FaceTecSessionStatus,
 } from "@/assets/facetec/FaceTecPublicApi.d";
 import type { FaceTecSDK } from "@/assets/facetec/FaceTecSDK";
+
 import { env } from "@/env";
+
 import { SessionRequestProcessor } from "./session-request-processor";
 
 const TRANSPARENT_COLOR = "transparent";

@@ -9,6 +9,7 @@ import {
   useEffect,
   useState,
 } from "react";
+
 import { projectId, useEthersSigner, wagmiConfig } from "@/wagmi.config";
 
 const _idOSClient = createIDOSClient({

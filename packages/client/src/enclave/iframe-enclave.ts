@@ -1,15 +1,17 @@
 import type { idOSCredential } from "@idos-network/credentials/types";
-import {
-  BaseProvider,
-  type EnclaveOptions,
-  type PublicEncryptionProfile,
-} from "@idos-network/enclave";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
   RemoveAddressMessageToSign,
   RemoveAddressSignatureMessage,
 } from "@idos-network/enclave/mpc";
+
+import {
+  BaseProvider,
+  type EnclaveOptions,
+  type PublicEncryptionProfile,
+} from "@idos-network/enclave";
+
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {

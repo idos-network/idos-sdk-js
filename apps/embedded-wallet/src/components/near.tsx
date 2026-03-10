@@ -1,11 +1,12 @@
+import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/kwil-infra";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
-import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/kwil-infra";
+import { setupModal } from "@near-wallet-selector/modal-ui";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
 import { useEffect, useState } from "react";
+
 import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
@@ -102,11 +103,11 @@ export function NearConnector() {
       ))}
       {stepper.when("sign-message", (step) => (
         <div className="flex flex-col gap-4">
-          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
-          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+          <h1 className="text-center text-2xl font-bold">{step.title}</h1>
+          <p className="text-center text-sm text-neutral-400">{step.description}</p>
           <div className="flex flex-col gap-2">
-            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p className="text-center text-neutral-400 text-sm">{accountId}</p>
+            <p className="text-center text-sm text-neutral-400">Connected as:</p>
+            <p className="text-center text-sm text-neutral-400">{accountId}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

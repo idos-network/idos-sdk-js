@@ -2,8 +2,9 @@
  * Local storage implementation of the store
  */
 
-import { durationElapsed, setDuration } from "./duration";
 import type { PipeCodecArgs, Store } from "./interface";
+
+import { durationElapsed, setDuration } from "./duration";
 
 export class LocalStorageStore implements Store {
   readonly keyPrefix: string;

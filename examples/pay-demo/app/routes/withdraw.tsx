@@ -1,5 +1,6 @@
 import { Landmark } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
@@ -23,6 +24,7 @@ import {
 import { userContext } from "~/middlewares/auth.server";
 import { COMMON_ENV } from "~/providers/envFlags.common";
 import { MachineContext } from "~/providers/state";
+
 import type { Route } from "./+types/withdraw";
 
 type TransferStep = "recipient" | "quote" | "confirm" | "signing" | "status" | "done";
@@ -132,7 +134,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
             <p className="text-muted-foreground text-sm">Complete your identity verification</p>
           </div>
         </div>
@@ -163,7 +165,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
               <p className="text-muted-foreground text-sm">
                 Accept Due's terms to continue with your withdrawal
               </p>
@@ -187,7 +189,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
               <p className="text-muted-foreground text-sm">
                 Complete your verification through Due
               </p>
@@ -209,7 +211,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                <h2 className="text-foreground text-2xl font-bold tracking-tight">
                   Withdraw Funds
                 </h2>
                 <p className="text-muted-foreground text-sm">An error occurred</p>
@@ -228,7 +230,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                <h2 className="text-foreground text-2xl font-bold tracking-tight">
                   Withdraw Funds
                 </h2>
                 <p className="text-muted-foreground text-sm">KYC is in progress, please wait...</p>
@@ -243,7 +245,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                <h2 className="text-foreground text-2xl font-bold tracking-tight">
                   Withdraw Funds
                 </h2>
                 <p className="text-muted-foreground text-sm">KYC has failed...</p>
@@ -264,7 +266,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                  <h2 className="text-foreground text-2xl font-bold tracking-tight">
                     Withdraw Funds
                   </h2>
                   <p className="text-muted-foreground text-sm">
@@ -290,7 +292,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                  <h2 className="text-foreground text-2xl font-bold tracking-tight">
                     Withdraw Funds
                   </h2>
                   <p className="text-muted-foreground text-sm">Review your transfer details</p>
@@ -324,7 +326,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                  <h2 className="text-foreground text-2xl font-bold tracking-tight">
                     Withdraw Funds
                   </h2>
                   <p className="text-muted-foreground text-sm">Confirm and sign the transaction</p>
@@ -375,7 +377,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                  <h2 className="text-foreground text-2xl font-bold tracking-tight">
                     Withdraw Funds
                   </h2>
                   <p className="text-muted-foreground text-sm">Transfer in progress</p>
@@ -399,7 +401,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                  <h2 className="text-foreground text-2xl font-bold tracking-tight">
                     Withdraw Funds
                   </h2>
                   <p className="text-muted-foreground text-sm">Transfer complete</p>
@@ -427,7 +429,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
             <p className="text-muted-foreground text-sm">An error occurred</p>
           </div>
         </div>
@@ -446,15 +448,15 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
             <p className="text-muted-foreground text-sm">Processing your request</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+          <div className="border-muted border-t-primary mb-4 h-8 w-8 animate-spin rounded-full border-2" />
           <p className="text-muted-foreground text-sm">{message}</p>
-          {errorMessage && <p className="mt-2 text-destructive text-sm">{errorMessage}</p>}
+          {errorMessage && <p className="text-destructive mt-2 text-sm">{errorMessage}</p>}
         </div>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
@@ -467,7 +469,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
             <p className="text-muted-foreground text-sm">KYC is in progress, please wait...</p>
           </div>
         </div>
@@ -480,7 +482,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
             <p className="text-muted-foreground text-sm">KYC has failed...</p>
           </div>
         </div>
@@ -493,7 +495,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+          <h2 className="text-foreground text-2xl font-bold tracking-tight">Withdraw Funds</h2>
           <p className="text-muted-foreground text-sm">
             Transfer back to your bank account via Due
           </p>
@@ -520,29 +522,29 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
                   <NumberFieldInput className="text-left text-lg" />
                 </NumberFieldGroup>
               </NumberField>
-              <div className="flex items-center justify-center rounded-md border border-input bg-muted px-4 font-medium text-sm">
+              <div className="border-input bg-muted flex items-center justify-center rounded-md border px-4 text-sm font-medium">
                 USDC
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-muted/50 p-4">
+          <div className="border-border bg-muted/50 rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border bg-card p-1 shadow-sm">
-                  <Landmark className="h-5 w-5 text-muted-foreground" />
+                <div className="border-border bg-card flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border p-1 shadow-sm">
+                  <Landmark className="text-muted-foreground h-5 w-5" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Due</div>
+                  <div className="text-foreground font-medium">Due</div>
                   <div className="text-muted-foreground text-xs">SEPA Instant Transfer</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-medium text-foreground">
+                <div className="text-foreground font-medium">
                   &asymp; {destinationCurrencySymbol}
                   {formattedDestinationAmount}
                 </div>
-                <div className="font-medium text-success-foreground text-xs">
+                <div className="text-success-foreground text-xs font-medium">
                   Rate: 1 {SOURCE_CURRENCY} = {destinationCurrencySymbol}
                   {DEMO_FX_RATE.toFixed(2)}
                 </div>

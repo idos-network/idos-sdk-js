@@ -1,4 +1,5 @@
 import nacl from "tweetnacl";
+
 import { base64Encode } from "../codecs";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 

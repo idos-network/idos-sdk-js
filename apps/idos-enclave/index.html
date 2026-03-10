@@ -1,86 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>idOS Secure Enclave</title>
 
     <style>
-    button {
-      display: none;
-    }
+      button {
+        display: none;
+      }
 
-    button:before {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      button:before {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    button#unlock::before {
-      content: "🔐 Unlock idOS";
-    }
+      button#unlock::before {
+        content: "🔐 Unlock idOS";
+      }
 
-    button#unlock:disabled {
-      background-color: grey;
-    }
+      button#unlock:disabled {
+        background-color: grey;
+      }
 
-    button#unlock:disabled::before {
-      content: "Unlocking...";
-    }
+      button#unlock:disabled::before {
+        content: "Unlocking...";
+      }
 
-    button#unlock.create::before {
-      content: "🔐 Create idOS Key";
-    }
+      button#unlock.create::before {
+        content: "🔐 Create idOS Key";
+      }
 
-    button#unlock.create:disabled::before {
-      content: "Creating...";
-    }
+      button#unlock.create:disabled::before {
+        content: "Creating...";
+      }
 
-    button#confirm::before {
-      content: "👀 See request";
-    }
+      button#confirm::before {
+        content: "👀 See request";
+      }
 
-    button#confirm:disabled {
-      background-color: grey;
-    }
+      button#confirm:disabled {
+        background-color: grey;
+      }
 
-    button#backup:disabled::before {
-      content: "Waiting...";
-    }
+      button#backup:disabled::before {
+        content: "Waiting...";
+      }
 
-    button#backup::before {
-      content: "💼 Back up idOS key";
-    }
+      button#backup::before {
+        content: "💼 Back up idOS key";
+      }
 
-    button#backup:disabled {
-      background-color: grey;
-    }
+      button#backup:disabled {
+        background-color: grey;
+      }
 
-    button#backup:disabled::before {
-      content: "Waiting...";
-    }
+      button#backup:disabled::before {
+        content: "Waiting...";
+      }
     </style>
   </head>
 
   <body>
-    <div id="container" class="w-screen h-screen">
+    <div id="container" class="h-screen w-screen">
       <button
         id="unlock"
         type="button"
-        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300"
+        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] text-[41cqmin] font-medium text-zinc-950 transition-colors hover:bg-green-300"
       ></button>
       <button
         id="confirm"
         type="button"
-        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300"
+        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] text-[41cqmin] font-medium text-zinc-950 transition-colors hover:bg-green-300"
       ></button>
       <button
         id="backup"
         type="button"
-        class="h-full w-full whitespace-pre rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300"
+        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] text-[41cqmin] font-medium whitespace-pre text-zinc-950 transition-colors hover:bg-green-300"
       ></button>
     </div>
 

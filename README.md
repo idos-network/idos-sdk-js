@@ -10,15 +10,17 @@
 > - <https://www.idos.network/legal/transparency-document>
 
 ## SDKs
-| Folder                                   | Contents                                     |
-| :--------------------------------------- | :------------------------------------------- |
+
+| Folder                                    | Contents                                     |
+| :---------------------------------------- | :------------------------------------------- |
 | **[`📁 consumer`](./packages/consumer/)** | idOS JavaScript SDK for consumers            |
 | **[`📁 issuer`](./packages/issuer)**      | idOS JavaScript SDK for issuers              |
 | **[`📁 client`](./packages/client)**      | idOS JavaScript SDK for browser environments |
 
 ## Auxiliary Applications
-| Folder                                                 | Contents                                                                                                                                |
-| :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+
+| Folder                                                  | Contents                                                                                                                                |
+| :------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
 | [`📁 dashboard-for-dapps`](./apps/dashboard-for-dapps/) | Dashboard for dApp developers to access data that users shared with them. <br> Deployed at <https://dashboard-for-dapps.idos.network/>. |
 | [`📁 idos-data-dashboard`](./apps/idos-data-dashboard)  | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>.                     |
 | [`📁 idos-enclave`](./apps/idos-enclave)                | A secure browser context for password input, key derivation, encryption, and decryption.                                                |
@@ -26,6 +28,7 @@
 ## Installation
 
 Get [client NPM packages](https://www.npmjs.com/package/@idos-network/client) and [consumer NPM packages](https://www.npmjs.com/package/@idos-network/consumer) and its dependencies with pnpm or the equivalent of your package manager of choice:
+
 ```
 pnpm add @idos-network/client @idos-network/consumer ethers near-api-js
 ```

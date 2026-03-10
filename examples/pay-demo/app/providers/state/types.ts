@@ -1,6 +1,7 @@
 // Import context types from all flows
 
 import type { idOSClientLoggedIn } from "@idos-network/client";
+
 import {
   type CredentialContext,
   emptyContext as credentialEmptyContext,

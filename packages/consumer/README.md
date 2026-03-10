@@ -24,8 +24,8 @@ import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
 
 // Initialize with your signer and encryption key
 const idOSConsumer = await idOSConsumerClass.init({
-  consumerSigner,                    // Your signing keypair
-  recipientEncryptionPrivateKey,     // Your encryption private key
+  consumerSigner, // Your signing keypair
+  recipientEncryptionPrivateKey, // Your encryption private key
 });
 
 // List access grants for a user

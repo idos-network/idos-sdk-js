@@ -1,34 +1,11 @@
 {
   "name": "@idos-network/kwil-infra",
-  "description": "Infrastructure and wallets for idOS",
   "version": "1.0.0-rc.1.1",
-  "dependencies": {
-    "@idos-network/kwil-js": "catalog:core",
-    "@idos-network/utils": "workspace:*",
-    "tiny-invariant": "catalog:core",
-    "tweetnacl": "catalog:core",
-    "zod": "catalog:core"
-  },
-  "devDependencies": {
-    "@gemwallet/api": "^3.8.0",
-    "@types/node": "^22.15.30",
-    "jsdom": "^22.1.0",
-    "tsdown": "catalog:build",
-    "typescript": "catalog:build",
-    "vitest": "catalog:testing",
-    "xumm": "catalog:xrp"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
+  "description": "Infrastructure and wallets for idOS",
+  "license": "MIT",
   "repository": "https://github.com/idos-network/idos-sdk-js",
-  "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown --watch",
-    "publint": "pnpx publint --strict",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit"
-  },
+  "type": "module",
+  "sideEffects": false,
   "exports": {
     "./actions": {
       "types": "./dist/actions/index.d.mts",
@@ -55,13 +32,38 @@
       "import": "./dist/index.mjs"
     }
   },
-  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@idos-network/kwil-js": "catalog:core",
+    "@idos-network/utils": "workspace:*",
+    "tiny-invariant": "catalog:core",
+    "tweetnacl": "catalog:core",
+    "zod": "catalog:core"
+  },
+  "devDependencies": {
+    "@gemwallet/api": "^3.8.0",
+    "@types/node": "^22.15.30",
+    "jsdom": "^22.1.0",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing",
+    "xumm": "catalog:xrp"
+  },
   "peerDependencies": {
-    "near-api-js": "catalog:near",
-    "ethers": "catalog:ethereum",
-    "@wagmi/core": "catalog:ethereum",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
+    "@wagmi/core": "catalog:ethereum",
+    "ethers": "catalog:ethereum",
+    "near-api-js": "catalog:near",
     "ripple-keypairs": "catalog:xrp",
     "xrpl": "catalog:xrp"
   },
@@ -84,7 +86,5 @@
     "xrpl": {
       "optional": true
     }
-  },
-  "sideEffects": false,
-  "type": "module"
+  }
 }

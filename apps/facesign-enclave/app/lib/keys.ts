@@ -1,5 +1,6 @@
 import { utf8Encode } from "@idos-network/utils/codecs";
 import { mnemonicToKeyPair } from "@idos-network/utils/facesign";
+
 import { storeGet, storeSet } from "./storage";
 
 export const DB_KEY_KEK = "idOS:facesign:kek";

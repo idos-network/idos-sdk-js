@@ -1,6 +1,8 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
+
 import { useMutationState } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
 import {
@@ -13,8 +15,10 @@ import {
 import { useDeleteCredentialMutation, useRevokeGrants } from "@/lib/mutations/credentials";
 import { useFetchGrants } from "@/lib/queries/credentials";
 import { timelockToMs } from "@/lib/time";
-import { safeParse } from "./shared";
+
 import type { idOSCredentialWithShares } from "./types";
+
+import { safeParse } from "./shared";
 
 interface DeleteCredentialProps {
   isOpen: boolean;

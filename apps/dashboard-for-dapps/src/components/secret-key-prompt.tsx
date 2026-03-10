@@ -1,5 +1,6 @@
-import { Stack, Text } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/credentials/types";
+
+import { Stack, Text } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 
 import {
@@ -15,7 +16,6 @@ import {
   Field,
   PasswordInput,
 } from "@/components/ui";
-
 import { decrypt } from "@/utils";
 
 export function SecretKeyPrompt({

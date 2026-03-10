@@ -1,7 +1,7 @@
-import { createRequire } from "node:module";
-import { resolve } from "node:path";
 import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
+import { createRequire } from "node:module";
+import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";

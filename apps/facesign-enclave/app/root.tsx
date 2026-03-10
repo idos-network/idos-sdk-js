@@ -1,4 +1,5 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+
 import "./styles.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -30,7 +31,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export function HydrateFallback() {
-  return <div className="flex min-h-svh items-center justify-center bg-background" />;
+  return <div className="bg-background flex min-h-svh items-center justify-center" />;
 }
 
 export default function App() {

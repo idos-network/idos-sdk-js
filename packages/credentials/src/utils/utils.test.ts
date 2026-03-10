@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import type { CredentialSubject } from "../types";
+
 import {
   deriveLevel,
   highestMatchingCredential,

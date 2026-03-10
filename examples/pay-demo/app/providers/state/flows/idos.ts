@@ -1,8 +1,11 @@
 import type { idOSClientWithUserSigner } from "@idos-network/client";
+
 import { createIDOSClient } from "@idos-network/client";
 import { ethers } from "ethers";
 import { assign, fromPromise } from "xstate";
+
 import { COMMON_ENV } from "~/providers/envFlags.common";
+
 import type { Context } from "../types";
 
 export interface idOSContext {

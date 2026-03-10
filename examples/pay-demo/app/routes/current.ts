@@ -1,5 +1,6 @@
 import { authMiddleware, userContext } from "~/middlewares/auth.server";
 import { setUserItem } from "~/providers/store.server";
+
 import type { Route } from "./+types/current";
 
 export const middleware = [authMiddleware];

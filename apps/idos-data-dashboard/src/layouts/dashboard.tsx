@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
 import { Link, Outlet, useLocation, useMatches } from "react-router";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,7 +41,7 @@ export function ConnectedWallet() {
 
   return (
     <div className="flex h-20 items-center gap-5">
-      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
+      <div className="bg-muted flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg">
         {isFaceSign ? (
           <img
             alt="FaceSign wallet"
@@ -75,7 +76,7 @@ export function ConnectedWallet() {
         <div className="text-card-foreground">
           {isFaceSign ? "idOS FaceSign" : "Connected Wallet"}
         </div>
-        <code className="max-w-[180px] truncate text-muted-foreground">
+        <code className="text-muted-foreground max-w-[180px] truncate">
           {address.slice(0, 6)}...{address.slice(-4)}
         </code>
       </div>
@@ -120,7 +121,7 @@ export function MainNavLinks() {
         </li>
       </ul>
       <div>
-        <h3 className="mb-1.5 px-6 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+        <h3 className="text-muted-foreground mb-1.5 px-6 text-xs font-semibold tracking-wider uppercase">
           idOS Portal
         </h3>
         <ul className="flex flex-col gap-1.5">
@@ -220,7 +221,7 @@ function Breadcrumbs() {
                   <BreadcrumbPage>{item.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
-                    className="rounded-full bg-muted px-4 py-2 font-normal text-foreground"
+                    className="bg-muted text-foreground rounded-full px-4 py-2 font-normal"
                     render={<Link to={item.to} />}
                   >
                     {item.label}
@@ -267,10 +268,10 @@ export default function DashboardLayout() {
             />
           </Link>
           <div className="flex flex-1 flex-col items-stretch gap-5">
-            <div className="rounded-xl bg-card px-5">
+            <div className="bg-card rounded-xl px-5">
               <ConnectedWallet />
             </div>
-            <div className="flex flex-1 flex-col items-stretch rounded-xl bg-card p-5">
+            <div className="bg-card flex flex-1 flex-col items-stretch rounded-xl p-5">
               <MainNavLinks />
               <div className="mt-auto flex flex-col items-stretch gap-5">
                 <FooterNavLinks />
@@ -300,7 +301,7 @@ export default function DashboardLayout() {
           <MobileNav isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </Suspense>
       )}
-      <div className="fixed right-5 bottom-5 hidden items-stretch gap-2 rounded-lg bg-card p-5 lg:flex">
+      <div className="bg-card fixed right-5 bottom-5 hidden items-stretch gap-2 rounded-lg p-5 lg:flex">
         <a
           href="https://www.idos.network/legal/privacy-policy"
           target="_blank"

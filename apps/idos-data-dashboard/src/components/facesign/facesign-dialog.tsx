@@ -34,7 +34,7 @@ export function FacesignDialog({ open, onOpenChange, onContinue, isLoading }: Fa
             <img src="/facesign-filled.svg" alt="" width={80} height={80} className="relative" />
           </div>
           <h2 className="text-center text-lg">Scan your Face to Continue</h2>
-          <p className="text-center text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-center text-sm">
             Scan your face to log in with FaceSign or enroll if you’re new.
           </p>
         </div>

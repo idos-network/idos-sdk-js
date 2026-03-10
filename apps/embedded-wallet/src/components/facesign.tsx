@@ -1,6 +1,8 @@
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
+
 import { hexEncode } from "@idos-network/utils/codecs";
 import { useRef, useState } from "react";
+
 import { useWalletState } from "../state";
 import { Button } from "./ui/button";
 
@@ -109,8 +111,8 @@ export function FaceSignConnector() {
   if (step === "consent") {
     return (
       <div className="flex max-w-sm flex-col gap-4 px-4">
-        <h2 className="text-center font-bold text-lg">Biometric Consent</h2>
-        <div className="max-h-[320px] overflow-y-auto text-neutral-400 text-xs leading-relaxed">
+        <h2 className="text-center text-lg font-bold">Biometric Consent</h2>
+        <div className="max-h-[320px] overflow-y-auto text-xs leading-relaxed text-neutral-400">
           <p>
             By proceeding, you explicitly consent to idOS Association processing your biometric
             data, including facial images and biometric data derived from them, for the purposes of
@@ -174,7 +176,7 @@ export function FaceSignConnector() {
   if (step === "running") {
     return (
       <div className="flex flex-col items-center gap-4">
-        <p className="text-center text-neutral-400 text-sm">
+        <p className="text-center text-sm text-neutral-400">
           Complete the FaceSign flow in the enclave...
         </p>
       </div>
@@ -195,7 +197,7 @@ export function FaceSignConnector() {
           />
         )}
       </Button>
-      {error && <p className="text-center text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-center text-xs text-red-400">{error}</p>}
     </div>
   );
 }

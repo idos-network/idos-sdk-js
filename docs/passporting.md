@@ -26,38 +26,37 @@ Alice has a profile in the idOS, but no credentials. She visits OE1, who offers 
 
 1. OE1 asks Alice for her personal data, and for a write grant
 2. Upon successful IDV, OE1:
-    1. issues the credential **C1**;
-        1. encrypts **C1** for Alice as **C1.0**, and inserts it in the idOS;
-    2. encrypts **C1** for itself as **C1.1**, and inserts it in the idOS;
-    3. calculates the hash of **C1**;
-    4. inserts an AG to **C1.1** in the idOS, containing the hash of **C1**.
+   1. issues the credential **C1**;
+      1. encrypts **C1** for Alice as **C1.0**, and inserts it in the idOS;
+   2. encrypts **C1** for itself as **C1.1**, and inserts it in the idOS;
+   3. calculates the hash of **C1**;
+   4. inserts an AG to **C1.1** in the idOS, containing the hash of **C1**.
 
 ### Alice visits OE2 and reuses her credential
 
 Later, Alice visits OE2, who asks her to list her idOS credentials. OE2 finds she has a compatible credential issued by OE1.
 
-
 ![passporting flow 1](assets/idos-passporting-2.png)
 
 1. OE2 asks Alice for an encrypted duplicate of **C1**;
 2. Alice then:
-    1. retrieves and decrypts **C1.0**, obtaining **C1**;
-    2. calculates the content hash of **C1**
-    3. encrypts **C1** for OE2 as **C1.2**
-    4. Alice inserts **C1.2** it in the idOS
+   1. retrieves and decrypts **C1.0**, obtaining **C1**;
+   2. calculates the content hash of **C1**
+   3. encrypts **C1** for OE2 as **C1.2**
+   4. Alice inserts **C1.2** it in the idOS
 
 OE2 now has credential **C1.2** in the idOS, but can’t access it yet. To do so compliantly, they must continue the process as follows.
 
 1. OE2 asks Alice for a delegated AG to **C1.2**;
 2. Alice:
-    1. calculates the hash of C1 and includes it in the AG;
-    2. signs the delegated AG to **C1.2**;
+   1. calculates the hash of C1 and includes it in the AG;
+   2. signs the delegated AG to **C1.2**;
 3. OE2 sends the delegated AG to OE1;
 4. OE1 then does the AG relay process:
-    1. retrieves and decrypts **C1.1**, obtaining **C1**;
-    2. calculates the hash of **C1**;
-    3. aborts if Alice provided a different hash in her AG;
-    4. inserts the delegated AG into the idOS, containing the hash of **C1**.
+   1. retrieves and decrypts **C1.1**, obtaining **C1**;
+   2. calculates the hash of **C1**;
+   3. aborts if Alice provided a different hash in her AG;
+   4. inserts the delegated AG into the idOS, containing the hash of **C1**.
 
 ### OE2 ensures safe credential reuse
 

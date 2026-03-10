@@ -1,6 +1,8 @@
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { useActorRef } from "@/machines/provider";
+
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
 import { COMMON_ENV } from "./core/envFlags.common";
 import { createFaceSignProvider } from "./lib/facesign";
@@ -48,7 +50,7 @@ export function ConnectWallet() {
         backgroundRepeat: "repeat",
       }}
     >
-      <div className="fixed inset-y-0 right-0 flex h-full w-full flex-col items-stretch overflow-y-auto bg-card p-5 md:items-center lg:w-[728px]">
+      <div className="bg-card fixed inset-y-0 right-0 flex h-full w-full flex-col items-stretch overflow-y-auto p-5 md:items-center lg:w-[728px]">
         <div className="flex flex-1 flex-col place-content-center items-stretch gap-8 md:items-center">
           <img
             src="/logo-light.svg"
@@ -67,13 +69,13 @@ export function ConnectWallet() {
             loading="eager"
           />
 
-          <h1 className="text-center font-normal text-xl">
+          <h1 className="text-center text-xl font-normal">
             Manage your data and grants effortlessly with the idOS Dashboard.
           </h1>
 
           <p className="text-center font-normal">Connect your wallet to get started.</p>
 
-          <div className="mx-auto flex w-full min-w-0 max-w-[400px] flex-col items-stretch gap-3">
+          <div className="mx-auto flex w-full max-w-[400px] min-w-0 flex-col items-stretch gap-3">
             {hasFacesign && (
               <>
                 <Button
@@ -132,10 +134,10 @@ export function ConnectWallet() {
           </div>
         </div>
         <div className="flex flex-col items-stretch gap-4">
-          <span className="font-semibold text-sm">
+          <span className="text-sm font-semibold">
             By connecting your wallet you agree to the
             <a
-              className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
+              className="text-primary inline-flex items-center gap-2 text-sm hover:underline hover:underline-offset-4"
               href="https://www.idos.network/legal/user-agreement"
               target="_blank"
               rel="noopener noreferrer"
@@ -144,7 +146,7 @@ export function ConnectWallet() {
             </a>{" "}
             and confirm you read our
             <a
-              className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
+              className="text-primary inline-flex items-center gap-2 text-sm hover:underline hover:underline-offset-4"
               href="https://www.idos.network/legal/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
@@ -153,7 +155,7 @@ export function ConnectWallet() {
             </a>{" "}
             and{" "}
             <a
-              className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
+              className="text-primary inline-flex items-center gap-2 text-sm hover:underline hover:underline-offset-4"
               href="https://drive.google.com/file/d/1lzrdgD_dwusE4xsKw_oTUcu8Hq3YU60b/view?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
@@ -161,8 +163,8 @@ export function ConnectWallet() {
               Transparency Document
             </a>
           </span>
-          <span className="flex place-content-center items-center gap-2 font-semibold text-sm">
-            <span className="font-semibold text-sm">Powered by</span>
+          <span className="flex place-content-center items-center gap-2 text-sm font-semibold">
+            <span className="text-sm font-semibold">Powered by</span>
             <img
               src="/logo-light.svg"
               alt="idOS logo"

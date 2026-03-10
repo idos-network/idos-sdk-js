@@ -212,17 +212,16 @@ export const CredentialSubjectSchema: z.ZodObject<{
 
 export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;
 
-export interface VerifiableCredentialSubject
-  extends Omit<
-    CredentialSubject,
-    | "residentialAddress"
-    | "idDocumentBackFile"
-    | "idDocumentFrontFile"
-    | "selfieFile"
-    | "idDocumentDateOfIssue"
-    | "idDocumentDateOfExpiry"
-    | "dateOfBirth"
-  > {
+export interface VerifiableCredentialSubject extends Omit<
+  CredentialSubject,
+  | "residentialAddress"
+  | "idDocumentBackFile"
+  | "idDocumentFrontFile"
+  | "selfieFile"
+  | "idDocumentDateOfIssue"
+  | "idDocumentDateOfExpiry"
+  | "dateOfBirth"
+> {
   "@context": string;
   // Files are strings in verifiable credentials, but as an input they should be buffers
   idDocumentFrontFile?: string;

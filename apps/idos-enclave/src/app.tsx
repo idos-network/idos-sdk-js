@@ -1,12 +1,15 @@
 import type { EncryptionPasswordStore } from "@idos-network/enclave";
-import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
+
+import { effect, useSignal } from "@preact/signals";
 import { useCallback, useRef } from "preact/hooks";
+
+import type { AllowedIntent, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
+
 import { Header } from "@/components/header";
 import Auth from "@/features/auth";
 import BackupPasswordContext from "@/features/backup";
 import Confirmation from "@/features/confirmation";
-import type { AllowedIntent, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
 export interface EventData {
   intent: AllowedIntent;

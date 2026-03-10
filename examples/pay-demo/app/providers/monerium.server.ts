@@ -1,6 +1,8 @@
 import type { Credential } from "@idos-network/consumer";
+
 // @ts-expect-error
 import ascii85 from "ascii85";
+
 import { SERVER_ENV } from "./envFlags.server";
 import { generateCodeChallenge } from "./utils";
 

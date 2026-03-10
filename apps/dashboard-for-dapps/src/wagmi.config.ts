@@ -1,7 +1,8 @@
+import type { Account, Client, Transport } from "viem";
+
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
-import type { Account, Client, Transport } from "viem";
 import { http, useConnectorClient } from "wagmi";
 import { type Chain, mainnet, sepolia } from "wagmi/chains";
 

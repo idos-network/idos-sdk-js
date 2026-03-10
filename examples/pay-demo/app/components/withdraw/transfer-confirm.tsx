@@ -1,4 +1,5 @@
 import { ArrowRight, Info, Wallet } from "lucide-react";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -36,7 +37,7 @@ export function TransferConfirm({
   return (
     <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-warning-foreground">
+        <div className="bg-warning/10 text-warning-foreground mb-2 flex h-12 w-12 items-center justify-center rounded-full">
           <Wallet className="h-6 w-6" />
         </div>
         <CardTitle>Confirm &amp; Sign</CardTitle>
@@ -44,19 +45,19 @@ export function TransferConfirm({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center justify-between rounded-lg bg-muted/50 p-4">
+        <div className="bg-muted/50 flex items-center justify-between rounded-lg p-4">
           <div className="flex flex-col gap-1">
             <span className="text-muted-foreground text-xs">Sending</span>
-            <span className="font-semibold text-foreground text-lg">
+            <span className="text-foreground text-lg font-semibold">
               {source.amount} {source.currency}
             </span>
           </div>
 
-          <ArrowRight className="h-5 w-5 text-muted-foreground" />
+          <ArrowRight className="text-muted-foreground h-5 w-5" />
 
           <div className="flex flex-col items-end gap-1">
             <span className="text-muted-foreground text-xs">Receiving</span>
-            <span className="font-semibold text-foreground text-lg">
+            <span className="text-foreground text-lg font-semibold">
               {destination.amount} {destination.currency}
             </span>
           </div>
@@ -65,16 +66,16 @@ export function TransferConfirm({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Recipient</span>
-            <span className="font-medium text-foreground">{recipientName}</span>
+            <span className="text-foreground font-medium">{recipientName}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">IBAN</span>
-            <span className="font-mono text-foreground text-sm">{maskIban(recipientIban)}</span>
+            <span className="text-foreground font-mono text-sm">{maskIban(recipientIban)}</span>
           </div>
         </div>
 
-        <div className="flex items-start gap-3 rounded-lg bg-info/10 px-4 py-3">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-info-foreground" />
+        <div className="bg-info/10 flex items-start gap-3 rounded-lg px-4 py-3">
+          <Info className="text-info-foreground mt-0.5 h-4 w-4 shrink-0" />
           <p className="text-info-foreground text-sm">
             You will be asked to sign a transaction with your wallet. This authorizes the transfer
             of funds.

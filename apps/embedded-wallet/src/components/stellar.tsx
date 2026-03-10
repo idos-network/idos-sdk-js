@@ -1,4 +1,5 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+
 import {
   FREIGHTER_ID,
   FreighterModule,
@@ -11,6 +12,7 @@ import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenXLM } from "@web3icons/react";
 import { useEffect, useState } from "react";
+
 import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
@@ -127,11 +129,11 @@ function Stellar() {
       ))}
       {stepper.when("sign-message", (step) => (
         <div className="flex flex-col gap-4">
-          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
-          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+          <h1 className="text-center text-2xl font-bold">{step.title}</h1>
+          <p className="text-center text-sm text-neutral-400">{step.description}</p>
           <div className="flex flex-col gap-2">
-            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p className="text-center text-neutral-400 text-sm">{address}</p>
+            <p className="text-center text-sm text-neutral-400">Connected as:</p>
+            <p className="text-center text-sm text-neutral-400">{address}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

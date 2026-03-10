@@ -2,17 +2,18 @@
 
 ## Required reading
 
-* [idOS System Overview](README.md)
-* [The Enclave](enclave.md)
+- [idOS System Overview](README.md)
+- [The Enclave](enclave.md)
 
 ## SDK feature overview
 
 The primary features provided by the Consumer SDK are:
-* checking if your user has an idOS profile and an adequate credential;
-* requesting access to user credentials, with an optional timelock to prevent premature access revocation;
-* retrieving and verifying credentials you've been granted access to;
-* listing all access grants you've been given by your users;
-* implementing a [Passporting-compliant](passporting.md) onboarding flow.
+
+- checking if your user has an idOS profile and an adequate credential;
+- requesting access to user credentials, with an optional timelock to prevent premature access revocation;
+- retrieving and verifying credentials you've been granted access to;
+- listing all access grants you've been given by your users;
+- implementing a [Passporting-compliant](passporting.md) onboarding flow.
 
 ## Getting started: what you'll need
 
@@ -20,9 +21,9 @@ The primary features provided by the Consumer SDK are:
 
 See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulatory-approach) for more context, and discuss with your compliance officer:
 
-* which credential Issuers are you open to trusting;
-* how long, if at all, you need to retain access to user data;
-* whether you’re going to be using [Passporting](passporting.md).
+- which credential Issuers are you open to trusting;
+- how long, if at all, you need to retain access to user data;
+- whether you’re going to be using [Passporting](passporting.md).
 
 ### Signature and encryption keys
 
@@ -31,10 +32,11 @@ See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulat
 > Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
 
 You'll need:
-  - `recipientEncryptionPrivateKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to decode the credential copies that the owners (users) share with you by creating access grants.
-    - see [Encryption](encryption.md) for more information
-  - `consumerSigner`: this can be a NEAR `KeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
-    - see [Signatures](signatures.md) for more information
+
+- `recipientEncryptionPrivateKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to decode the credential copies that the owners (users) share with you by creating access grants.
+  - see [Encryption](encryption.md) for more information
+- `consumerSigner`: this can be a NEAR `KeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
+  - see [Signatures](signatures.md) for more information
 
 ### A frontend
 
@@ -54,8 +56,9 @@ Your backend (private server) is where you’ll:
 ### Our Consumer SDK
 
 Get our NPM packages
-* https://www.npmjs.com/package/@idos-network/client
-* https://www.npmjs.com/package/@idos-network/consumer
+
+- https://www.npmjs.com/package/@idos-network/client
+- https://www.npmjs.com/package/@idos-network/consumer
 
 and their dependencies with pnpm (or your package manager of choice)
 
@@ -102,6 +105,7 @@ To initialize the idOS Consumer SDK, you need to pass in something as a `consume
 ```
 
 **Implementation with tweetnacl:**
+
 ```typescript
 import nacl from "tweetnacl";
 import { hexDecode } from "@idos-network/utils/codecs";
@@ -126,6 +130,7 @@ const signer = nacl.sign.keyPair.fromSecretKey(hexDecode(secretKey));
 ```
 
 **Implementation with @stellar/stellar-sdk:**
+
 ```typescript
 import { Keypair } from "@stellar/stellar-sdk";
 
@@ -149,6 +154,7 @@ const signer = Keypair.fromSecret(secretKey);
 ```
 
 **Implementation with ripple-keypairs:**
+
 ```typescript
 import * as xrpKeypair from "ripple-keypairs";
 
@@ -163,7 +169,7 @@ const publicKey = "ED9A5A5420707D80B24C83C0333EBFBB1E8290530DFF45D39B7305B0982CA
 const signer = {
   privateKey: secretKey,
   publicKey: publicKey,
-  sign: (message: string) => xrpKeypair.sign(message, secretKey)
+  sign: (message: string) => xrpKeypair.sign(message, secretKey),
 };
 ```
 
@@ -178,11 +184,12 @@ const signer = {
 
 ```typescript
 {
-  sign: (message: string | Uint8Array) => Promise<string>
+  sign: (message: string | Uint8Array) => Promise<string>;
 }
 ```
 
 **Implementation with ethers:**
+
 ```typescript
 import { Wallet } from "ethers";
 
@@ -271,7 +278,6 @@ grants.filter(g =>
 );
 ```
 
-
 ### [ backend ] Checking for existing access grant
 
 You can double check that the existing access grant matches your requirements. You will do this on your backend.
@@ -295,41 +301,45 @@ const { grants, totalCount } = await idOSConsumer.getAccessGrants({
 And you can get the credentials contents from the grant via:
 
 ```typescript
-const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted(grants[0].data_id)
+const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted(
+  grants[0].data_id,
+);
 ```
 
 If you don't have an access grant, you can proceed to filtering the user's credentials and requesting one or more access grants.
 
-
 ### [ frontend ] Filtering credentials
 
 Credential filtering is done by calling the method `filterCredentials` from the `idOSClient` and passing the filtering requirements:
+
 ```typescript
 const filteredCredentials: idOSCredential[] = await idOSClient.filterCredentials({
-    acceptedIssuers: [{
+  acceptedIssuers: [
+    {
       authPublicKey, // the accepted issuer auth public key to filter credentials by
-    }],
-    // OPTIONAL. A list of public notes fields of a credential that should be picked or omitted.
-    publicNotesFieldFilters: {
-      pick: {},
-      omit: {},
     },
-    // OPTIONAL. A list of private fields of a credential that should be picked or omitted.
-    privateFieldFilters: {
-      pick: {},
-      omit: {},
-    },
+  ],
+  // OPTIONAL. A list of public notes fields of a credential that should be picked or omitted.
+  publicNotesFieldFilters: {
+    pick: {},
+    omit: {},
+  },
+  // OPTIONAL. A list of private fields of a credential that should be picked or omitted.
+  privateFieldFilters: {
+    pick: {},
+    omit: {},
+  },
 });
 ```
+
 This will return a list of `idOSCredentials` that match the filtering criteria.
 
 ### [ frontend ] Requesting access grant
 
-
 The simplest way to do this is to ask the user to create and insert an access grant for you.
 
 ```typescript
-const accessGrant: idOSGrant = await idOSClient.requestAccessGrant('CREDENTIAL_ID')
+const accessGrant: idOSGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID");
 ```
 
 Alternatively, you can ask for a delegated access grant, which the user creates:
@@ -357,20 +367,23 @@ await idOSConsumer.createAccessGrantByDag({
 
 #### Using passporting
 
-* TODO: missing code examples for [passporting](passporting.md):
-    * ask for credential duplicate (C1.2) separately and before asking for AG
-    * get hash from C1.2 and use it on dAG request
-    * send dAG to own backend, which proxy sends to OE1's passporting server
+- TODO: missing code examples for [passporting](passporting.md):
+  - ask for credential duplicate (C1.2) separately and before asking for AG
+  - get hash from C1.2 and use it on dAG request
+  - send dAG to own backend, which proxy sends to OE1's passporting server
 
 ### [ backend ] Retrieving and verifying credential
 
 ```typescript
-const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted('GRANT_DATA_ID')
+const credentialContents: string =
+  await idOSConsumer.getCredentialSharedContentDecrypted("GRANT_DATA_ID");
 ```
 
 If you're using passporting:
+
 ```typescript
-const credentialContents: string = await idOSConsumer.getReusableCredentialCompliantly('GRANT_DATA_ID')
+const credentialContents: string =
+  await idOSConsumer.getReusableCredentialCompliantly("GRANT_DATA_ID");
 ```
 
 ## Verify credentials signature

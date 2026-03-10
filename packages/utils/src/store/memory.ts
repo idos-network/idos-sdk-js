@@ -2,8 +2,9 @@
  * In-memory implementation of the store.
  */
 
-import { durationElapsed, setDuration } from "./duration";
 import type { PipeCodecArgs, Store } from "./interface";
+
+import { durationElapsed, setDuration } from "./duration";
 
 export class MemoryStore implements Store {
   readonly REMEMBER_DURATION_KEY = "storage-expiration";

@@ -1,5 +1,7 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
+
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+
 import { useIDOSClient } from "@/hooks/idOS";
 
 export function walletsQueryOptions(idOSClient: idOSClientLoggedIn) {

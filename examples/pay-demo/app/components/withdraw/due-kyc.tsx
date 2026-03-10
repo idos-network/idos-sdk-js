@@ -8,10 +8,10 @@ export function DueKyc({ kycUrl }: DueKycProps) {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-4">
       <div className="flex flex-col items-center gap-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning-foreground">
+        <div className="bg-warning/10 text-warning-foreground flex h-10 w-10 items-center justify-center rounded-full">
           <ScanFace className="h-5 w-5" />
         </div>
-        <h3 className="font-semibold text-foreground text-lg leading-none">
+        <h3 className="text-foreground text-lg leading-none font-semibold">
           Identity Verification
         </h3>
       </div>
