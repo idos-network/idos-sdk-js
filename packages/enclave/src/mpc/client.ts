@@ -396,7 +396,7 @@ export class Client {
     if (this.engines === undefined) {
       const chainController = new ChainControllerApi(new Configuration({ basePath: this.baseUrl }));
       const rawState = await chainController.getContract({ address: this.contractAddress });
-      // biome-ignore lint/style/noNonNullAssertion: we know serializedContract is present here
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- we know serializedContract is present here
       const state = deserializeState(Buffer.from(rawState.serializedContract!, "base64"));
       this.engines = state.nodes.map(
         (value) => new EngineClient(value.endpoint, this.contractAddress, this.walletType),

@@ -58,7 +58,7 @@ export default function Session() {
       className="bg-background fixed inset-0 flex items-center justify-center p-6"
       onMouseDown={(e) => e.button === 0 && handleReject()}
     >
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for backdrop dismiss */}
+      {/* oxlint-disable-next-line jsx-a11y/no-static-element-interactions -- Stop propagation for backdrop dismiss */}
       <div
         className="bg-card relative flex w-full max-w-sm flex-col gap-5 rounded-xl p-6 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}

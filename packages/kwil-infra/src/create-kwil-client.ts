@@ -24,7 +24,7 @@ type ActionName = keyof KwilActions;
 type AllKwilCallAction = {
   [Name in ActionName]: {
     name: Name;
-    // biome-ignore lint/suspicious/noExplicitAny: This is fine
+    // oxlint-disable-next-line typescript/no-explicit-any -- This is fine
     inputs: Record<KwilActions[Name][number]["name"], any>;
   };
 };
@@ -120,6 +120,7 @@ const createKwilClient =
   (Cls: new (opts: Config) => NodeKwil | WebKwil) =>
   async ({ nodeUrl: kwilProvider, chainId }: CreateKwilClientParams): Promise<KwilActionClient> => {
     const _kwil = new Cls({ kwilProvider, chainId: "" });
+    // oxlint-disable-next-line no-param-reassign -- Default value fallback
     chainId ||= (await _kwil.chainInfo({ disableWarning: true })).data?.chain_id;
     invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
 

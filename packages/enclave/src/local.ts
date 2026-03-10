@@ -118,6 +118,7 @@ export class LocalEnclave<
    * This ensures that data is minimally obfuscated to avoid low-sophistication attacks.
    */
   private userIdObfuscationCodec(): PipeCodecArgs<string> {
+    // oxlint-disable-next-line typescript/no-this-alias -- Needed for `this` in nested encode/decode functions
     const self = this;
 
     const toKey = (userId: string, salt: Uint8Array) =>
@@ -441,11 +442,11 @@ export class LocalEnclave<
     const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest) as UploadMessageToSign;
 
     const signedMessage = await this.signTypedData(
-      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
+      // oxlint-disable-next-line typescript/no-explicit-any -- TODO: Change this when we know how to MPC & other chains
       messageToSign.domain as any,
-      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
+      // oxlint-disable-next-line typescript/no-explicit-any -- TODO: Change this when we know how to MPC & other chains
       messageToSign.types as any,
-      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
+      // oxlint-disable-next-line typescript/no-explicit-any -- TODO: Change this when we know how to MPC & other chains
       messageToSign.value as any,
     );
 

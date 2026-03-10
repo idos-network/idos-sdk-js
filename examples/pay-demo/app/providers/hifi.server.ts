@@ -138,17 +138,17 @@ export const createUserAndKYC = async (
     // @ts-expect-error Demo
     dateOfBirth: data.credentialSubject.dateOfBirth?.split("T")[0],
     address: {
-      // biome-ignore lint/style/noNonNullAssertion: false positive
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
       addressLine1: data.credentialSubject.residentialAddressStreet!,
       addressLine2: data.credentialSubject.residentialAddressHouseNumber ?? "",
-      // biome-ignore lint/style/noNonNullAssertion: false positive
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
       city: data.credentialSubject.residentialAddressCity!,
-      // biome-ignore lint/style/noNonNullAssertion: false positive
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
       postalCode: data.credentialSubject.residentialAddressPostalCode!,
       stateProvinceRegion: stateProvinceRegion.slice(0, 2),
       country:
         countries2to3[
-          // biome-ignore lint/style/noNonNullAssertion: false positive
+          // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
           data.credentialSubject.residentialAddressCountry! as keyof typeof countries2to3
         ],
     },

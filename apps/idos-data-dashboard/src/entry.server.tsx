@@ -77,7 +77,7 @@ export default function handleRequest(
         onError(error: unknown) {
           Sentry.captureException(error);
 
-          // biome-ignore lint/style/noParameterAssign: This is on purpose from react-router
+          // oxlint-disable-next-line no-param-reassign -- React Router template pattern
           responseStatusCode = 500;
           // Log streaming rendering errors from inside the shell.  Don't log
           // errors encountered during initial shell rendering since they'll

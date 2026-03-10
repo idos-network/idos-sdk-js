@@ -36,7 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const typeFromBuffer = await fileTypeFromBuffer(file);
     const mimeType = typeFromBuffer?.mime ?? "application/pdf";
 
-    // biome-ignore lint/suspicious/noExplicitAny: false positive as of now.
+    // oxlint-disable-next-line typescript/no-explicit-any -- false positive as of now.
     return new Response(file as any, {
       headers: {
         "Content-Type": mimeType,

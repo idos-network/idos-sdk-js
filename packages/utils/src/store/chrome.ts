@@ -15,14 +15,14 @@ export class ChromeExtensionStore implements Store {
     this.checkRememberDurationElapsed();
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   async get<K = any>(key: string): Promise<K | undefined> {
     const prefixedKey = `${this.keyPrefix}${key}`;
     const result = await chrome.storage.local.get(prefixedKey);
     return result[prefixedKey] as K | undefined;
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   set<K = any>(key: string, value: K): Promise<void> {
     const prefixedKey = `${this.keyPrefix}${key}`;
     return chrome.storage.local.set({ [prefixedKey]: value });

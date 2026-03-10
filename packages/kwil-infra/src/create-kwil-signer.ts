@@ -190,7 +190,7 @@ export async function createClientKwilSigner(
   wallet: Wallet,
 ): Promise<[KwilSigner, SignerAddress, SignerPublicKey, WalletType]> {
   if ("connect" in wallet && "address" in wallet) {
-    //biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
+    // oxlint-disable-next-line no-param-reassign -- Narrowing the type on purpose
     wallet = wallet as unknown as JsonRpcSigner;
     const currentAddress = await wallet.getAddress();
 

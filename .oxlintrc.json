@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "jsx-a11y"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "react-hooks/exhaustive-deps": "warn",
+    "no-param-reassign": "error",
+    "default-param-last": "error",
+    "typescript/prefer-enum-initializers": "error",
+    "react/self-closing-comp": "error",
+    "unicorn/prefer-number-properties": "error",
+    "typescript/no-inferrable-types": "warn"
+  },
+  "ignorePatterns": [
+    "**/*.gen.ts",
+    "**/*/ui/**/*.tsx",
+    "**/*/*.js",
+    "packages/enclave/src/mpc/**/*.ts",
+    "**/*.css",
+    "**/facesign-enclave/src/assets/facetec/**/*",
+    "**/facesign-enclave/public/facetec/**/*",
+    "**/facesign-enclave/app/assets/facetec/**/*",
+    "packages/credentials/types/**"
+  ]
+}

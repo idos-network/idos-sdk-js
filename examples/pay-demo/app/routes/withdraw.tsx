@@ -77,7 +77,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
   const formattedDestinationAmount = destinationAmount.toFixed(2);
 
   const messageReceiver = useCallback(
-    // biome-ignore lint/suspicious/noExplicitAny: message event type
+    // oxlint-disable-next-line typescript/no-explicit-any -- message event type
     (message: any) => {
       // KYC iframe messages
       if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {

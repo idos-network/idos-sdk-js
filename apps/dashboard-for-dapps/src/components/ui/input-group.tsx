@@ -25,7 +25,7 @@ export const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
         {cloneElement(children, {
           ...(startElement && { ps: "calc(var(--input-height) - 6px)" }),
           ...(endElement && { pe: "calc(var(--input-height) - 6px)" }),
-          // biome-ignore lint/suspicious/noExplicitAny: This is fine
+          // oxlint-disable-next-line typescript/no-explicit-any -- This is fine
           ...(children.props as any),
         })}
         {endElement && (

@@ -68,7 +68,7 @@ declare module "@digitalbazaar/vc" {
     proof: VerifiedCredentialsProof;
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: I don't know the right type
+  // oxlint-disable-next-line typescript/no-explicit-any -- I don't know the right type
   export declare function issue<K = any>(options: IssueOptions): Promise<VerifiedCredentials<K>>;
 
   export interface VerifyCredentialOptions<K> {
@@ -106,7 +106,7 @@ declare module "@digitalbazaar/vc" {
 declare module "jsonld-document-loader" {
   export interface JsonLdDocument {
     contextUrl?: string | null;
-    // biome-ignore lint/suspicious/noExplicitAny: I don't know the right type
+    // oxlint-disable-next-line typescript/no-explicit-any -- I don't know the right type
     document: any;
     documentUrl: string;
     tag?: string;

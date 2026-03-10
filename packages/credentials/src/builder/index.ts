@@ -38,7 +38,7 @@ export type CredentialBuilder<TInput, TOutput = TInput> = (
 export type CredentialConverter<TInput> = (
   subject: TInput,
   validate: boolean,
-  // biome-ignore lint/suspicious/noExplicitAny: any is needed here
+  // oxlint-disable-next-line typescript/no-explicit-any -- any is needed here
 ) => Record<string, any>;
 
 function genericCredentialBuilder<TInput, TOutput = TInput>(

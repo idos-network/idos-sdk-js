@@ -25,7 +25,7 @@ const { useStepper } = defineStepper(
 
 const selector = await setupWalletSelector({
   network: (import.meta.env.VITE_NEAR_NETWORK as "testnet" | "mainnet") || "testnet",
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  // oxlint-disable-next-line typescript/no-explicit-any -- false positive
   modules: [setupMeteorWallet() as any],
 });
 
@@ -65,7 +65,7 @@ export function NearConnector() {
 
   const handleSignMessage = async () => {
     const wallet = await selector.wallet();
-    // biome-ignore lint/suspicious/noExplicitAny: false positive
+    // oxlint-disable-next-line typescript/no-explicit-any -- false positive
     const signature = await signNearMessage(wallet as any, message);
 
     if (signature) {

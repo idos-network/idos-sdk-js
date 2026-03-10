@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: any is fine here. */
+/* oxlint-disable typescript/no-explicit-any -- any is fine here. */
 import type { BaseProvider } from "@idos-network/enclave";
 
 type BaseProviderInstance = typeof BaseProvider.prototype & {

@@ -127,7 +127,7 @@ export async function createTransakWidgetUrl({
 
   // Decrypt the credential to extract user data for prefilling
   const credentialData = await getCredentialShared(credentialId);
-  // biome-ignore lint/suspicious/noExplicitAny: credential structure varies
+  // oxlint-disable-next-line typescript/no-explicit-any -- credential structure varies
   const credentialSubject = (credentialData as any).credentialSubject as CredentialSubject;
 
   // Resolve state/region code from postal code + country

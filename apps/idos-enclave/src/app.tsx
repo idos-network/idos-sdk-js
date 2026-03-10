@@ -13,7 +13,7 @@ import Confirmation from "@/features/confirmation";
 
 export interface EventData {
   intent: AllowedIntent;
-  // biome-ignore lint/suspicious/noExplicitAny: The message will be a bit hard to narrow. Using `any` is fine in this case.
+  // oxlint-disable-next-line typescript/no-explicit-any -- The message will be a bit hard to narrow. Using `any` is fine in this case.
   message: Record<string, any>;
   configuration: idOSEnclaveConfiguration;
 }

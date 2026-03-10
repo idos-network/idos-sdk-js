@@ -30,7 +30,7 @@ export function toBytes(obj: Parameters<typeof JSON.stringify>[0]): Uint8Array {
   return utf8Encode(JSON.stringify(obj));
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: any is fine here
+// oxlint-disable-next-line typescript/no-explicit-any -- any is fine here
 export function fromBytesToJson<K = Record<string, any>>(data: Uint8Array): K {
   return JSON.parse(utf8Decode(data));
 }

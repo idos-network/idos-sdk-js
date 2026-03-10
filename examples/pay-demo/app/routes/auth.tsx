@@ -91,7 +91,7 @@ export async function action({ request }: Route.ActionArgs) {
     await setUserItem({
       id: crypto.randomUUID(),
       address: user.address,
-      ...(userItem ?? {}), // Update user item with new message and signature, fine to overwrite ids etc.
+      ...userItem, // Update user item with new message and signature, fine to overwrite ids etc.
       message: message.prepareMessage(),
       signature,
       lastSignedIn: new Date().toISOString(),

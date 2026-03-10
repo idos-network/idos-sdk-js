@@ -10,7 +10,7 @@ export type idOSEnclaveConfiguration = {
 
 export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordContext";
 
-// biome-ignore lint/suspicious/noExplicitAny: false positive
+// oxlint-disable-next-line typescript/no-explicit-any -- false positive
 export interface AuthMethodProps<K = any> {
   mode: UIMode;
   store: Store;

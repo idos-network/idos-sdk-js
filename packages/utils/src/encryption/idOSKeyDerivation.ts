@@ -72,6 +72,7 @@ export const idOSKeyDerivation = async ({
 
   if (!validateSalt(salt)) throw new Error("Invalid salt");
 
+  // oxlint-disable-next-line no-param-reassign -- Normalizing before use
   password = normalizePassword(password);
   const passwordBytes = utf8Encode(password);
   const saltBytes = utf8Encode(salt);

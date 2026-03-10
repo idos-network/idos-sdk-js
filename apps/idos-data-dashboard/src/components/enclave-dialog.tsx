@@ -46,7 +46,7 @@ export function EnclaveDialog() {
   };
 
   return (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: onClick handles backdrop dismiss; keyboard close is handled via onCancel (Escape).
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events -- Keyboard close handled via onCancel (Escape)
     <dialog
       ref={dialogRef}
       aria-labelledby="enclave-dialog-title"
