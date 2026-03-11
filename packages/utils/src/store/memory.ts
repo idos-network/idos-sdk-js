@@ -9,14 +9,14 @@ import { durationElapsed, setDuration } from "./duration";
 export class MemoryStore implements Store {
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
   readonly keyPrefix: string;
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   private readonly storage: Map<string, any> = new Map();
 
   constructor(keyPrefix = "idOS-") {
     this.keyPrefix = keyPrefix;
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   async get<K = any>(key: string): Promise<K | undefined> {
     if (this.hasRememberDurationElapsed()) {
       // Duration is expired, reset the store
@@ -28,7 +28,7 @@ export class MemoryStore implements Store {
     return this.storage.get(`${this.keyPrefix}${key}`);
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   set<K = any>(key: string, value: K): Promise<void> {
     this.storage.set(`${this.keyPrefix}${key}`, value);
     return Promise.resolve();

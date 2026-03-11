@@ -21,6 +21,7 @@ function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
     <div class="flex flex-col gap-1">
       <TextField
         id="idos-password-input"
+        // oxlint-disable-next-line jsx-a11y/no-autofocus -- Password field should auto-focus on mount
         autoFocus
         type="password"
         required={true}
@@ -81,7 +82,7 @@ export interface PasswordFormProps {
   encryptionPublicKey: string;
   mode: UIMode;
   userId: string;
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  // oxlint-disable-next-line typescript/no-explicit-any -- false positive
   onSuccess: (result: any) => void;
   onCancel: () => void;
 }

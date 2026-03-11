@@ -38,7 +38,7 @@ export default defineConfig(async (config) => {
     tsconfigPaths(),
     mkcert(),
     // https://github.com/getsentry/sentry-javascript/blob/master/dev-packages/e2e-tests/test-applications/react-router-7-framework-instrumentation/vite.config.ts#L9C77-L9C86
-    // biome-ignore lint/suspicious/noExplicitAny: Expected
+    // oxlint-disable-next-line typescript/no-explicit-any -- Expected
     ...((await sentryReactRouter(sentryConfig, config)) as any[]),
   ];
 

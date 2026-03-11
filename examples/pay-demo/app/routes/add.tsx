@@ -34,7 +34,7 @@ export default function AddFunds() {
   const errorMessage = MachineContext.useSelector((s) => s.context.errorMessage);
 
   const messageReceiver = useCallback(
-    // biome-ignore lint/suspicious/noExplicitAny: message event type
+    // oxlint-disable-next-line typescript/no-explicit-any -- message event type
     (message: any) => {
       // KYC iframe messages
       if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {

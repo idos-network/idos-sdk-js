@@ -46,7 +46,7 @@ export class LocalStorageStore implements Store {
     return store;
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   get<K = any>(key: string): Promise<K | undefined> {
     const value = this.#getLocalStorage(key);
 
@@ -86,7 +86,7 @@ export class LocalStorageStore implements Store {
     }
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
+  // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   set<K = any>(key: string, value: K): Promise<void> {
     if (!key || typeof key !== "string") {
       throw new Error(`Bad key: ${key}`);

@@ -5,10 +5,10 @@ export interface HifiContext {
   hifiTosUrl: string | null;
   hifiTosId: string | null;
   hifiUrl: string | null;
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  // oxlint-disable-next-line typescript/no-explicit-any -- false positive
   hifiKycStatus: "ACTIVE" | any;
   getHifiKycStatusAttempts: number;
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  // oxlint-disable-next-line typescript/no-explicit-any -- false positive
   onRampAccount: any | null;
 }
 

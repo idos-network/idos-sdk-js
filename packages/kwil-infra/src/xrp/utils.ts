@@ -44,7 +44,7 @@ export function createXummPayload(message: string): Record<string, unknown> {
 
 export function signXummTx(xummInstance: Xumm, payload: Record<string, unknown>): Promise<string> {
   return new Promise((resolve) => {
-    // biome-ignore lint/suspicious/noExplicitAny: xumm payload type is not easy to import
+    // oxlint-disable-next-line typescript/no-explicit-any -- xumm payload type is not easy to import
     xummInstance.payload?.createAndSubscribe(payload as unknown as any, async (event) => {
       if (!event.payload.response.hex) return;
       const hex = event.payload.response.hex;

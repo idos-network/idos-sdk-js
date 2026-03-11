@@ -9,7 +9,9 @@ attestment
 banxa
 barebones
 betanet
-biomejs
+oxfmt
+oxlint
+oxlintrc
 Blockhash
 Borsh
 bowser

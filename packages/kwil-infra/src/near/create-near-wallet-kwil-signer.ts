@@ -77,7 +77,7 @@ function createNearWalletSigner(
       signature,
       // @ts-expect-error Signatures don't seem to be updated for NEP413 yet.
       callbackUrl,
-      // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- Only non-signing wallets return void.
     } = (await (
       wallet.signMessage as (
         _: SignMessageParams,

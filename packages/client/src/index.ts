@@ -67,7 +67,7 @@ import { IframeEnclave } from "./enclave/iframe-enclave";
 export { IframeEnclave };
 
 type Properties<T> = {
-  // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
+  // oxlint-disable-next-line typescript/no-restricted-types -- All functions are to be removed.
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
 };
 

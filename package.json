@@ -4,8 +4,10 @@
   "scripts": {
     "build": "turbo run build",
     "build:packages": "pnpm --filter './packages/**' build",
-    "check": "oxfmt && biome check . --write",
-    "check:ci": "oxfmt --check",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt --check",
+    "format:fix": "oxfmt",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
     "postinstall": "lefthook install",
@@ -15,11 +17,11 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.0",
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
     "lefthook": "1.13.6",
     "oxfmt": "^0.37.0",
+    "oxlint": "^1.52.0",
     "size-limit": "^11.1.6",
     "turbo": "^2.7.3"
   },

@@ -117,7 +117,7 @@
           }
           document.cookie.split(";").forEach((c) => {
             const name = c.replace(/^\s*|\s*$/g, "").split("=")[0];
-            // biome-ignore lint/suspicious/noDocumentCookie: clearing cookies; Cookie Store API not universally supported
+            // oxlint-disable-next-line unicorn/no-document-cookie -- clearing cookies; Cookie Store API not universally supported
             document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
           });
           log("Cleared storage; reloading iframe.");

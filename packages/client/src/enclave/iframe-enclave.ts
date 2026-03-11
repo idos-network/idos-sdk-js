@@ -205,7 +205,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     }
 
     let el: HTMLElement | null;
-    // biome-ignore lint/suspicious/noAssignInExpressions: it's on purpose
+    // oxlint-disable-next-line no-cond-assign -- it's on purpose
     while ((el = document.getElementById(this.iframe.id))) {
       console.log("reinstalling idOS iframe...");
       container.removeChild(el);
@@ -224,12 +224,12 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private showEnclave(): void {
-    // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.
     this.iframe.parentElement!.classList.add("visible");
   }
 
   private hideEnclave(): void {
-    // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.
     this.iframe.parentElement!.classList.remove("visible");
   }
 
@@ -242,10 +242,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
       port1.onmessage = ({ data }) => {
         port1.close();
+        // oxlint-disable-next-line no-unused-expressions
         data.error ? reject(data.error) : resolve(data.result);
       };
 
-      // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.
       this.iframe.contentWindow!.postMessage(
         {
           method,

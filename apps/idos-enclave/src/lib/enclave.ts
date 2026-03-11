@@ -126,7 +126,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         // User providing the password also means that they want to authorize the origin
         await this.acceptParentOrigin();
 
-        // biome-ignore lint/style/noNonNullAssertion: This needs to be properly typed.
+        // oxlint-disable-next-line typescript/no-non-null-assertion -- This needs to be properly typed.
         return resolve({ encryptionPasswordStore, password: password!, duration });
       });
     });
@@ -161,7 +161,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     }
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
+  // oxlint-disable-next-line typescript/no-explicit-any -- TODO: Change this when we know how to MPC & other chains
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
     return new Promise((resolve, _reject) => {
       this.signTypeDataResponseResolver.push(resolve);
@@ -277,7 +277,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
   private async openDialog(
     intent: string,
-    // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
+    // oxlint-disable-next-line typescript/no-explicit-any -- any is fine here.
     message?: any,
   ): Promise<{
     encryptionPasswordStore?: EncryptionPasswordStore;
