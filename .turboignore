@@ -1,4 +1,5 @@
 # .turboignore
+.changeset
 project-words.txt
 .oxlintrc.json
 .oxfmtrc.json

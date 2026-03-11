@@ -44,6 +44,8 @@ Holyheld
 Holyheld
 hono
 chakra
+changeset
+changesets
 chatset
 iban
 ibans
