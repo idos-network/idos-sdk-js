@@ -1,4 +1,5 @@
 import { completeSession } from "@/lib/handoff-store";
+
 import type { Route } from "./+types/api.handoff.$sessionId";
 
 export async function action({ params, request }: Route.ActionArgs) {

@@ -1,6 +1,8 @@
 import { hexEncode } from "@idos-network/utils/codecs";
 import { fromPromise } from "xstate";
+
 import type { ProfileData } from "@/routes/api/profile";
+
 import type { CreateFacesignProfileInput, CreateFacesignProfileOutput } from "../dashboard.machine";
 
 export const createFacesignProfile = fromPromise<

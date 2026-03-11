@@ -28,7 +28,7 @@ await idOSClient.addWallet({
   public_key: "0x...", // Public key in hex format
   message: "Sign this message to prove you own this wallet",
   signature: "0x...", // Signature of the message
-  wallet_type: "EVM" // Required: "EVM", "NEAR", "XRPL"...
+  wallet_type: "EVM", // Required: "EVM", "NEAR", "XRPL"...
 });
 ```
 

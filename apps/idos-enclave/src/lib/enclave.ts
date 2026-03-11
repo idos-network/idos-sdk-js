@@ -3,6 +3,7 @@ import type {
   MPCPasswordContext,
   PasswordContext,
 } from "@idos-network/enclave";
+
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/enclave/local";
 
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";

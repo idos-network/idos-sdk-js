@@ -1,5 +1,6 @@
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
+
 import { base64Encode } from "../codecs/index.js";
 import { encryptContent, generatePassword, NoncedBox } from "./index.js";
 

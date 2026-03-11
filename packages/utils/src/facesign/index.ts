@@ -1,6 +1,7 @@
 import { mnemonicToSeed, validateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 import tweetnacl from "tweetnacl";
+
 import { utf8Decode } from "../codecs";
 
 export async function mnemonicToKeyPair(

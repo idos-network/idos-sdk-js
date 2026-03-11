@@ -1,6 +1,8 @@
 import type { idOSCredential } from "@idos-network/credentials/types";
+
 import { recordFilter } from "@idos-network/credentials/utils";
 import { base64Decode, fromBytesToJson, hexEncode } from "@idos-network/utils/codecs";
+
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,

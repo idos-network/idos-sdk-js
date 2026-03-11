@@ -1,5 +1,7 @@
 import { neon } from "@neondatabase/serverless";
+
 import { SERVER_ENV } from "~/providers/envFlags.server";
+
 import type { TosDocumentLinks } from "./due.server";
 
 const sql = neon(SERVER_ENV.DATABASE_URL);

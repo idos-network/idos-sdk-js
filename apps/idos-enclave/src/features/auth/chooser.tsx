@@ -1,9 +1,12 @@
 import type { EncryptionPasswordStore } from "@idos-network/enclave";
+
 import { KeyRoundIcon } from "lucide-preact";
+
+import type { UIMode } from "@/types";
+
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
-import type { UIMode } from "@/types";
 
 export interface ChooserProps {
   mode: UIMode;
@@ -45,7 +48,7 @@ export default function Chooser({
             (recommended) or create a password
           </Paragraph>
 
-          <div class="rounded-xl bg-muted p-4">
+          <div class="bg-muted rounded-xl p-4">
             <div class="flex items-center gap-4">
               <span class="text-primary">
                 <KeyRoundIcon size={32} />

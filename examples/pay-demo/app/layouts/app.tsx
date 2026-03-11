@@ -1,7 +1,9 @@
 import { Outlet, useRouteLoaderData } from "react-router";
+
 import { Header } from "~/components/header";
 import { Sidebar } from "~/components/sidebar";
 import { authMiddleware, userContext } from "~/middlewares/auth.server";
+
 import type { Route } from "./+types/app";
 
 export const middleware = [authMiddleware];

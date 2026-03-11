@@ -1,5 +1,6 @@
 import { ArrowDown, Clock, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -57,7 +58,7 @@ export function QuoteDisplay({
   return (
     <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-info-foreground">
+        <div className="bg-info/10 text-info-foreground mb-2 flex h-12 w-12 items-center justify-center rounded-full">
           <RefreshCw className="h-6 w-6" />
         </div>
         <CardTitle>Transfer Summary</CardTitle>
@@ -65,10 +66,10 @@ export function QuoteDisplay({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4">
+        <div className="bg-muted/50 flex flex-col gap-3 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-sm">You send</span>
-            <span className="font-semibold text-foreground text-lg">
+            <span className="text-foreground text-lg font-semibold">
               {source.amount} {source.currency}
             </span>
           </div>
@@ -84,15 +85,15 @@ export function QuoteDisplay({
         </div>
 
         <div className="flex items-center justify-center">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-            <ArrowDown className="h-4 w-4 text-muted-foreground" />
+          <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+            <ArrowDown className="text-muted-foreground h-4 w-4" />
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4">
+        <div className="bg-muted/50 flex flex-col gap-3 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-sm">Recipient gets</span>
-            <span className="font-semibold text-foreground text-lg">
+            <span className="text-foreground text-lg font-semibold">
               {destination.amount} {destination.currency}
             </span>
           </div>
@@ -112,14 +113,14 @@ export function QuoteDisplay({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Exchange rate</span>
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               1 {source.currency} = {fxRate} {destination.currency}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Total fees</span>
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {source.fee} {source.currency}
               {Number(destination.fee) > 0 && ` + ${destination.fee} ${destination.currency}`}
             </span>

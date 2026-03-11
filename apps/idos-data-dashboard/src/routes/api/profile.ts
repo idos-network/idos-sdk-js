@@ -1,11 +1,13 @@
-import crypto from "node:crypto";
 import { idOSIssuer } from "@idos-network/issuer";
 import { hexDecode } from "@idos-network/utils/codecs";
+import crypto from "node:crypto";
 import nacl from "tweetnacl";
 import { z } from "zod";
+
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { sessionStorage } from "@/core/sessions.server";
+
 import type { Route } from "./+types/profile";
 
 export async function loader({ request }: Route.LoaderArgs) {

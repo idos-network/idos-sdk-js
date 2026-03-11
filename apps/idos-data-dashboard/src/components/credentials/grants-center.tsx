@@ -1,4 +1,5 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -48,20 +49,20 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
     <div className="flex flex-col items-stretch gap-8">
       <div className="flex flex-col gap-2">
         <span className="block">Credentials Grants Access Center</span>
-        <span className="block text-muted-foreground">
+        <span className="text-muted-foreground block">
           This is where you can manage your credentials grants. You can choose which access is
           revoked or granted.
         </span>
       </div>
-      <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-border bg-muted">
+      <div className="border-border bg-muted max-h-[30vh] overflow-y-auto rounded-lg border">
         <table
           className="table w-full border-collapse [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
           id={`grants-for-${credentialId}`}
         >
-          <thead className="sticky top-0 z-10 bg-muted">
+          <thead className="bg-muted sticky top-0 z-10">
             <tr className="border-b">
-              <th className="text-left text-muted-foreground">Consumer</th>
-              <th className="text-left text-muted-foreground">Locked until</th>
+              <th className="text-muted-foreground text-left">Consumer</th>
+              <th className="text-muted-foreground text-left">Locked until</th>
               <th />
             </tr>
           </thead>
@@ -80,7 +81,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
                   </span>
                 </td>
-                <td className="w-0 whitespace-nowrap text-right">
+                <td className="w-0 text-right whitespace-nowrap">
                   <Button
                     className="min-w-[80px]"
                     id={`revoke-grant-${generateGrantId(grant)}`}

@@ -1,11 +1,12 @@
 import "./instrument.server.mjs";
-import { PassThrough } from "node:stream";
+import type { RenderToPipeableStreamOptions } from "react-dom/server";
+import type { EntryContext } from "react-router";
+
 import { createReadableStreamFromReadable } from "@react-router/node";
 import * as Sentry from "@sentry/react-router";
 import { isbot } from "isbot";
-import type { RenderToPipeableStreamOptions } from "react-dom/server";
+import { PassThrough } from "node:stream";
 import { renderToPipeableStream } from "react-dom/server";
-import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 
 export const streamTimeout = 5_000;

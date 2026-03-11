@@ -19,7 +19,7 @@ export default function Confirmation({ onSuccess, origin, message }: Confirmatio
       {origin && (
         <div className="text-sm">
           from:
-          <span className="ml-2 font-semibold text-sm">{sanitize(origin)}</span>
+          <span className="ml-2 text-sm font-semibold">{sanitize(origin)}</span>
         </div>
       )}
 

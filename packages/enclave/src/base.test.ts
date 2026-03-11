@@ -1,8 +1,11 @@
 import type { idOSCredential } from "@idos-network/credentials/types";
+
 import { base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it, vi } from "vitest";
-import { BaseProvider } from "./base.js";
+
 import type { PublicEncryptionProfile } from "./types.js";
+
+import { BaseProvider } from "./base.js";
 
 type TestOptions = { userId?: string };
 

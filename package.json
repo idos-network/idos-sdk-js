@@ -1,45 +1,11 @@
 {
   "name": "idos-sdk-js",
-  "devDependencies": {
-    "@biomejs/biome": "2.4.0",
-    "@size-limit/file": "^11.2.0",
-    "@size-limit/time": "^11.2.0",
-    "lefthook": "1.13.6",
-    "size-limit": "^11.1.6",
-    "turbo": "^2.7.3"
-  },
-  "packageManager": "pnpm@10.29.3",
-  "pnpm": {
-    "overrides": {
-      "web-streams-polyfill": "3.3.3"
-    },
-    "onlyBuiltDependencies": [
-      "@reown/appkit",
-      "@rolldown/binding-linux-x64-gnu",
-      "@rolldown/binding-linux-x64-musl",
-      "@swc/core",
-      "@tailwindcss/oxide",
-      "blake-hash",
-      "bufferutil",
-      "es5-ext",
-      "esbuild",
-      "keccak",
-      "lefthook",
-      "protobufjs",
-      "rolldown",
-      "secp256k1",
-      "sharp",
-      "tiny-secp256k1",
-      "usb",
-      "utf-8-validate"
-    ]
-  },
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "build:packages": "pnpm --filter './packages/**' build",
-    "check": "biome check . --write",
-    "check:ci": "biome ci --formatter-enabled=true --linter-enabled=false .",
+    "check": "oxfmt && biome check . --write",
+    "check:ci": "oxfmt --check",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
     "postinstall": "lefthook install",
@@ -47,6 +13,15 @@
     "size": "size-limit",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.0",
+    "@size-limit/file": "^11.2.0",
+    "@size-limit/time": "^11.2.0",
+    "lefthook": "1.13.6",
+    "oxfmt": "^0.37.0",
+    "size-limit": "^11.1.6",
+    "turbo": "^2.7.3"
   },
   "size-limit": [
     {
@@ -85,5 +60,31 @@
       "path": "packages/utils/dist/**/*.mjs",
       "limit": "20 KB"
     }
-  ]
+  ],
+  "packageManager": "pnpm@10.29.3",
+  "pnpm": {
+    "overrides": {
+      "web-streams-polyfill": "3.3.3"
+    },
+    "onlyBuiltDependencies": [
+      "@reown/appkit",
+      "@rolldown/binding-linux-x64-gnu",
+      "@rolldown/binding-linux-x64-musl",
+      "@swc/core",
+      "@tailwindcss/oxide",
+      "blake-hash",
+      "bufferutil",
+      "es5-ext",
+      "esbuild",
+      "keccak",
+      "lefthook",
+      "protobufjs",
+      "rolldown",
+      "secp256k1",
+      "sharp",
+      "tiny-secp256k1",
+      "usb",
+      "utf-8-validate"
+    ]
+  }
 }

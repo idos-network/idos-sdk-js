@@ -1,7 +1,16 @@
 {
   "name": "facesign-enclave",
-  "description": "idOS FaceSign Sign",
   "version": "0.1.0",
+  "description": "idOS FaceSign Sign",
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "dev": "react-router dev",
+    "preview": "react-router-serve ./build/server/index.js"
+  },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@idos-network/utils": "workspace:*",
@@ -39,14 +48,5 @@
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.8",
     "vite-tsconfig-paths": "^5.1.4"
-  },
-  "license": "MIT",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "scripts": {
-    "build": "react-router build",
-    "typecheck": "react-router typegen && tsc --noEmit",
-    "dev": "react-router dev",
-    "preview": "react-router-serve ./build/server/index.js"
-  },
-  "type": "module"
+  }
 }

@@ -1,9 +1,10 @@
 # XRPL Credentials guide
 
 This module provides utilities for creating and managing XRPL Credential transactions. It includes functionality for:
-* Creating Credentials on the XRPL blockchain
-* Generating Credential acceptance payloads
-* Managing both original and copy credentials
+
+- Creating Credentials on the XRPL blockchain
+- Generating Credential acceptance payloads
+- Managing both original and copy credentials
 
 ## Usage
 
@@ -37,7 +38,7 @@ class XrplCredentialsCreate {
    * @param params - Parameters for creating the original credential
    * @returns Promise resolving to the XRPL transaction result
    */
-  async createCredentialForOriginal(params: CreateCredentialForOriginalParams): Promise<any>
+  async createCredentialForOriginal(params: CreateCredentialForOriginalParams): Promise<any>;
 
   /**
    * Creates a time-locked credential copy on the XRPL.
@@ -51,18 +52,15 @@ class XrplCredentialsCreate {
    *
    * @throws {Error} When timelockYears is not a non-negative integer
    */
-  async createCredentialForCopy(params: CreateCredentialForCopyParams): Promise<any>
+  async createCredentialForCopy(params: CreateCredentialForCopyParams): Promise<any>;
 }
-
 ```
 
 #### Example
 
 ```js
 import { Wallet } from "xrpl";
-import {
-    XrplCredentialsCreate,
-} from "@idos-network/kwil-infra/xrpl-credentials";
+import { XrplCredentialsCreate } from "@idos-network/kwil-infra/xrpl-credentials";
 
 const wallet = Wallet.fromSeed("s...");
 const xrplService = await XrplCredentialsCreate.init("wss://s.devnet.rippletest.net:51233", wallet);
@@ -71,7 +69,7 @@ const xrplService = await XrplCredentialsCreate.init("wss://s.devnet.rippletest.
 await xrplService.createCredentialForOriginal({
   credId: "...uuid...",
   credType: "KYC",
-  userAddress: "r..."
+  userAddress: "r...",
 });
 
 const result = await xrplService.createCredentialForCopy({
@@ -79,10 +77,9 @@ const result = await xrplService.createCredentialForCopy({
   credType: "KYC",
   userAddress: "r...",
   timelockYears: 5,
-  origCredIssuerAddress: "r..."
+  origCredIssuerAddress: "r...",
 });
-
-``` 
+```
 
 ### CredentialAccept transactions
 
@@ -140,28 +137,18 @@ export function CopyCredentialAcceptPayload(
 ```js
 import { Xumm } from "xumm";
 import {
-    OriginalCredentialAcceptPayload,
-    CopyCredentialAcceptPayload,
+  OriginalCredentialAcceptPayload,
+  CopyCredentialAcceptPayload,
 } from "@idos-network/kwil-infra/xrpl-credentials";
 
 const xumm = new Xumm("Xaman API Key");
 await xumm.authorize();
 
 await xumm.payload.createAndSubscribe(
-    OriginalCredentialAcceptPayload(
-      "rIssuer...",
-      "rUser...",
-      "KYC",
-    ),
+  OriginalCredentialAcceptPayload("rIssuer...", "rUser...", "KYC"),
 );
 
 await xumm.payload.createAndSubscribe(
-  CopyCredentialAcceptPayload(
-    "rConsumer...",
-    "rUser...",
-    "rIssuer...",
-    "KYC",
-    5,
-  ),
+  CopyCredentialAcceptPayload("rConsumer...", "rUser...", "rIssuer...", "KYC", 5),
 );
 ```

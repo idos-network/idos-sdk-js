@@ -1,13 +1,15 @@
-import {
-  buildInsertableIDOSCredential,
-  matchLevelOrHigher,
-  recordFilter,
-} from "@idos-network/credentials/utils";
 import type {
   BaseProvider,
   EncryptionPasswordStore,
   PublicEncryptionProfile,
 } from "@idos-network/enclave";
+import type { KwilSigner } from "@idos-network/kwil-js";
+
+import {
+  buildInsertableIDOSCredential,
+  matchLevelOrHigher,
+  recordFilter,
+} from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
   createWebKwilClient,
@@ -51,7 +53,6 @@ import {
   shareCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
-import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
   base64Encode,

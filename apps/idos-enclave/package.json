@@ -1,10 +1,19 @@
 {
   "name": "idos-enclave",
-  "description": "idOS Enclave",
   "version": "0.1.0",
+  "description": "idOS Enclave",
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
-    "@idos-network/enclave": "workspace:*",
     "@idos-network/credentials": "workspace:*",
+    "@idos-network/enclave": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
@@ -33,14 +42,5 @@
     "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4"
-  },
-  "license": "MIT",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
-  },
-  "type": "module"
+  }
 }

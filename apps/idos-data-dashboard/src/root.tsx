@@ -10,14 +10,16 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "react-router";
+
 import type { Route } from "./+types/root";
+
 import { CookieBanner } from "./components/cookie";
 import { EnclaveDialog } from "./components/enclave-dialog";
 import { Toaster } from "./components/ui/sonner";
-import { wagmiAdapter } from "./core/wagmi";
-import Providers from "./providers";
-import "./styles/index.css";
 import { COMMON_ENV } from "./core/envFlags.common";
+import { wagmiAdapter } from "./core/wagmi";
+import "./styles/index.css";
+import Providers from "./providers";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "idOS Data Dashboard" }];

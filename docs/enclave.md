@@ -27,8 +27,8 @@ idOS keys are derived using [scrypt](https://en.wikipedia.org/wiki/Scrypt) (an i
 1. Take a seed (e.g. a user’s password)
 2. [Normalize](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize) the seed for consistency across platforms
 3. Use [scrypt-js](https://github.com/ricmoo/scrypt-js) to derive a 32-byte private key from a combination of
-    1. the normalized seed
-    2. the user’s ID, which acts as a [salt](https://en.wikipedia.org/wiki/Salt_(cryptography)) with to help thwart [rainbow table](https://en.wikipedia.org/wiki/Rainbow_table) attacks
+   1. the normalized seed
+   2. the user’s ID, which acts as a [salt](<https://en.wikipedia.org/wiki/Salt_(cryptography)>) with to help thwart [rainbow table](https://en.wikipedia.org/wiki/Rainbow_table) attacks
 4. Use [tweetnacl-js](https://github.com/dchest/tweetnacl-js) to derive the public key from this private key
 
 Voilà, the Enclave now has an encryption keypair (private key + public key), and is now ready to serve encryption and decryption requests coming from the idOS SDK.
@@ -40,6 +40,7 @@ When a dapp initializes the idOS frontend SDK, the SDK creates an invisible ifra
 ![enclave unlock button](assets/enclave-unlock-button.png)
 
 There are two reasons to have this iframe:
+
 - To have a separate execution context to make it impossible to exfiltrate user secrets
 - To control the button's code to be sure it's not blocked by the browser. Even though this could be handled on the dApp's side, we'd rather not burden every integrator with this minutiae
 

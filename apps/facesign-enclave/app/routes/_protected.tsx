@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
+
 import { useKeyStorageContext } from "@/providers/key.provider";
 
 export default function ProtectedLayout() {

@@ -1,8 +1,11 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+
 import { watchAccount } from "@wagmi/core";
 import { fromPromise } from "xstate";
+
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import { createFaceSignProvider } from "@/lib/facesign";
+
 import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
 
 export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(

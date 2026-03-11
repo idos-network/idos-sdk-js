@@ -1,8 +1,11 @@
 import type * as GemWallet from "@gemwallet/api";
-import { KwilSigner } from "@idos-network/kwil-js";
 import type { Store } from "@idos-network/utils/store";
 import type { Xumm } from "xumm";
+
+import { KwilSigner } from "@idos-network/kwil-js";
+
 import type { KwilActionClient } from "../create-kwil-client";
+
 import { getXrpTxHash } from "./utils";
 
 export async function createXrpKwilSigner(

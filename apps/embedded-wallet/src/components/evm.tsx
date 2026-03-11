@@ -1,11 +1,12 @@
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit, useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
 import { useEffect } from "react";
 import { useSignMessage, WagmiProvider } from "wagmi";
+
 import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
@@ -122,11 +123,11 @@ function Ethereum() {
       ))}
       {stepper.when("sign-message", (step) => (
         <div className="flex flex-col gap-4">
-          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
-          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+          <h1 className="text-center text-2xl font-bold">{step.title}</h1>
+          <p className="text-center text-sm text-neutral-400">{step.description}</p>
           <div className="flex flex-col gap-2">
-            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p className="text-center text-neutral-400 text-sm">{address}</p>
+            <p className="text-center text-sm text-neutral-400">Connected as:</p>
+            <p className="text-center text-sm text-neutral-400">{address}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

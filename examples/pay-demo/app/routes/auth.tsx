@@ -1,7 +1,9 @@
 import { redirect } from "react-router";
 import { SiweMessage } from "siwe";
+
 import { sessionStorage } from "~/providers/sessions.server";
 import { getUserItem, setUserItem } from "~/providers/store.server";
+
 import type { Route } from "./+types/auth";
 
 // Create a new user session

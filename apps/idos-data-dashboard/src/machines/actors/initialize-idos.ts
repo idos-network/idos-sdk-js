@@ -1,6 +1,8 @@
-import { idOSClientConfiguration } from "@idos-network/client";
 import type { Wallet } from "@idos-network/kwil-infra";
+
+import { idOSClientConfiguration } from "@idos-network/client";
 import { fromPromise } from "xstate";
+
 import { COMMON_ENV } from "@/core/envFlags.common";
 import {
   createEvmSigner,
@@ -9,6 +11,7 @@ import {
   createStellarSigner,
   createXrplSigner,
 } from "@/core/signers";
+
 import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard.machine";
 
 let config: idOSClientConfiguration | null = null;

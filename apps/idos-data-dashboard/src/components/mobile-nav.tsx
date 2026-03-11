@@ -1,5 +1,6 @@
 import { ExternalLinkIcon, XIcon } from "lucide-react";
 import { Link } from "react-router";
+
 import {
   ConnectedWallet,
   DisconnectButton,
@@ -7,6 +8,7 @@ import {
   MainNavLinks,
 } from "@/layouts/dashboard";
 import { cn } from "@/lib/utils";
+
 import { Button, buttonVariants } from "./ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui/drawer";
 

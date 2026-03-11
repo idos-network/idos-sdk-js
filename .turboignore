@@ -1,6 +1,7 @@
 # .turboignore
 project-words.txt
 biome.jsonc
+.oxfmtrc.json
 cspell.config.yaml
 lefthook.yml
 README.md

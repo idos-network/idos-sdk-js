@@ -1,4 +1,5 @@
 import { useCookieConsent } from "@/lib/cookie";
+
 import { Button } from "./ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 
@@ -28,7 +29,7 @@ export function CookieBanner() {
   }
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 z-40 flex bg-background text-foreground">
+    <div className="bg-background text-foreground fixed right-0 bottom-0 left-0 z-40 flex">
       <div className="flex w-full flex-row items-start justify-center gap-5 px-6 py-10">
         <Collapsible className="max-w-7xl text-sm">
           <p>
@@ -71,7 +72,7 @@ export function CookieBanner() {
             </p>
           </CollapsibleContent>
 
-          <CollapsibleTrigger className="group mt-2 cursor-pointer border-0 bg-transparent p-0 text-primary text-sm underline-offset-4 hover:underline">
+          <CollapsibleTrigger className="group text-primary mt-2 cursor-pointer border-0 bg-transparent p-0 text-sm underline-offset-4 hover:underline">
             <span className="group-data-panel-open:hidden">Read more</span>
             <span className="hidden group-data-panel-open:inline">Read less</span>
           </CollapsibleTrigger>

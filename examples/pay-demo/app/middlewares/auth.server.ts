@@ -1,7 +1,10 @@
 import { createContext, redirect } from "react-router";
+
 import type { SessionUser } from "~/interfaces";
+
 import { sessionStorage } from "~/providers/sessions.server";
 import { getUserItem } from "~/providers/store.server";
+
 import type { Route } from "../+types/root";
 
 export const userContext = createContext<SessionUser>();

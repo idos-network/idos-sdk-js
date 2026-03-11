@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useFetchCredentialDetails } from "@/lib/queries/credentials";
+
 import { safeParse } from "./shared";
 
 interface CredentialDetailsProps {

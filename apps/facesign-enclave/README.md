@@ -69,17 +69,17 @@ KV_PREFIX="your keys prefix"
 SECRET_KEY_BASE="abcd1234"
 ```
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `VITE_FACESIGN_SERVICE_URL` | Yes | FaceSign backend service endpoint. |
-| `VITE_ENTROPY_SERVICE_URL` | Yes | Entropy service endpoint for key derivation. |
-| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Yes | FaceTec device key identifier. |
-| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Yes | FaceTec iframe feature flag UUID. |
-| `VITE_ALLOWED_ORIGINS` | Yes | Comma-separated origins allowed to embed the enclave. Use `"*"` for development only. |
-| `KV_REST_API_URL` | Yes | Upstash Redis REST URL for mobile handoff sessions. |
-| `KV_REST_API_TOKEN` | Yes | Upstash Redis REST token. |
-| `KV_PREFIX` | Yes | Redis keys prefix. |
-| `SECRET_KEY_BASE` | Yes | Session secret key. |
+| Variable                             | Required | Description                                                                           |
+| ------------------------------------ | -------- | ------------------------------------------------------------------------------------- |
+| `VITE_FACESIGN_SERVICE_URL`          | Yes      | FaceSign backend service endpoint.                                                    |
+| `VITE_ENTROPY_SERVICE_URL`           | Yes      | Entropy service endpoint for key derivation.                                          |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Yes      | FaceTec device key identifier.                                                        |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG`   | Yes      | FaceTec iframe feature flag UUID.                                                     |
+| `VITE_ALLOWED_ORIGINS`               | Yes      | Comma-separated origins allowed to embed the enclave. Use `"*"` for development only. |
+| `KV_REST_API_URL`                    | Yes      | Upstash Redis REST URL for mobile handoff sessions.                                   |
+| `KV_REST_API_TOKEN`                  | Yes      | Upstash Redis REST token.                                                             |
+| `KV_PREFIX`                          | Yes      | Redis keys prefix.                                                                    |
+| `SECRET_KEY_BASE`                    | Yes      | Session secret key.                                                                   |
 
 ### Running with the dashboard
 
@@ -137,15 +137,15 @@ The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available a
 
 Set these in the Vercel project settings (KV variables are auto-provisioned by the integration):
 
-| Variable | Value | Notes |
-| --- | --- | --- |
-| `VITE_FACESIGN_SERVICE_URL` | Production FaceSign service URL | |
-| `VITE_ENTROPY_SERVICE_URL` | Production entropy service URL | |
-| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Production FaceTec device key | |
-| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Production FaceTec iframe feature flag | |
-| `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` | Never use `"*"` in production |
-| `KV_REST_API_URL` | *(auto-provisioned by Vercel KV)* | Upstash Redis REST URL |
-| `KV_REST_API_TOKEN` | *(auto-provisioned by Vercel KV)* | Upstash Redis REST token |
+| Variable                             | Value                                  | Notes                         |
+| ------------------------------------ | -------------------------------------- | ----------------------------- |
+| `VITE_FACESIGN_SERVICE_URL`          | Production FaceSign service URL        |                               |
+| `VITE_ENTROPY_SERVICE_URL`           | Production entropy service URL         |                               |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Production FaceTec device key          |                               |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG`   | Production FaceTec iframe feature flag |                               |
+| `VITE_ALLOWED_ORIGINS`               | `https://dashboard.idos.network`       | Never use `"*"` in production |
+| `KV_REST_API_URL`                    | _(auto-provisioned by Vercel KV)_      | Upstash Redis REST URL        |
+| `KV_REST_API_TOKEN`                  | _(auto-provisioned by Vercel KV)_      | Upstash Redis REST token      |
 
 The `VITE_ALLOWED_ORIGINS` variable controls which parent origins can embed the enclave via iframe **and** which origins can call the handoff API routes (via CORS). In production, this must be an explicit list of trusted origins.
 
@@ -169,11 +169,11 @@ Sessions are stored in Upstash Redis with a 5-minute TTL. The `secret` query par
 
 ### API routes
 
-| Method | Path | Description |
-| --- | --- | --- |
-| `POST` | `/api/handoff` | Creates a new session. Returns `{ sessionId, secret }`. |
-| `GET` | `/api/handoff/:sessionId?secret=...` | Polls session status. Returns `{ status, attestationToken? }`. Deletes session on completed read. |
-| `POST` | `/api/handoff/:sessionId` | Completes a session. Body: `{ attestationToken }`. |
+| Method | Path                                 | Description                                                                                       |
+| ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/handoff`                       | Creates a new session. Returns `{ sessionId, secret }`.                                           |
+| `GET`  | `/api/handoff/:sessionId?secret=...` | Polls session status. Returns `{ status, attestationToken? }`. Deletes session on completed read. |
+| `POST` | `/api/handoff/:sessionId`            | Completes a session. Body: `{ attestationToken }`.                                                |
 
 ### Testing the mobile handoff
 

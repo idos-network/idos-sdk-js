@@ -1,7 +1,7 @@
-import path from "node:path";
 import { reactRouter } from "@react-router/dev/vite";
 import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";

@@ -1,7 +1,10 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
+
 import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
 import { assign, fromPromise } from "xstate";
+
 import { COMMON_ENV } from "~/providers/envFlags.common";
+
 import type { Context } from "../types";
 
 export interface CredentialContext {

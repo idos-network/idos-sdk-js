@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { hexEncode, utf8Encode } from "../codecs/index.js";
 import { mnemonicToKeyPair } from "./index.js";
 

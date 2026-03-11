@@ -1,7 +1,33 @@
 {
   "name": "@idos-network/client",
-  "description": "idOS Client JavaScript SDK for browser environments",
   "version": "1.0.0-rc.1.2",
+  "description": "idOS Client JavaScript SDK for browser environments",
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown  --watch",
+    "publint": "pnpx publint --strict",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@idos-network/credentials": "workspace:*",
     "@idos-network/enclave": "workspace:*",
@@ -15,31 +41,5 @@
   },
   "engines": {
     "node": ">=22.19.0"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist/**/*",
-    "src/**/*"
-  ],
-  "homepage": "https://idos.network",
-  "license": "MIT",
-  "module": "dist/index.js",
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown  --watch",
-    "publint": "pnpx publint --strict",
-    "typecheck": "tsc --noEmit"
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "dist/index.d.ts"
+  }
 }

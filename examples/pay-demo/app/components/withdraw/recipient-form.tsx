@@ -1,5 +1,6 @@
 import { Landmark } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -105,7 +106,7 @@ export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProp
   return (
     <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-info-foreground">
+        <div className="bg-info/10 text-info-foreground mb-2 flex h-12 w-12 items-center justify-center rounded-full">
           <Landmark className="h-6 w-6" />
         </div>
         <CardTitle>Bank Account Details</CardTitle>

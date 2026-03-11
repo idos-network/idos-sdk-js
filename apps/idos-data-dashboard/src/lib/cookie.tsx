@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/react-router";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
+
 import { useSelector } from "@/machines/provider";
 import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 

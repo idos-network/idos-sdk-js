@@ -1,5 +1,7 @@
 import invariant from "tiny-invariant";
+
 import type { WalletType } from "../actions";
+
 import { verifyNearSignature } from "../near/signature-verification";
 import { verifyRippleSignature } from "../xrp/signature-verification";
 import { verifyEvmSignature } from "./evm";

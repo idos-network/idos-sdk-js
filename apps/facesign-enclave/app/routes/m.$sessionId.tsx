@@ -1,12 +1,14 @@
 import { AlertCircleIcon, CheckCircle2Icon, SmartphoneIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { data, useLoaderData } from "react-router";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { confirmNewUser } from "@/lib/api";
 import { faceTec } from "@/lib/facetec";
 import { getSession } from "@/lib/handoff-store";
+
 import type { Route } from "./+types/m.$sessionId";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -116,12 +118,12 @@ export default function MobileHandoff() {
   }, []);
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6">
+    <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6">
       <img src="/facesign-logo.svg" alt="idOS FaceSign" width={64} height={64} />
 
       {state === "ready" && (
         <div className="flex max-w-sm flex-col items-center gap-4 text-center">
-          <h1 className="font-semibold text-xl">FaceSign Verification</h1>
+          <h1 className="text-xl font-semibold">FaceSign Verification</h1>
           <p className="text-muted-foreground text-sm">
             Complete a quick face scan to verify your identity. This will be linked to your desktop
             session.
@@ -149,7 +151,7 @@ export default function MobileHandoff() {
 
       {state === "confirmNewUser" && (
         <div className="flex flex-col items-center gap-4 text-center">
-          <h1 className="font-semibold text-xl">No FaceSign profile found</h1>
+          <h1 className="text-xl font-semibold">No FaceSign profile found</h1>
           <p className="text-muted-foreground text-sm">
             If we couldn't log you in with FaceSign, you're likely not enrolled yet. Let's create
             your idOS Profile and turn on Login with FaceSign.
@@ -179,7 +181,7 @@ export default function MobileHandoff() {
       {state === "success" && (
         <div className="flex max-w-sm flex-col items-center gap-4 text-center">
           <CheckCircle2Icon className="size-12 text-green-500" />
-          <h1 className="font-semibold text-xl">Verification Complete</h1>
+          <h1 className="text-xl font-semibold">Verification Complete</h1>
           <p className="text-muted-foreground text-sm">
             You can now close this page and return to your desktop. Your session will continue
             automatically.
@@ -189,7 +191,7 @@ export default function MobileHandoff() {
 
       {state === "error" && (
         <div className="flex max-w-sm flex-col items-center gap-4 text-center">
-          <h1 className="font-semibold text-xl">Something went wrong</h1>
+          <h1 className="text-xl font-semibold">Something went wrong</h1>
           <Alert variant="destructive">
             <AlertCircleIcon className="size-6" />
             <AlertDescription>{error}</AlertDescription>

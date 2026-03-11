@@ -1,6 +1,14 @@
 {
   "name": "embedded-wallet",
   "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "catalog:core",
@@ -25,19 +33,11 @@
     "@tailwindcss/vite": "^4.1.11",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.4",
+    "@vitejs/plugin-react-swc": "^3.0.0",
     "tailwindcss": "^4.1.11",
     "typescript": "catalog:build",
-    "@vitejs/plugin-react-swc": "^3.0.0",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-node-polyfills": "catalog:build"
-  },
-  "private": true,
-  "scripts": {
-    "build": "tsc -b && vite build",
-    "dev": "vite",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
-  },
-  "type": "module"
+  }
 }

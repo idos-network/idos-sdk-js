@@ -1,4 +1,5 @@
 import nacl from "tweetnacl";
+
 import { base64Decode, base64Encode, utf8Decode } from "../codecs";
 
 /**

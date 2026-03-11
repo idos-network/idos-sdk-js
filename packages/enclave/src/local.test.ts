@@ -1,9 +1,11 @@
 import type { idOSCredential } from "@idos-network/credentials/types";
+
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
 import { MemoryStore } from "@idos-network/utils/store";
 import tweetnacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
+
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 
 class TestEnclave extends LocalEnclave {

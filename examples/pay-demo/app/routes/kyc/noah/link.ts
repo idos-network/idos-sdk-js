@@ -1,6 +1,7 @@
 import { userContext } from "~/middlewares/auth.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
 import { createOnboardingSession, prefillNoahUser } from "~/providers/noah.server";
+
 import type { Route } from "../+types/link";
 
 export async function loader({ request, context }: Route.LoaderArgs) {

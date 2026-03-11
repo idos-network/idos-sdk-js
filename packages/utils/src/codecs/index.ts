@@ -3,6 +3,7 @@ import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
 import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
 import bs58 from "bs58";
+
 import type { PipeCodecArgs } from "../store/interface";
 
 export { base64Decode, base64Encode };

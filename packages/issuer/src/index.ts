@@ -1,9 +1,3 @@
-import {
-  buildCredential,
-  buildFaceIdCredential,
-  type Credential,
-  type FaceIdCredential,
-} from "@idos-network/credentials/builder";
 import type {
   AvailableIssuerType,
   CredentialFields,
@@ -11,8 +5,6 @@ import type {
   CredentialSubjectFaceId,
   idOSCredential,
 } from "@idos-network/credentials/types";
-import { deriveLevel } from "@idos-network/credentials/utils";
-import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 import type {
   EditPublicNotesAsIssuerInput,
   idOSDelegatedWriteGrant,
@@ -23,6 +15,16 @@ import type {
   idOSWallet,
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
+
+import {
+  buildCredential,
+  buildFaceIdCredential,
+  type Credential,
+  type FaceIdCredential,
+} from "@idos-network/credentials/builder";
+import { deriveLevel } from "@idos-network/credentials/utils";
+import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
+
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,

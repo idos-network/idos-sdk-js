@@ -1,4 +1,5 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
+
 import { utf8Encode } from "../codecs";
 
 /*

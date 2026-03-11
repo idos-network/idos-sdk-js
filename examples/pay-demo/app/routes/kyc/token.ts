@@ -1,5 +1,6 @@
 import { userContext } from "~/middlewares/auth.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
+
 import type { Route } from "./+types/token";
 
 export async function loader({ request, context }: Route.LoaderArgs) {

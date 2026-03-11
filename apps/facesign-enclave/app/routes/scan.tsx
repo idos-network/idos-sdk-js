@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+
 import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
 import { faceTec } from "@/lib/facetec";
@@ -48,7 +49,7 @@ export default function Scan() {
   }, []);
 
   return (
-    <div className="flex h-svh items-center justify-center bg-background">
+    <div className="bg-background flex h-svh items-center justify-center">
       <Spinner className="size-8" />
     </div>
   );

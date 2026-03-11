@@ -1,32 +1,19 @@
 {
   "name": "@idos-network/utils",
-  "description": "idOS Utils for JavaScript SDK",
   "version": "1.0.0-rc.1.1",
-  "dependencies": {
-    "@stablelib/base64": "catalog:utils",
-    "@stablelib/binary": "catalog:utils",
-    "@stablelib/bytes": "catalog:utils",
-    "@stablelib/hex": "catalog:utils",
-    "@stablelib/sha256": "catalog:utils",
-    "@stablelib/utf8": "catalog:utils",
-    "@noble/hashes": "^2.0.1",
-    "borsh": "catalog:utils",
-    "bs58": "catalog:utils",
-    "tiny-invariant": "catalog:core",
-    "@scure/bip39": "2.0.1",
-    "tweetnacl": "catalog:core"
-  },
-  "devDependencies": {
-    "@types/chrome": "^0.1.0",
-    "@types/node": "^22.15.30",
-    "jsdom": "^22.1.0",
-    "tsdown": "catalog:build",
-    "typescript": "catalog:build",
-    "vitest": "catalog:testing"
-  },
-  "engines": {
-    "node": ">=22.19.0"
-  },
+  "description": "idOS Utils for JavaScript SDK",
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./store": {
       "types": "./dist/store/index.d.mts",
@@ -49,18 +36,9 @@
       "import": "./dist/facesign/index.mjs"
     }
   },
-  "files": [
-    "dist/**/*",
-    "src/**/*"
-  ],
-  "homepage": "https://idos.network",
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
@@ -68,7 +46,29 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "sideEffects": false,
-  "type": "module",
-  "types": "./dist/index.d.ts"
+  "dependencies": {
+    "@noble/hashes": "^2.0.1",
+    "@scure/bip39": "2.0.1",
+    "@stablelib/base64": "catalog:utils",
+    "@stablelib/binary": "catalog:utils",
+    "@stablelib/bytes": "catalog:utils",
+    "@stablelib/hex": "catalog:utils",
+    "@stablelib/sha256": "catalog:utils",
+    "@stablelib/utf8": "catalog:utils",
+    "borsh": "catalog:utils",
+    "bs58": "catalog:utils",
+    "tiny-invariant": "catalog:core",
+    "tweetnacl": "catalog:core"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^22.15.30",
+    "jsdom": "^22.1.0",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
 }

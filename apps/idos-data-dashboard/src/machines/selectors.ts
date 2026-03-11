@@ -1,6 +1,7 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 import type { SnapshotFrom } from "xstate";
+
 import type { dashboardMachine } from "./dashboard.machine";
 
 type DashboardSnapshot = SnapshotFrom<typeof dashboardMachine>;

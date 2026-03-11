@@ -1,6 +1,7 @@
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { confirmNewUser, getEntropy } from "@/lib/api";
@@ -35,10 +36,10 @@ function NewUserView({ token, redirect }: { token: string; redirect: string }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-6">
       <img src="/facesign-error.svg" alt="idOS FaceSign" width={80} height={80} />
       <div className="flex max-w-sm flex-col items-center justify-center gap-4 text-center">
-        <h2 className="font-medium text-xl">No FaceSign profile found</h2>
+        <h2 className="text-xl font-medium">No FaceSign profile found</h2>
         <p className="text-muted-foreground text-sm">
           If we couldn't log you in with FaceSign, you're likely not enrolled yet. Let's create your
           idOS Profile and turn on Login with FaceSign.
@@ -73,7 +74,7 @@ function NewUserView({ token, redirect }: { token: string; redirect: string }) {
 
 function GenericErrorView({ message, redirect }: { message: string; redirect: string }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-6">
       <img src="/facesign-error.svg" alt="idOS FaceSign" width={80} height={80} />
       <div className="flex flex-col items-center justify-center gap-4">
         <h2 className="text-center text-xl">An error occurred</h2>

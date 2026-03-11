@@ -1,4 +1,5 @@
 import type { KwilActionClient } from "@idos-network/kwil-infra";
+
 import {
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,

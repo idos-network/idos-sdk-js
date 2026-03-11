@@ -1,7 +1,9 @@
 import type { EncryptionPasswordStore } from "@idos-network/enclave";
+import type { JSX } from "preact";
+
 import { useSignal } from "@preact/signals";
 import { CheckIcon, ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
-import type { JSX } from "preact";
+
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
@@ -59,7 +61,7 @@ function ReadonlyInput(
   return (
     <input
       readOnly
-      class="w-full border-0 bg-transparent font-semibold outline-none ring-0 focus:outline-none focus:ring-0"
+      class="w-full border-0 bg-transparent font-semibold ring-0 outline-none focus:ring-0 focus:outline-none"
       {...props}
     />
   );
@@ -75,7 +77,7 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 }
 
 const UserDisclaimer = () => (
-  <span class="mt-1 block text-muted-foreground text-xs">
+  <span class="text-muted-foreground mt-1 block text-xs">
     Keep your password safe. Ideally in a password manager. Don't store it in plain files or notes.
   </span>
 );

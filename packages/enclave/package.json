@@ -1,27 +1,18 @@
 {
   "name": "@idos-network/enclave",
-  "description": "idOS Enclave JavaScript SDK",
   "version": "1.0.0-rc.1.1",
-  "dependencies": {
-    "@idos-network/credentials": "workspace:*",
-    "@idos-network/utils": "workspace:*",
-    "@idos-network/kwil-infra": "workspace:*",
-    "scrypt-js": "^3.0.1",
-    "tweetnacl": "catalog:core",
-    "tiny-invariant": "catalog:core",
-    "zod": "catalog:core"
-  },
-  "devDependencies": {
-    "@types/chrome": "^0.1.0",
-    "@types/node": "^22.15.30",
-    "jsdom": "^22.1.0",
-    "tsdown": "catalog:build",
-    "typescript": "catalog:build",
-    "vitest": "catalog:testing"
-  },
-  "engines": {
-    "node": ">=22.19.0"
-  },
+  "description": "idOS Enclave JavaScript SDK",
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -40,13 +31,33 @@
       "import": "./dist/mpc/index.mjs"
     }
   },
-  "files": [
-    "dist/**/*",
-    "src/**/*"
-  ],
-  "homepage": "https://idos.network",
-  "license": "MIT",
-  "main": "./dist/index.mjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown  --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
+    "@idos-network/utils": "workspace:*",
+    "scrypt-js": "^3.0.1",
+    "tiny-invariant": "catalog:core",
+    "tweetnacl": "catalog:core",
+    "zod": "catalog:core"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^22.15.30",
+    "jsdom": "^22.1.0",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
+  },
   "peerDependencies": {
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
@@ -63,18 +74,7 @@
       "optional": true
     }
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown  --watch",
-    "publint": "pnpx publint --strict",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit"
-  },
-  "sideEffects": false,
-  "type": "module",
-  "types": "./dist/index.d.mts"
+  "engines": {
+    "node": ">=22.19.0"
+  }
 }

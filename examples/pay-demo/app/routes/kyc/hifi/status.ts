@@ -1,5 +1,6 @@
 import { getKycStatus } from "~/providers/hifi.server";
 import { sessionStorage } from "~/providers/sessions.server";
+
 import type { Route } from "./+types/status";
 
 export async function loader({ request }: Route.LoaderArgs) {

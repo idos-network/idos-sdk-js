@@ -1,5 +1,7 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
+
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -45,7 +47,7 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-full bg-card lg:max-w-lg" showCloseButton={true}>
+      <DialogContent className="bg-card max-w-full lg:max-w-lg" showCloseButton={true}>
         <DialogHeader>
           <DialogTitle>Delete wallet</DialogTitle>
         </DialogHeader>

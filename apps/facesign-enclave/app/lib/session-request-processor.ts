@@ -3,6 +3,7 @@ import type {
   FaceTecSessionRequestProcessorCallback,
   FaceTecSessionResult,
 } from "@/assets/facetec/FaceTecPublicApi.d";
+
 import { isLoginResponse, isNewUserResponse, login } from "@/lib/api";
 
 export type SessionRequestProcessorCallback = (

@@ -22,7 +22,6 @@ const key = await Ed25519VerificationKey2020.generate({
   publicKeyMultibase: 'z6MkqozXNX5bbcs17yarKiwiZN1obZ3AR6evoubA2AyRnFnq',
   privateKeyMultibase: 'zrv1yczBBXSupDwutYPAoi1fyZLi1cZTPdXHaJXLiKX68E4u1jRy7Npc4dp65hAbKuwTws79MoiAJFDs4XKscz7Sjh3'
 } */
-
 ```
 
 ## Issue a credentials
@@ -76,20 +75,22 @@ const data = await buildCredential(
 
 console.log(data);
 ```
+
 ## Verify a credentials
 
 ```javascript
 import { verifyCredential } from "@idos-network/credentials";
 
 // We have a list of issuers we trust to
-const allowedIssuers = [{
+const allowedIssuers = [
+  {
     issuer: "https://invalid-issuer.id/",
     publicKeyMultibase: "z6MkfjxfHddp5Pf1GGUSJQ3m6PEycX2DFTVFruUMZsHPXoJx",
   },
   // Ed25519VerificationKey2020 instance, or issuer information are available
   // You don't need a privateKeyMultibase for verification!
   key,
-]
+];
 
 const [verified, resultsByIssuer] = await verifyCredential(credential, allowedIssuers);
 console.log("Verified: ", verified);
@@ -118,15 +119,19 @@ const level = deriveLevel({
 ## Filtering and matching levels
 
 ```javascript
-import { pickHighestMatchingLevel, matchLevelOrHigher, highestMatchingCredential } from "@idos-network/credentials/utils";
+import {
+  pickHighestMatchingLevel,
+  matchLevelOrHigher,
+  highestMatchingCredential,
+} from "@idos-network/credentials/utils";
 
-const matched = matchLevelOrHigher("basic", ["liveness"], "basic+liveness")
+const matched = matchLevelOrHigher("basic", ["liveness"], "basic+liveness");
 // matched = true
 
-const matched = matchLevelOrHigher("basic", ["liveness+email"], "basic+liveness")
+const matched = matchLevelOrHigher("basic", ["liveness+email"], "basic+liveness");
 // matched = false
 
-const matched = matchLevelOrHigher("basic", ["liveness+email"], "plus+liveness")
+const matched = matchLevelOrHigher("basic", ["liveness+email"], "plus+liveness");
 // matched = true
 
 const pickedLevel = pickHighestMatchingLevel(
@@ -136,18 +141,13 @@ const pickedLevel = pickHighestMatchingLevel(
 );
 // pickedLevel = plus+liveness+email+phoneNumber
 
-const pickedCredential = highestMatchingCredential(
-  [...idOSCredentials],
-  "basic",
-  {
-    addons: ["email", "liveness"],
-    publicNotesConstraint: {
-      status: "approved",
-      type: "kyc",
-    }
-  }
-);
+const pickedCredential = highestMatchingCredential([...idOSCredentials], "basic", {
+  addons: ["email", "liveness"],
+  publicNotesConstraint: {
+    status: "approved",
+    type: "kyc",
+  },
+});
 // pickedCredential => for example plus+email+liveness etc...
 // don't forget to verify credentials signature before usage!
-
 ```

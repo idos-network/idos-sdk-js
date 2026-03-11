@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+
 import type { Route } from "./+types/profile";
 
 export function meta(_args: Route.MetaArgs) {
@@ -6,6 +7,7 @@ export function meta(_args: Route.MetaArgs) {
 }
 
 import { Check, HardDrive, User, Wallet } from "lucide-react";
+
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 
@@ -16,7 +18,7 @@ export default function Profile() {
     <div className="flex min-h-full flex-col space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bold text-2xl text-foreground tracking-tight">Your Profile</h2>
+          <h2 className="text-foreground text-2xl font-bold tracking-tight">Your Profile</h2>
           <p className="text-muted-foreground text-sm">
             Manage your identity and connected wallets
           </p>
@@ -31,12 +33,12 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-border border-b pb-4">
+              <div className="border-border flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-success/10 p-2 text-success-foreground">
+                  <div className="bg-success/10 text-success-foreground rounded-full p-2">
                     <User className="h-4 w-4" />
                   </div>
-                  <span className="font-medium text-foreground">Profile Exists</span>
+                  <span className="text-foreground font-medium">Profile Exists</span>
                 </div>
                 <Badge variant="success">
                   <Check className="mr-1 h-3 w-3" />
@@ -46,10 +48,10 @@ export default function Profile() {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-success/10 p-2 text-success-foreground">
+                  <div className="bg-success/10 text-success-foreground rounded-full p-2">
                     <Wallet className="h-4 w-4" />
                   </div>
-                  <span className="font-medium text-foreground">Wallet Connected</span>
+                  <span className="text-foreground font-medium">Wallet Connected</span>
                 </div>
                 <Badge variant="success">
                   <Check className="mr-1 h-3 w-3" />
@@ -57,11 +59,11 @@ export default function Profile() {
                 </Badge>
               </div>
 
-              <div className="mt-4 rounded-lg border border-border bg-muted p-4">
-                <div className="mb-2 flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              <div className="border-border bg-muted mt-4 rounded-lg border p-4">
+                <div className="text-muted-foreground mb-2 flex items-center gap-2 text-xs font-medium tracking-wider uppercase">
                   <HardDrive className="h-3 w-3" /> Credential Data
                 </div>
-                <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-muted-foreground text-xs">
+                <pre className="text-muted-foreground max-h-40 overflow-auto font-mono text-xs break-all whitespace-pre-wrap">
                   {JSON.stringify(
                     { type: "VerifiableCredential", issuer: "did:idos:123", status: "active" },
                     null,
@@ -80,12 +82,12 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-3">
+              <div className="border-border bg-muted/50 flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-xs">
+                  <div className="bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
                     W
                   </div>
-                  <div className="truncate font-mono text-muted-foreground text-sm">{ADDRESS}</div>
+                  <div className="text-muted-foreground truncate font-mono text-sm">{ADDRESS}</div>
                 </div>
                 <Badge variant="info" className="ml-2 shrink-0">
                   Primary
@@ -101,8 +103,8 @@ export default function Profile() {
       </div>
 
       <div className="mt-auto pt-8 text-center">
-        <p className="mb-1 text-muted-foreground text-xs">Decentralized Identity powered by</p>
-        <div className="font-bold text-foreground text-lg tracking-tight">idOS</div>
+        <p className="text-muted-foreground mb-1 text-xs">Decentralized Identity powered by</p>
+        <div className="text-foreground text-lg font-bold tracking-tight">idOS</div>
       </div>
     </div>
   );

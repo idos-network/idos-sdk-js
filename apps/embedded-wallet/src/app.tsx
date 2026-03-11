@@ -1,5 +1,7 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
+
 import { useEffect } from "react";
+
 import { EVMConnector } from "./components/evm";
 import { FaceSignConnector } from "./components/facesign";
 import { NearConnector } from "./components/near";
@@ -87,7 +89,7 @@ export function App() {
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <img alt="idOS" src="/logo.svg" width={136} height={44} />
-          <span className="font-bold text-lg text-neutral-50">Wallet Connector</span>
+          <span className="text-lg font-bold text-neutral-50">Wallet Connector</span>
         </div>
         <div className="flex min-w-80 flex-col items-stretch justify-center gap-4">
           <WalletConnector />

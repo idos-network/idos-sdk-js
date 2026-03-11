@@ -75,25 +75,25 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 
 ## Environment variables
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `VITE_WALLET_CONNECT_PROJECT_ID` | Yes | Reown (WalletConnect) project ID for EVM wallet connections. |
-| `VITE_IDOS_NODE_URL` | Yes | URL of the idOS node the client connects to. |
-| `VITE_IDOS_ENCLAVE_URL` | Yes | URL of the idOS secure enclave for credential decryption. |
-| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes | NEAR contract ID for the idOS access grants contract. |
-| `VITE_EMBEDDED_WALLET_APP_URLS` | Yes | Comma-separated URLs for the embedded wallet add flow popup. |
-| `VITE_FACESIGN_ENCLAVE_URL` | No | URL of the FaceSign enclave for biometric authentication. |
+| Variable                             | Required | Description                                                  |
+| ------------------------------------ | -------- | ------------------------------------------------------------ |
+| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections. |
+| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                 |
+| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.    |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.        |
+| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup. |
+| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.    |
 
 ## Available scripts
 
 Run these from the `apps/idos-data-dashboard` directory:
 
-| Script | Description |
-| --- | --- |
-| `pnpm dev` | Start the Vite development server with HMR and HTTPS. |
-| `pnpm build` | Type-check with `tsc` and produce a production build. |
-| `pnpm preview` | Serve the production build locally for inspection. |
-| `pnpm typecheck` | Run the TypeScript compiler in `--noEmit` mode. |
+| Script           | Description                                           |
+| ---------------- | ----------------------------------------------------- |
+| `pnpm dev`       | Start the Vite development server with HMR and HTTPS. |
+| `pnpm build`     | Type-check with `tsc` and produce a production build. |
+| `pnpm preview`   | Serve the production build locally for inspection.    |
+| `pnpm typecheck` | Run the TypeScript compiler in `--noEmit` mode.       |
 
 ## Architecture
 
@@ -199,13 +199,13 @@ src/
 
 ## Multi-chain wallet support
 
-| Chain | SDK | Loaded |
-| --- | --- | --- |
-| EVM (Ethereum, etc.) | Reown AppKit + Wagmi | Eagerly (WagmiProvider wraps the app) |
-| NEAR | `@near-wallet-selector` | Lazily (dynamic `import()`) |
-| Stellar | `@creit.tech/stellar-wallets-kit` | Lazily (dynamic `import()`) |
-| XRPL | `@gemwallet/api` | Lazily (dynamic `import()`) |
-| FaceSign | `@idos-network/kwil-infra/facesign` | Lazily (dynamic `import()`) |
+| Chain                | SDK                                 | Loaded                                |
+| -------------------- | ----------------------------------- | ------------------------------------- |
+| EVM (Ethereum, etc.) | Reown AppKit + Wagmi                | Eagerly (WagmiProvider wraps the app) |
+| NEAR                 | `@near-wallet-selector`             | Lazily (dynamic `import()`)           |
+| Stellar              | `@creit.tech/stellar-wallets-kit`   | Lazily (dynamic `import()`)           |
+| XRPL                 | `@gemwallet/api`                    | Lazily (dynamic `import()`)           |
+| FaceSign             | `@idos-network/kwil-infra/facesign` | Lazily (dynamic `import()`)           |
 
 Non-EVM wallet SDKs are dynamically imported only when the user selects that chain, keeping the initial bundle small. FaceSign embeds the enclave as a fullscreen iframe and communicates via `postMessage`.
 
@@ -226,9 +226,9 @@ Non-EVM signer and SDK code uses `import()` in actor and signer files so Rollup 
 
 Both the dashboard and the FaceSign enclave are hosted on [Vercel](https://vercel.com) and auto-deploy from the `main` branch.
 
-| App | Production URL |
-| --- | --- |
-| Dashboard | [dashboard.idos.network](https://dashboard.idos.network) |
+| App              | Production URL                                                         |
+| ---------------- | ---------------------------------------------------------------------- |
+| Dashboard        | [dashboard.idos.network](https://dashboard.idos.network)               |
 | FaceSign enclave | [facesign-enclave.idos.network](https://facesign-enclave.idos.network) |
 
 ### Vercel environment variables
@@ -237,32 +237,32 @@ When deploying, set the following environment variables in each Vercel project:
 
 **Dashboard** (`idos-data-dashboard`):
 
-| Variable | Value |
-| --- | --- |
-| `VITE_WALLET_CONNECT_PROJECT_ID` | Your Reown (WalletConnect) project ID |
-| `VITE_IDOS_NODE_URL` | `https://nodes.idos.network` |
-| `VITE_IDOS_ENCLAVE_URL` | `https://enclave.idos.network` |
-| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | `idos.near` |
-| `VITE_EMBEDDED_WALLET_APP_URLS` | `https://dashboard.idos.network/add-wallet` |
-| `VITE_FACESIGN_ENCLAVE_URL` | `https://facesign-enclave.idos.network` |
+| Variable                             | Value                                       |
+| ------------------------------------ | ------------------------------------------- |
+| `VITE_WALLET_CONNECT_PROJECT_ID`     | Your Reown (WalletConnect) project ID       |
+| `VITE_IDOS_NODE_URL`                 | `https://nodes.idos.network`                |
+| `VITE_IDOS_ENCLAVE_URL`              | `https://enclave.idos.network`              |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | `idos.near`                                 |
+| `VITE_EMBEDDED_WALLET_APP_URLS`      | `https://dashboard.idos.network/add-wallet` |
+| `VITE_FACESIGN_ENCLAVE_URL`          | `https://facesign-enclave.idos.network`     |
 
 **FaceSign enclave** (`facesign-enclave`):
 
-| Variable | Value |
-| --- | --- |
-| `VITE_FACESIGN_SERVICE_URL` | FaceSign service endpoint |
-| `VITE_ENTROPY_SERVICE_URL` | Entropy service endpoint |
-| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | FaceTec device key |
-| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | FaceTec iframe feature flag UUID |
-| `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` (comma-separated for multiple) |
+| Variable                             | Value                                                           |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `VITE_FACESIGN_SERVICE_URL`          | FaceSign service endpoint                                       |
+| `VITE_ENTROPY_SERVICE_URL`           | Entropy service endpoint                                        |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | FaceTec device key                                              |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG`   | FaceTec iframe feature flag UUID                                |
+| `VITE_ALLOWED_ORIGINS`               | `https://dashboard.idos.network` (comma-separated for multiple) |
 
 **Embedded wallet** (`embedded-wallet`):
 
-| Variable | Value |
-| --- | --- |
-| `VITE_DATA_DASHBOARD_URL` | `https://dashboard.idos.network` |
-| `VITE_FACESIGN_ENCLAVE_URL` | `https://facesign-enclave.idos.network` |
-| `VITE_WALLET_CONNECT_PROJECT_ID` | Your Reown (WalletConnect) project ID |
+| Variable                         | Value                                   |
+| -------------------------------- | --------------------------------------- |
+| `VITE_DATA_DASHBOARD_URL`        | `https://dashboard.idos.network`        |
+| `VITE_FACESIGN_ENCLAVE_URL`      | `https://facesign-enclave.idos.network` |
+| `VITE_WALLET_CONNECT_PROJECT_ID` | Your Reown (WalletConnect) project ID   |
 
 The `VITE_ALLOWED_ORIGINS` variable on the enclave must list every origin that is permitted to embed it (including the embedded-wallet origin if it is hosted separately). In production, never use `"*"`.
 

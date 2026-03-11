@@ -1,5 +1,6 @@
-import { env } from "@/env";
 import type { SessionProposal, SignProposal } from "@/providers/requests.provider";
+
+import { env } from "@/env";
 
 export class BaseHandler {
   addSignProposal: (proposal: SignProposal) => void;

@@ -1,5 +1,6 @@
 import { CreditCard } from "lucide-react";
 import { useCallback, useEffect } from "react";
+
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
@@ -14,6 +15,7 @@ import {
 import { useUser } from "~/layouts/app";
 import { COMMON_ENV } from "~/providers/envFlags.common";
 import { MachineContext } from "~/providers/state";
+
 import type { Route } from "./+types/add";
 
 export function meta(_args: Route.MetaArgs) {
@@ -80,7 +82,7 @@ export default function AddFunds() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Add Funds</h2>
             <p className="text-muted-foreground text-sm">Complete your identity verification</p>
           </div>
         </div>
@@ -116,7 +118,7 @@ export default function AddFunds() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Add Funds</h2>
             <p className="text-muted-foreground text-sm">Complete your purchase</p>
           </div>
         </div>
@@ -146,15 +148,15 @@ export default function AddFunds() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">Add Funds</h2>
             <p className="text-muted-foreground text-sm">Processing your request</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+          <div className="border-muted border-t-primary mb-4 h-8 w-8 animate-spin rounded-full border-2" />
           <p className="text-muted-foreground text-sm">{message}</p>
-          {errorMessage && <p className="mt-2 text-destructive text-sm">{errorMessage}</p>}
+          {errorMessage && <p className="text-destructive mt-2 text-sm">{errorMessage}</p>}
         </div>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
@@ -167,7 +169,7 @@ export default function AddFunds() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+          <h2 className="text-foreground text-2xl font-bold tracking-tight">Add Funds</h2>
           <p className="text-muted-foreground text-sm">
             Buy crypto with your credit card or bank transfer
           </p>
@@ -201,22 +203,22 @@ export default function AddFunds() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-muted/50 p-4">
+          <div className="border-border bg-muted/50 rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border bg-card p-1 shadow-sm">
-                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                <div className="border-border bg-card flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border p-1 shadow-sm">
+                  <CreditCard className="text-muted-foreground h-5 w-5" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Transak</div>
+                  <div className="text-foreground font-medium">Transak</div>
                   <div className="text-muted-foreground text-xs">
                     Global cards &amp; bank transfers
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-medium text-foreground">&asymp; 100 USDC</div>
-                <div className="font-medium text-success-foreground text-xs">Best rate</div>
+                <div className="text-foreground font-medium">&asymp; 100 USDC</div>
+                <div className="text-success-foreground text-xs font-medium">Best rate</div>
               </div>
             </div>
           </div>

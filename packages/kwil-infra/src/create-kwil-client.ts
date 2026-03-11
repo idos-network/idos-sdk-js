@@ -1,4 +1,3 @@
-import { type KwilSigner, NodeKwil, WebKwil } from "@idos-network/kwil-js";
 import type { Config } from "@idos-network/kwil-js/dist/api_client/config";
 import type {
   ActionBody,
@@ -6,8 +5,12 @@ import type {
   PositionalParams,
 } from "@idos-network/kwil-js/dist/core/action";
 import type { DataInfo } from "@idos-network/kwil-js/dist/core/database";
+
+import { type KwilSigner, NodeKwil, WebKwil } from "@idos-network/kwil-js";
 import invariant from "tiny-invariant";
+
 import type { ActionSchemaElement } from "./actions";
+
 import { actionSchema } from "./actions";
 
 type CreateKwilClientParams = {

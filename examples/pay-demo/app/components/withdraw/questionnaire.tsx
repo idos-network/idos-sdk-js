@@ -1,5 +1,6 @@
 import { ClipboardList } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -62,7 +63,7 @@ export function DueQuestionnaire({ onSubmit, isLoading = false }: DueQuestionnai
   return (
     <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-info-foreground">
+        <div className="bg-info/10 text-info-foreground mb-2 flex h-12 w-12 items-center justify-center rounded-full">
           <ClipboardList className="h-6 w-6" />
         </div>
         <CardTitle>Declarations</CardTitle>
@@ -77,7 +78,7 @@ export function DueQuestionnaire({ onSubmit, isLoading = false }: DueQuestionnai
             {index > 0 && <Separator className="mb-4" />}
             <fieldset disabled={isLoading} className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <legend className="font-medium text-foreground text-sm leading-tight">
+                <legend className="text-foreground text-sm leading-tight font-medium">
                   {declaration.label}
                 </legend>
                 <p className="text-muted-foreground text-xs leading-relaxed">

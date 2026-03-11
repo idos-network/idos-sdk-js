@@ -1,5 +1,6 @@
 import { LogOutIcon, SmilePlusIcon } from "lucide-react";
 import { Outlet } from "react-router";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
@@ -30,8 +31,8 @@ export default function AppLayout() {
 
   if (isError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
-        <p className="max-w-md text-center text-destructive text-lg">
+      <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-6">
+        <p className="text-destructive max-w-md text-center text-lg">
           {error || "Something went wrong"}
         </p>
         <div className="flex gap-4">
@@ -65,7 +66,7 @@ export default function AppLayout() {
 
   if (isNoProfile) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background">
+      <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-8">
         <img
           src="/logo-light.svg"
           alt="idOS logo"

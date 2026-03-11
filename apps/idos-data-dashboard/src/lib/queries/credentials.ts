@@ -1,7 +1,10 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
+
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
+
 import { useIDOSClient } from "@/hooks/idOS";
 
 export function credentialsQueryOptions(idOSClient: idOSClientLoggedIn) {

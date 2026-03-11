@@ -1,3 +1,12 @@
+import type { Store } from "@idos-network/utils/store";
+import type {
+  Wallet as NearWallet,
+  SignedMessage,
+  SignMessageParams,
+} from "@near-wallet-selector/core";
+import type { connect as connectT } from "near-api-js";
+import type { AccessKeyList } from "near-api-js/lib/providers/provider";
+
 import { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -9,15 +18,8 @@ import {
   utf8Decode,
 } from "@idos-network/utils/codecs";
 
-import type { Store } from "@idos-network/utils/store";
-import type {
-  Wallet as NearWallet,
-  SignedMessage,
-  SignMessageParams,
-} from "@near-wallet-selector/core";
-import type { connect as connectT } from "near-api-js";
-import type { AccessKeyList } from "near-api-js/lib/providers/provider";
 import type { KwilActionClient } from "../create-kwil-client";
+
 import { getNearConnectionConfig } from "./get-config";
 
 const NEAR_WALLET_TYPES: string[] = [

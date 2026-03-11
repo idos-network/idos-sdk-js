@@ -1,3 +1,5 @@
+import type { idOSCredential } from "@idos-network/credentials/types";
+
 import {
   Center,
   Container,
@@ -10,13 +12,13 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/credentials/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useDeferredValue, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
+
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
   Button,

@@ -1,7 +1,9 @@
 import type { Wallet } from "@idos-network/kwil-infra";
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import type { WalletSelector } from "@near-wallet-selector/core";
+
 import { getWalletClient } from "@wagmi/core";
+
 import { wagmiConfig } from "./wagmi";
 
 let faceSignProvider: FaceSignSignerProvider | null = null;

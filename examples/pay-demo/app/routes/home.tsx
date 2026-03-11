@@ -1,7 +1,10 @@
 import { redirect } from "react-router";
+
 import { sessionStorage } from "~/providers/sessions.server";
-import { Welcome } from "../welcome/welcome";
+
 import type { Route } from "./+types/home";
+
+import { Welcome } from "../welcome/welcome";
 
 export function meta() {
   return [
