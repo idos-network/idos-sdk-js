@@ -104,6 +104,7 @@ PKCE
 pkoch
 pnpx
 preact
+publint
 qrcode
 Reown
 Revalidator

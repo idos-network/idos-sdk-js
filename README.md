@@ -75,24 +75,24 @@ A pre-commit hook (via [Lefthook](https://github.com/evilmartians/lefthook)) is 
 
 ### Common commands
 
-| Command              | Description                            |
-| :------------------- | :------------------------------------- |
-| `pnpm dev`           | Start all apps in development mode     |
-| `pnpm build`         | Build all packages and apps            |
-| `pnpm build:packages`| Build only the packages under `packages/` |
-| `pnpm test`          | Run unit tests                         |
-| `pnpm typecheck`     | Run TypeScript type checking           |
+| Command               | Description                               |
+| :-------------------- | :---------------------------------------- |
+| `pnpm dev`            | Start all apps in development mode        |
+| `pnpm build`          | Build all packages and apps               |
+| `pnpm build:packages` | Build only the packages under `packages/` |
+| `pnpm test`           | Run unit tests                            |
+| `pnpm typecheck`      | Run TypeScript type checking              |
 
 ### Code quality
 
 Formatting is handled by [oxfmt](https://oxc.rs/docs/guide/usage/formatter) and linting by [oxlint](https://oxc.rs/docs/guide/usage/linter), both from the [Oxc](https://oxc.rs/) project.
 
-| Command              | Description                                      |
-| :------------------- | :----------------------------------------------- |
-| `pnpm format:fix`    | Format the codebase                              |
-| `pnpm format`        | Check formatting (no writes)                     |
-| `pnpm lint:fix`      | Lint and auto-fix issues                         |
-| `pnpm lint`          | Check for lint errors                            |
+| Command                  | Description                                 |
+| :----------------------- | :------------------------------------------ |
+| `pnpm format:fix`        | Format the codebase                         |
+| `pnpm format`            | Check formatting (no writes)                |
+| `pnpm lint:fix`          | Lint and auto-fix issues                    |
+| `pnpm lint`              | Check for lint errors                       |
 | `pnpm turbo run quality` | Run both format and lint checks in parallel |
 
 ## Releasing
