@@ -18,10 +18,6 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
-    "./encryption": {
-      "types": "./dist/encryption/index.d.mts",
-      "import": "./dist/encryption/index.mjs"
-    },
     "./local": {
       "types": "./dist/local.d.mts",
       "import": "./dist/local.mjs"
