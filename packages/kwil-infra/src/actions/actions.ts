@@ -327,40 +327,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Int,
     },
   ],
-  create_credential_copy: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "original_credential_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "public_notes",
-      type: DataType.Text,
-    },
-    {
-      name: "public_notes_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "broader_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "content",
-      type: DataType.Text,
-    },
-    {
-      name: "encryptor_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "issuer_auth_public_key",
-      type: DataType.Text,
-    },
-  ],
   create_credentials_by_dwg: [
     {
       name: "issuer_auth_public_key",
@@ -1306,41 +1272,6 @@ export async function shareCredential(
   });
 }
 
-export const CreateCredentialCopyInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-  original_credential_id: z.ZodUUID;
-  public_notes: z.ZodString;
-  public_notes_signature: z.ZodString;
-  broader_signature: z.ZodString;
-  content: z.ZodString;
-  encryptor_public_key: z.ZodString;
-  issuer_auth_public_key: z.ZodString;
-}> = z.object({
-  id: z.uuid(),
-  original_credential_id: z.uuid(),
-  public_notes: z.string(),
-  public_notes_signature: z.string(),
-  broader_signature: z.string(),
-  content: z.string(),
-  encryptor_public_key: z.string(),
-  issuer_auth_public_key: z.string(),
-});
-
-export type CreateCredentialCopyInput = z.infer<typeof CreateCredentialCopyInputSchema>;
-
-/**  Credential copy actions */
-export async function createCredentialCopy(
-  kwilClient: KwilActionClient,
-  params: CreateCredentialCopyInput,
-): Promise<void> {
-  const inputs = CreateCredentialCopyInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "create_credential_copy",
-    inputs,
-    description: "Share a credential without AG (access grant)",
-  });
-}
-
 export const CreateCredentialsByDwgInputSchema: z.ZodObject<{
   issuer_auth_public_key: z.ZodString;
   original_encryptor_public_key: z.ZodString;
@@ -1390,6 +1321,7 @@ export const CreateCredentialsByDwgInputSchema: z.ZodObject<{
 export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgInputSchema>;
 
 /**
+ *  Delegated write credential actions
  *  For access grant
  *  Check the content creator (encryptor) of credentials is the issuer that user delegated to issue the credentials
  *  Get the wallet type and public key for XRPL/NEAR wallets from database
