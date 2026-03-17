@@ -5,7 +5,7 @@ This document will take you on a long tour that'll encompass most of idOS's conc
 We strongly recommend you read [idOS System Overview](./README.md) first.
 
 > 🚧 Will change soon 🚧
->
+
 ## Cold Start Journey
 
 The journey of a brand-new user to idOS begins with several key steps that ensure a smooth onboarding process and compliance with the system's requirements.
