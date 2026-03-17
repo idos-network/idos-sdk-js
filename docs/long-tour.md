@@ -1,13 +1,11 @@
 # Long Tour
 
-This document will take you on a long tour that'll encompass most of idOS's concepts and components. It assumes you don't need Passporting.
+This document will take you on a long tour that'll encompass most of idOS's concepts and components.
 
 We strongly recommend you read [idOS System Overview](./README.md) first.
 
 > 🚧 Will change soon 🚧
 >
-> We'll add a Passporting journey soon.
-
 ## Cold Start Journey
 
 The journey of a brand-new user to idOS begins with several key steps that ensure a smooth onboarding process and compliance with the system's requirements.

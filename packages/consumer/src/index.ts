@@ -24,12 +24,10 @@ import {
   getCredentialShared,
   getCredentialsSharedByUser,
   getGrants,
-  getPassportingPeers,
   type idOSGrant,
-  type idOSPassportingPeer,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
-import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
+import { base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 
@@ -128,36 +126,6 @@ export class idOSConsumer {
     });
   }
 
-  async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
-    const credential = await this.getCredentialSharedFromIDOS(credentialId);
-
-    invariant(credential, `Credential with id ${credentialId} not found`);
-
-    const accessGrants = await this.getAccessGrantsForCredential(credentialId);
-
-    invariant(
-      accessGrants.length > 0,
-      `Access grants for credential with id ${credentialId} not found`,
-    );
-
-    // @todo Solve this, there can be more than 1 grant
-    const accessGrant = accessGrants[0];
-
-    // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
-    const credentialContent = await this.#noncedBox.decrypt(
-      credential.content,
-      credential.encryptor_public_key,
-    );
-
-    const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
-
-    if (contentHash !== accessGrant.content_hash) {
-      throw new Error("Credential content hash does not match the access grant hash");
-    }
-
-    return credential;
-  }
-
   async getAccessGrants(params: Partial<GetAccessGrantsGrantedInput>): Promise<{
     grants: idOSGrant[];
     totalCount: number;
@@ -173,10 +141,6 @@ export class idOSConsumer {
   ): Promise<CreateAgByDagForCopyInput> {
     await createAgByDagForCopy(this.#kwilClient, params);
     return params;
-  }
-
-  async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
-    return getPassportingPeers(this.#kwilClient);
   }
 
   async verifyCredential<K = VerifiableCredentialSubject>(

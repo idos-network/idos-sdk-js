@@ -1,8 +1,6 @@
 import type { KwilActionClient } from "..";
 
 import {
-  type AddPassportingClubAsOwnerInput,
-  type AddPassportingPeerAsOwnerInput,
   type AddUserAsInserterInput,
   type AddWalletInput,
   addWallet,
@@ -27,8 +25,6 @@ export type idOSCredentialListItem = GetCredentialsOutput;
 export type idOSUserAttribute = GetAttributesOutput;
 export type idOSWallet = UpsertWalletAsInserterInput;
 export type idOSDelegatedWriteGrant = DwgMessageInput;
-export type idOSPassportingPeer = AddPassportingPeerAsOwnerInput;
-export type idOSPassportingClub = AddPassportingClubAsOwnerInput;
 
 export async function addWallets(
   kwilClient: KwilActionClient,
