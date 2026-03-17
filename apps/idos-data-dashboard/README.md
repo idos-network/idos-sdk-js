@@ -83,17 +83,20 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 | `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.        |
 | `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup. |
 | `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.    |
+| `LEGACY_APP_DB_URL`                  | No       | PostgreSQL URL for the legacy app DB (Neon). Used by community-sale and leaderboard. Set in `.env.local` (server-only). |
 
 ## Available scripts
 
 Run these from the `apps/idos-data-dashboard` directory:
 
-| Script           | Description                                           |
-| ---------------- | ----------------------------------------------------- |
-| `pnpm dev`       | Start the Vite development server with HMR and HTTPS. |
-| `pnpm build`     | Type-check with `tsc` and produce a production build. |
-| `pnpm preview`   | Serve the production build locally for inspection.    |
-| `pnpm typecheck` | Run the TypeScript compiler in `--noEmit` mode.       |
+| Script             | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `pnpm dev`         | Start the Vite development server with HMR and HTTPS. |
+| `pnpm build`       | Type-check with `tsc` and produce a production build. |
+| `pnpm preview`     | Serve the production build locally for inspection.    |
+| `pnpm typecheck`   | Run the TypeScript compiler in `--noEmit` mode.       |
+| `pnpm db:generate` | Generate Drizzle migrations from schema changes.      |
+| `pnpm db:push`     | Push schema to the database (development).             |
 
 ## Architecture
 
