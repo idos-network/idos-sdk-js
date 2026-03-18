@@ -67,7 +67,7 @@ function buildSearchParams(page: number, pageSize: number, epoch: number | null)
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("pageSize", String(pageSize));
-  if (epoch != null) params.set("epoch", String(epoch));
+  if (epoch !== null) params.set("epoch", String(epoch));
   const s = params.toString();
   return s ? `?${s}` : "";
 }
@@ -98,7 +98,7 @@ export async function loader(args: Route.LoaderArgs) {
   ]);
   const availableEpochs = epochsResult;
   let epoch: number;
-  if (epochParam != null && !Number.isNaN(epochParam)) {
+  if (epochParam !== null && !Number.isNaN(epochParam)) {
     epoch = epochParam;
   } else {
     epoch = maxRow?.epoch ?? 0;
@@ -137,7 +137,7 @@ export async function loader(args: Route.LoaderArgs) {
 type LeaderboardEntry = Awaited<ReturnType<typeof getLeaderboardCheckpointEntries>>[number];
 
 function parseDecimal(value: string | null | undefined): number {
-  if (value == null) return 0;
+  if (value === null || value === undefined) return 0;
   const n = Number.parseFloat(String(value));
   return Number.isNaN(n) ? 0 : n;
 }
@@ -169,7 +169,7 @@ function getPaginationItems(page: number, totalPages: number): PaginationPageIte
 }
 
 function buildLeaderboardColumns(epoch: number | null): ColumnDef<LeaderboardEntry>[] {
-  const showArenaPoints = epoch != null && epoch >= 3;
+  const showArenaPoints = epoch !== null && epoch >= 3;
 
   const cols: ColumnDef<LeaderboardEntry>[] = [
     {
@@ -178,7 +178,7 @@ function buildLeaderboardColumns(epoch: number | null): ColumnDef<LeaderboardEnt
       header: () => <span className="text-accent-foreground font-normal">Rank</span>,
       cell: ({ row }: { row: { original: LeaderboardEntry } }) => {
         const r = row.original.rank;
-        if (r == null) return "—";
+        if (r === null) return "—";
         return `#${r}`;
       },
     },
@@ -342,13 +342,13 @@ function useUserLeaderboardPosition(address: string | null, epoch: number | null
       if (!res.ok) return null;
       return res.json();
     },
-    enabled: !!address && epoch != null && epoch > 0,
+    enabled: !!address && epoch !== null && epoch > 0,
     staleTime: 60_000,
   });
 }
 
 function UserPositionCard({ data, epoch }: { data: UserPositionData; epoch: number | null }) {
-  const showArenaPoints = epoch != null && epoch >= 3;
+  const showArenaPoints = epoch !== null && epoch >= 3;
   const mindshare = parseDecimal(data.relativeMindshare);
   const mindshareDisplay =
     mindshare === 0 ? "—" : mindshare <= 0.0001 ? "<0.01%" : `${(mindshare * 100).toFixed(2)}%`;
@@ -359,7 +359,7 @@ function UserPositionCard({ data, epoch }: { data: UserPositionData; epoch: numb
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <div>
           <p className="text-muted-foreground text-xs">Rank</p>
-          <p className="text-lg font-semibold">{data.rank != null ? `#${data.rank}` : "—"}</p>
+          <p className="text-lg font-semibold">{data.rank !== null ? `#${data.rank}` : "—"}</p>
         </div>
         <div>
           <p className="text-muted-foreground text-xs">Total Points</p>
@@ -483,7 +483,7 @@ export default function Leaderboard() {
               );
             })}
           </ButtonGroup>
-          {epoch != null && (
+          {epoch !== null && (
             <p className="text-accent-foreground w-full text-center sm:flex-1">
               The idOS App Leaderboard {getEpochLabel(epoch)} has ended. For more details check{" "}
               <a
