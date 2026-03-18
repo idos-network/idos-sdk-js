@@ -75,14 +75,14 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 
 ## Environment variables
 
-| Variable                             | Required | Description                                                  |
-| ------------------------------------ | -------- | ------------------------------------------------------------ |
-| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections. |
-| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                 |
-| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.    |
-| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.        |
-| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup. |
-| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.    |
+| Variable                             | Required | Description                                                                                                             |
+| ------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections.                                                            |
+| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                                                                            |
+| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.                                                               |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.                                                                   |
+| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup.                                                            |
+| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.                                                               |
 | `LEGACY_APP_DB_URL`                  | No       | PostgreSQL URL for the legacy app DB (Neon). Used by community-sale and leaderboard. Set in `.env.local` (server-only). |
 
 ## Available scripts
@@ -96,7 +96,7 @@ Run these from the `apps/idos-data-dashboard` directory:
 | `pnpm preview`     | Serve the production build locally for inspection.    |
 | `pnpm typecheck`   | Run the TypeScript compiler in `--noEmit` mode.       |
 | `pnpm db:generate` | Generate Drizzle migrations from schema changes.      |
-| `pnpm db:push`     | Push schema to the database (development).             |
+| `pnpm db:push`     | Push schema to the database (development).            |
 
 ## Architecture
 
