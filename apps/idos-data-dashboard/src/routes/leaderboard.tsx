@@ -221,15 +221,9 @@ function buildLeaderboardColumns(epoch: number | null): ColumnDef<LeaderboardEnt
       ),
       cell: ({ row }: { row: { original: LeaderboardEntry } }) => {
         const item = row.original;
-        const hasMultiplier = item.contributionMultiplier === true;
         return (
           <div className="flex items-center justify-center gap-1">
             <span>{formatNumber(item.totalPoints)}</span>
-            {hasMultiplier && (
-              <span className="border-primary flex size-5 items-center justify-center rounded-full border-2 text-[10px]">
-                1.5x
-              </span>
-            )}
           </div>
         );
       },
@@ -347,79 +341,104 @@ function useUserLeaderboardPosition(address: string | null, epoch: number | null
   });
 }
 
-function UserPositionCard({ data, epoch }: { data: UserPositionData; epoch: number | null }) {
+function UserPositionCard({
+  data,
+  epoch,
+  isLoading,
+}: {
+  data: UserPositionData | null | undefined;
+  epoch: number | null;
+  isLoading: boolean;
+}) {
   const showArenaPoints = epoch !== null && epoch >= 3;
-  const mindshare = parseDecimal(data.relativeMindshare);
+
+  const mindshare = data ? parseDecimal(data.relativeMindshare) : 0;
   const mindshareDisplay =
     mindshare === 0 ? "—" : mindshare <= 0.0001 ? "<0.01%" : `${(mindshare * 100).toFixed(2)}%`;
 
   return (
     <div className="bg-card rounded-xl border p-4">
-      <p className="text-accent-foreground mb-3 text-sm font-medium">Your Position</p>
+      <p className="text-accent-foreground mb-3 text-sm font-medium">
+        Your Position
+        {!isLoading && !data && (
+          <span className="text-muted-foreground ml-2 font-normal">
+            — You are not ranked in this epoch.
+          </span>
+        )}
+      </p>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div>
+        <div className="min-w-[80px]">
           <p className="text-muted-foreground text-xs">Rank</p>
-          <p className="text-lg font-semibold">{data.rank !== null ? `#${data.rank}` : "—"}</p>
+          {isLoading ? (
+            <Skeleton className="mt-1 h-5 w-20 rounded" />
+          ) : (
+            <p className="text-sm font-semibold lg:text-base">
+              {data?.rank !== null && data?.rank !== undefined ? `#${data.rank}` : "—"}
+            </p>
+          )}
         </div>
-        <div>
+        <div className="min-w-[110px]">
           <p className="text-muted-foreground text-xs">Total Points</p>
-          <p className="text-lg font-semibold">
-            {formatNumber(data.totalPoints)}
-            {data.contributionMultiplier && (
-              <span className="border-primary ml-1 inline-flex size-5 items-center justify-center rounded-full border-2 align-middle text-[10px]">
-                1.5x
-              </span>
-            )}
-          </p>
+          {isLoading ? (
+            <Skeleton className="mt-1 h-5 w-20 rounded" />
+          ) : (
+            <p className="text-sm font-semibold lg:text-base">
+              {data ? formatNumber(data.totalPoints) : "—"}
+            </p>
+          )}
         </div>
         {showArenaPoints && (
-          <div>
+          <div className="min-w-[110px]">
             <p className="text-muted-foreground text-xs">Arena Points</p>
-            <p className="text-lg font-semibold">
-              {data.gamePoints === 0 ? "—" : formatNumber(data.gamePoints)}
-            </p>
+            {isLoading ? (
+              <Skeleton className="mt-1 h-5 w-20 rounded" />
+            ) : (
+              <p className="text-sm font-semibold lg:text-base">
+                {!data || data.gamePoints === 0 ? "—" : formatNumber(data.gamePoints)}
+              </p>
+            )}
           </div>
         )}
-        <div>
+        <div className="min-w-[110px]">
           <p className="text-muted-foreground text-xs">Quest Points</p>
-          <p className="text-lg font-semibold">
-            {parseDecimal(data.questPoints) === 0
-              ? "—"
-              : formatNumber(parseDecimal(data.questPoints))}
-          </p>
+          {isLoading ? (
+            <Skeleton className="mt-1 h-5 w-20 rounded" />
+          ) : (
+            <p className="text-sm font-semibold lg:text-base">
+              {!data || parseDecimal(data.questPoints) === 0
+                ? "—"
+                : formatNumber(parseDecimal(data.questPoints))}
+            </p>
+          )}
         </div>
-        <div>
+        <div className="min-w-[90px]">
           <p className="text-muted-foreground text-xs">Mindshare</p>
-          <p className="text-lg font-semibold">{mindshareDisplay}</p>
+          {isLoading ? (
+            <Skeleton className="mt-1 h-5 w-20 rounded" />
+          ) : (
+            <p className="text-sm font-semibold lg:text-base">{mindshareDisplay}</p>
+          )}
         </div>
-        <div>
+        <div className="min-w-[110px]">
           <p className="text-muted-foreground text-xs">Social Points</p>
-          <p className="text-lg font-semibold">
-            {parseDecimal(data.socialPoints) === 0
-              ? "—"
-              : formatNumber(parseDecimal(data.socialPoints))}
-          </p>
+          {isLoading ? (
+            <Skeleton className="mt-1 h-5 w-20 rounded" />
+          ) : (
+            <p className="text-sm font-semibold lg:text-base">
+              {!data || parseDecimal(data.socialPoints) === 0
+                ? "—"
+                : formatNumber(parseDecimal(data.socialPoints))}
+            </p>
+          )}
         </div>
-        <div>
+        <div className="min-w-[120px]">
           <p className="text-muted-foreground text-xs">Contribution Tier</p>
-          <p className="text-lg font-semibold">{data.contributionTier ?? "—"}</p>
+          {isLoading ? (
+            <Skeleton className="mt-1 h-5 w-20 rounded" />
+          ) : (
+            <p className="text-sm font-semibold lg:text-base">{data?.contributionTier ?? "—"}</p>
+          )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function UserPositionSkeleton() {
-  return (
-    <div className="bg-card rounded-xl border p-4">
-      <p className="text-accent-foreground mb-3 text-sm font-medium">Your Position</p>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i}>
-            <Skeleton className="mb-1 h-3 w-16 rounded" />
-            <Skeleton className="h-6 w-20 rounded" />
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -500,14 +519,9 @@ export default function Leaderboard() {
         </div>
       )}
 
-      {walletAddress && isLoadingPosition && <UserPositionSkeleton />}
-      {walletAddress && !isLoadingPosition && !userPosition && (
-        <div className="bg-card rounded-xl border p-4">
-          <p className="text-accent-foreground text-sm font-medium">Your Position</p>
-          <p className="text-muted-foreground mt-1 text-sm">You are not ranked in this epoch.</p>
-        </div>
+      {walletAddress && (
+        <UserPositionCard data={userPosition} epoch={epoch} isLoading={isLoadingPosition} />
       )}
-      {userPosition && <UserPositionCard data={userPosition} epoch={epoch} />}
 
       <div className="flex min-w-0 flex-col items-stretch gap-5">
         <div className="min-w-0">
