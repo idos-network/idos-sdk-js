@@ -31,6 +31,7 @@
     "@sentry/react-router": "^10.41.0",
     "@stellar/stellar-base": "catalog:stellar",
     "@tanstack/react-query": "catalog:tanstack",
+    "@tanstack/react-table": "^8.20.0",
     "@vercel/react-router": "catalog:react-router",
     "@wagmi/core": "catalog:ethereum",
     "@xstate/react": "^6.0.0",

@@ -1,4 +1,6 @@
 import { FileLockIcon } from "lucide-react";
+
+export const handle = { breadcrumb: "Settings" };
 import { useState } from "react";
 import { toast } from "sonner";
 

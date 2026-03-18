@@ -6,7 +6,11 @@ export default [
       index("routes/index.tsx"),
       route("wallets", "routes/wallets.tsx"),
       route("settings", "routes/settings.tsx"),
-      ...prefix("api", [route("profile", "routes/api/profile.ts")]),
+      route("leaderboard", "routes/leaderboard.tsx"),
+      ...prefix("api", [
+        route("profile", "routes/api/profile.ts"),
+        route("leaderboard-position", "routes/api/leaderboard-position.ts"),
+      ]),
     ]),
   ]),
 ] satisfies RouteConfig;
