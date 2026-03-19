@@ -10,7 +10,7 @@ export function WalletCardSkeleton() {
           <Skeleton className="h-4 w-24 rounded" />
         </div>
       </div>
-      <Skeleton className="h-9 w-44 rounded-lg" />
+      <Skeleton className="h-8 w-44 rounded-lg" />
     </div>
   );
 }

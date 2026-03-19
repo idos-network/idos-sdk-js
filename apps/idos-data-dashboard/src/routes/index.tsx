@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router";
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
 
 import { CredentialCard } from "@/components/credentials/credential-card";
+import { CredentialsPending } from "@/components/credentials/credentials-pending";
 import { SearchField } from "@/components/ui/search-field";
 import { useFetchCredentials } from "@/lib/queries/credentials";
 
@@ -104,7 +105,9 @@ export default function Credentials() {
       <div className="bg-card flex h-14 items-center justify-between rounded-xl p-5 lg:h-20">
         <h1 className="block text-2xl font-bold lg:text-3xl">My Data</h1>
       </div>
-      <CredentialsList />
+      <Suspense fallback={<CredentialsPending />}>
+        <CredentialsList />
+      </Suspense>
     </div>
   );
 }

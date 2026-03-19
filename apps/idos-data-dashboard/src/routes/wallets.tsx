@@ -1,11 +1,12 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { FacesignBanner } from "@/components/facesign/facesign-banner";
 import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
+import { WalletsPending } from "@/components/wallets/wallets-pending";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
@@ -71,7 +72,9 @@ export default function Wallets() {
           <AddWalletButton />
         </div>
       </div>
-      <WalletsList />
+      <Suspense fallback={<WalletsPending />}>
+        <WalletsList />
+      </Suspense>
     </div>
   );
 }

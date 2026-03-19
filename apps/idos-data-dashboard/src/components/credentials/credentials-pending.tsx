@@ -1,18 +1,16 @@
+import { SearchField } from "@/components/ui/search-field";
+import { Skeleton } from "@/components/ui/skeleton";
+
 import { CredentialCardSkeleton } from "./credential-card-skeleton";
 
 export function CredentialsPending() {
   return (
-    <div className="flex flex-1 flex-col items-stretch gap-5">
-      <div className="bg-card flex h-14 items-center justify-between rounded-xl p-5 lg:h-20">
-        <h1 className="block text-2xl font-bold lg:text-3xl">My Data</h1>
-      </div>
-      <ul className="flex flex-1 flex-col gap-5">
-        {Array.from({ length: 3 }, (_, i) => (
-          <li key={i} className="list-none">
-            <CredentialCardSkeleton />
-          </li>
-        ))}
-      </ul>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
+      <SearchField value="" onChange={() => {}} onClear={() => {}} />
+      <Skeleton className="h-4 w-36 rounded" />
+      {Array.from({ length: 3 }, (_, i) => (
+        <CredentialCardSkeleton key={i} />
+      ))}
     </div>
   );
 }
