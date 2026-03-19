@@ -1,5 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 
+export const handle = { breadcrumb: "Credentials" };
+
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
 
 import { CredentialCard } from "@/components/credentials/credential-card";

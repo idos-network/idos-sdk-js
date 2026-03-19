@@ -61,8 +61,8 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
         >
           <thead className="bg-muted sticky top-0 z-10">
             <tr className="border-b">
-              <th className="text-muted-foreground text-left">Consumer</th>
-              <th className="text-muted-foreground text-left">Locked until</th>
+              <th className="text-accent-foreground text-left">Consumer</th>
+              <th className="text-accent-foreground text-left">Locked until</th>
               <th />
             </tr>
           </thead>

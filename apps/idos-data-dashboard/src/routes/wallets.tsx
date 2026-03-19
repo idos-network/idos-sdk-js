@@ -1,5 +1,7 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 
+export const handle = { breadcrumb: "Wallets" };
+
 import { useState } from "react";
 
 import { FacesignBanner } from "@/components/facesign/facesign-banner";
