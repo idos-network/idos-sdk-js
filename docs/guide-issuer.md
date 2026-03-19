@@ -11,7 +11,7 @@ The primary features provided by the Issuer SDK are:
 
 - checking if your user has an idOS profile, and create one otherwise;
 - transforming IDV results into idOS credentials;
-- implementing a [Passporting-compliant](passporting.md) onboarding flow.
+- issuing and managing credentials through standard idOS sharing primitives.
 
 ## Getting started: what you'll need
 
@@ -19,7 +19,7 @@ The primary features provided by the Issuer SDK are:
 
 See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulatory-approach) for more context, and discuss with your compliance officer:
 
-- whether you’re going to be using [Passporting](passporting.md).
+- what retention and credential-sharing policies your issuance flow needs to support.
 
 ### Signature and encryption keys
 

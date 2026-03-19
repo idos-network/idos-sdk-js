@@ -88,7 +88,6 @@ oxfmt
 partialize
 partisia
 partisiablockchain
-passporting
 Payin
 PayinFiat
 permissioned
