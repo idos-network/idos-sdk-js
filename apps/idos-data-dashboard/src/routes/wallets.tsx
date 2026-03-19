@@ -12,6 +12,8 @@ import { useFetchWallets } from "@/lib/queries/wallets";
 import { useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
 
+export const handle = { breadcrumb: "Wallets" };
+
 function WalletsList() {
   const { data: wallets } = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
