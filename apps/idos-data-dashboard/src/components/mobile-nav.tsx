@@ -1,15 +1,15 @@
-import { ExternalLinkIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { Link } from "react-router";
 
 import {
   ConnectedWallet,
   DisconnectButton,
   FooterNavLinks,
+  LegalLinks,
   MainNavLinks,
 } from "@/layouts/dashboard";
-import { cn } from "@/lib/utils";
 
-import { Button, buttonVariants } from "./ui/button";
+import { Button } from "./ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui/drawer";
 
 interface MobileNavProps {
@@ -62,31 +62,7 @@ export default function MobileNav({ isOpen, onOpen, onClose }: MobileNavProps) {
           <FooterNavLinks />
 
           <DisconnectButton />
-
-          <div className="flex gap-2">
-            <a
-              href="https://www.idos.network/legal/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                buttonVariants({ variant: "secondary", size: "sm" }),
-                "flex flex-1 items-center gap-2",
-              )}
-            >
-              Privacy Policy <ExternalLinkIcon size={14} />
-            </a>
-            <a
-              href="https://www.idos.network/legal/user-agreement"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                buttonVariants({ variant: "secondary", size: "sm" }),
-                "flex flex-1 items-center gap-2",
-              )}
-            >
-              User Agreement <ExternalLinkIcon size={14} />
-            </a>
-          </div>
+          <LegalLinks />
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
