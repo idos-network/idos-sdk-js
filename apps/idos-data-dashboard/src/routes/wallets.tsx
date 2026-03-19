@@ -1,7 +1,5 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 
-export const handle = { breadcrumb: "Wallets" };
-
 import { useState } from "react";
 
 import { FacesignBanner } from "@/components/facesign/facesign-banner";
@@ -13,6 +11,8 @@ import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
 import { useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
+
+export const handle = { breadcrumb: "Wallets" };
 
 function WalletsList() {
   const { data: wallets } = useFetchWallets();

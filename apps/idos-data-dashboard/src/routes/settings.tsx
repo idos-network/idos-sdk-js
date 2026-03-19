@@ -1,11 +1,11 @@
 import { FileLockIcon } from "lucide-react";
-
-export const handle = { breadcrumb: "Settings" };
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useIDOSClient } from "@/hooks/idOS";
+
+export const handle = { breadcrumb: "Settings" };
 
 function waitForDismiss(signal: AbortSignal) {
   return new Promise<never>((_resolve, reject) => {

@@ -1,11 +1,11 @@
 import { lazy, Suspense, useState } from "react";
 
-export const handle = { breadcrumb: "Credentials" };
-
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
 
 import { CredentialCard } from "@/components/credentials/credential-card";
 import { useFetchCredentials } from "@/lib/queries/credentials";
+
+export const handle = { breadcrumb: "Credentials" };
 
 const CredentialDetails = lazy(() =>
   import("@/components/credentials/credential-details").then((m) => ({

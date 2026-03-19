@@ -1,9 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { useQuery } from "@tanstack/react-query";
-
-export const handle = { breadcrumb: "Leaderboard" };
-
 import { max } from "drizzle-orm";
 import { Link, useLoaderData, useLocation, useNavigation } from "react-router";
 
@@ -34,6 +31,8 @@ import { useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
 
 import type { Route } from "./+types/leaderboard";
+
+export const handle = { breadcrumb: "Leaderboard" };
 
 const DEFAULT_PAGE_SIZE = 20;
 
