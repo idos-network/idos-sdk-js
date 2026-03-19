@@ -237,7 +237,7 @@ function NavigationProgress() {
 
   return (
     <div className="fixed inset-x-0 top-0 z-50 h-1">
-      <div className="bg-primary h-full origin-left animate-[progress_2s_ease-out_forwards]" />
+      <div className="bg-primary animate-progress h-full origin-left" />
     </div>
   );
 }
