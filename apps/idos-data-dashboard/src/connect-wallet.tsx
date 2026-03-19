@@ -1,5 +1,8 @@
 import { useState } from "react";
 
+import Arbitrum from "@/assets/arbitrum.webp";
+import Ethereum from "@/assets/ethereum.webp";
+import WalletConnect from "@/assets/wallet-connect.webp";
 import { Button } from "@/components/ui/button";
 import { useActorRef } from "@/machines/provider";
 
@@ -101,26 +104,24 @@ export function ConnectWallet() {
               variant="secondary"
               onClick={() => send({ type: "CONNECT_EVM" })}
             >
-              Connect with a wallet
-              <img alt="EVM logo" src="/wallet-connect.svg" width={36} height={36} />
-            </Button>
-            <Button
-              className="justify-between"
-              size="xl"
-              variant="secondary"
-              onClick={() => send({ type: "CONNECT_NEAR" })}
-            >
-              Connect with NEAR
-              <img alt="NEAR logo" src="/near.svg" width={40} height={40} />
-            </Button>
-            <Button
-              className="justify-between"
-              size="xl"
-              variant="secondary"
-              onClick={() => send({ type: "CONNECT_XRPL" })}
-            >
-              Connect with XRP
-              <img alt="XRP logo" src="/xrp.svg" width={40} height={40} />
+              Connect an EVM wallet
+              <div className="flex items-center">
+                <img
+                  src={Arbitrum}
+                  alt="Arbitrum"
+                  className="h-9 w-full rounded-full border-2 border-[#1a1a1a] object-cover group-hover:border-neutral-800"
+                />
+                <img
+                  src={Ethereum}
+                  alt="Ethereum"
+                  className="-ml-2 h-9 w-full rounded-full border-2 border-[#1a1a1a] object-cover group-hover:border-neutral-800"
+                />
+                <img
+                  alt="Wallet connect"
+                  src={WalletConnect}
+                  className="-ml-2 h-9 w-full rounded-full border-2 border-[#1a1a1a] object-cover group-hover:border-neutral-800"
+                />
+              </div>
             </Button>
             <Button
               className="justify-between"
@@ -133,9 +134,9 @@ export function ConnectWallet() {
             </Button>
           </div>
         </div>
-        <div className="flex flex-col items-stretch gap-4">
+        <div className="flex flex-col items-stretch gap-4 text-center">
           <span className="text-sm font-semibold">
-            By connecting your wallet you agree to the
+            By connecting your wallet you agree to the{" "}
             <a
               className="text-primary inline-flex items-center gap-2 text-sm hover:underline hover:underline-offset-4"
               href="https://www.idos.network/legal/user-agreement"
@@ -144,7 +145,7 @@ export function ConnectWallet() {
             >
               User Agreement
             </a>{" "}
-            and confirm you read our
+            and confirm you read our{" "}
             <a
               className="text-primary inline-flex items-center gap-2 text-sm hover:underline hover:underline-offset-4"
               href="https://www.idos.network/legal/privacy-policy"
