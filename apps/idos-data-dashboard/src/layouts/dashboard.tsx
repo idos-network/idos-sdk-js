@@ -236,7 +236,7 @@ function NavigationProgress() {
   if (navigation.state !== "loading") return null;
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 h-1">
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-1">
       <div className="bg-primary animate-progress h-full origin-left" />
     </div>
   );

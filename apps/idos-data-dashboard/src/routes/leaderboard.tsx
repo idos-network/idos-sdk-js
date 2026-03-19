@@ -96,11 +96,17 @@ export async function loader(args: Route.LoaderArgs) {
       .then((rows) => rows[0]),
   ]);
   const availableEpochs = epochsResult;
+  const maxEpoch = maxRow?.epoch ?? 0;
   let epoch: number;
-  if (epochParam !== null && !Number.isNaN(epochParam)) {
+  if (
+    epochParam !== null &&
+    Number.isInteger(epochParam) &&
+    epochParam >= 1 &&
+    epochParam <= maxEpoch
+  ) {
     epoch = epochParam;
   } else {
-    epoch = maxRow?.epoch ?? 0;
+    epoch = maxEpoch;
   }
 
   if (epoch === 0) {
@@ -115,17 +121,15 @@ export async function loader(args: Route.LoaderArgs) {
     };
   }
 
-  const [entries, totalCount] = await Promise.all([
-    getLeaderboardCheckpointEntries(epoch, pageSize, page),
-    getLeaderboardCheckpointEntriesCount(epoch),
-  ]);
-
+  const totalCount = await getLeaderboardCheckpointEntriesCount(epoch);
   const totalPages = Math.ceil(Number(totalCount) / pageSize) || 0;
+  const clampedPage = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+  const entries = await getLeaderboardCheckpointEntries(epoch, pageSize, clampedPage);
 
   return {
     entries,
     totalCount: Number(totalCount),
-    page,
+    page: clampedPage,
     pageSize,
     epoch,
     totalPages,
@@ -332,7 +336,8 @@ function useUserLeaderboardPosition(address: string | null, epoch: number | null
       params.set("address", address!);
       params.set("epoch", String(epoch));
       const res = await fetch(`/api/leaderboard-position?${params}`);
-      if (!res.ok) return null;
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`Leaderboard position request failed (${res.status})`);
       return res.json();
     },
     enabled: !!address && epoch !== null && epoch > 0,
