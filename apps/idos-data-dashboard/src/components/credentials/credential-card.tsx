@@ -81,13 +81,19 @@ export function CredentialCard({
       </div>
 
       {detailEntries.length > 0 && (
-        <div className="bg-muted/50 flex flex-col divide-y rounded-lg px-4">
-          {detailEntries.map(([key, value]) => (
-            <div key={key} className="flex items-center justify-between gap-4 py-2.5">
-              <span className="text-muted-foreground text-sm font-medium">{formatLabel(key)}</span>
-              <span className="text-sm">{value}</span>
-            </div>
-          ))}
+        <div className="border-border bg-muted overflow-hidden rounded-lg border">
+          <table className="table w-full border-collapse text-sm [&_td]:px-3 [&_td]:py-2 [&_th]:px-3 [&_th]:py-2">
+            <tbody>
+              {detailEntries.map(([key, value], i) => (
+                <tr key={key} className={i < detailEntries.length - 1 ? "border-b" : ""}>
+                  <th className="text-muted-foreground text-left font-medium">
+                    {formatLabel(key)}
+                  </th>
+                  <td className="text-right">{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
