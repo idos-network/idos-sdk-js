@@ -133,7 +133,7 @@ export function ConnectWallet() {
             </Button>
           </div>
         </div>
-        <div className="flex flex-col items-stretch gap-4">
+        <div className="flex flex-col items-stretch justify-center gap-4 text-center">
           <span className="text-sm font-semibold">
             By connecting your wallet you agree to the
             <a
