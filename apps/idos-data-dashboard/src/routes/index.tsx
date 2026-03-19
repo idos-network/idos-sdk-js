@@ -45,7 +45,7 @@ function CredentialsList() {
   }, [deferredSearch, credentials]);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
       <SearchField
         value={search}
         onChange={(e) => {
