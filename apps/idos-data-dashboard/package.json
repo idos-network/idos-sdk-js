@@ -37,6 +37,7 @@
     "ethers": "catalog:ethereum",
     "isbot": "^5",
     "lucide-react": "^0.564.0",
+    "match-sorter": "^8.2.0",
     "near-api-js": "catalog:near",
     "react": "catalog:react",
     "react-dom": "catalog:react",

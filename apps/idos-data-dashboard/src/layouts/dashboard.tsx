@@ -5,9 +5,9 @@ import {
   ClockIcon,
   CogIcon,
   ExternalLinkIcon,
-  KeyRoundIcon,
   LogOutIcon,
   MenuIcon,
+  ShieldCheckIcon,
   Wallet2Icon,
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
@@ -109,8 +109,8 @@ export function MainNavLinks() {
       <ul className="flex flex-col gap-1.5">
         <li>
           <ListItemLink to="/">
-            <KeyRoundIcon size={24} strokeWidth="1.5" />
-            <span>Credentials</span>
+            <ShieldCheckIcon size={24} strokeWidth="1.5" />
+            <span>My Data</span>
           </ListItemLink>
         </li>
         <li>
