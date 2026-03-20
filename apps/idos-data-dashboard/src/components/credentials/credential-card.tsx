@@ -6,7 +6,7 @@ import { useFetchGrants } from "@/lib/queries/credentials";
 
 import type { idOSCredentialWithShares } from "./types";
 
-import { safeParse } from "./shared";
+import { formatType, safeParse } from "./shared";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -20,15 +20,6 @@ const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "
 };
 
 const HEADER_FIELDS = new Set(["type", "status", "issuer", "id"]);
-
-const TYPE_OVERRIDES: Record<string, string> = {
-  kyc: "KYC",
-  pop: "PoP",
-};
-
-function formatType(raw: string): string {
-  return TYPE_OVERRIDES[raw.toLowerCase()] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
-}
 
 function formatLabel(key: string): string {
   return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

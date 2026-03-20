@@ -21,16 +21,7 @@ import { timelockToMs } from "@/lib/time";
 
 import type { idOSCredentialWithShares } from "./types";
 
-import { safeParse } from "./shared";
-
-const TYPE_OVERRIDES: Record<string, string> = {
-  kyc: "KYC",
-  pop: "PoP",
-};
-
-function formatType(raw: string): string {
-  return TYPE_OVERRIDES[raw.toLowerCase()] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
-}
+import { formatType, safeParse } from "./shared";
 
 interface DeleteCredentialProps {
   isOpen: boolean;

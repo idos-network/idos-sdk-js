@@ -5,14 +5,14 @@ import { LockIcon, Trash2Icon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const CHAIN_LABEL: Record<string, string> = {
+const CHAIN_LABEL: Partial<Record<WalletType, string>> = {
   EVM: "ETH",
   NEAR: "NEAR",
   XRPL: "XRP",
   Stellar: "XLM",
 };
 
-const DISPLAY_NAME: Record<string, string> = {
+const DISPLAY_NAME: Partial<Record<WalletType, string>> = {
   EVM: "EVM Wallet",
   NEAR: "Near Wallet",
   XRPL: "XRP Wallet",
