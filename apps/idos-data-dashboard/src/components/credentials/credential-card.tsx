@@ -1,4 +1,4 @@
-import { KeyRoundIcon, XIcon } from "lucide-react";
+import { EyeIcon, FileCheckIcon, Share2Icon, Trash2Icon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { useFetchGrants } from "@/lib/queries/credentials";
 
 import type { idOSCredentialWithShares } from "./types";
 
-import { safeParse } from "./shared";
+import { formatType, safeParse } from "./shared";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -18,6 +18,12 @@ const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "
   revoked: "destructive",
   invalid: "destructive",
 };
+
+const HEADER_FIELDS = new Set(["type", "status", "issuer", "id"]);
+
+function formatLabel(key: string): string {
+  return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 interface CredentialCardProps {
   credential: idOSCredentialWithShares;
@@ -33,76 +39,81 @@ export function CredentialCard({
   onDelete,
 }: CredentialCardProps) {
   const publicFields = safeParse(credential.public_notes);
-  const shares = useFetchGrants({ credentialId: credential.id });
+  const grants = useFetchGrants({ credentialId: credential.id });
 
-  const fieldOrder = ["type", "status", "issuer", "level"];
-  const entries = Object.entries(publicFields)
-    .filter(([key]) => key !== "id")
+  const type = typeof publicFields.type === "string" ? formatType(publicFields.type) : "Credential";
+  const issuer = typeof publicFields.issuer === "string" ? publicFields.issuer : null;
+  const status = typeof publicFields.status === "string" ? publicFields.status : null;
+
+  const detailEntries = Object.entries(publicFields)
+    .filter(([key]) => !HEADER_FIELDS.has(key))
     .map(([key, value]) => [key, typeof value === "string" ? value : String(value ?? "")] as const);
-  const meta = entries.sort(([a], [b]) => {
-    const ai = fieldOrder.indexOf(a);
-    const bi = fieldOrder.indexOf(b);
-    if (ai !== -1 && bi !== -1) {
-      return ai - bi;
-    }
-    if (ai !== -1) {
-      return -1;
-    }
-    if (bi !== -1) {
-      return 1;
-    }
-    return 0;
-  });
+
+  const grantsCount = grants.data?.length ?? 0;
 
   return (
-    <div className="bg-card flex flex-col gap-12 rounded-xl p-5">
-      <div className="grid grid-cols-2 gap-5 lg:grid-cols-6">
-        {meta.map(([key, value]) => (
-          <div key={key} className="flex flex-col gap-2">
-            <span className="text-muted-foreground text-sm capitalize">{key}</span>
-            {key === "status" ? (
-              <Badge
-                variant={statusVariantMap[value.toLowerCase()] ?? "default"}
-                className="w-fit capitalize"
-              >
-                {value}
-              </Badge>
-            ) : (
-              <span className="truncate">{value}</span>
-            )}
-          </div>
-        ))}
-        <div className="flex flex-col gap-2">
-          <span className="text-muted-foreground text-sm">Shares</span>
-          <span>{shares.data?.length || 0}</span>
+    <div className="bg-card flex w-full flex-col gap-4 rounded-xl border p-5">
+      <div className="flex items-center gap-3">
+        <div className="bg-primary/10 flex size-12 shrink-0 items-center justify-center rounded-lg">
+          <FileCheckIcon size={24} className="text-primary" />
         </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold">{type}</p>
+          {issuer && <p className="text-muted-foreground truncate text-sm">{issuer}</p>}
+        </div>
+        {status && (
+          <Badge
+            variant={statusVariantMap[status.toLowerCase()] ?? "default"}
+            className="shrink-0 capitalize"
+          >
+            {status}
+          </Badge>
+        )}
       </div>
-      <div className="flex flex-col gap-4 lg:flex-row">
+
+      {detailEntries.length > 0 && (
+        <div className="border-border bg-muted overflow-hidden rounded-lg border">
+          <table className="table w-full border-collapse text-sm [&_td]:px-3 [&_td]:py-2 [&_th]:px-3 [&_th]:py-2">
+            <tbody>
+              {detailEntries.map(([key, value], i) => (
+                <tr key={key} className={i < detailEntries.length - 1 ? "border-b" : ""}>
+                  <th className="text-muted-foreground text-left font-medium">
+                    {formatLabel(key)}
+                  </th>
+                  <td className="text-right">{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
         <Button
           id={`view-details-${credential.id}`}
           variant="secondary"
-          size="lg"
           onClick={() => onViewDetails(credential.id)}
         >
-          View details
+          <EyeIcon size={16} />
+          Details
         </Button>
         <Button
           variant="secondary"
-          size="lg"
           id={`manage-grants-${credential.id}`}
           onClick={() => onManageGrants(credential.id)}
         >
-          <KeyRoundIcon size={16} />
-          Manage grants
+          <Share2Icon size={16} />
+          Shared ({grantsCount})
         </Button>
         <Button
-          variant="secondary"
-          size="lg"
+          variant="destructive"
+          size="icon"
+          className="ml-auto"
           id={`delete-credential-${credential.id}`}
+          aria-label="Delete credential"
           onClick={() => onDelete(credential)}
         >
-          <XIcon size={16} />
-          Delete
+          <Trash2Icon size={16} />
         </Button>
       </div>
     </div>
