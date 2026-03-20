@@ -13,6 +13,8 @@ import { useFetchWallets } from "@/lib/queries/wallets";
 import { useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
 
+export const handle = { breadcrumb: "Wallets" };
+
 const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
 function WalletsList() {
