@@ -9,7 +9,6 @@ import type {
   EditPublicNotesAsIssuerInput,
   idOSDelegatedWriteGrant,
   idOSGrant,
-  idOSPassportingPeer,
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
@@ -31,7 +30,6 @@ import {
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
 import { type CreateAccessGrantFromDAGParams, GrantService } from "./services/grant.service";
-import { PassportingService } from "./services/passporting.service";
 import {
   type CreateProfileReqParams,
   type CreateWalletReqParams,
@@ -50,7 +48,6 @@ export class idOSIssuer {
   readonly #credentialService: CredentialService;
   readonly #grantService: GrantService;
   readonly #userService: UserService;
-  readonly #passportingService: PassportingService;
 
   static async init(params: CreateIssuerParams): Promise<idOSIssuer> {
     const kwilClient = await createNodeKwilClient({
@@ -69,21 +66,18 @@ export class idOSIssuer {
 
     const grantService = new GrantService(kwilClient, params.encryptionSecretKey);
     const userService = new UserService(kwilClient);
-    const passportingService = new PassportingService(kwilClient);
 
-    return new idOSIssuer(credentialService, grantService, userService, passportingService);
+    return new idOSIssuer(credentialService, grantService, userService);
   }
 
   private constructor(
     credentialService: CredentialService,
     grantService: GrantService,
     userService: UserService,
-    passportingService: PassportingService,
   ) {
     this.#credentialService = credentialService;
     this.#grantService = grantService;
     this.#userService = userService;
-    this.#passportingService = passportingService;
   }
 
   // User Service facade methods
@@ -174,10 +168,6 @@ export class idOSIssuer {
     validate = true,
   ): Promise<FaceIdCredential> {
     return buildFaceIdCredential(fields, subject, issuer, validate);
-  }
-
-  async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
-    return this.#passportingService.getPassportingPeers();
   }
 }
 
