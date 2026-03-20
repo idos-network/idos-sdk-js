@@ -2,9 +2,9 @@ import { DownloadIcon, FileLockIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { safeParse } from "@/components/credentials/shared";
 import { Button } from "@/components/ui/button";
 import { useIDOSClient } from "@/hooks/idOS";
+import { safeParse } from "@/lib/credential-utils";
 
 function waitForDismiss(signal: AbortSignal) {
   return new Promise<never>((_resolve, reject) => {
