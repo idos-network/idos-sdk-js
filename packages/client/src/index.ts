@@ -23,7 +23,6 @@ import {
   addWallet,
   addWallets,
   addAttribute as createAttribute,
-  createCredentialCopy,
   type DagMessageInput,
   dagMessage,
   dwgMessage,
@@ -351,50 +350,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
 
     return utf8Decode(plaintext);
-  }
-
-  async createCredentialCopy(
-    id: string,
-    consumerRecipientEncryptionPublicKey: string,
-    consumerAddress: string,
-    lockedUntil: number,
-  ): Promise<{ id: string }> {
-    const originalCredential = await this.getCredentialById(id);
-    invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
-
-    await this.enclaveProvider.ensureUserEncryptionProfile();
-
-    const decryptedContent = await this.enclaveProvider.decrypt(
-      base64Decode(originalCredential.content),
-      base64Decode(originalCredential.encryptor_public_key),
-    );
-
-    const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
-      decryptedContent,
-      base64Decode(consumerRecipientEncryptionPublicKey),
-    );
-
-    const insertableCredential = {
-      ...buildInsertableIDOSCredential(
-        originalCredential.user_id,
-        "",
-        base64Encode(content),
-        base64Encode(encryptorPublicKey),
-      ),
-      grantee_wallet_identifier: consumerAddress,
-      locked_until: lockedUntil,
-    };
-
-    const copyId = crypto.randomUUID();
-
-    await createCredentialCopy(this.kwilClient, {
-      original_credential_id: originalCredential.id,
-      ...originalCredential,
-      ...insertableCredential,
-      id: copyId,
-    });
-
-    return { id: copyId };
   }
 
   async requestDAGMessage(params: DagMessageInput): Promise<string> {

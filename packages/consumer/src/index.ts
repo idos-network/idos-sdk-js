@@ -24,9 +24,7 @@ import {
   getCredentialShared,
   getCredentialsSharedByUser,
   getGrants,
-  getPassportingPeers,
   type idOSGrant,
-  type idOSPassportingPeer,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
@@ -173,10 +171,6 @@ export class idOSConsumer {
   ): Promise<CreateAgByDagForCopyInput> {
     await createAgByDagForCopy(this.#kwilClient, params);
     return params;
-  }
-
-  async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
-    return getPassportingPeers(this.#kwilClient);
   }
 
   async verifyCredential<K = VerifiableCredentialSubject>(
