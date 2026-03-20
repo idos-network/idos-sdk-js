@@ -21,7 +21,7 @@ import { timelockToMs } from "@/lib/time";
 
 import type { idOSCredentialWithShares } from "./types";
 
-import { formatType, safeParse } from "./shared";
+import { formatType, safeParse } from "@/lib/credential-utils";
 
 interface DeleteCredentialProps {
   isOpen: boolean;

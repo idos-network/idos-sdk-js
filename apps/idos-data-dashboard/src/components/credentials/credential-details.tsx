@@ -14,7 +14,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useFetchCredentialDetails } from "@/lib/queries/credentials";
 
-import { safeParse } from "./shared";
+import { safeParse } from "@/lib/credential-utils";
 
 interface CredentialDetailsProps {
   isOpen: boolean;

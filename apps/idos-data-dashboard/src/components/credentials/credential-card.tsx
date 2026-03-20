@@ -6,7 +6,7 @@ import { useFetchGrants } from "@/lib/queries/credentials";
 
 import type { idOSCredentialWithShares } from "./types";
 
-import { formatType, safeParse } from "./shared";
+import { formatType, safeParse } from "@/lib/credential-utils";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
