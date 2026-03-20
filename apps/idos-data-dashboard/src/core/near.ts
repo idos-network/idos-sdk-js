@@ -9,7 +9,7 @@ export const connector = new NearConnector({
   features: isTestnet ? { testnet: true } : undefined,
   logger: {
     log: (message: string) => {
-      console.log(message);
+      console.log("Near debug: ", message);
     },
   },
 });
