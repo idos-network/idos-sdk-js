@@ -6,6 +6,15 @@
  * @returns Parsed object or empty object if parsing fails
  * @template T - Expected return type (defaults to Record<string, unknown>)
  */
+export const TYPE_OVERRIDES: Record<string, string> = {
+  kyc: "KYC",
+  pop: "PoP",
+};
+
+export function formatType(raw: string): string {
+  return TYPE_OVERRIDES[raw.toLowerCase()] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
 export const safeParse = <T = Record<string, unknown>>(json?: string | null): T => {
   try {
     const parsed: unknown = JSON.parse(json ?? "{}");

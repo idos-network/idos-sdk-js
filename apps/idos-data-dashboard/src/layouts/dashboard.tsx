@@ -5,9 +5,10 @@ import {
   ClockIcon,
   CogIcon,
   ExternalLinkIcon,
-  KeyRoundIcon,
   LogOutIcon,
   MenuIcon,
+  SendIcon,
+  ShieldCheckIcon,
   Wallet2Icon,
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
@@ -109,8 +110,14 @@ export function MainNavLinks() {
       <ul className="flex flex-col gap-1.5">
         <li>
           <ListItemLink to="/">
-            <KeyRoundIcon size={24} strokeWidth="1.5" />
-            <span>Credentials</span>
+            <ShieldCheckIcon size={24} strokeWidth="1.5" />
+            <span>My Data</span>
+          </ListItemLink>
+        </li>
+        <li>
+          <ListItemLink to="/shared-with-others">
+            <SendIcon size={24} strokeWidth="1.5" />
+            <span>Shared with others</span>
           </ListItemLink>
         </li>
         <li>
