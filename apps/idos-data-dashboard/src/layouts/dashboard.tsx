@@ -116,15 +116,15 @@ export function MainNavLinks() {
           </ListItemLink>
         </li>
         <li>
-          <ListItemLink to="/shared-with-others">
-            <SendIcon size={24} strokeWidth="1.5" />
-            <span>Shared with others</span>
-          </ListItemLink>
-        </li>
-        <li>
           <ListItemLink to="/shared-with-me">
             <Share2Icon size={24} strokeWidth="1.5" />
             <span>Shared with me</span>
+          </ListItemLink>
+        </li>
+        <li>
+          <ListItemLink to="/shared-with-others">
+            <SendIcon size={24} strokeWidth="1.5" />
+            <span>Shared with others</span>
           </ListItemLink>
         </li>
         <li>
@@ -254,7 +254,6 @@ function Breadcrumbs() {
 export default function DashboardLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
-
   useEffect(() => {
     onClose();
   }, [location.pathname, onClose]);
