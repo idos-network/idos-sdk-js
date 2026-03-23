@@ -93,6 +93,53 @@ export function useFetchSharedGrants() {
   });
 }
 
+export function useFetchReceivedGrants() {
+  const idOSClient = useIDOSClient();
+  return useSuspenseQuery({
+    queryKey: ["grants", "received"],
+    queryFn: () => idOSClient.getGrants({}),
+    select: (data) => data.grants,
+  });
+}
+
+export function useFetchSharedCredentialPublicNotes({ credentialId }: { credentialId: string }) {
+  const idOSClient = useIDOSClient();
+  return useQuery({
+    queryKey: ["credential_public_notes", credentialId],
+    queryFn: async () => {
+      const credential = await idOSClient.getCredentialShared(credentialId);
+      if (!credential) return null;
+      return credential.public_notes;
+    },
+  });
+}
+
+export function useFetchSharedCredentialDetails({ credentialId }: { credentialId: string }) {
+  const idOSClient = useIDOSClient();
+
+  return useQuery({
+    queryKey: ["credential_details", "shared", credentialId],
+    queryFn: async () => {
+      const credential = await idOSClient.getCredentialShared(credentialId);
+
+      if (!credential) {
+        throw new Error(`Shared credential with id ${credentialId} not found`);
+      }
+
+      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
+
+      const decryptedContent = await idOSClient.enclaveProvider.decrypt(
+        base64Decode(credential.content),
+        base64Decode(credential.encryptor_public_key),
+      );
+
+      Object.assign(credential, { content: utf8Decode(decryptedContent) });
+
+      return credential;
+    },
+  });
+}
+
 export function useFetchGrants({ credentialId }: { credentialId: string }) {
   const idOSClient = useIDOSClient();
   const queryClient = useQueryClient();

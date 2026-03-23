@@ -8,6 +8,7 @@ import {
   LogOutIcon,
   MenuIcon,
   SendIcon,
+  Share2Icon,
   ShieldCheckIcon,
   Wallet2Icon,
 } from "lucide-react";
@@ -118,6 +119,12 @@ export function MainNavLinks() {
           <ListItemLink to="/shared-with-others">
             <SendIcon size={24} strokeWidth="1.5" />
             <span>Shared with others</span>
+          </ListItemLink>
+        </li>
+        <li>
+          <ListItemLink to="/shared-with-me">
+            <Share2Icon size={24} strokeWidth="1.5" />
+            <span>Shared with me</span>
           </ListItemLink>
         </li>
         <li>
