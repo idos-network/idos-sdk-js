@@ -159,7 +159,7 @@ export function MainNavLinks() {
               rel="noopener noreferrer"
             >
               <ClockIcon size={24} strokeWidth="1.5" />
-              <span>Vesting</span>
+              <span>Claims</span>
               <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
             </a>
           </li>
