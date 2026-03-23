@@ -4,9 +4,10 @@ import {
   ClockIcon,
   CogIcon,
   ExternalLinkIcon,
-  KeyRoundIcon,
   LogOutIcon,
   MenuIcon,
+  SendIcon,
+  ShieldCheckIcon,
   TrophyIcon,
   Wallet2Icon,
 } from "lucide-react";
@@ -109,8 +110,14 @@ export function MainNavLinks() {
       <ul className="flex flex-col gap-1.5">
         <li>
           <ListItemLink to="/">
-            <KeyRoundIcon size={24} strokeWidth="1.5" />
-            <span>Credentials</span>
+            <ShieldCheckIcon size={24} strokeWidth="1.5" />
+            <span>My Data</span>
+          </ListItemLink>
+        </li>
+        <li>
+          <ListItemLink to="/shared-with-others">
+            <SendIcon size={24} strokeWidth="1.5" />
+            <span>Shared with others</span>
           </ListItemLink>
         </li>
         <li>
@@ -236,8 +243,8 @@ function NavigationProgress() {
   if (navigation.state !== "loading") return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-1">
-      <div className="bg-primary animate-progress h-full origin-left" />
+    <div className="fixed inset-x-0 top-0 z-50 h-1">
+      <div className="bg-primary h-full origin-left animate-[progress_2s_ease-out_forwards]" />
     </div>
   );
 }

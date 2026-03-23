@@ -41,6 +41,7 @@
     "ethers": "catalog:ethereum",
     "isbot": "^5",
     "lucide-react": "^0.564.0",
+    "match-sorter": "^8.2.0",
     "near-api-js": "catalog:near",
     "pg": "^8.13.0",
     "react": "catalog:react",

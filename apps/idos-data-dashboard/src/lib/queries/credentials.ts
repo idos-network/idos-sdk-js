@@ -3,7 +3,7 @@ import type { idOSClientLoggedIn } from "@idos-network/client";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import type { idOSCredentialWithShares } from "@/components/credentials/types";
+import type { SharedGrant, idOSCredentialWithShares } from "@/components/credentials/types";
 
 import { useIDOSClient } from "@/hooks/idOS";
 
@@ -51,6 +51,44 @@ export function useFetchCredentialDetails({ credentialId }: { credentialId: stri
       Object.assign(credential, { content: utf8Decode(decryptedContent) });
 
       return credential;
+    },
+  });
+}
+
+export function useFetchSharedGrants() {
+  const idOSClient = useIDOSClient();
+  const queryClient = useQueryClient();
+
+  return useSuspenseQuery({
+    queryKey: ["grants", "shared"],
+    queryFn: async () => {
+      const [grants] = await Promise.all([
+        idOSClient.getAccessGrantsOwned(),
+        queryClient.ensureQueryData(credentialsQueryOptions(idOSClient)),
+      ]);
+
+      const allCredentials =
+        queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]) ?? [];
+
+      return grants.map<SharedGrant>((grant) => {
+        const sharedCopy = allCredentials.find((c) => c.id === grant.data_id);
+        const original = sharedCopy?.original_id
+          ? allCredentials.find((c) => c.id === sharedCopy.original_id)
+          : null;
+
+        const source = original ?? sharedCopy;
+
+        return {
+          grant,
+          credential: source
+            ? {
+                id: source.id,
+                originalId: original?.id ?? source.id,
+                publicNotes: JSON.parse(source.public_notes || "{}"),
+              }
+            : null,
+        };
+      });
     },
   });
 }

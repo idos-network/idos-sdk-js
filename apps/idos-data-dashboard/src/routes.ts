@@ -5,6 +5,7 @@ export default [
     layout("layouts/dashboard.tsx", [
       index("routes/index.tsx"),
       route("wallets", "routes/wallets.tsx"),
+      route("shared-with-others", "routes/shared-with-others.tsx"),
       route("settings", "routes/settings.tsx"),
       route("leaderboard", "routes/leaderboard.tsx"),
       ...prefix("api", [

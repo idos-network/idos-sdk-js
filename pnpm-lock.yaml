@@ -611,6 +611,9 @@ importers:
       lucide-react:
         specifier: ^0.564.0
         version: 0.564.0(react@19.2.3)
+      match-sorter:
+        specifier: ^8.2.0
+        version: 8.2.0
       near-api-js:
         specifier: catalog:near
         version: 4.0.3(encoding@0.1.13)
@@ -7317,6 +7320,9 @@ packages:
   borsh@2.0.0:
     resolution: {integrity: sha512-kc9+BgR3zz9+cjbwM8ODoUB4fs3X3I5A/HtX7LZKxCLaMrEeDFoBpnhZY//DTS1VZBSs6S5v46RZRbZjRFspEg==}
 
+  bowser@2.13.1:
+    resolution: {integrity: sha512-OHawaAbjwx6rqICCKgSG0SAnT05bzd7ppyKLVUITZpANBaaMFBAsaNkto3LoQ31tyFP5kNujE8Cdx85G9VzOkw==}
+
   bowser@2.14.1:
     resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
@@ -10847,6 +10853,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.7.3:
+    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   semver@7.7.4:
     resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
     engines: {node: '>=10'}
@@ -14010,7 +14021,7 @@ snapshots:
       '@ledgerhq/errors': 6.28.0
       '@ledgerhq/logs': 6.13.0
       rxjs: 7.8.2
-      semver: 7.7.4
+      semver: 7.7.3
 
   '@ledgerhq/errors@6.28.0': {}
 
@@ -14093,7 +14104,7 @@ snapshots:
 
   '@metamask/onboarding@1.0.1':
     dependencies:
-      bowser: 2.14.1
+      bowser: 2.13.1
 
   '@metamask/providers@16.1.0':
     dependencies:
@@ -14163,7 +14174,7 @@ snapshots:
       '@metamask/sdk-communication-layer': 0.33.1(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.16)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       '@metamask/sdk-install-modal-web': 0.32.1
       '@paulmillr/qr': 0.2.1
-      bowser: 2.14.1
+      bowser: 2.13.1
       cross-fetch: 4.1.0(encoding@0.1.13)
       debug: 4.3.4
       eciesjs: 0.4.16
@@ -15232,7 +15243,7 @@ snapshots:
       extract-zip: 2.0.1
       progress: 2.0.3
       proxy-agent: 6.5.0
-      semver: 7.7.4
+      semver: 7.7.3
       tar-fs: 3.1.1
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -16018,7 +16029,7 @@ snapshots:
       prettier: 3.7.4
       react-refresh: 0.14.2
       react-router: 7.13.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      semver: 7.7.4
+      semver: 7.7.3
       tinyglobby: 0.2.15
       valibot: 1.2.0(typescript@5.9.3)
       vite: 7.0.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.41.0)(tsx@4.21.0)(yaml@2.8.0)
@@ -16068,7 +16079,7 @@ snapshots:
       prettier: 3.7.4
       react-refresh: 0.14.2
       react-router: 7.13.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      semver: 7.7.4
+      semver: 7.7.3
       tinyglobby: 0.2.15
       valibot: 1.2.0(typescript@5.9.3)
       vite: 7.0.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.41.0)(tsx@4.21.0)(yaml@2.8.0)
@@ -16118,7 +16129,7 @@ snapshots:
       prettier: 3.7.4
       react-refresh: 0.14.2
       react-router: 7.13.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      semver: 7.7.4
+      semver: 7.7.3
       tinyglobby: 0.2.15
       valibot: 1.2.0(typescript@5.9.3)
       vite: 7.0.6(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.41.0)(tsx@4.21.0)(yaml@2.8.0)
@@ -18597,13 +18608,13 @@ snapshots:
 
   '@solana/web3.js@1.98.4(bufferutil@4.1.0)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.28.6
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@solana/buffer-layout': 4.0.1
       '@solana/codecs-numbers': 2.3.0(typescript@5.9.3)
       agentkeepalive: 4.6.0
-      bn.js: 5.2.3
+      bn.js: 5.2.2
       borsh: 0.7.0
       bs58: 4.0.1
       buffer: 6.0.3
@@ -23160,13 +23171,15 @@ snapshots:
 
   borsh@0.7.0:
     dependencies:
-      bn.js: 5.2.3
+      bn.js: 5.2.2
       bs58: 4.0.1
       text-encoding-utf-8: 1.0.2
 
   borsh@1.0.0: {}
 
   borsh@2.0.0: {}
+
+  bowser@2.13.1: {}
 
   bowser@2.14.1: {}
 
@@ -25670,7 +25683,7 @@ snapshots:
 
   match-sorter@8.2.0:
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.28.6
       remove-accents: 0.5.0
 
   math-intrinsics@1.1.0: {}
@@ -26678,6 +26691,7 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+    optional: true
 
   postgres-array@2.0.0: {}
 
@@ -27357,6 +27371,8 @@ snapshots:
   semver@7.7.1: {}
 
   semver@7.7.2: {}
+
+  semver@7.7.3: {}
 
   semver@7.7.4: {}
 
@@ -28620,7 +28636,7 @@ snapshots:
       esbuild: 0.25.8
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
-      postcss: 8.5.8
+      postcss: 8.5.6
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
@@ -28637,7 +28653,7 @@ snapshots:
       esbuild: 0.25.8
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
-      postcss: 8.5.8
+      postcss: 8.5.6
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
@@ -28654,7 +28670,7 @@ snapshots:
       esbuild: 0.25.8
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
-      postcss: 8.5.8
+      postcss: 8.5.6
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
@@ -28671,7 +28687,7 @@ snapshots:
       esbuild: 0.25.8
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
-      postcss: 8.5.8
+      postcss: 8.5.6
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:

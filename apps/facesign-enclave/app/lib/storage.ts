@@ -1,5 +1,5 @@
-const DB_NAME = "idOS:facesign";
-const DB_STORE_NAME = "idOS:facesign:keystore";
+const DB_NAME = "db:idOS:facesign";
+const DB_STORE_NAME = "db:idOS:facesign:keystore";
 
 async function openDatabase() {
   return new Promise<IDBDatabase>((resolve, reject) => {
