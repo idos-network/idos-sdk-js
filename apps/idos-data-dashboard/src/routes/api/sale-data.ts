@@ -90,7 +90,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     currentTokenPrice > 0 ? confirmedContribution / currentTokenPrice : 0;
 
   const totalReferralsAllocations = Number(
-    formatUnits(BigInt(referralsAllocResult.totalAllocationValue), 6),
+    formatUnits(BigInt(Math.round(referralsAllocResult.totalAllocationValue)), 6),
   );
   const priceDiscount = calculatePriceDiscount(totalUserInvestedUsdc + totalReferralsAllocations);
   const airdropBonus = confirmedIdosAllocation * priceDiscount;

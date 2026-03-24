@@ -72,7 +72,7 @@ export const saleParticipants = pgTable(
   },
   (table) => [
     index("sale_participants_user_id_idx").on(table.userId),
-    index("sale_participants_address_normalized_idx").on(table.address),
+    index("sale_participants_address_idx").on(table.address),
     unique("sale_participants_user_address_unique").on(table.userId, table.address),
   ],
 );
