@@ -1,13 +1,16 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 
 import { useMutationState } from "@tanstack/react-query";
+import { TriangleAlertIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -18,7 +21,7 @@ import { timelockToMs } from "@/lib/time";
 
 import type { idOSCredentialWithShares } from "./types";
 
-import { safeParse } from "./shared";
+import { formatType, safeParse } from "./shared";
 
 interface DeleteCredentialProps {
   isOpen: boolean;
@@ -109,49 +112,85 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
   const { ag_grantee_wallet_identifier } = currentToRevoke ?? {};
 
   const meta = safeParse<{ type?: string; issuer?: string }>(credential.public_notes);
+  const type = meta.type ? formatType(meta.type) : "Credential";
+  const issuer = meta.issuer ?? "Unknown";
+  const grantsCount = grants.data?.length ?? 0;
+  const credentialLabel = type;
+  const isProcessing = revokeGrants.isPending || deleteCredential.isPending;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent>
+      <DialogContent showCloseButton={true}>
         <DialogHeader>
           <DialogTitle>
             {revokeGrants.isPending
               ? "Revoking grants"
               : deleteCredential.isPending
                 ? "Deleting credential"
-                : "Delete credential"}
+                : "Delete Credential"}
           </DialogTitle>
+          {!isProcessing && <DialogDescription>This action cannot be undone.</DialogDescription>}
         </DialogHeader>
-        <div>
-          {revokeGrants.isPending ? (
-            <div className="flex flex-col items-stretch gap-2">
-              <span className="mb-1 block">Revoking grant for consumer:</span>
-              <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
+
+        {isProcessing ? (
+          <div>
+            {revokeGrants.isPending ? (
+              <div className="flex flex-col items-stretch gap-2">
+                <span className="mb-1 block">Revoking grant for consumer:</span>
+                <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
+              </div>
+            ) : (
+              <div>
+                Deleting credential <span className="font-semibold">{credentialLabel}</span> from
+                issuer <span className="font-semibold">{issuer}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <Alert variant="destructive">
+              <TriangleAlertIcon />
+              <AlertDescription>
+                If you delete this credential, access grants will be revoked unless under timelock,
+                you will not be able to restore the credential and will need to go through the
+                issuance process with the issuer again to have the credential verified.
+              </AlertDescription>
+            </Alert>
+
+            <div className="border-border bg-muted overflow-hidden rounded-lg border">
+              <table className="table w-full border-collapse [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3">
+                <tbody>
+                  <tr className="border-b">
+                    <th className="text-muted-foreground text-left font-medium">Credential</th>
+                    <td className="text-right">{credentialLabel}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <th className="text-muted-foreground text-left font-medium">Issuer</th>
+                    <td className="text-right">{issuer}</td>
+                  </tr>
+                  <tr>
+                    <th className="text-muted-foreground text-left font-medium">Active grants</th>
+                    <td className="text-right">{grantsCount}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          ) : deleteCredential.isPending ? (
-            <div>
-              Deleting credential of type{" "}
-              <span className="font-semibold text-green-200">{meta.type}</span> from issuer{" "}
-              <span className="font-semibold text-green-200">{meta.issuer}</span>
-            </div>
-          ) : (
-            <span className="block">Do you want to delete this credential from the idOS?</span>
-          )}
-        </div>
+          </>
+        )}
+
         <DialogFooter className="flex items-center gap-2">
-          {!(revokeGrants.isPending || deleteCredential.isPending) ? (
+          {!isProcessing && (
             <Button variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
-          ) : null}
-
+          )}
           <Button
             id={`confirm-delete-credential-${credential.id}`}
             variant="destructive"
             onClick={handleDeleteCredential}
-            isLoading={revokeGrants.isPending || deleteCredential.isPending}
+            isLoading={isProcessing}
           >
-            {deleteCredential.isError ? "Retry" : "Delete"}
+            {deleteCredential.isError ? "Retry" : "Delete Credential"}
           </Button>
         </DialogFooter>
       </DialogContent>

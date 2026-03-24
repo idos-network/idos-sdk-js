@@ -111,7 +111,7 @@ export function FacesignBanner() {
 
   return (
     <>
-      <div className="border-border bg-card relative flex min-h-[120px] items-center gap-6 overflow-hidden rounded-xl border p-5 lg:gap-10">
+      <div className="bg-card relative flex min-h-[138px] items-center gap-6 overflow-hidden rounded-xl border p-5 lg:gap-10">
         <img
           src="/facesign-logo-light.svg"
           alt="idOS FaceSign"

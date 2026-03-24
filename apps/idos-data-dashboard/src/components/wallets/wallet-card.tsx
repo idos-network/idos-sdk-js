@@ -1,9 +1,29 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 
-import { XIcon } from "lucide-react";
+import { LockIcon, Trash2Icon } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+const CHAIN_LABEL: Partial<Record<WalletType, string>> = {
+  EVM: "ETH",
+  NEAR: "NEAR",
+  XRPL: "XRP",
+  Stellar: "XLM",
+};
+
+const DISPLAY_NAME: Partial<Record<WalletType, string>> = {
+  EVM: "EVM Wallet",
+  NEAR: "Near Wallet",
+  XRPL: "XRP Wallet",
+  Stellar: "Stellar Wallet",
+  FaceSign: "idOS FaceSign",
+};
+
+function truncateAddress(addr: string): string {
+  if (addr.length <= 30) return addr;
+  return `${addr.slice(0, 16)}...${addr.slice(-10)}`;
+}
 
 interface WalletCardProps {
   address: string;
@@ -13,70 +33,64 @@ interface WalletCardProps {
 }
 
 export function WalletCard({ address, walletType, isDisabled, onDelete }: WalletCardProps) {
+  const isFaceSign = walletType === "FaceSign";
+  const chainLabel = walletType ? CHAIN_LABEL[walletType] : null;
+  const displayName = walletType ? (DISPLAY_NAME[walletType] ?? "Wallet") : "Wallet";
+
   return (
-    <div className="bg-card flex items-center justify-between gap-5 rounded-xl p-5">
-      <div className="flex items-center gap-5">
-        {walletType === "FaceSign" ? (
-          <img
-            src="/facesign-filled.svg"
-            alt="FaceSign wallet"
-            width={36}
-            height={36}
-            className="h-9 w-9"
-          />
-        ) : (
-          <>
+    <div className="bg-card flex w-full flex-col gap-4 rounded-xl border p-5">
+      <div className="flex items-center gap-3">
+        {isFaceSign ? (
+          <div className="bg-primary/10 flex size-12 shrink-0 items-center justify-center rounded-lg">
             <img
-              src="/wallet-light.svg"
-              alt="Wallet logo"
-              width={48}
-              height={48}
-              className="h-12 w-12 dark:hidden"
+              src="/facesign-filled.svg"
+              alt="FaceSign wallet"
+              width={24}
+              height={24}
+              className="size-6"
             />
-            <img
-              src="/wallet.svg"
-              alt="Wallet logo"
-              width={48}
-              height={48}
-              className="hidden h-12 w-12 dark:block"
-            />
-          </>
-        )}
-        <div className="flex flex-col items-stretch gap-0 overflow-hidden">
-          <span className="text-muted-foreground block">Address</span>
-          <div className="flex items-center gap-2">
-            <span className="block" title={address}>
-              {address.slice(0, 6)}...{address.slice(-4)}
-            </span>
-            {walletType === "FaceSign" && (
-              <span className="dark:bg-primary/20 dark:text-primary inline-flex shrink-0 items-center gap-1.5 rounded-md border border-transparent bg-emerald-100 px-2.5 py-1 text-xs text-emerald-700">
-                <img src="/facesign-filled.svg" alt="" width={16} height={16} />
-                idOS FaceSign
-              </span>
-            )}
           </div>
+        ) : (
+          <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-lg text-xs font-semibold">
+            {chainLabel}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold" title={address}>
+            {truncateAddress(address)}
+          </p>
+          <p className="text-muted-foreground text-sm">{displayName}</p>
         </div>
+        {isFaceSign && (
+          <Badge variant="default" className="shrink-0">
+            FaceSign
+          </Badge>
+        )}
+        {isDisabled && (
+          <Badge variant="success" className="shrink-0">
+            Connected
+          </Badge>
+        )}
       </div>
-      <Tooltip disabled={!isDisabled}>
-        <TooltipTrigger render={<span className="inline-block" />}>
+
+      <div className="flex items-center gap-2">
+        {isDisabled ? (
+          <Button variant="secondary" disabled>
+            <LockIcon size={16} />
+            Currently connected
+          </Button>
+        ) : (
           <Button
-            disabled={isDisabled}
-            variant="secondary"
+            variant="destructive"
             id={`delete-wallet-${address}`}
+            aria-label={`Remove wallet ${address}`}
             onClick={() => onDelete(address)}
           >
-            <XIcon size={20} />
-            Delete
+            <Trash2Icon size={16} />
+            Remove wallet
           </Button>
-        </TooltipTrigger>
-        <TooltipContent
-          side="left"
-          className="bg-muted-foreground"
-          arrowClassName="bg-muted-foreground fill-muted-foreground"
-        >
-          Please connect another wallet to delete this one
-        </TooltipContent>
-      </Tooltip>
+        )}
+      </div>
     </div>
   );
 }

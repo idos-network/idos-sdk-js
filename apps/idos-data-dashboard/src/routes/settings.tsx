@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useIDOSClient } from "@/hooks/idOS";
 
+export const handle = { breadcrumb: "Settings" };
+
 function waitForDismiss(signal: AbortSignal) {
   return new Promise<never>((_resolve, reject) => {
     document.addEventListener(
