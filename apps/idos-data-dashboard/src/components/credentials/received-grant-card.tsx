@@ -25,7 +25,7 @@ function formatTimelock(lockedUntil: number): string {
   const ms = timelockToMs(lockedUntil);
   if (!lockedUntil) return "No timelock";
 
-  return new Intl.DateTimeFormat(["ban", "id"], {
+  return new Intl.DateTimeFormat(undefined, {
     dateStyle: "short",
     timeStyle: "short",
     hour12: true,
@@ -92,9 +92,11 @@ export function ReceivedGrantCard({ grant, onViewDetails }: ReceivedGrantCardPro
               {status}
             </Badge>
           )}
-          <Badge variant="success" className="capitalize">
-            active
-          </Badge>
+          {status?.toLowerCase() !== "active" && (
+            <Badge variant="success" className="capitalize">
+              active
+            </Badge>
+          )}
           {isTimelocked && (
             <Badge variant="warning" className="capitalize">
               timelocked

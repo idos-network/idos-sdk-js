@@ -16,6 +16,10 @@ import { useFetchSharedCredentialDetails } from "@/lib/queries/credentials";
 
 import { safeParse } from "./shared";
 
+function sanitizeFileName(value: string): string {
+  return value.replace(/[/\\:*?"<>|]/g, "_").trim();
+}
+
 interface SharedCredentialDetailsProps {
   isOpen: boolean;
   credentialId: string;
@@ -33,16 +37,12 @@ export function SharedCredentialDetails({
   useEffect(() => {
     const dismiss = () => {
       queryClient.cancelQueries({ queryKey: ["credential_details", "shared", credentialId] });
-      onClose();
       queryClient.removeQueries({ queryKey: ["credential_details", "shared", credentialId] });
+      onClose();
     };
     document.addEventListener("idos:enclave-dismissed", dismiss);
     return () => document.removeEventListener("idos:enclave-dismissed", dismiss);
   }, [onClose, credentialId, queryClient]);
-
-  const jsonLink = `data:text/json;charset=utf-8,${encodeURIComponent(
-    JSON.stringify(credential.data),
-  )}`;
 
   const credentialContent = credential.data?.content
     ? (() => {
@@ -57,7 +57,7 @@ export function SharedCredentialDetails({
   const meta = safeParse<{ type?: string; issuer?: string }>(credential.data?.public_notes);
 
   const downloadFileName = credential.data?.public_notes
-    ? `${meta.type || "credential"}_${meta.issuer || "unknown"}.json`
+    ? `${sanitizeFileName(meta.type || "credential")}_${sanitizeFileName(meta.issuer || "unknown")}.json`
     : "credential.json";
 
   return (
@@ -94,6 +94,9 @@ export function SharedCredentialDetails({
               id={`download-shared-credential-${credential.data?.id}`}
               variant="default"
               onClick={() => {
+                const jsonLink = `data:text/json;charset=utf-8,${encodeURIComponent(
+                  JSON.stringify(credential.data),
+                )}`;
                 const a = document.createElement("a");
                 a.href = jsonLink;
                 a.download = downloadFileName;
