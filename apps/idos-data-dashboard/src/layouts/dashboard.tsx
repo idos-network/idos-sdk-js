@@ -1,5 +1,4 @@
 import {
-  ArchiveIcon,
   ArrowUpRightFromSquare,
   CircleDollarSignIcon,
   ClockIcon,
@@ -9,10 +8,11 @@ import {
   MenuIcon,
   SendIcon,
   ShieldCheckIcon,
+  TrophyIcon,
   Wallet2Icon,
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
-import { Link, Outlet, useLocation, useMatches } from "react-router";
+import { Link, Outlet, useLocation, useMatches, useNavigation } from "react-router";
 
 import {
   Breadcrumb,
@@ -166,16 +166,10 @@ export function FooterNavLinks() {
   return (
     <ul className="flex flex-1 flex-col gap-1.5">
       <li>
-        <a
-          href="https://app.idos.network/"
-          className={externalLinkClasses}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <ArchiveIcon size={24} strokeWidth="1.5" />
-          <span>Legacy</span>
-          <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-        </a>
+        <ListItemLink to="/leaderboard">
+          <TrophyIcon size={24} strokeWidth="1.5" />
+          <span>Leaderboard</span>
+        </ListItemLink>
       </li>
       <li>
         <ListItemLink to="/settings">
@@ -244,6 +238,17 @@ function Breadcrumbs() {
   );
 }
 
+function NavigationProgress() {
+  const navigation = useNavigation();
+  if (navigation.state !== "loading") return null;
+
+  return (
+    <div className="fixed inset-x-0 top-0 z-50 h-1">
+      <div className="bg-primary h-full origin-left animate-[progress_2s_ease-out_forwards]" />
+    </div>
+  );
+}
+
 export default function DashboardLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
@@ -254,6 +259,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex min-h-screen lg:gap-5">
+      <NavigationProgress />
       <nav className="sticky top-0 hidden h-screen w-[380px] flex-col items-stretch lg:flex">
         <div className="flex flex-1 flex-col items-stretch gap-5 p-5 pr-0">
           <Link to="/" className="flex h-[100px] items-center">
@@ -288,7 +294,7 @@ export default function DashboardLayout() {
           </div>
         </div>
       </nav>
-      <div className="flex flex-1 flex-col items-stretch gap-5 p-5 lg:pl-0">
+      <div className="flex min-w-0 flex-1 flex-col items-stretch gap-5 p-5 lg:pl-0">
         <div className="mb-5 flex h-10 items-center justify-between lg:mb-0 lg:h-[100px]">
           <Button
             variant="secondary"

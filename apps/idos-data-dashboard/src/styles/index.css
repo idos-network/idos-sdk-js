@@ -5,6 +5,7 @@
 
 @theme inline {
   --animate-skeleton: skeleton 2s -1s infinite linear;
+  --animate-progress: progress 2s ease-out forwards;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -15,6 +16,14 @@
   @keyframes skeleton {
     to {
       background-position: -200% 0;
+    }
+  }
+  @keyframes progress {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
     }
   }
   --color-background: var(--background);

@@ -69,6 +69,7 @@ kwilteam
 LCVJ
 libc
 lucide
+Mindshare
 monerium
 multibase
 multicodec
