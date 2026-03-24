@@ -15,13 +15,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatType, safeParse } from "@/lib/credential-utils";
 import { useDeleteCredentialMutation, useRevokeGrants } from "@/lib/mutations/credentials";
 import { useFetchGrants } from "@/lib/queries/credentials";
 import { timelockToMs } from "@/lib/time";
 
 import type { idOSCredentialWithShares } from "./types";
-
-import { formatType, safeParse } from "./shared";
 
 interface DeleteCredentialProps {
   isOpen: boolean;
