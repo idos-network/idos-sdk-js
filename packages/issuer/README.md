@@ -47,7 +47,6 @@ For complete documentation, examples, and implementation guides:
 - 🏗️ **[System Overview](../../docs/README.md)** - Understanding idOS architecture
 - 🔒 **[Encryption](../../docs/encryption.md)** - Encryption key management
 - ✍️ **[Signatures](../../docs/signatures.md)** - Signer implementation details
-- 💼 **[Passporting](../../docs/passporting.md)** - Credential passporting workflows
 
 ## Key Features
 

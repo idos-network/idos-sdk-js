@@ -23,7 +23,7 @@ if (!projectId) {
 const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",
-  url: COMMON_ENV.DEV ? "*" : "https://dashboard.idos.network",
+  url: COMMON_ENV.DEV ? "https://localhost:5173" : "https://dashboard.idos.network",
   icons: ["/logo.svg"],
 };
 

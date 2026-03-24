@@ -142,7 +142,7 @@ While Issuers and Consumers are key actors in the system, they are primarily rep
   - **Grantee Wallet Identifier**: The wallet address of the entity receiving access.
   - **Signature**: A cryptographic signature verifying the authenticity of the dAG.
   - **Locked Until**: A timestamp indicating when the Access Grant can be revoked.
-  - **Content Hash**: A hash of the data being shared to ensure integrity during Passporting.
+  - **Content Hash**: A hash of shared data used to verify integrity across credential copy and access grant flows.
 
   Whoever transmits the dAG to idOS also needs to provide the copy credential's fields (including the encrypted content). Check the schema for more details.
 

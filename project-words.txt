@@ -69,6 +69,7 @@ kwilteam
 LCVJ
 libc
 lucide
+Mindshare
 monerium
 multibase
 multicodec
@@ -88,7 +89,6 @@ oxfmt
 partialize
 partisia
 partisiablockchain
-passporting
 Payin
 PayinFiat
 permissioned
