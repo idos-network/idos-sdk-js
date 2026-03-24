@@ -3,11 +3,7 @@ import type { Address } from "viem";
 import { formatEther, formatUnits } from "viem";
 
 import { getUserByEvmAddress } from "@/core/db/leaderboard.queries.server";
-import {
-  getContributionWallet,
-  getReferralsAllocations,
-  getReferralsUncappedAllocations,
-} from "@/core/db/sale.queries.server";
+import { getContributionWallet, getReferralsAllocations } from "@/core/db/sale.queries.server";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { readSaleContractMulticall } from "@/core/sale-contract.server";
 import { calculatePriceDiscount, calculateTokenPrice } from "@/lib/sale-utils";
@@ -66,23 +62,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   let contributionAddress: Address = address as Address;
   let referralsAllocResult = { totalReferralsCountAllocation: 0, totalAllocationValue: 0 };
-  let _referralsUncappedResult = {
-    totalReferralsCountUncapped: 0,
-    totalUncappedAllocationValue: 0,
-  };
 
   if (userId) {
-    const [wallet, refAlloc, refUncapped] = await Promise.all([
+    const [wallet, refAlloc] = await Promise.all([
       getContributionWallet(userId),
       getReferralsAllocations(userId),
-      getReferralsUncappedAllocations(userId),
     ]);
 
     if (wallet) {
       contributionAddress = wallet as Address;
     }
     referralsAllocResult = refAlloc;
-    _referralsUncappedResult = refUncapped;
   }
 
   const contractData = await readSaleContractMulticall(contributionAddress);

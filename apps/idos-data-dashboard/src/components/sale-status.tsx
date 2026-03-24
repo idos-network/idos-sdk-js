@@ -13,14 +13,18 @@ function ProgressBar({ min, max, value }: { min: number; max: number; value: num
   const valueInM = value / 1_000_000;
   const maxM = max / 1_000_000;
   const minM = min / 1_000_000;
-  const percentage = (valueInM / maxM) * 100;
+  const percentage = maxM > 0 ? (valueInM / maxM) * 100 : 0;
   const displayPct = getDisplayPercentage(percentage);
   const pctRounded = `${Math.round(displayPct)}%`;
 
   const isBetween = valueInM >= minM && valueInM <= maxM;
-  const isBelowMin = valueInM <= minM;
+  const isBelowMin = valueInM < minM;
 
-  const barWidth = isBetween ? "90.5%" : isBelowMin ? `${(valueInM / minM) * 100}%` : pctRounded;
+  const barWidth = isBetween
+    ? "90.5%"
+    : isBelowMin
+      ? `${minM > 0 ? (valueInM / minM) * 100 : 0}%`
+      : pctRounded;
 
   const capStatusLabel =
     valueInM < minM
