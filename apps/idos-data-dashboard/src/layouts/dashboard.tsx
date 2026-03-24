@@ -3,6 +3,7 @@ import {
   CircleDollarSignIcon,
   ClockIcon,
   CogIcon,
+  CoinsIcon,
   ExternalLinkIcon,
   LogOutIcon,
   MenuIcon,
@@ -172,6 +173,12 @@ export function FooterNavLinks() {
         </ListItemLink>
       </li>
       <li>
+        <ListItemLink to="/community-sale">
+          <CoinsIcon size={24} strokeWidth="1.5" />
+          <span>Community Sale</span>
+        </ListItemLink>
+      </li>
+      <li>
         <ListItemLink to="/settings">
           <CogIcon size={24} strokeWidth="1" />
           <span>Settings</span>
@@ -193,6 +200,35 @@ export function DisconnectButton() {
       <LogOutIcon size={24} strokeWidth="1.5" />
       Disconnect wallet
     </Button>
+  );
+}
+
+export function LegalLinks() {
+  return (
+    <div className="flex gap-2">
+      <a
+        href="https://www.idos.network/legal/privacy-policy"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          buttonVariants({ variant: "secondary", size: "sm" }),
+          "flex flex-1 items-center gap-2",
+        )}
+      >
+        Privacy Policy <ExternalLinkIcon size={14} />
+      </a>
+      <a
+        href="https://www.idos.network/legal/user-agreement"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          buttonVariants({ variant: "secondary", size: "sm" }),
+          "flex flex-1 items-center gap-2",
+        )}
+      >
+        User Agreement <ExternalLinkIcon size={14} />
+      </a>
+    </div>
   );
 }
 
@@ -289,6 +325,7 @@ export default function DashboardLayout() {
               <div className="mt-auto flex flex-col items-stretch gap-5">
                 <FooterNavLinks />
                 <DisconnectButton />
+                <LegalLinks />
               </div>
             </div>
           </div>
@@ -314,35 +351,6 @@ export default function DashboardLayout() {
           <MobileNav isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </Suspense>
       )}
-      <div className="bg-card fixed right-5 bottom-5 hidden items-stretch gap-2 rounded-lg p-5 lg:flex">
-        <a
-          href="https://www.idos.network/legal/privacy-policy"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            buttonVariants({
-              variant: "secondary",
-            }),
-            "flex items-center gap-2",
-          )}
-        >
-          Privacy Policy <ExternalLinkIcon size={16} />
-        </a>
-
-        <a
-          href="https://www.idos.network/legal/user-agreement"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            buttonVariants({
-              variant: "secondary",
-            }),
-            "flex items-center gap-2",
-          )}
-        >
-          User Agreement <ExternalLinkIcon size={16} />
-        </a>
-      </div>
     </div>
   );
 }

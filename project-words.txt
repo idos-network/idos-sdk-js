@@ -23,6 +23,7 @@ cooldown
 CPRA
 creit
 crxjs
+ctznd
 cryptosuite
 DAG
 Datil
@@ -73,6 +74,7 @@ Mindshare
 monerium
 multibase
 multicodec
+multicall
 nacl
 nanostores
 Neobank

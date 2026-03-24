@@ -4,6 +4,7 @@ import {
   decimal,
   index,
   integer,
+  numeric,
   pgTable,
   serial,
   text,
@@ -54,6 +55,25 @@ export const userWallets = pgTable(
     index("user_wallets_user_id_idx").on(table.userId),
     index("user_wallets_address_idx").on(sql`lower(${table.address})`),
     unique("user_wallets_user_address_unique").on(table.userId, table.address),
+  ],
+);
+
+export const saleParticipants = pgTable(
+  "sale_participants",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    address: varchar("address").notNull(),
+    allocation: numeric("allocation").default("0"),
+    uncappedAllocation: numeric("uncapped_allocation").default("0"),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("sale_participants_user_id_idx").on(table.userId),
+    index("sale_participants_address_idx").on(table.address),
+    unique("sale_participants_user_address_unique").on(table.userId, table.address),
   ],
 );
 
