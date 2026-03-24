@@ -2,11 +2,10 @@ import { EyeIcon, FileCheckIcon, Share2Icon, Trash2Icon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatType, safeParse } from "@/lib/credential-utils";
 import { useFetchGrants } from "@/lib/queries/credentials";
 
 import type { idOSCredentialWithShares } from "./types";
-
-import { formatType, safeParse } from "@/lib/credential-utils";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
