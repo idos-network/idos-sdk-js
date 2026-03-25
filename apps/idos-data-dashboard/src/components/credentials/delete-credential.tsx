@@ -49,7 +49,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
 
   const hasTimeLock =
     grants.data?.length &&
-    grants.data?.find((grant) => timelockToMs(+grant.locked_until) >= Date.now());
+    grants.data?.find((grant) => timelockToMs(Number(grant.locked_until)) >= Date.now());
 
   const handleClose = () => {
     revokeGrants.reset();
