@@ -8,6 +8,43 @@ import { createFaceSignProvider } from "@/lib/facesign";
 
 import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.machine";
 
+const EVM_RECONNECT_TIMEOUT_MS = 5000;
+
+async function ensureEvmConnected(): Promise<void> {
+  if (getEvmAccount().isConnected) return;
+
+  try {
+    await reconnect(wagmiConfig);
+    if (getEvmAccount().isConnected) return;
+  } catch {}
+
+  if (wagmiConfig.state.status === "connected") return;
+
+  return new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      unsubscribe();
+      reject(new Error("EVM reconnection timed out"));
+    }, EVM_RECONNECT_TIMEOUT_MS);
+
+    const unsubscribe = wagmiConfig.subscribe(
+      (state) => state.status,
+      (status) => {
+        if (status === "connected") {
+          clearTimeout(timeout);
+          unsubscribe();
+          resolve();
+        }
+      },
+    );
+
+    if (wagmiConfig.state.status === "connected") {
+      clearTimeout(timeout);
+      unsubscribe();
+      resolve();
+    }
+  });
+}
+
 export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(
   async ({ input }) => {
     const { walletType } = input;
@@ -15,19 +52,15 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
 
     switch (walletType) {
       case "EVM": {
-        const account = getEvmAccount();
-        if (account.isConnected && account.address) {
-          return { nearSelector: null };
-        }
+        await ensureEvmConnected();
 
-        await reconnect(wagmiConfig);
-        const reconnectedAccount = getEvmAccount();
-        if (!reconnectedAccount.isConnected || !reconnectedAccount.address) {
+        const account = getEvmAccount();
+        if (!account.isConnected || !account.address) {
           throw new Error("EVM reconnection failed");
         }
-        if (reconnectedAccount.address.toLowerCase() !== input.walletAddress.toLowerCase()) {
+        if (account.address.toLowerCase() !== input.walletAddress.toLowerCase()) {
           throw new Error(
-            `EVM reconnection address mismatch: expected ${input.walletAddress}, got ${reconnectedAccount.address}`,
+            `EVM reconnection address mismatch: expected ${input.walletAddress}, got ${account.address}`,
           );
         }
         return { nearSelector: null };

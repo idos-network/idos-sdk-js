@@ -197,10 +197,12 @@ export const dashboardMachine = setup({
   },
   states: {
     idle: {
-      always: [
-        { target: "reconnecting", guard: "hasPersistedWallet" },
-        { target: "disconnected", guard: "isClient" },
-      ],
+      after: {
+        0: [
+          { target: "reconnecting", guard: "hasPersistedWallet" },
+          { target: "disconnected", guard: "isClient" },
+        ],
+      },
     },
 
     disconnected: {
@@ -253,17 +255,24 @@ export const dashboardMachine = setup({
             "persistWalletToStorage",
           ],
         },
-        onError: {
-          target: "error",
-          actions: assign({
-            error: ({ event }) => {
-              console.error("Failed to connect wallet", event.error);
-              return event.error instanceof Error
-                ? event.error.message
-                : "Failed to connect wallet";
-            },
-          }),
-        },
+        onError: [
+          {
+            target: "disconnected",
+            guard: ({ event }) =>
+              event.error instanceof Error && event.error.message === "Connection cancelled",
+          },
+          {
+            target: "error",
+            actions: assign({
+              error: ({ event }) => {
+                console.error("Failed to connect wallet", event.error);
+                return event.error instanceof Error
+                  ? event.error.message
+                  : "Failed to connect wallet";
+              },
+            }),
+          },
+        ],
       },
       on: {
         WALLET_CONNECTED: {
