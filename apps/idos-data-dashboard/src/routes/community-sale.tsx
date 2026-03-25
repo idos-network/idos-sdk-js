@@ -91,7 +91,7 @@ export default function CommunitySale() {
           <div className="border-b px-4 py-3">
             <h2 className="text-accent-foreground text-sm font-medium">Your Contribution</h2>
           </div>
-          <Table>
+          <Table className="min-w-0">
             <TableBody>
               <ContributionRow
                 label="Your committed contribution"
