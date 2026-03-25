@@ -24,14 +24,24 @@ function generateGrantId(grant: idOSGrant): string {
   return [data_id, ag_grantee_wallet_identifier, locked_until].join("-");
 }
 
+const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
+
 function timelockToDate(timelock: number): string {
+  if (!timelock) return "No timelock";
+  if (!Number.isFinite(timelock) || timelock > MAX_REPRESENTABLE_TIMELOCK) {
+    return "Permanently locked";
+  }
+
   const milliseconds = timelockToMs(timelock);
+  const date = new Date(milliseconds);
+
+  if (Number.isNaN(date.getTime())) return "Permanently locked";
 
   return new Intl.DateTimeFormat(["ban", "id"], {
     dateStyle: "short",
     timeStyle: "short",
     hour12: true,
-  }).format(new Date(milliseconds));
+  }).format(date);
 }
 
 function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) {
@@ -77,9 +87,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>
                 </td>
                 <td className="w-0 whitespace-nowrap">
-                  <span className="block">
-                    {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
-                  </span>
+                  <span className="block">{timelockToDate(Number(grant.locked_until))}</span>
                 </td>
                 <td className="w-0 text-right whitespace-nowrap">
                   <Button
@@ -87,7 +95,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
                     variant="destructive-outline"
-                    disabled={timelockToMs(+grant.locked_until) >= Date.now()}
+                    disabled={timelockToMs(Number(grant.locked_until)) >= Date.now()}
                     isLoading={revokeGrant.isPending && revokeGrant.variables?.id === grant.id}
                     onClick={() => onRevoke(grant)}
                   >

@@ -19,15 +19,24 @@ const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "
   invalid: "destructive",
 };
 
+const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
+
 function formatTimelock(lockedUntil: number): string {
-  const ms = timelockToMs(lockedUntil);
   if (!lockedUntil) return "No timelock";
+  if (!Number.isFinite(lockedUntil) || lockedUntil > MAX_REPRESENTABLE_TIMELOCK) {
+    return "Permanently locked";
+  }
+
+  const ms = timelockToMs(lockedUntil);
+  const date = new Date(ms);
+
+  if (Number.isNaN(date.getTime())) return "Permanently locked";
 
   return new Intl.DateTimeFormat(["ban", "id"], {
     dateStyle: "short",
     timeStyle: "short",
     hour12: true,
-  }).format(new Date(ms));
+  }).format(date);
 }
 
 function formatType(type: string): string {
@@ -47,7 +56,7 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
   const { grant, credential } = sharedGrant;
   const revokeGrant = useRevokeGrant();
 
-  const isTimelocked = timelockToMs(+grant.locked_until) >= Date.now();
+  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= Date.now();
 
   const publicNotes = credential?.publicNotes ?? {};
   const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Grant";
@@ -58,7 +67,7 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
     ["Grant ID", grant.id],
     ["Cred ID", grant.data_id],
     ["Recipient", grant.ag_grantee_wallet_identifier],
-    ["Time-lock", formatTimelock(+grant.locked_until)],
+    ["Time-lock", formatTimelock(Number(grant.locked_until))],
   ];
 
   return (

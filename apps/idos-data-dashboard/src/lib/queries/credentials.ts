@@ -7,6 +7,15 @@ import type { SharedGrant, idOSCredentialWithShares } from "@/components/credent
 
 import { useIDOSClient } from "@/hooks/idOS";
 
+function safeParseJson(value: string | null | undefined): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(value || "{}");
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export function credentialsQueryOptions(idOSClient: idOSClientLoggedIn) {
   return queryOptions({
     queryKey: ["credentials"],
@@ -84,7 +93,7 @@ export function useFetchSharedGrants() {
             ? {
                 id: source.id,
                 originalId: original?.id ?? source.id,
-                publicNotes: JSON.parse(source.public_notes || "{}"),
+                publicNotes: safeParseJson(source.public_notes),
               }
             : null,
         };
