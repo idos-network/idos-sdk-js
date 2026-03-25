@@ -64,7 +64,7 @@ export default function CommunitySale() {
   const { data, isLoading } = useSaleData(walletAddress);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-stretch gap-5">
+    <div className="flex flex-1 flex-col items-stretch gap-5">
       <div className="bg-card flex h-14 items-center rounded-xl p-5 lg:h-20">
         <h1 className="block text-2xl font-bold lg:text-3xl">idOS Community Sale</h1>
         <Badge variant="success" className="ml-auto hidden lg:inline-flex">
