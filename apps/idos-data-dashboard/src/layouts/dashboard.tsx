@@ -8,6 +8,7 @@ import {
   LogOutIcon,
   MenuIcon,
   SendIcon,
+  Share2Icon,
   ShieldCheckIcon,
   TrophyIcon,
   Wallet2Icon,
@@ -116,6 +117,12 @@ export function MainNavLinks() {
           </ListItemLink>
         </li>
         <li>
+          <ListItemLink to="/shared-with-me">
+            <Share2Icon size={24} strokeWidth="1.5" />
+            <span>Shared with me</span>
+          </ListItemLink>
+        </li>
+        <li>
           <ListItemLink to="/shared-with-others">
             <SendIcon size={24} strokeWidth="1.5" />
             <span>Shared with others</span>
@@ -153,7 +160,7 @@ export function MainNavLinks() {
               rel="noopener noreferrer"
             >
               <ClockIcon size={24} strokeWidth="1.5" />
-              <span>Vesting</span>
+              <span>Claims</span>
               <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
             </a>
           </li>
@@ -288,7 +295,6 @@ function NavigationProgress() {
 export default function DashboardLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
-
   useEffect(() => {
     onClose();
   }, [location.pathname, onClose]);
