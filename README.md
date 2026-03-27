@@ -19,10 +19,10 @@
 
 ## Auxiliary Applications
 
-| Folder                                                 | Contents                                                                                                          |
-| :----------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| Folder                                                 | Contents                                                                                                            |
+| :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
 | [`📁 idos-data-dashboard`](./apps/idos-data-dashboard) | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>. |
-| [`📁 idos-enclave`](./apps/idos-enclave)               | A secure browser context for password input, key derivation, encryption, and decryption.                          |
+| [`📁 idos-enclave`](./apps/idos-enclave)               | A secure browser context for password input, key derivation, encryption, and decryption.                            |
 
 ## Installation
 
