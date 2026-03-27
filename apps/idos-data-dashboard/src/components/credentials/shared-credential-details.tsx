@@ -12,9 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import { safeParse } from "@/lib/credential-utils";
 import { useFetchSharedCredentialDetails } from "@/lib/queries/credentials";
-
-import { safeParse } from "./shared";
 
 function sanitizeFileName(value: string): string {
   return value.replace(/[/\\:*?"<>|]/g, "_").trim();
