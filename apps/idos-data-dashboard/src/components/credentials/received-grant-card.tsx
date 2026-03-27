@@ -5,10 +5,9 @@ import { EyeIcon, Share2Icon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { safeParse } from "@/lib/credential-utils";
 import { useFetchSharedCredentialPublicNotes } from "@/lib/queries/credentials";
 import { timelockToMs } from "@/lib/time";
-
-import { safeParse } from "./shared";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
