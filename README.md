@@ -19,11 +19,10 @@
 
 ## Auxiliary Applications
 
-| Folder                                                  | Contents                                                                                                                                |
-| :------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| [`📁 dashboard-for-dapps`](./apps/dashboard-for-dapps/) | Dashboard for dApp developers to access data that users shared with them. <br> Deployed at <https://dashboard-for-dapps.idos.network/>. |
-| [`📁 idos-data-dashboard`](./apps/idos-data-dashboard)  | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>.                     |
-| [`📁 idos-enclave`](./apps/idos-enclave)                | A secure browser context for password input, key derivation, encryption, and decryption.                                                |
+| Folder                                                 | Contents                                                                                                            |
+| :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| [`📁 idos-data-dashboard`](./apps/idos-data-dashboard) | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>. |
+| [`📁 idos-enclave`](./apps/idos-enclave)               | A secure browser context for password input, key derivation, encryption, and decryption.                            |
 
 ## Installation
 
