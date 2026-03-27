@@ -6,6 +6,7 @@ export default [
       index("routes/index.tsx"),
       route("wallets", "routes/wallets.tsx"),
       route("shared-with-others", "routes/shared-with-others.tsx"),
+      route("shared-with-me", "routes/shared-with-me.tsx"),
       route("settings", "routes/settings.tsx"),
       route("leaderboard", "routes/leaderboard.tsx"),
       route("community-sale", "routes/community-sale.tsx"),
