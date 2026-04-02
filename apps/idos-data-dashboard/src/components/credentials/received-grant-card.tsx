@@ -1,12 +1,13 @@
-import { EyeIcon, Share2Icon, XCircleIcon } from "lucide-react";
-import { toast } from "sonner";
+import type { idOSGrant } from "@idos-network/kwil-infra/actions";
+
+import { EyeIcon, Share2Icon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useRevokeGrant } from "@/lib/mutations/credentials";
+import { Skeleton } from "@/components/ui/skeleton";
+import { safeParse } from "@/lib/credential-utils";
+import { useFetchSharedCredentialPublicNotes } from "@/lib/queries/credentials";
 import { timelockToMs } from "@/lib/time";
-
-import type { SharedGrant } from "./types";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -32,7 +33,7 @@ function formatTimelock(lockedUntil: number): string {
 
   if (Number.isNaN(date.getTime())) return "Permanently locked";
 
-  return new Intl.DateTimeFormat(["ban", "id"], {
+  return new Intl.DateTimeFormat(undefined, {
     dateStyle: "short",
     timeStyle: "short",
     hour12: true,
@@ -47,26 +48,27 @@ function formatType(type: string): string {
   return typeMap[type.toLowerCase()] ?? type.charAt(0).toUpperCase() + type.slice(1);
 }
 
-interface SharedGrantCardProps {
-  sharedGrant: SharedGrant;
+interface ReceivedGrantCardProps {
+  grant: idOSGrant;
   onViewDetails: (credentialId: string) => void;
 }
 
-export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardProps) {
-  const { grant, credential } = sharedGrant;
-  const revokeGrant = useRevokeGrant();
+export function ReceivedGrantCard({ grant, onViewDetails }: ReceivedGrantCardProps) {
+  const { data: rawPublicNotes, isLoading } = useFetchSharedCredentialPublicNotes({
+    credentialId: grant.data_id,
+  });
 
   const isTimelocked = timelockToMs(Number(grant.locked_until)) >= Date.now();
 
-  const publicNotes = credential?.publicNotes ?? {};
-  const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Grant";
+  const publicNotes = safeParse(rawPublicNotes);
+  const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Credential";
   const issuer = typeof publicNotes.issuer === "string" ? publicNotes.issuer : null;
   const status = typeof publicNotes.status === "string" ? publicNotes.status : null;
 
   const detailEntries: readonly (readonly [string, string])[] = [
     ["Grant ID", grant.id],
-    ["Cred ID", grant.data_id],
-    ["Recipient", grant.ag_grantee_wallet_identifier],
+    ["Data ID", grant.data_id],
+    ["Owner", grant.ag_owner_user_id],
     ["Time-lock", formatTimelock(Number(grant.locked_until))],
   ];
 
@@ -77,8 +79,17 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
           <Share2Icon size={24} className="text-primary" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">{type}</p>
-          {issuer && <p className="text-muted-foreground truncate text-sm">{issuer}</p>}
+          {isLoading ? (
+            <div className="flex flex-col gap-1.5">
+              <Skeleton className="h-5 w-32 rounded" />
+              <Skeleton className="h-4 w-24 rounded" />
+            </div>
+          ) : (
+            <>
+              <p className="truncate font-semibold">{type}</p>
+              {issuer && <p className="text-muted-foreground truncate text-sm">{issuer}</p>}
+            </>
+          )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {status && (
@@ -89,9 +100,11 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
               {status}
             </Badge>
           )}
-          <Badge variant="success" className="capitalize">
-            active
-          </Badge>
+          {status?.toLowerCase() !== "active" && (
+            <Badge variant="success" className="capitalize">
+              active
+            </Badge>
+          )}
           {isTimelocked && (
             <Badge variant="warning" className="capitalize">
               timelocked
@@ -118,34 +131,10 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        {credential ? (
-          <Button variant="secondary" onClick={() => onViewDetails(credential.originalId)}>
-            <EyeIcon size={16} />
-            Details
-          </Button>
-        ) : null}
-
-        {!isTimelocked && (
-          <Button
-            variant="destructive"
-            isLoading={revokeGrant.isPending && revokeGrant.variables?.id === grant.id}
-            onClick={() =>
-              revokeGrant.mutate(grant, {
-                onSuccess: () =>
-                  toast.success("Grant revoked", {
-                    description: "The access grant has been successfully revoked.",
-                  }),
-                onError: () =>
-                  toast.error("Failed to revoke grant", {
-                    description: "An unexpected error occurred. Please try again.",
-                  }),
-              })
-            }
-          >
-            <XCircleIcon size={16} />
-            Revoke
-          </Button>
-        )}
+        <Button variant="secondary" onClick={() => onViewDetails(grant.data_id)}>
+          <EyeIcon size={16} />
+          Details
+        </Button>
       </div>
     </div>
   );

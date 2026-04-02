@@ -7,6 +7,15 @@ import type { SharedGrant, idOSCredentialWithShares } from "@/components/credent
 
 import { useIDOSClient } from "@/hooks/idOS";
 
+function safeParseJson(value: string | null | undefined): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(value || "{}");
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export function credentialsQueryOptions(idOSClient: idOSClientLoggedIn) {
   return queryOptions({
     queryKey: ["credentials"],
@@ -84,11 +93,58 @@ export function useFetchSharedGrants() {
             ? {
                 id: source.id,
                 originalId: original?.id ?? source.id,
-                publicNotes: JSON.parse(source.public_notes || "{}"),
+                publicNotes: safeParseJson(source.public_notes),
               }
             : null,
         };
       });
+    },
+  });
+}
+
+export function useFetchReceivedGrants() {
+  const idOSClient = useIDOSClient();
+  return useSuspenseQuery({
+    queryKey: ["grants", "received"],
+    queryFn: () => idOSClient.getGrants({}),
+    select: (data) => data.grants,
+  });
+}
+
+export function useFetchSharedCredentialPublicNotes({ credentialId }: { credentialId: string }) {
+  const idOSClient = useIDOSClient();
+  return useQuery({
+    queryKey: ["credential_public_notes", credentialId],
+    queryFn: async () => {
+      const credential = await idOSClient.getCredentialShared(credentialId);
+      if (!credential) return null;
+      return credential.public_notes;
+    },
+  });
+}
+
+export function useFetchSharedCredentialDetails({ credentialId }: { credentialId: string }) {
+  const idOSClient = useIDOSClient();
+
+  return useQuery({
+    queryKey: ["credential_details", "shared", credentialId],
+    queryFn: async () => {
+      const credential = await idOSClient.getCredentialShared(credentialId);
+
+      if (!credential) {
+        throw new Error(`Shared credential with id ${credentialId} not found`);
+      }
+
+      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
+
+      const decryptedContent = await idOSClient.enclaveProvider.decrypt(
+        base64Decode(credential.content),
+        base64Decode(credential.encryptor_public_key),
+      );
+
+      Object.assign(credential, { content: utf8Decode(decryptedContent) });
+
+      return credential;
     },
   });
 }
