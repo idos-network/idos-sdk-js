@@ -37,6 +37,7 @@ function PasswordField({ hasError, password, showPassword, ...props }: PasswordF
         />
         <button
           type="button"
+          aria-label={showPassword.value ? "Hide password" : "Show password"}
           class="bg-muted absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer p-2"
           onClick={() => {
             showPassword.value = !showPassword.value;
@@ -182,7 +183,7 @@ export default function PasswordForm({
                 <CircleAlertIcon size={32} />
               </span>
               <p class="text-xs">
-                Losing this password means losing access to your data.There is no backup, we
+                Losing this password means losing access to your data. There is no backup, we
                 recommend most users go back and sign with their wallets via MPC.
               </p>
             </div>

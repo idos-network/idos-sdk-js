@@ -191,7 +191,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     this.iframe.referrerPolicy = referrerPolicy;
     this.iframe.sandbox.add(...liftedSandboxRestrictions);
     this.iframe.src = this.hostUrl.toString();
-    this.iframe.tabIndex = 0;
+    this.iframe.tabIndex = -1;
     this.iframe.setAttribute("aria-hidden", "true");
 
     for (const [k, v] of Object.entries(iframeStyles)) {
@@ -220,6 +220,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   private showEnclave(): void {
     this.iframe.style.opacity = "1";
     this.iframe.style.pointerEvents = "auto";
+    this.iframe.tabIndex = 0;
     this.iframe.removeAttribute("aria-hidden");
     this.iframe.setAttribute("aria-modal", "true");
   }
@@ -227,6 +228,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   private hideEnclave(): void {
     this.iframe.style.opacity = "0";
     this.iframe.style.pointerEvents = "none";
+    this.iframe.tabIndex = -1;
     this.iframe.setAttribute("aria-hidden", "true");
     this.iframe.removeAttribute("aria-modal");
   }
@@ -270,6 +272,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   private async onMessage(message: MessageEvent): Promise<void> {
     if (!message || !message.data || typeof message.data !== "object") return;
     if (message.origin !== this.hostUrl.origin) return;
+    if (message.source !== this.iframe.contentWindow) return;
 
     if (message.data.type === "idOS:enclaveHide") {
       this.hideEnclave();

@@ -8,7 +8,14 @@ const enclaveWindow = window.self;
 const hasParentWindow = enclaveWindow !== window.top;
 
 if (hasParentWindow) {
-  const parentOrigin = new URL(document.referrer).origin;
+  let parentOrigin: string;
+  try {
+    parentOrigin = new URL(document.referrer).origin;
+  } catch {
+    console.error("Failed to parse document.referrer:", document.referrer);
+    throw new Error("idOS Enclave: unable to determine parent origin from document.referrer");
+  }
+
   const enclave = new Enclave({ parentOrigin });
 
   const root = document.getElementById("app");
