@@ -14,7 +14,6 @@ import {
 import type { Route } from "./+types/root";
 
 import { CookieBanner } from "./components/cookie";
-import { EnclaveDialog } from "./components/enclave-dialog";
 import { Toaster } from "./components/ui/sonner";
 import { COMMON_ENV } from "./core/envFlags.common";
 import { wagmiAdapter } from "./core/wagmi";
@@ -71,7 +70,6 @@ export default function App() {
   return (
     <Providers initialState={initialState}>
       <Toaster position="bottom-right" duration={3000} />
-      <EnclaveDialog />
       <Outlet />
       <CookieBanner />
       <ReactQueryDevtools initialIsOpen={false} />

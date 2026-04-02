@@ -14,25 +14,43 @@ import { TextField, type TextFieldProps } from "@/components/ui/text-field";
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
   password: Signal<string>;
+  showPassword: Signal<boolean>;
 }
 
-function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
+function PasswordField({ hasError, password, showPassword, ...props }: PasswordFieldProps) {
   return (
     <div class="flex flex-col gap-1">
-      <TextField
-        id="idos-password-input"
-        // oxlint-disable-next-line jsx-a11y/no-autofocus -- Password field should auto-focus on mount
-        autoFocus
-        type="password"
-        required={true}
-        value={password.value}
-        onInput={(e) => {
-          password.value = (e.target as HTMLInputElement).value;
-        }}
-        {...props}
-      />
+      <div class="relative">
+        <TextField
+          id="idos-password-input"
+          className="w-full"
+          // oxlint-disable-next-line jsx-a11y/no-autofocus -- Password field should auto-focus on mount
+          autoFocus
+          required={true}
+          value={password.value}
+          type={showPassword.value ? "text" : "password"}
+          onInput={(e) => {
+            password.value = (e.target as HTMLInputElement).value;
+            if (hasError?.value) hasError.value = false;
+          }}
+          {...props}
+        />
+        <button
+          type="button"
+          class="bg-muted absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer p-2"
+          onClick={() => {
+            showPassword.value = !showPassword.value;
+          }}
+        >
+          {showPassword.value ? (
+            <EyeIcon className="text-foreground" />
+          ) : (
+            <EyeOffIcon className="text-muted-foreground" />
+          )}
+        </button>
+      </div>
       {hasError?.value ? (
-        <p class="tex-sm text-left font-semibold text-red-500">Invalid password.</p>
+        <p class="text-left text-sm font-semibold text-red-500">Invalid password.</p>
       ) : null}
     </div>
   );
@@ -149,28 +167,12 @@ export default function PasswordForm({
             <label htmlFor="idos-password-input" class="text-foreground text-sm font-medium">
               New password
             </label>
-            <div class="relative">
-              <PasswordField
-                id="idos-password-input"
-                type={showPassword.value ? "text" : "password"}
-                password={password}
-                hasError={hasError}
-                placeholder="Enter password"
-              />
-              <button
-                type="button"
-                class="bg-muted absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer p-2"
-                onClick={() => {
-                  showPassword.value = !showPassword.value;
-                }}
-              >
-                {showPassword.value ? (
-                  <EyeIcon className="text-foreground" />
-                ) : (
-                  <EyeOffIcon className="text-muted-foreground" />
-                )}
-              </button>
-            </div>
+            <PasswordField
+              password={password}
+              hasError={hasError}
+              showPassword={showPassword}
+              placeholder="Enter password"
+            />
             <DurationField duration={duration} />
           </div>
 
@@ -205,28 +207,12 @@ export default function PasswordForm({
             <label htmlFor="idos-password-input" class="text-foreground text-sm font-medium">
               Password
             </label>
-            <div class="relative">
-              <PasswordField
-                id="idos-password-input"
-                type={showPassword.value ? "text" : "password"}
-                password={password}
-                hasError={hasError}
-                placeholder="Enter password"
-              />
-              <button
-                type="button"
-                class="bg-muted absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer p-2"
-                onClick={() => {
-                  showPassword.value = !showPassword.value;
-                }}
-              >
-                {showPassword.value ? (
-                  <EyeIcon className="text-foreground" />
-                ) : (
-                  <EyeOffIcon className="text-muted-foreground" />
-                )}
-              </button>
-            </div>
+            <PasswordField
+              password={password}
+              hasError={hasError}
+              showPassword={showPassword}
+              placeholder="Enter password"
+            />
             <DurationField duration={duration} />
           </div>
 

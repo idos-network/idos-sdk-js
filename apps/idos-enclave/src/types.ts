@@ -8,7 +8,7 @@ export type idOSEnclaveConfiguration = {
   theme?: Theme;
 };
 
-export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordContext";
+export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordContext" | "pending";
 
 // oxlint-disable-next-line typescript/no-explicit-any -- false positive
 export interface AuthMethodProps<K = any> {

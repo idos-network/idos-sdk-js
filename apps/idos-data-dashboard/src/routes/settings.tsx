@@ -8,16 +8,6 @@ import { safeParse } from "@/lib/credential-utils";
 
 export const handle = { breadcrumb: "Settings" };
 
-function waitForDismiss(signal: AbortSignal) {
-  return new Promise<never>((_resolve, reject) => {
-    document.addEventListener(
-      "idos:enclave-dismissed",
-      () => reject(new DOMException("Enclave dismissed", "AbortError")),
-      { once: true, signal },
-    );
-  });
-}
-
 function tryParseJson(str: string): unknown {
   try {
     return JSON.parse(str);
@@ -32,38 +22,26 @@ export default function Settings() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleBackup = async () => {
-    const controller = new AbortController();
     setIsBackingUp(true);
     try {
-      await Promise.race([
-        idOSClient.enclaveProvider.backupUserEncryptionProfile(),
-        waitForDismiss(controller.signal),
-      ]);
+      await idOSClient.enclaveProvider.backupUserEncryptionProfile();
     } catch (error) {
-      const isDismissed = error instanceof DOMException && error.name === "AbortError";
-      if (!isDismissed) {
-        toast.error("Backup failed", {
-          description: error instanceof Error ? error.message : "An unexpected error occurred",
-        });
-      }
+      toast.error("Backup failed", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
     } finally {
-      controller.abort();
       setIsBackingUp(false);
     }
   };
 
   const handleDownloadData = async () => {
-    const controller = new AbortController();
     setIsDownloading(true);
 
     try {
       const credentials = await idOSClient.getAllCredentials();
       const originals = credentials.filter((c) => !c.original_id && !!c.public_notes);
 
-      await Promise.race([
-        idOSClient.enclaveProvider.ensureUserEncryptionProfile(),
-        waitForDismiss(controller.signal),
-      ]);
+      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
 
       const decrypted = await Promise.all(
         originals.map(async (cred) => {
@@ -104,14 +82,10 @@ export default function Settings() {
         description: `${decrypted.length} credential${decrypted.length === 1 ? "" : "s"} exported successfully.`,
       });
     } catch (error) {
-      const isDismissed = error instanceof DOMException && error.name === "AbortError";
-      if (!isDismissed) {
-        toast.error("Download failed", {
-          description: error instanceof Error ? error.message : "An unexpected error occurred",
-        });
-      }
+      toast.error("Download failed", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
     } finally {
-      controller.abort();
       setIsDownloading(false);
     }
   };
