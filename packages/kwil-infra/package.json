@@ -51,8 +51,8 @@
   },
   "devDependencies": {
     "@gemwallet/api": "^3.8.0",
-    "@types/node": "^22.15.30",
-    "jsdom": "^22.1.0",
+    "@types/node": "^24.0.0",
+    "jsdom": "^29.0.0",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing",

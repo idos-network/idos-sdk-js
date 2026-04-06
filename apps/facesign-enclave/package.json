@@ -21,13 +21,13 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "isbot": "^5",
-    "lucide-react": "^0.564.0",
+    "lucide-react": "^1.0.0",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-qr-code": "^2.0.18",
     "react-router": "^7.5.3",
     "tailwind-merge": "^3.4.0",
-    "tailwind-variants": "^1.0.0",
+    "tailwind-variants": "^3.0.0",
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "catalog:core"
   },
@@ -47,6 +47,6 @@
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.8",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^6.0.0"
   }
 }

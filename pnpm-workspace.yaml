@@ -29,8 +29,8 @@ catalogs:
     "es-toolkit": "^1.39.0"
 
   ethereum:
-    "wagmi": "^2.14.16"
-    "@wagmi/core": "^2.16.4"
+    "wagmi": "^3.0.0"
+    "@wagmi/core": "^3.0.0"
     "viem": "^2.14.0"
     "ethers": "^6.14.0"
 
@@ -39,17 +39,17 @@ catalogs:
     "@reown/appkit-adapter-wagmi": "^1.7.13"
 
   near:
-    "near-api-js": "4.0.3"
-    "@near-wallet-selector/core": "8.10.2"
-    "@near-wallet-selector/here-wallet": "8.10.2"
-    "@near-wallet-selector/meteor-wallet": "8.10.2"
-    "@near-wallet-selector/modal-ui": "8.10.2"
+    "near-api-js": "7.2.0"
+    "@near-wallet-selector/core": "10.1.4"
+    "@near-wallet-selector/here-wallet": "10.1.4"
+    "@near-wallet-selector/meteor-wallet": "10.1.4"
+    "@near-wallet-selector/modal-ui": "10.1.4"
 
   stellar:
-    "@stellar/stellar-sdk": "^13.3.0"
-    "@stellar/stellar-base": "^13.1.0"
-    "@creit.tech/stellar-wallets-kit": "^1.7.5"
-    "@stellar/freighter-api": "^4.1.0"
+    "@stellar/stellar-sdk": "^15.0.0"
+    "@stellar/stellar-base": "^15.0.0"
+    "@creit.tech/stellar-wallets-kit": "^2.0.0"
+    "@stellar/freighter-api": "^6.0.0"
 
   xrp:
     "xrpl": "^4.3.0"
@@ -59,7 +59,7 @@ catalogs:
 
   build:
     "vite": "^7.0.6"
-    "typescript": "^5.8.3"
+    "typescript": "^6.0.0"
     "tsdown": "^0.18.0"
     "vite-plugin-node-polyfills": "0.17.0"
 

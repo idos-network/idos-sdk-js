@@ -15,17 +15,17 @@
     "@idos-network/credentials": "workspace:*",
     "@idos-network/enclave": "workspace:*",
     "@idos-network/utils": "workspace:*",
-    "@partisiablockchain/abi-client": "^5.207.0",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^6.0.0",
+    "@partisiablockchain/blockchain-api-transaction-client": "^6.0.0",
     "@preact/signals": "catalog:preact",
     "@rollup/plugin-inject": "^5.0.5",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
     "dompurify": "^3.2.5",
-    "lucide-preact": "^0.564.0",
+    "lucide-preact": "^1.0.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
-    "tailwind-variants": "^1.0.0",
+    "tailwind-variants": "^3.0.0",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3"
   },
@@ -41,6 +41,6 @@
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-node-polyfills": "catalog:build",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^6.0.0"
   }
 }
