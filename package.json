@@ -17,12 +17,12 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@size-limit/file": "^11.2.0",
-    "@size-limit/time": "^11.2.0",
-    "lefthook": "1.13.6",
+    "@size-limit/file": "^12.0.0",
+    "@size-limit/time": "^12.0.0",
+    "lefthook": "2.1.5",
     "oxfmt": "^0.37.0",
     "oxlint": "^1.52.0",
-    "size-limit": "^11.1.6",
+    "size-limit": "^12.0.0",
     "turbo": "^2.7.3"
   },
   "size-limit": [
@@ -66,7 +66,7 @@
   "packageManager": "pnpm@10.29.3",
   "pnpm": {
     "overrides": {
-      "web-streams-polyfill": "3.3.3"
+      "web-streams-polyfill": "4.2.0"
     },
     "onlyBuiltDependencies": [
       "@reown/appkit",
