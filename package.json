@@ -20,7 +20,7 @@
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
     "lefthook": "1.13.6",
-    "oxfmt": "^0.37.0",
+    "oxfmt": "^0.43.0",
     "oxlint": "^1.52.0",
     "size-limit": "^11.1.6",
     "turbo": "^2.7.3"
@@ -63,7 +63,7 @@
       "limit": "20 KB"
     }
   ],
-  "packageManager": "pnpm@10.29.3",
+  "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {
       "web-streams-polyfill": "3.3.3"
