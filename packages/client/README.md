@@ -37,10 +37,10 @@ const idOSClientWithoutSigner = await createIDOSClient({
 const idOSClientWithSigner = await idOSClientWithoutSigner.withUserSigner(signer);
 
 // Check if user is already in idOS onboarded
-const hasProfile = await store.idOSClient.hasProfile();
+const hasProfile = await idOSClientWithSigner.hasProfile();
 
 // If yes we can create a new session
-const loggedInClient = await store.idOSClient.logIn();
+const loggedInClient = await idOSClientWithSigner.logIn();
 
 // User id and public encryption key
 const profile = loggedInClient.user;
@@ -55,10 +55,10 @@ const credentials = await loggedInClient.filterCredentials({
 
 // If we found a credentials which we can use, we will ask user for AccessGrant
 // which we later can use in our consumer to get the users data
-const ag = await loggedInClient.requestAccessGrant(credentials.id, {
+const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
   consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
   consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
-  lockedUntil: (Date.now() + 90 * 24 * 60 * 60 * 1000) / 1000, // 3 months from now
+  lockedUntil: lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 
 // Also when the user is logged in, we can ask him to add another wallet
