@@ -9,7 +9,7 @@
 > - <https://www.idos.network/legal/privacy-policy>
 > - <https://www.idos.network/legal/transparency-document>
 
-## Installing
+## Installation
 
 Get [our NPM package](https://www.npmjs.com/package/@idos-network/client) and its dependencies with pnpm or the equivalent of your package manager of choice:
 
@@ -17,12 +17,53 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/client) and it
 pnpm add @idos-network/client
 ```
 
-## Adding Wallets
+## Quick start
 
-The `addWallet` method allows you to add a wallet to a user's idOS profile. The method requires a `wallet_type` parameter to specify the blockchain type:
+```typescript
+import {
+  createIDOSClient,
+  idOSClientLoggedIn,
+  type idOSClientWithUserSigner,
+} from "@idos-network/client";
 
-```js
-await idOSClient.addWallet({
+const idOSClientWithoutSigner = await createIDOSClient({
+  nodeUrl: "https://nodes.idos.network",
+  enclaveOptions: {
+    container: "#idosContainer",
+  },
+}).createClient();
+
+// Signer can be JsonRpcSigner, or check below for supported chains
+const idOSClientWithSigner = await idOSClientWithoutSigner.withUserSigner(signer);
+
+// Check if user is already in idOS onboarded
+const hasProfile = await idOSClientWithSigner.hasProfile();
+
+// If yes we can create a new session
+const loggedInClient = await idOSClientWithSigner.logIn();
+
+// User id and public encryption key
+const profile = loggedInClient.user;
+
+// Now we can filer over users credentials (no access to them)
+const credentials = await loggedInClient.filterCredentials({
+  credentialLevelOrHigherFilter: {
+    userLevel: "basic",
+    requiredAddons: ["email", "liveness"],
+  },
+});
+
+// If we found a credentials which we can use, we will ask user for AccessGrant
+// which we later can use in our consumer to get the users data
+const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
+  consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
+  consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
+  lockedUntil: lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
+});
+
+// Also when the user is logged in, we can ask him to add another wallet
+// wallet type is required.
+await loggedInClient.addWallet({
   id: "unique-wallet-id",
   address: "0x...", // Wallet address
   public_key: "0x...", // Public key in hex format
@@ -38,3 +79,43 @@ await idOSClient.addWallet({
 - `"xrpl"` - XRP Ledger wallets
 - `"near"` - NEAR Protocol wallets
 - `"stellar"` - Stellar network wallets
+
+## Documentation
+
+For complete documentation, examples, and implementation guides:
+
+- 📖 **[Client Guide](../../docs/guide-client.md)** - Comprehensive implementation guide
+- 🏗️ **[System Overview](../../docs/README.md)** - Understanding idOS architecture
+- 🔒 **[Encryption](../../docs/encryption.md)** - Encryption key management
+- ✍️ **[Signatures](../../docs/signatures.md)** - Signer implementation details
+
+## Key Features
+
+- **Profile & Session Lifecycle** - Check profile existence, attach a wallet signer, and log users in/out
+- **Enclave-Backed Encryption** - Generate user encryption profiles and decrypt credential content safely via the enclave
+- **Credential Access & Filtering** - Fetch credentials, read decrypted content, and filter by issuer, level, and field rules
+- **Credential Sharing Flows** - Request DAG/DWG messages, create access grants, and share credentials with controlled lock times
+- **Wallet Management** - Add, list, and remove wallets (single or batch), including MPC-aware wallet synchronization
+- **Multi-Chain Wallet Support** - Works with EVM, NEAR, XRPL, and Stellar wallet types
+
+## Support
+
+Please follow the process outlined here: <https://github.com/idos-network/.github/blob/main/profile/README.md>
+
+---
+
+## Developing the SDK locally
+
+Run:
+
+```bash
+pnpm dev
+```
+
+This will start the compiler in watch mode that will rebuild every time any of the source files are changed.
+
+You can also create a production build by running the following command in the root folder of the SDK package:
+
+```bash
+pnpm build
+```
