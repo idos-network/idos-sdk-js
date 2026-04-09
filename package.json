@@ -23,7 +23,8 @@
     "oxfmt": "^0.44.0",
     "oxlint": "^1.52.0",
     "size-limit": "^11.1.6",
-    "turbo": "^2.7.3"
+    "turbo": "^2.7.3",
+    "vite-plugin-node-polyfills": "catalog:build"
   },
   "size-limit": [
     {

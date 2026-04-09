@@ -155,7 +155,8 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
           throw new Error("GemWallet is not installed");
         }
 
-        const publicKey = await getGemWalletPublicKey(GemWallet as any);
+        // @ts-expect-error - ResponseType are now typed as Enum
+        const publicKey = await getGemWalletPublicKey(GemWallet);
         if (!publicKey) {
           throw new Error("Failed to get XRPL public key");
         }
