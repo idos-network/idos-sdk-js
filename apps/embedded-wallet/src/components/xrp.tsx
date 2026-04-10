@@ -45,6 +45,7 @@ function XRPL() {
   }, [address, stepper]);
 
   const handleSignMessage = async () => {
+    // @ts-expect-error - ResponseType are now typed as Enum
     const signature = await signGemWalletTx(GemWallet, message);
 
     if (!address || !signature || !publicKey) return;
@@ -65,6 +66,7 @@ function XRPL() {
 
       if (!installed?.result?.isInstalled) throw new Error("GemWallet is not installed");
 
+      // @ts-expect-error - ResponseType are now typed as Enum
       const result = await getGemWalletPublicKey(GemWallet);
 
       if (!result) throw new Error("Failed to get wallet info");

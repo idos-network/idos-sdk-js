@@ -50,7 +50,7 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@gemwallet/api": "^3.8.0",
+    "@gemwallet/api": "catalog:xrp",
     "@types/node": "^22.15.30",
     "jsdom": "^22.1.0",
     "tsdown": "catalog:build",
