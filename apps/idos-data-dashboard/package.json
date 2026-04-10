@@ -68,7 +68,7 @@
     "@tanstack/react-devtools": "^0.10.0",
     "@tanstack/react-query-devtools": "catalog:tanstack",
     "@testing-library/react": "^14.3.1",
-    "@types/node": "^20.14.12",
+    "@types/node": "catalog:build",
     "@types/pg": "^8.11.0",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
@@ -82,6 +82,6 @@
     "vite-plugin-mkcert": "^1.17.5",
     "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^1.6.0"
+    "vitest": "catalog:testing"
   }
 }

@@ -72,6 +72,33 @@ export default defineConfig(async (config) => {
             // State management
             if (id.includes("/xstate/") || id.includes("@xstate/")) return "xstate";
 
+            // Shared QR code dependencies are used by multiple wallet SDKs.
+            // Keep them out of wallet-specific chunks to avoid duplication.
+            if (
+              id.includes("/qrcode/") ||
+              id.includes("/dijkstrajs/") ||
+              id.includes("/encode-utf8/") ||
+              id.includes("/pngjs/") ||
+              id.includes("/qr.js/") ||
+              id.includes("/react-qr-code/") ||
+              id.includes("@paulmillr/qr")
+            )
+              return "wallet-qr";
+
+            // Lit is shared by Reown web components and Stellar wallet UI.
+            // Keep it separate so Stellar doesn't depend on the Wagmi chunk.
+            if (
+              id.includes("/lit/") ||
+              id.includes("/lit-html/") ||
+              id.includes("/lit-element/") ||
+              id.includes("/@lit/")
+            )
+              return "lit";
+
+            // RxJS is shared across multiple wallet SDKs.
+            // Make it a stable shared chunk instead of inheriting a wallet chunk.
+            if (id.includes("/rxjs/")) return "rxjs";
+
             // Web3 — EVM (always loaded: WagmiProvider is at root)
             if (
               id.includes("@reown/") ||
