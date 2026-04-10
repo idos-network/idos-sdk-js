@@ -60,7 +60,6 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.9",
-    "vite-plugin-node-polyfills": "catalog:build",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-node-polyfills": "catalog:build"
   }
 }

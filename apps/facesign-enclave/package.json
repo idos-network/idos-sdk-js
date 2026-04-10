@@ -46,7 +46,6 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-mkcert": "^1.17.8",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-mkcert": "^1.17.8"
   }
 }

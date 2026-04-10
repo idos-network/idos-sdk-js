@@ -1,11 +1,9 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
 import tailwindcss from "@tailwindcss/vite";
-import path from "node:path";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 // On Vercel, VITE_SENTRY_ENV can be set in Project Settings. If unset, we fall back to VERCEL_ENV.
 if (process.env.VERCEL_ENV && !process.env.VITE_SENTRY_ENVIRONMENT) {
@@ -35,7 +33,6 @@ export default defineConfig(async (config) => {
   const plugins = [
     tailwindcss(),
     reactRouter(),
-    tsconfigPaths(),
     mkcert(),
     // https://github.com/getsentry/sentry-javascript/blob/master/dev-packages/e2e-tests/test-applications/react-router-7-framework-instrumentation/vite.config.ts#L9C77-L9C86
     // oxlint-disable-next-line typescript/no-explicit-any -- Expected
@@ -56,9 +53,9 @@ export default defineConfig(async (config) => {
   return {
     build: {
       target: "esnext",
-      rollupOptions: {
+      rolldownOptions: {
         input: config.isSsrBuild ? "./server/app.ts" : undefined,
-        output: {
+        /*output: {
           manualChunks(id: string) {
             if (!id.includes("node_modules")) return;
 
@@ -128,15 +125,13 @@ export default defineConfig(async (config) => {
             // Icons
             if (id.includes("lucide-react")) return "icons";
           },
-        },
+        },*/
       },
     },
 
     resolve: {
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+      tsconfigPaths: true,
     },
 
     plugins,

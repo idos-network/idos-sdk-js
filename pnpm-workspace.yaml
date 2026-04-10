@@ -26,8 +26,6 @@ overrides:
   web-streams-polyfill: "3.3.3"
   "@idos-network/kwil-js>lru-cache": "11.2.7"
   "path-scurry>lru-cache": "11.2.7"
-  "vitest>vite": "7.3.2"
-  "vite-plugin-node-polyfills>vite": "7.3.2"
 
 strictDepBuilds: true
 
@@ -87,14 +85,14 @@ catalogs:
     "@gemwallet/api": "^3.8.0"
 
   build:
-    "vite": "7.3.2"
+    "vite": "8.0.8"
     "typescript": "^5.8.3"
     "tsdown": "^0.21.0"
-    "vite-plugin-node-polyfills": "0.17.0"
+    "vite-plugin-node-polyfills": "0.26.0"
     "@types/node": "25.5.2"
 
   testing:
-    "vitest": "4.0.16"
+    "vitest": "4.1.4"
 
   react:
     "react": "^19.2.5"
