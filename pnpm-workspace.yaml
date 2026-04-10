@@ -68,18 +68,18 @@ catalogs:
     "vitest": "^4.0.6"
 
   react:
-    "react": "^19.1.4"
-    "react-dom": "^19.1.4"
-    "@types/react": "^19.1.4"
-    "@types/react-dom": "^19.1.4"
+    "react": "^19.2.5"
+    "react-dom": "^19.2.5"
+    "@types/react": "^19.2.5"
+    "@types/react-dom": "^19.2.3"
 
   react-router:
-    "react-router": "^7.12.0"
-    "@react-router/node": "^7.12.0"
-    "@react-router/serve": "^7.12.0"
-    "@vercel/react-router": "^1.1.2"
-    "@react-router/dev": "^7.12.0"
-    "@react-router/fs-routes": "^7.5.3"
+    "react-router": "^7.14.0"
+    "@react-router/node": "^7.14.0"
+    "@react-router/serve": "^7.14.0"
+    "@vercel/react-router": "^1.2.6"
+    "@react-router/dev": "^7.14.0"
+    "@react-router/fs-routes": "^7.14.0"
 
   preact:
     "preact": "^10.28.2"

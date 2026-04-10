@@ -81,35 +81,35 @@ catalogs:
       version: 10.29.1
   react:
     '@types/react':
-      specifier: ^19.1.4
+      specifier: ^19.2.5
       version: 19.2.14
     '@types/react-dom':
-      specifier: ^19.1.4
+      specifier: ^19.2.3
       version: 19.2.3
     react:
-      specifier: ^19.1.4
+      specifier: ^19.2.5
       version: 19.2.5
     react-dom:
-      specifier: ^19.1.4
+      specifier: ^19.2.5
       version: 19.2.5
   react-router:
     '@react-router/dev':
-      specifier: ^7.12.0
+      specifier: ^7.14.0
       version: 7.14.0
     '@react-router/fs-routes':
-      specifier: ^7.5.3
+      specifier: ^7.14.0
       version: 7.14.0
     '@react-router/node':
-      specifier: ^7.12.0
+      specifier: ^7.14.0
       version: 7.14.0
     '@react-router/serve':
-      specifier: ^7.12.0
+      specifier: ^7.14.0
       version: 7.14.0
     '@vercel/react-router':
-      specifier: ^1.1.2
+      specifier: ^1.2.6
       version: 1.2.6
     react-router:
-      specifier: ^7.12.0
+      specifier: ^7.14.0
       version: 7.14.0
   reown:
     '@reown/appkit':

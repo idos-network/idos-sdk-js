@@ -4,6 +4,6 @@ export default defineConfig({
   entry: ["./src/index.ts"],
   dts: true,
   outputOptions: {
-    inlineDynamicImports: true,
+    codeSplitting: false,
   },
 });
