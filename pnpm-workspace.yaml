@@ -35,8 +35,8 @@ catalogs:
     "ethers": "^6.14.0"
 
   reown:
-    "@reown/appkit": "^1.7.13"
-    "@reown/appkit-adapter-wagmi": "^1.7.13"
+    "@reown/appkit": "1.7.20"
+    "@reown/appkit-adapter-wagmi": "1.7.20"
 
   near:
     "near-api-js": "4.0.4"
