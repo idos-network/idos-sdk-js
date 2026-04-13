@@ -1,6 +1,6 @@
 import Bowser from "bowser";
 import { useEffect, useState } from "react";
-import QRCode from "react-qr-code";
+import { QRCode } from "react-qr-code";
 import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
