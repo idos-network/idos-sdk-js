@@ -50,7 +50,7 @@
     "@react-router/dev": "catalog:react-router",
     "@tailwindcss/vite": "^4.1.8",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.15.30",
+    "@types/node": "catalog:build",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "@vitejs/plugin-basic-ssl": "^2.1.0",
@@ -60,7 +60,6 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.9",
-    "vite-plugin-node-polyfills": "catalog:build",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-node-polyfills": "catalog:build"
   }
 }

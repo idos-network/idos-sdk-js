@@ -24,13 +24,8 @@ export const fetchSharedToken = async (
     }),
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${await getKrakenToken()}`,
+      Authorization: `Bearer ${await getRelayToken()}`,
     },
-    // @ts-expect-error - Node.js specific option
-    agent: new https.Agent({
-      rejectUnauthorized: false,
-      checkServerIdentity: () => undefined,
-    }),
   });
 
   if (!response.ok) {
@@ -54,7 +49,7 @@ export const fetchCredentialStatus = async (credentialId: string): Promise<Share
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${await getKrakenToken()}`,
+        Authorization: `Bearer ${await getRelayToken()}`,
       },
       // @ts-expect-error - Node.js specific option
       agent: new https.Agent({
@@ -75,7 +70,7 @@ export const fetchCredentialStatus = async (credentialId: string): Promise<Share
   return (await response.json()) as SharedTokenResponse;
 };
 
-export const generateKrakenUrl = async (type: string, walletAddress: string) => {
+export const generateRelayUrl = async (type: string, walletAddress: string) => {
   const payload = {
     clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
     kyc: true,
@@ -88,7 +83,7 @@ export const generateKrakenUrl = async (type: string, walletAddress: string) => 
   return `${SERVER_ENV.KRAKEN_API_URL}/kyc?token=${token}&provider=${type}&walletAddress=${encodeURIComponent(walletAddress)}`;
 };
 
-export async function getKrakenToken(): Promise<string> {
+export async function getRelayToken(): Promise<string> {
   const payload = {
     api: true,
     clientId: SERVER_ENV.KRAKEN_CLIENT_ID,

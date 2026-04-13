@@ -1,5 +1,5 @@
 import { userContext } from "~/middlewares/auth.server";
-import { fetchCredentialStatus } from "~/providers/kraken.server";
+import { fetchCredentialStatus } from "~/providers/relay.server";
 
 import type { Route } from "./+types/credential-status";
 

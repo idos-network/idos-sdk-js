@@ -1,7 +1,7 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { ethers } from "ethers";
 import nacl from "tweetnacl";
-import { type HeadersInit, patchRequest, postRequest, putRequest } from "./api";
+import { patchRequest, postRequest, putRequest } from "./api";
 import type {
   AddAddressRequest,
   Bytes,
@@ -98,7 +98,7 @@ export class EngineClient {
     updateRequest: UpdateWalletsRequest,
     signature: string,
   ): Promise<string> {
-    const authHeader: HeadersInit = {
+    const authHeader: RequestInit["headers"] = {
       Authorization: `eip712 ${signature}`,
     };
 

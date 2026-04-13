@@ -40,7 +40,6 @@
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.8",
-    "vite-plugin-node-polyfills": "catalog:build",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-node-polyfills": "catalog:build"
   }
 }

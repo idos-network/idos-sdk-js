@@ -1,7 +1,7 @@
 import { userContext } from "~/middlewares/auth.server";
 import { getKycStatus, shareToken } from "~/providers/due.server";
 import { SERVER_ENV } from "~/providers/envFlags.server";
-import { fetchSharedToken } from "~/providers/kraken.server";
+import { fetchSharedToken } from "~/providers/relay.server";
 import { setUserItem } from "~/providers/store.server";
 
 import type { Route } from "./+types/kyc";
