@@ -161,3 +161,4 @@ xsignature
 xstate
 XUMM
 ziif
+curations
