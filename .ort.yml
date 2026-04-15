@@ -1,0 +1,14 @@
+---
+excludes:
+  paths:
+    - pattern: "ort-results/**"
+      reason: "OTHER"
+      comment: >-
+        Local ORT output is generated during scans and should not be treated as
+        repository source content.
+  scopes:
+    - pattern: "devDependencies"
+      reason: "DEV_DEPENDENCY_OF"
+      comment: >-
+        Development-only dependencies are out of scope for the initial
+        application-focused license inventory.

@@ -1,0 +1,6 @@
+ort:
+  forceOverwrite: true
+  analyzer:
+    enabledPackageManagers:
+      - PNPM
+    skipExcluded: true

@@ -60,3 +60,7 @@ test-results
 
 # Synpress
 .cache-synpress
+
+# ORT
+ort-results/
+.pnpm-store/*

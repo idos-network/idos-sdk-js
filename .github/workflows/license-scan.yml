@@ -1,0 +1,94 @@
+name: License Scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "**/package.json"
+      - ".ort.yml"
+      - "ort-config/**"
+      - ".github/workflows/license-scan.yml"
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  ort:
+    name: ORT License Inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # Intentionally unpinned for the initial rollout; pin after the first
+      # successful production run to stabilize future updates.
+      ORT_IMAGE: ghcr.io/oss-review-toolkit/ort:latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: "pnpm"
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Prepare ORT output directory
+        run: |
+          rm -rf ort-results
+          mkdir -p ort-results/analyzer
+
+      - name: Analyze dependencies with ORT
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --workdir /project \
+            --volume "${GITHUB_WORKSPACE}:/project" \
+            --env HOME=/tmp/ort-home \
+            --env ORT_CONFIG_DIR=/project/ort-config \
+            --env ORT_DATA_DIR=/tmp/ort-data \
+            "${ORT_IMAGE}" \
+            --info \
+            --stacktrace \
+            analyze \
+            -f JSON \
+            -i /project \
+            -o /project/ort-results/analyzer
+
+      - name: Generate SBOMs and report with ORT
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --workdir /project \
+            --volume "${GITHUB_WORKSPACE}:/project" \
+            --env HOME=/tmp/ort-home \
+            --env ORT_CONFIG_DIR=/project/ort-config \
+            --env ORT_DATA_DIR=/tmp/ort-data \
+            "${ORT_IMAGE}" \
+            --info \
+            --stacktrace \
+            report \
+            -i /project/ort-results/analyzer/analyzer-result.json \
+            -o /project/ort-results \
+            -f CycloneDx,SpdxDocument,WebApp \
+            -O CycloneDX=output.file.formats=json,xml \
+            -O SpdxDocument=output.file.formats=json,yaml \
+            -O SpdxDocument=document.name=idos-sdk-js
+
+      - name: Upload ORT artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ort-license-scan
+          path: ort-results
+          if-no-files-found: error
+          retention-days: 14
