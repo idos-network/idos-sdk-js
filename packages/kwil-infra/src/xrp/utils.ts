@@ -1,11 +1,10 @@
-import type * as GemWalletAPI from "@gemwallet/api";
 import type * as GemWallet from "@gemwallet/api";
 import type { Xumm } from "xumm";
 export type WalletName = "XAMAN" | "GEM";
 
 export interface WalletConfig {
   name: WalletName;
-  instance: Xumm | typeof GemWalletAPI;
+  instance: Xumm | typeof GemWallet;
 }
 
 export type XamanConfig = {
@@ -15,7 +14,7 @@ export type XamanConfig = {
 
 export type GemConfig = {
   name: "GEM";
-  instance: typeof GemWalletAPI;
+  instance: typeof GemWallet;
 };
 
 export type WalletInitConfig = XamanConfig | GemConfig;

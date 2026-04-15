@@ -2,14 +2,14 @@
   "extends": ["config:base"],
   "prConcurrentLimit": 5,
   "baseBranches": ["main"],
-  "assignees": ["@strnadj", "@ditoglez"],
+  "assignees": ["@strnadj", "@pkoch"],
   "schedule": ["before 6am on the first day of the month"],
   "docker": {
     "enabled": false
   },
   "vulnerabilityAlerts": {
     "labels": ["dependencies", "security"],
-    "assignees": ["@strnadj", "@ditoglez"],
+    "assignees": ["@strnadj", "@pkoch"],
     "schedule": "at any time"
   },
   "packageRules": [

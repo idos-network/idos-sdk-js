@@ -16,12 +16,12 @@
     "@idos-network/utils": "workspace:*",
     "@react-router/node": "^7.5.3",
     "@upstash/redis": "^1.36.2",
-    "axios": "1.13.5",
+    "axios": "1.15.0",
     "bowser": "^2.14.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "isbot": "^5",
-    "lucide-react": "^0.564.0",
+    "lucide-react": "^0.577.0",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-qr-code": "^2.0.18",
@@ -34,10 +34,9 @@
   "devDependencies": {
     "@heroicons/react": "^2.2.0",
     "@react-router/dev": "catalog:react-router",
-    "@react-router/fs-routes": "catalog:react-router",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/vite": "^4.1.1",
-    "@types/node": "^25.2.0",
+    "@types/node": "catalog:build",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "@vercel/react-router": "catalog:react-router",
@@ -46,7 +45,6 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-mkcert": "^1.17.8",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-mkcert": "^1.17.8"
   }
 }

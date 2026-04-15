@@ -1,11 +1,9 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
 import tailwindcss from "@tailwindcss/vite";
-import path from "node:path";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 // On Vercel, VITE_SENTRY_ENV can be set in Project Settings. If unset, we fall back to VERCEL_ENV.
 if (process.env.VERCEL_ENV && !process.env.VITE_SENTRY_ENVIRONMENT) {
@@ -35,7 +33,6 @@ export default defineConfig(async (config) => {
   const plugins = [
     tailwindcss(),
     reactRouter(),
-    tsconfigPaths(),
     mkcert(),
     // https://github.com/getsentry/sentry-javascript/blob/master/dev-packages/e2e-tests/test-applications/react-router-7-framework-instrumentation/vite.config.ts#L9C77-L9C86
     // oxlint-disable-next-line typescript/no-explicit-any -- Expected
@@ -56,60 +53,14 @@ export default defineConfig(async (config) => {
   return {
     build: {
       target: "esnext",
-      rollupOptions: {
+      rolldownOptions: {
         input: config.isSsrBuild ? "./server/app.ts" : undefined,
-        output: {
-          manualChunks(id: string) {
-            if (!id.includes("node_modules")) return;
-
-            // React core
-            if (id.includes("/react-dom/") || /\/node_modules\/react\//.test(id)) return "react";
-
-            // TanStack
-            if (id.includes("@tanstack/react-router")) return "tanstack-router";
-            if (id.includes("@tanstack/react-query")) return "tanstack-query";
-
-            // State management
-            if (id.includes("/xstate/") || id.includes("@xstate/")) return "xstate";
-
-            // Web3 — EVM (always loaded: WagmiProvider is at root)
-            if (
-              id.includes("@reown/") ||
-              id.includes("/wagmi/") ||
-              id.includes("@wagmi/") ||
-              id.includes("/viem/")
-            )
-              return "wagmi";
-            if (id.includes("/ethers/")) return "ethers";
-
-            // Web3 — NEAR (lazy-loaded)
-            if (id.includes("@near-wallet-selector/") || id.includes("/near-api-js/"))
-              return "near";
-
-            // Web3 — Stellar (lazy-loaded)
-            if (
-              id.includes("stellar-wallets-kit") ||
-              id.includes("stellar-base") ||
-              id.includes("stellar-sdk")
-            )
-              return "stellar";
-
-            // Web3 — XRPL (lazy-loaded)
-            if (id.includes("@gemwallet/") || id.includes("/ripple-") || id.includes("/xumm/"))
-              return "xrpl";
-
-            // Icons
-            if (id.includes("lucide-react")) return "icons";
-          },
-        },
       },
     },
 
     resolve: {
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+      tsconfigPaths: true,
     },
 
     plugins,

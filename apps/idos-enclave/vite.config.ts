@@ -5,7 +5,6 @@ import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 const require = createRequire(import.meta.url);
 
@@ -19,12 +18,13 @@ export default defineConfig({
       react: require.resolve("preact/compat"),
       "react-dom": require.resolve("preact/compat"),
     },
+    tsconfigPaths: true,
   },
   optimizeDeps: {
     include: ["preact/compat"],
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
         dialog: resolve(__dirname, "dialog.html"),
@@ -35,7 +35,6 @@ export default defineConfig({
     mkcert(),
     preact(),
     tailwindcss(),
-    tsconfigPaths(),
     nodePolyfills({
       globals: {
         Buffer: true,

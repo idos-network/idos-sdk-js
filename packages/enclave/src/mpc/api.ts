@@ -1,17 +1,15 @@
-export type HeadersInit = Record<string, string> | string[][];
-
-const postHeaders: HeadersInit = {
+const postHeaders = {
   Accept: "application/json, text/plain, */*",
   "Content-Type": "application/json",
 };
 
-const getHeaders: Record<string, string> = {
+const getHeaders = {
   Accept: "application/json, text/plain, */*",
 };
 
 export type RequestType = "GET" | "PUT" | "POST" | "PATCH";
 
-function buildOptions<T>(method: RequestType, headers: HeadersInit, entityBytes: T) {
+function buildOptions<T>(method: RequestType, headers: RequestInit["headers"], entityBytes: T) {
   const result: RequestInit = { method, headers, body: null };
 
   if (entityBytes != null) {
@@ -69,7 +67,7 @@ export function putRequest<T>(
 export function patchRequest<T>(
   url: string,
   object: T,
-  headers?: Record<string, string>,
+  headers?: RequestInit["headers"],
 ): Promise<string> {
   const options = buildOptions("PATCH", { ...postHeaders, ...headers }, object);
   return fetch(url, options)

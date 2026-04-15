@@ -22,7 +22,7 @@
     "@stablelib/base64": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
     "dompurify": "^3.2.5",
-    "lucide-preact": "^0.564.0",
+    "lucide-preact": "^0.577.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^1.0.0",
@@ -40,7 +40,6 @@
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.8",
-    "vite-plugin-node-polyfills": "catalog:build",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-node-polyfills": "catalog:build"
   }
 }

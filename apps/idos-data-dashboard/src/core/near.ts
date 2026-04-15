@@ -28,6 +28,7 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
   _selector = await setupWalletSelector({
     network: COMMON_ENV.DEV ? "testnet" : "mainnet",
     debug: COMMON_ENV.DEV,
+    // @ts-expect-error - WalletModuleFactory<InjectedWallet> can't be assigned to WalletModuleFactory<Wallet>
     modules: [setupMeteorWallet(), setupHereWallet()],
   });
 
