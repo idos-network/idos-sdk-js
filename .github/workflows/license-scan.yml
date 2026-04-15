@@ -20,15 +20,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ort:
     name: ORT License Inventory
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      # Intentionally unpinned for the initial rollout; pin after the first
-      # successful production run to stabilize future updates.
-      ORT_IMAGE: ghcr.io/oss-review-toolkit/ort:latest
+      ORT_IMAGE: ghcr.io/oss-review-toolkit/ort@sha256:a0c7fd0db3f642a1e80d7c14e87762c2fcd62a594162de0812925f22f9b9c467
     steps:
       - uses: actions/checkout@v6
 

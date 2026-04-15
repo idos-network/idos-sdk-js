@@ -27,7 +27,7 @@ docker run --rm \
   --env HOME=/tmp/ort-home \
   --env ORT_CONFIG_DIR=/project/ort-config \
   --env ORT_DATA_DIR=/tmp/ort-data \
-  ghcr.io/oss-review-toolkit/ort:latest \
+  ghcr.io/oss-review-toolkit/ort@sha256:a0c7fd0db3f642a1e80d7c14e87762c2fcd62a594162de0812925f22f9b9c467 \
   --info \
   --stacktrace \
   analyze \
@@ -42,7 +42,7 @@ docker run --rm \
   --env HOME=/tmp/ort-home \
   --env ORT_CONFIG_DIR=/project/ort-config \
   --env ORT_DATA_DIR=/tmp/ort-data \
-  ghcr.io/oss-review-toolkit/ort:latest \
+  ghcr.io/oss-review-toolkit/ort@sha256:a0c7fd0db3f642a1e80d7c14e87762c2fcd62a594162de0812925f22f9b9c467 \
   --info \
   --stacktrace \
   report \

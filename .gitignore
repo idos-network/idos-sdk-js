@@ -64,4 +64,3 @@ test-results
 
 # ORT
 ort-results/
-.pnpm-store/*
