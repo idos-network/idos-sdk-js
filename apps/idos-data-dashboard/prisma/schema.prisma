@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @db.VarChar(36)
+  name          String?   @unique @db.VarChar
+  xHandle       String?   @default("") @db.VarChar
+  mainEvm       String?   @default("") @db.VarChar(255)
+  referrerCode  String?   @default("") @db.VarChar
+  cookieConsent Int?
+  createdAt     DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([mainEvm], map: "main_evm_idx")
+  @@map("users")
+}
+
+model UserWallet {
+  id         Int       @id @default(autoincrement())
+  userId     String    @db.VarChar(36)
+  address    String    @db.VarChar
+  walletType String    @db.VarChar
+  createdAt  DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt  DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([userId], map: "user_wallets_user_id_idx")
+  @@unique([userId, address], map: "user_wallets_user_address_unique")
+  @@map("user_wallets")
+}
+
+model SaleParticipant {
+  id                 Int       @id @default(autoincrement())
+  userId             String    @map("user_id") @db.VarChar(36)
+  address            String    @db.VarChar
+  allocation         Decimal?  @default(0) @db.Decimal
+  uncappedAllocation Decimal?  @default(0) @map("uncapped_allocation") @db.Decimal
+  updatedAt          DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  @@index([userId], map: "sale_participants_user_id_idx")
+  @@index([address], map: "sale_participants_address_idx")
+  @@unique([userId, address], map: "sale_participants_user_address_unique")
+  @@map("sale_participants")
+}
+
+model LeaderboardCheckpoint {
+  id                   Int      @id @default(autoincrement())
+  userId               String?  @db.VarChar(36)
+  name                 String?  @db.VarChar(255)
+  xHandle              String?  @db.VarChar(255)
+  questPoints          Decimal  @default(0.0) @db.Decimal(20, 2)
+  gamePoints           Int      @default(0)
+  socialPoints         Decimal  @default(0.0) @db.Decimal(20, 2)
+  contributionTier     String?  @default("No Tier") @db.VarChar(64)
+  contributionTierNumber Int?   @default(0)
+  contributionPoints   Int      @default(0)
+  referralCount        Int      @default(0)
+  totalPoints          Int      @default(0)
+  rank                 Int?     @default(0)
+  relativeMindshare    Decimal? @default(0.0) @db.Decimal(20, 4)
+  epoch                Int
+  contributionMultiplier Boolean? @default(false)
+
+  @@map("leaderboard_checkpoint")
+}

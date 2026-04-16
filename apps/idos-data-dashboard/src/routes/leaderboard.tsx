@@ -1,7 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { useQuery } from "@tanstack/react-query";
-import { max } from "drizzle-orm";
 import { Link, useLoaderData, useLocation, useNavigation } from "react-router";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -17,13 +16,12 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getDb } from "@/core/db.server";
 import {
   getLeaderboardCheckpointEntries,
   getLeaderboardCheckpointEntriesCount,
   getLeaderboardEpochs,
+  getLatestLeaderboardEpoch,
 } from "@/core/db/leaderboard.queries.server";
-import { leaderboardCheckpoint } from "@/core/db/schema";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { formatNumber } from "@/lib/leaderboard-constants";
 import { cn } from "@/lib/utils";
@@ -87,16 +85,11 @@ export async function loader(args: Route.LoaderArgs) {
     };
   }
 
-  const db = getDb();
-  const [epochsResult, maxRow] = await Promise.all([
+  console.log("LOADER MAX EPOCH");
+  const [availableEpochs, maxEpoch] = await Promise.all([
     getLeaderboardEpochs(),
-    db
-      .select({ epoch: max(leaderboardCheckpoint.epoch) })
-      .from(leaderboardCheckpoint)
-      .then((rows) => rows[0]),
+    getLatestLeaderboardEpoch(),
   ]);
-  const availableEpochs = epochsResult;
-  const maxEpoch = maxRow?.epoch ?? 0;
   let epoch: number;
   if (
     epochParam !== null &&
@@ -451,6 +444,9 @@ function UserPositionCard({
 export default function Leaderboard() {
   const { entries, page, pageSize, epoch, totalPages, availableEpochs } =
     useLoaderData<typeof loader>();
+
+  console.log("LEADERBOARD EPOCH", epoch);
+  console.log("LEADERBOARD AVAILABLE EPOCHS", availableEpochs);
   const location = useLocation();
   const pathname = location.pathname;
   const navigation = useNavigation();
