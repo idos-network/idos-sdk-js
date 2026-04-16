@@ -95,3 +95,11 @@ jobs:
           path: ort-results
           if-no-files-found: error
           retention-days: 14
+
+      - name: Note GitHub Pages publishing
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/ort'
+        run: |
+          {
+            echo "### GitHub Pages"
+            echo "The ORT WebApp report (\`scan-report-web-app.html\`) is published at **/license-scan/** by the workflow _Deploy static content to Pages_ (triggered after this run on \`main\`)."
+          } >> "$GITHUB_STEP_SUMMARY"
