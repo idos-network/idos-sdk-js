@@ -121,3 +121,6 @@ catalogs:
     "@tanstack/react-router-devtools": "^1.115.2"
     "@tanstack/router-plugin": "^1.115.2"
     "@tanstack/react-table": "^8.20.0"
+minimumReleaseAgeExclude:
+  # Renovate security update: dompurify@3.4.0
+  - dompurify@3.4.0
