@@ -97,7 +97,7 @@ jobs:
           retention-days: 14
 
       - name: Note GitHub Pages publishing
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/ort'
+        if: github.ref == 'refs/heads/main'
         run: |
           {
             echo "### GitHub Pages"
