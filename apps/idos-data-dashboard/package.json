@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "db:pull": "prisma db pull",
     "db:validate": "prisma validate",
-    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:dev": "npx dotenv-cli -e .env.development.local -- npx prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
