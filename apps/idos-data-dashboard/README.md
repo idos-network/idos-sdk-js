@@ -75,31 +75,31 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 
 ## Environment variables
 
-| Variable                             | Required | Description                                                                                                                             |
-| ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections.                                                                            |
-| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                                                                                            |
-| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.                                                                               |
-| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.                                                                                   |
-| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup.                                                                            |
-| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.                                                                               |
-| `LEGACY_APP_DB_URL`                  | No       | Runtime PostgreSQL URL for the legacy app DB (Neon). Used by community-sale and leaderboard. Set in `.env.local` (server-only).       |
+| Variable                             | Required | Description                                                                                                                     |
+| ------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections.                                                                    |
+| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                                                                                    |
+| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.                                                                       |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.                                                                           |
+| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup.                                                                    |
+| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.                                                                       |
+| `LEGACY_APP_DB_URL`                  | No       | Runtime PostgreSQL URL for the legacy app DB (Neon). Used by community-sale and leaderboard. Set in `.env.local` (server-only). |
 
 ## Available scripts
 
 Run these from the `apps/idos-data-dashboard` directory:
 
-| Script                  | Description                                                                 |
-| ----------------------- | --------------------------------------------------------------------------- |
-| `pnpm dev`              | Generate the Prisma client, then start the Vite dev server with HMR/HTTPS. |
-| `pnpm build`            | Type-check and produce a production build.                                  |
-| `pnpm preview`          | Serve the production build locally for inspection.                          |
-| `pnpm typecheck`        | Regenerate Prisma types, run route typegen, then run `tsc`.                 |
-| `pnpm db:generate`      | Generate the Prisma client from `prisma/schema.prisma`.                     |
-| `pnpm db:pull`          | Introspect the configured Postgres database into the Prisma schema.         |
-| `pnpm db:validate`      | Validate the Prisma schema.                                                 |
-| `pnpm db:migrate:dev`   | Create and apply a development migration.                                   |
-| `pnpm db:migrate:deploy`| Apply committed Prisma migrations.                                          |
+| Script                   | Description                                                                |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `pnpm dev`               | Generate the Prisma client, then start the Vite dev server with HMR/HTTPS. |
+| `pnpm build`             | Type-check and produce a production build.                                 |
+| `pnpm preview`           | Serve the production build locally for inspection.                         |
+| `pnpm typecheck`         | Regenerate Prisma types, run route typegen, then run `tsc`.                |
+| `pnpm db:generate`       | Generate the Prisma client from `prisma/schema.prisma`.                    |
+| `pnpm db:pull`           | Introspect the configured Postgres database into the Prisma schema.        |
+| `pnpm db:validate`       | Validate the Prisma schema.                                                |
+| `pnpm db:migrate:dev`    | Create and apply a development migration.                                  |
+| `pnpm db:migrate:deploy` | Apply committed Prisma migrations.                                         |
 
 ## Database
 
