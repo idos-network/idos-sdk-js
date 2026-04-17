@@ -1,0 +1,6 @@
+---
+# Keep this file in place so later ORT phases can document accepted exceptions
+# without changing the repository layout again.
+issues: []
+rule_violations: []
+vulnerabilities: []

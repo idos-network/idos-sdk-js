@@ -56,6 +56,11 @@ console.log(credentials);
 
 More details on https://github.com/idos-network/idos-sdk-js/blob/main/docs
 
+## License Inventory
+
+License inventory workflow and local ORT usage are documented in
+[`ort-config/README.md`](./ort-config/README.md).
+
 ## Support
 
 Please follow the process outlined here: https://github.com/idos-network/.github/blob/main/profile/README.md
