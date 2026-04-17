@@ -3,14 +3,12 @@ import {
   CircleDollarSignIcon,
   ClockIcon,
   CogIcon,
-  CoinsIcon,
   ExternalLinkIcon,
   LogOutIcon,
   MenuIcon,
   SendIcon,
   Share2Icon,
   ShieldCheckIcon,
-  TrophyIcon,
   Wallet2Icon,
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
@@ -173,18 +171,6 @@ export function MainNavLinks() {
 export function FooterNavLinks() {
   return (
     <ul className="flex flex-1 flex-col gap-1.5">
-      <li>
-        <ListItemLink to="/leaderboard">
-          <TrophyIcon size={24} strokeWidth="1.5" />
-          <span>Leaderboard</span>
-        </ListItemLink>
-      </li>
-      <li>
-        <ListItemLink to="/community-sale">
-          <CoinsIcon size={24} strokeWidth="1.5" />
-          <span>Community Sale</span>
-        </ListItemLink>
-      </li>
       <li>
         <ListItemLink to="/settings">
           <CogIcon size={24} strokeWidth="1" />
