@@ -8,7 +8,14 @@ export default [
       route("shared-with-others", "routes/shared-with-others.tsx"),
       route("shared-with-me", "routes/shared-with-me.tsx"),
       route("settings", "routes/settings.tsx"),
-      ...prefix("api", [route("profile", "routes/api/profile.ts")]),
+      ...prefix("api", [
+        route("profile", "routes/api/profile.ts"),
+        route("login", "routes/api/login.ts"),
+      ]),
+      ...prefix("developer", [
+        index("routes/developer/index.tsx"),
+        route("onboarding", "routes/developer/onboarding.tsx"),
+      ]),
     ]),
   ]),
 ] satisfies RouteConfig;

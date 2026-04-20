@@ -1,12 +1,9 @@
-import { idOSIssuer } from "@idos-network/issuer";
-import { hexDecode } from "@idos-network/utils/codecs";
 import crypto from "node:crypto";
-import nacl from "tweetnacl";
 import { z } from "zod";
 
-import { COMMON_ENV } from "@/core/envFlags.common";
-import { SERVER_ENV } from "@/core/envFlags.server";
+import { getDb } from "@/core/db.server";
 import { sessionStorage } from "@/core/sessions.server";
+import { WalletType } from "@/generated/prisma/enums";
 
 import type { Route } from "./+types/profile";
 
@@ -14,15 +11,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
   // Generate a message to sign to validate ownership of the wallet address
-  const userId = crypto.randomUUID();
   const proofMessage = `Please sign this message to confirm you own this wallet address. Nonce ${crypto.randomUUID()}`;
   session.set("proofMessage", proofMessage);
-  session.set("profileUserId", userId);
 
   return Response.json(
     {
       proofMessage,
-      userId,
     },
     {
       headers: {
@@ -36,6 +30,7 @@ const ProfileSchema = z.object({
   recipientEncryptionPublicKey: z.string(),
   encryptionPasswordStore: z.enum(["user", "mpc"]),
   walletAddress: z.string(),
+  walletType: z.enum(WalletType),
   walletPublicKey: z.string(),
   signature: z.string(),
 });
@@ -58,45 +53,37 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+  if (!session.get("proofMessage")) {
+    return Response.json({ error: "Proof message not found" }, { status: 400 });
+  }
 
-  if (!session.get("profileUserId") || !session.get("proofMessage")) {
+  // TODO: Validate signature
+
+  // Create or use existing user
+  const db = await getDb();
+
+  let user = await db.user.upsert({
+    where: {
+      walletAddress: profileData.walletAddress,
+      walletType: profileData.walletType,
+    },
+    update: {},
+    create: {
+      walletAddress: profileData.walletAddress,
+      walletType: profileData.walletType,
+      relayPublicEncryptionKey: profileData.recipientEncryptionPublicKey,
+    },
+  });
+
+  if (!session.get("userId") || !session.get("proofMessage")) {
     return Response.json({ error: "User ID or proof message not found" }, { status: 400 });
   }
 
-  const issuer = await idOSIssuer.init({
-    nodeUrl: COMMON_ENV.IDOS_NODE_URL,
-    signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
-    encryptionSecretKey: hexDecode(SERVER_ENV.IDOS_ISSUER_ENCRYPTION_SECRET_KEY),
-  });
-
-  const {
-    recipientEncryptionPublicKey,
-    encryptionPasswordStore,
-    walletAddress,
-    walletPublicKey,
-    signature,
-  } = profileData;
-
-  await issuer.createUser(
-    {
-      id: session.get("profileUserId"),
-      recipient_encryption_public_key: recipientEncryptionPublicKey,
-      encryption_password_store: encryptionPasswordStore,
-    },
-    {
-      address: walletAddress,
-      public_key: walletPublicKey,
-      wallet_type: "FaceSign",
-      signature: signature,
-      message: session.get("proofMessage") as string,
-    },
-  );
-
   session.unset("proofMessage");
-  session.unset("profileUserId");
+  session.set("userId", user.id);
 
   return Response.json(
-    { profileCreated: true },
+    { loggedIn: true },
     {
       headers: {
         "Set-Cookie": await sessionStorage.commitSession(session),

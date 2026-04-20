@@ -7,188 +7,24 @@ datasource db {
   provider = "postgresql"
 }
 
+enum WalletType {
+  FACE_SIGN
+  EVM
+  NEAR
+  STELLAR
+  XRPL
+}
+
 model User {
-  id                           String    @id(map: "users_id_unique") @db.VarChar(36)
-  mainEvm                      String?   @default("") @db.VarChar(255)
-  referrerCode                 String?   @default("") @db.VarChar
-  cookieConsent                Int?
-  faceSignUserId               String?   @unique(map: "users_faceSignUserId_unique") @db.VarChar
-  faceSignTokenCreatedAt       DateTime? @db.Timestamp(6)
-  createdAt                    DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt                    DateTime? @default(now()) @db.Timestamp(6)
-  faceSignToken                String?   @db.VarChar
-  name                         String?   @unique(map: "users_name_unique") @db.VarChar
-  xHandle                      String?   @default("") @db.VarChar
-  popCredentialId              String?   @db.VarChar
-  noahCustomerId               String?   @unique(map: "users_noahCustomerId_unique") @db.VarChar
-  kycCredentialId              String?   @db.VarChar
-  kycIdDocumentCountry         String?   @db.VarChar
-  kycResidentialAddressCountry String?   @db.VarChar
-  kycKrakenUserId              String?   @db.VarChar
-  kycKrakenStatus              String?   @db.VarChar
-  lastGeneratedKrakenLinkAt    DateTime? @db.Timestamp(6)
-  kycKrakenLevel               String?   @db.VarChar
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  @@index([mainEvm], map: "main_evm_idx")
-  @@index([name], map: "name_idx")
-  @@index([referrerCode], map: "referrer_code_idx")
-  @@index([xHandle], map: "x_handle_idx")
-  @@map("users")
-}
+  walletAddress String @unique @db.VarChar(255) @map("wallet_address")
+  walletType WalletType @map("wallet_type")
 
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
-model UserWallet {
-  id         Int       @id @default(autoincrement())
-  userId     String    @db.VarChar(36)
-  address    String    @db.VarChar
-  walletType String    @db.VarChar
-  createdAt  DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt  DateTime? @default(now()) @db.Timestamp(6)
+  relayClientId String? @db.Uuid @map("relay_client_id")
+  relayPrivateKey String? @db.Text @map("relay_private_key") /// @encrypted
+  relayPublicEncryptionKey String @db.Text @map("relay_public_encryption_key")
 
-  @@unique([userId, address], map: "user_wallets_user_address_unique")
-  @@index([userId], map: "user_wallets_user_id_idx")
-  @@index([walletType], map: "user_wallets_wallet_type_idx")
-  @@map("user_wallets")
-}
-
-model SaleParticipant {
-  id                 Int       @id @default(autoincrement())
-  userId             String    @map("user_id") @db.VarChar(36)
-  address            String    @db.VarChar
-  allocation         Decimal?  @default(0) @db.Decimal
-  uncappedAllocation Decimal?  @default(0) @map("uncapped_allocation") @db.Decimal
-  updatedAt          DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
-
-  @@unique([userId, address], map: "sale_participants_user_address_unique")
-  @@index([userId])
-  @@index([address], map: "sale_participants_address_normalized_idx")
-  @@map("sale_participants")
-}
-
-model LeaderboardCheckpoint {
-  id                     Int      @id @default(autoincrement())
-  userId                 String?  @db.VarChar(36)
-  name                   String?  @db.VarChar
-  xHandle                String?  @db.VarChar
-  questPoints            Decimal  @default(0.0) @db.Decimal
-  socialPoints           Decimal  @default(0.0) @db.Decimal
-  contributionPoints     Int      @default(0)
-  referralCount          Int      @default(0)
-  totalPoints            Int      @default(0)
-  rank                   Int?     @default(0)
-  relativeMindshare      Decimal? @default(0.0) @db.Decimal
-  epoch                  Int
-  contributionTier       String?  @default("No Tier") @db.VarChar
-  contributionTierNumber Int?     @default(0)
-  contributionMultiplier Boolean? @default(false)
-  gamePoints             Int      @default(0)
-
-  @@map("leaderboard_checkpoint")
-}
-
-model EnvVar {
-  id    Int    @id @default(autoincrement())
-  key   String @unique(map: "env_vars_key_unique") @db.VarChar
-  value String
-
-  @@map("env_vars")
-}
-
-model GamePoint {
-  id        Int       @id @default(autoincrement())
-  userId    String    @unique(map: "game_points_user_id_unique") @map("user_id") @db.VarChar(36)
-  points    Int       @default(0)
-  createdAt DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([userId])
-  @@map("game_points")
-}
-
-model LockTable {
-  id Int @id @default(autoincrement())
-
-  @@map("lock_table")
-}
-
-model OauthXSession {
-  id           Int       @id @default(autoincrement())
-  userId       String    @unique(map: "oauth_x_sessions_userId_unique") @db.VarChar(36)
-  codeVerifier String?   @db.VarChar
-  state        String?   @db.VarChar
-  createdAt    DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([userId], map: "oauth_x_sessions_user_id_idx")
-  @@map("oauth_x_sessions")
-}
-
-model Quest {
-  id           Int       @id
-  name         String    @unique(map: "quests_name_unique") @db.VarChar
-  pointsReward Int
-  isActive     Boolean   @default(false)
-  isRepeatable Boolean   @default(false)
-  createdAt    DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([isActive], map: "quests_is_active_idx")
-  @@index([isRepeatable], map: "quests_is_repeatable_idx")
-  @@index([name])
-  @@map("quests")
-}
-
-model Referral {
-  id            Int       @id @default(autoincrement())
-  userId        String    @db.VarChar(36)
-  referralCode  String    @unique(map: "referrals_referralCode_unique") @db.VarChar
-  referralCount Int       @default(0)
-  createdAt     DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt     DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([referralCode], map: "referrals_referral_code_idx")
-  @@index([userId], map: "referrals_user_id_idx")
-  @@map("referrals")
-}
-
-model UserQuest {
-  id        Int       @id @default(autoincrement())
-  userId    String    @db.VarChar(36)
-  questName String    @db.VarChar(255)
-  createdAt DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([questName], map: "user_quests_quest_name_idx")
-  @@index([userId], map: "user_quests_user_id_idx")
-  @@index([userId, questName], map: "user_quests_user_quest_idx")
-  @@map("user_quests")
-}
-
-model UserToken {
-  id            Int       @id @default(autoincrement())
-  userId        String?   @default("") @db.VarChar(36)
-  publicAddress String    @db.VarChar(255)
-  walletType    String    @db.VarChar
-  accessToken   String
-  refreshToken  String
-  createdAt     DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt     DateTime? @default(now()) @db.Timestamp(6)
-
-  @@unique([userId, publicAddress], map: "user_tokens_user_address_unique")
-  @@index([publicAddress], map: "user_tokens_public_address_idx")
-  @@index([refreshToken], map: "user_tokens_refresh_token_idx")
-  @@index([userId], map: "user_tokens_user_id_idx")
-  @@index([walletType], map: "user_tokens_wallet_type_idx")
-  @@map("user_tokens")
-}
-
-model WallchainLeaderboard {
-  id                Int       @id @default(autoincrement())
-  username          String    @db.VarChar
-  relativeMindshare Decimal   @default(0.0) @db.Decimal
-  createdAt         DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt         DateTime? @default(now()) @db.Timestamp(6)
-  epoch             Int       @default(1)
-
-  @@map("wallchain_leaderboard")
+  createdAt DateTime @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt DateTime @default(now()) @db.Timestamp(6) @map("updated_at")
 }

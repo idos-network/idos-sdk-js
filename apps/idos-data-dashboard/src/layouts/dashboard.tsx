@@ -2,6 +2,7 @@ import {
   ArrowUpRightFromSquare,
   CircleDollarSignIcon,
   ClockIcon,
+  CodeSquareIcon,
   CogIcon,
   ExternalLinkIcon,
   LogOutIcon,
@@ -171,6 +172,12 @@ export function MainNavLinks() {
 export function FooterNavLinks() {
   return (
     <ul className="flex flex-1 flex-col gap-1.5">
+      <li>
+        <ListItemLink to="/developer">
+          <CodeSquareIcon size={24} strokeWidth="1" />
+          <span>Developer console</span>
+        </ListItemLink>
+      </li>
       <li>
         <ListItemLink to="/settings">
           <CogIcon size={24} strokeWidth="1" />
