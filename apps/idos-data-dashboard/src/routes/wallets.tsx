@@ -10,8 +10,8 @@ import { WalletsPending } from "@/components/wallets/wallets-pending";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
-import { useSelector } from "@/machines/provider";
-import { selectWalletAddress } from "@/machines/selectors";
+import { useSelector } from "@/machines/dashboard/provider";
+import { selectWalletAddress } from "@/machines/dashboard/selectors";
 
 export const handle = { breadcrumb: "Wallets" };
 

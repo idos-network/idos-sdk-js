@@ -1,8 +1,8 @@
 import * as Sentry from "@sentry/react-router";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
-import { useSelector } from "@/machines/provider";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
+import { useSelector } from "@/machines/dashboard/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/dashboard/selectors";
 
 // Version for cookie consent localStorage format
 const COOKIE_CONSENT_VERSION = "1.0";

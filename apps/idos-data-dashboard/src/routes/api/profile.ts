@@ -1,5 +1,6 @@
 import { idOSIssuer } from "@idos-network/issuer";
 import { hexDecode } from "@idos-network/utils/codecs";
+import * as Sentry from "@sentry/react-router";
 import crypto from "node:crypto";
 import nacl from "tweetnacl";
 import { z } from "zod";
@@ -7,6 +8,7 @@ import { z } from "zod";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { sessionStorage } from "@/core/sessions.server";
+import { WalletType } from "@/generated/prisma/enums";
 
 import type { Route } from "./+types/profile";
 
@@ -17,7 +19,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const userId = crypto.randomUUID();
   const proofMessage = `Please sign this message to confirm you own this wallet address. Nonce ${crypto.randomUUID()}`;
   session.set("proofMessage", proofMessage);
-  session.set("userId", userId);
+  session.set("profileUserId", userId);
 
   return Response.json(
     {
@@ -35,6 +37,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 const ProfileSchema = z.object({
   recipientEncryptionPublicKey: z.string(),
   encryptionPasswordStore: z.enum(["user", "mpc"]),
+  walletType: z.enum(WalletType),
   walletAddress: z.string(),
   walletPublicKey: z.string(),
   signature: z.string(),
@@ -59,7 +62,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
-  if (!session.get("userId") || !session.get("proofMessage")) {
+  if (!session.get("profileUserId") || !session.get("proofMessage")) {
     return Response.json({ error: "User ID or proof message not found" }, { status: 400 });
   }
 
@@ -75,28 +78,32 @@ export async function action({ request }: Route.ActionArgs) {
     walletAddress,
     walletPublicKey,
     signature,
+    walletType,
   } = profileData;
 
-  const createProfileResponse = await issuer.createUser(
-    {
-      id: session.get("userId"),
-      recipient_encryption_public_key: recipientEncryptionPublicKey,
-      encryption_password_store: encryptionPasswordStore,
-    },
-    {
-      address: walletAddress,
-      public_key: walletPublicKey,
-      wallet_type: "FaceSign",
-      signature: signature,
-      message: session.get("proofMessage") as string,
-    },
-  );
-
-  console.log("createProfileResponse");
-  console.log(createProfileResponse);
+  try {
+    await issuer.createUser(
+      {
+        id: session.get("profileUserId"),
+        recipient_encryption_public_key: recipientEncryptionPublicKey,
+        encryption_password_store: encryptionPasswordStore,
+      },
+      {
+        address: walletAddress,
+        public_key: walletPublicKey,
+        wallet_type: walletType,
+        signature: signature,
+        message: session.get("proofMessage") as string,
+      },
+    );
+  } catch (error) {
+    console.error("Failed to create user", error);
+    Sentry.captureException(error);
+    return Response.json({ error: "Failed to create user" }, { status: 500 });
+  }
 
   session.unset("proofMessage");
-  session.unset("userId");
+  session.unset("profileUserId");
 
   return Response.json(
     { profileCreated: true },
