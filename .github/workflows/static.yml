@@ -2,18 +2,28 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
+  # Runs on pushes targeting the default branch only (github-pages env is restricted to main)
   push:
-    branches: ["main"]
+    branches:
+      - main
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows you to run this workflow manually from the Actions tab (use branch main to deploy)
   workflow_dispatch:
+
+  # Redeploy when ORT license scan finishes so the WebApp report is published
+  workflow_run:
+    workflows: ["License Scan"]
+    types:
+      - completed
+    branches:
+      - main
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -24,6 +34,9 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
+    if: |
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+      (github.event_name == 'workflow_run' || github.ref == 'refs/heads/main')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -31,12 +44,49 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Download ORT WebApp report (from triggering License Scan run)
+        if: github.event_name == 'workflow_run'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          run_id: ${{ github.event.workflow_run.id }}
+          name: ort-license-scan
+          path: ort-results-download
+          if_no_artifact_found: ignore
+
+      - name: Download ORT WebApp report (latest successful scan on main)
+        if: github.event_name != 'workflow_run'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: license-scan.yml
+          branch: main
+          workflow_conclusion: success
+          name: ort-license-scan
+          path: ort-results-download
+          if_no_artifact_found: ignore
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Prepare deploy folder
         run: |
-          mkdir -p public/credentials
+          mkdir -p public/credentials public/license-scan
           cp -r packages/credentials/assets/* public/credentials/
+          if [ -f ort-results-download/scan-report-web-app.html ]; then
+            cp ort-results-download/scan-report-web-app.html public/license-scan/index.html
+          else
+            printf '%s\n' \
+              '<!doctype html>' \
+              '<html lang="en"><head><meta charset="utf-8" />' \
+              '<meta name="viewport" content="width=device-width, initial-scale=1" />' \
+              '<title>License scan report</title>' \
+              '<style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem;line-height:1.5}</style>' \
+              '</head><body><h1>License scan report</h1>' \
+              '<p>The ORT WebApp report is not available yet. It is produced by the <strong>License Scan</strong> workflow.</p>' \
+              '<p>After the next successful scan on <code>main</code>, this page will show the report automatically.</p>' \
+              '</body></html>' > public/license-scan/index.html
+          fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
