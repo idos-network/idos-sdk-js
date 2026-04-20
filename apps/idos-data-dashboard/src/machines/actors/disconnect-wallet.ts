@@ -3,7 +3,7 @@ import { fromPromise } from "xstate";
 import { disconnectEvm } from "@/core/wagmi";
 import { queryClient } from "@/query-client";
 
-import type { DisconnectWalletInput } from "../dashboard.machine";
+import type { DisconnectWalletInput } from "../dashboard/machine";
 
 export const disconnectWallet = fromPromise<void, DisconnectWalletInput>(async ({ input }) => {
   const { walletType, nearSelector, idOSClient } = input;

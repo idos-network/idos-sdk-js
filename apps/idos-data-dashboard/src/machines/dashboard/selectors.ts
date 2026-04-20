@@ -2,7 +2,7 @@ import type { idOSClientLoggedIn } from "@idos-network/client";
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 import type { SnapshotFrom } from "xstate";
 
-import type { dashboardMachine } from "./dashboard.machine";
+import type { dashboardMachine } from "./machine";
 
 type DashboardSnapshot = SnapshotFrom<typeof dashboardMachine>;
 
@@ -17,8 +17,8 @@ export const selectIsDisconnected = (snapshot: DashboardSnapshot): boolean =>
 export const selectIsConnectingFaceSign = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("connecting") && snapshot.context.walletType === "FaceSign";
 
-export const selectIsCreatingFacesignProfile = (snapshot: DashboardSnapshot): boolean =>
-  snapshot.matches("creatingFacesignProfile");
+export const selectIsCreatingProfile = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("creatingProfile");
 
 export const selectIsLoggedIn = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("loggedIn");

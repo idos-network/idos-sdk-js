@@ -3,7 +3,7 @@ import { type State, WagmiProvider } from "wagmi";
 
 import { wagmiAdapter } from "./core/wagmi";
 import { CookieProvider } from "./lib/cookie";
-import { MachineProvider } from "./machines/provider";
+import { MachineProvider } from "./machines/dashboard/provider";
 import { queryClient } from "./query-client";
 
 export default function Providers({
