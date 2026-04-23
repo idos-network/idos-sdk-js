@@ -4,24 +4,24 @@ import { Outlet } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
-import { useActorRef, useSelector } from "@/machines/provider";
+import { useActorRef, useSelector } from "@/machines/dashboard/provider";
 import {
   selectError,
   selectIsConnectingFaceSign,
-  selectIsCreatingFacesignProfile,
+  selectIsCreatingProfile,
   selectIsDisconnected,
   selectIsError,
   selectIsLoading,
   selectIsNoProfile,
   selectLoggedInClient,
   selectWalletType,
-} from "@/machines/selectors";
+} from "@/machines/dashboard/selectors";
 
 export default function AppLayout() {
   const { send } = useActorRef();
   const isLoading = useSelector(selectIsLoading);
   const isConnectingFaceSign = useSelector(selectIsConnectingFaceSign);
-  const isCreatingFacesignProfile = useSelector(selectIsCreatingFacesignProfile);
+  const isCreatingProfile = useSelector(selectIsCreatingProfile);
   const isDisconnected = useSelector(selectIsDisconnected);
   const isNoProfile = useSelector(selectIsNoProfile);
   const isError = useSelector(selectIsError);
@@ -52,7 +52,7 @@ export default function AppLayout() {
     );
   }
 
-  if (isLoading || isConnectingFaceSign || isCreatingFacesignProfile) {
+  if (isLoading || isConnectingFaceSign || isCreatingProfile) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
@@ -82,11 +82,9 @@ export default function AppLayout() {
           className="hidden h-auto w-40 dark:block"
         />
         <p className="text-foreground text-xl">No idOS account found for the connected wallet</p>
-        {walletType === "FaceSign" && (
-          <Button size="lg" onClick={() => send({ type: "CREATE_FACESIGN_PROFILE" })}>
-            <SmilePlusIcon size={20} />I want to create an idOS account with FaceSign
-          </Button>
-        )}
+        <Button size="lg" onClick={() => send({ type: "CREATE_PROFILE" })}>
+          <SmilePlusIcon size={20} />I want to create an idOS account
+        </Button>
         <Button
           size={walletType === "FaceSign" ? "lg" : "xl"}
           variant={walletType === "FaceSign" ? "secondary" : "default"}

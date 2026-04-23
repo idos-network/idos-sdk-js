@@ -6,13 +6,19 @@ import {
   RocketIcon,
   SparklesIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLoaderData } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { sessionStorage } from "@/core/sessions.server";
 import { cn } from "@/lib/utils";
+import {
+  MachineProvider,
+  selectActiveStep,
+  useActorRef,
+  useSelector,
+} from "@/machines/developer/provider";
 
 import type { Route } from "../+types";
 
@@ -136,17 +142,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export default function Developer() {
-  const { userId } = useLoaderData<typeof loader>();
-
-  const [activeStep, setActiveStep] = useState(0);
-  // const isComplete = activeStep >= setupSteps.length;
+function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
+  const actorRef = useActorRef();
+  const activeStep = useSelector(selectActiveStep);
 
   useEffect(() => {
-    if (userId) {
-      setActiveStep(1);
-    }
-  }, [userId]);
+    actorRef.send({ type: "INIT", userId });
+  }, [actorRef, userId]);
 
   return (
     <div className="flex flex-1 flex-col items-stretch gap-5">
@@ -175,5 +177,15 @@ export default function Developer() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Developer() {
+  const { userId } = useLoaderData<typeof loader>();
+
+  return (
+    <MachineProvider>
+      <DeveloperOnboardingContent userId={userId ?? null} />
+    </MachineProvider>
   );
 }

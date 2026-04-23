@@ -7,6 +7,7 @@ import { z } from "zod";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { sessionStorage } from "@/core/sessions.server";
+import { WalletType } from "@/generated/prisma/enums";
 
 import type { Route } from "./+types/profile";
 
@@ -35,6 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 const ProfileSchema = z.object({
   recipientEncryptionPublicKey: z.string(),
   encryptionPasswordStore: z.enum(["user", "mpc"]),
+  walletType: z.enum(WalletType),
   walletAddress: z.string(),
   walletPublicKey: z.string(),
   signature: z.string(),
@@ -75,6 +77,7 @@ export async function action({ request }: Route.ActionArgs) {
     walletAddress,
     walletPublicKey,
     signature,
+    walletType,
   } = profileData;
 
   await issuer.createUser(
@@ -86,7 +89,7 @@ export async function action({ request }: Route.ActionArgs) {
     {
       address: walletAddress,
       public_key: walletPublicKey,
-      wallet_type: "FaceSign",
+      wallet_type: walletType,
       signature: signature,
       message: session.get("proofMessage") as string,
     },

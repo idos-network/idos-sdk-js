@@ -1,7 +1,7 @@
 import invariant from "tiny-invariant";
 
-import { useSelector } from "../machines/provider";
-import { selectLoggedInClient } from "../machines/selectors";
+import { useSelector } from "../machines/dashboard/provider";
+import { selectLoggedInClient } from "../machines/dashboard/selectors";
 
 /**
  * Returns the logged-in idOS client. Uses React hooks — only call from a component

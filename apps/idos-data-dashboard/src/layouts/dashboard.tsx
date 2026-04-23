@@ -26,8 +26,8 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
-import { useActorRef, useSelector } from "@/machines/provider";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
+import { useActorRef, useSelector } from "@/machines/dashboard/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/dashboard/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 

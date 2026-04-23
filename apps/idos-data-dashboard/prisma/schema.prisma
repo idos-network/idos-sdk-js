@@ -8,10 +8,10 @@ datasource db {
 }
 
 enum WalletType {
-  FACE_SIGN
+  FaceSign
   EVM
   NEAR
-  STELLAR
+  Stellar
   XRPL
 }
 

@@ -88,6 +88,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const userId = session.get("userId");
 
   if (!userId) {
+    // TODO: Check if user is ready for developer console
     return redirect("/developer/onboarding");
   }
 
