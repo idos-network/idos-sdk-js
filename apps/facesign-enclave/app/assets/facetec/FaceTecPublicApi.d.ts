@@ -1,4 +1,4 @@
-/** Represents the reason why initialization failed. */
+/** Represents the reason why intialization failed. */
 export declare enum FaceTecInitializationError {
   /**
    * The FaceTec Server could not validate this application.
@@ -73,7 +73,7 @@ export interface FaceTecSessionRequestProcessorCallback {
  */
 export declare enum FaceTecSessionStatus {
   /**
-   * The Session was completed successfully.
+   * The Session was completed.
    */
   SessionCompleted = 0,
   /**
