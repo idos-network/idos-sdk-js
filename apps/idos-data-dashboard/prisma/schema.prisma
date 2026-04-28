@@ -20,10 +20,11 @@ model User {
 
   walletAddress String @unique @db.VarChar(255) @map("wallet_address")
   walletType WalletType @map("wallet_type")
+  publicEncryptionKey String @db.Text @map("public_encryption_key")
 
   relayClientId String? @db.Uuid @map("relay_client_id")
   relayPrivateKey String? @db.Text @map("relay_private_key") /// @encrypted
-  relayPublicEncryptionKey String @db.Text @map("relay_public_encryption_key")
+  relayPublicKey String? @db.Text @map("relay_public_key")
 
   createdAt DateTime @default(now()) @db.Timestamp(6) @map("created_at")
   updatedAt DateTime @default(now()) @db.Timestamp(6) @map("updated_at")

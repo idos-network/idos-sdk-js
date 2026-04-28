@@ -2,130 +2,108 @@ import type { SnapshotFrom } from "xstate";
 
 import { assign, setup } from "xstate";
 
-export interface OnboardingContext {
-  userId: string | null;
-}
-
-export type OnboardingEvent =
-  | {
-      type: "INIT";
-      userId: string | null;
-    }
-  | { type: "KEYS_GENERATED" }
-  | { type: "JOURNEYS_CREATED" }
-  | { type: "RESET" };
+import {
+  actions as journeysActions,
+  actors as journeysActors,
+  flow as journeysFlow,
+} from "./flows/journeys";
+import { actions as keysActions, actors as keysActors, flow as keysFlow } from "./flows/keys";
+import {
+  actions as sessionActions,
+  actors as sessionActors,
+  flow as sessionFlow,
+} from "./flows/session";
+import { emptyContext, type Context } from "./types";
 
 export const onboardingMachine = setup({
   types: {
-    context: {} as OnboardingContext,
-    events: {} as OnboardingEvent,
+    context: {} as Context,
   },
   guards: {
-    hasUserId: ({ event }) =>
-      event.type === "INIT" && typeof event.userId === "string" && event.userId.length > 0,
-    isSignedOut: ({ event }) => event.type === "INIT" && !event.userId,
+    hasError: ({ context }: { context: Context }) => context.errorMessage !== null,
+    hasKeys: ({ context }: { context: Context }) => context.hasKeys,
+    hasClientId: ({ context }: { context: Context }) => context.relayClientId !== null,
   },
   actions: {
-    resetContext: assign({
-      userId: () => null,
+    setIdOSClient: assign({
+      idOSClient: ({ event }) => event.idOSClient,
     }),
-    syncSession: assign({
-      userId: ({ context, event }) => (event.type === "INIT" ? event.userId : context.userId),
+
+    setErrorMessage: assign({
+      errorMessage: ({ event }) => event.error?.message ?? null,
     }),
+
+    ...sessionActions,
+    ...keysActions,
+    ...journeysActions,
+  },
+  actors: {
+    ...sessionActors,
+    ...keysActors,
+    ...journeysActors,
   },
 }).createMachine({
   id: "developerOnboarding",
-  initial: "signIn",
-  context: {
-    userId: null,
-  },
+  initial: "notConfigured",
+  context: emptyContext,
   states: {
-    login,
-
-    signIn: {
-      invoke: {
-        src: "signIn",
-        input: ({ context }): SignInInput => {
-          return {
-            userId: context.userId,
-          };
-        },
-      },
+    notConfigured: {
       on: {
-        SESSION_UPDATED: [
-          {
-            target: "generateKeys",
-            guard: "hasUserId",
-            actions: "syncSession",
-          },
-          {
-            actions: "syncSession",
-          },
-        ],
-        RESET: {
-          target: "checkingSession",
-          actions: "resetContext",
+        init: {
+          target: "session",
+          actions: ["setIdOSClient"],
         },
       },
     },
 
-    generateKeys: {
-      on: {
-        SESSION_UPDATED: [
-          {
-            target: "signIn",
-            guard: "isSignedOut",
-            actions: "syncSession",
-          },
-          {
-            actions: "syncSession",
-          },
-        ],
-        KEYS_GENERATED: "createJourneys",
-        RESET: {
-          target: "checkingSession",
-          actions: "resetContext",
+    // step 0
+    session: sessionFlow,
+    sessionDone: {
+      always: [
+        {
+          target: "error",
+          guard: "hasError",
         },
-      },
+        {
+          target: "keys",
+        },
+      ],
     },
 
-    createJourneys: {
-      on: {
-        SESSION_UPDATED: [
-          {
-            target: "signIn",
-            guard: "isSignedOut",
-            actions: "syncSession",
-          },
-          {
-            actions: "syncSession",
-          },
-        ],
-        JOURNEYS_CREATED: "done",
-        RESET: {
-          target: "checkingSession",
-          actions: "resetContext",
+    // step 1
+    keys: keysFlow,
+    keysDone: {
+      always: [
+        {
+          target: "error",
+          guard: "hasError",
         },
-      },
+        {
+          target: "journeys",
+        },
+      ],
     },
 
+    // step 2
+    journeys: journeysFlow,
+    journeysDone: {
+      always: [
+        {
+          target: "error",
+          guard: "hasError",
+        },
+        {
+          target: "done",
+        },
+      ],
+    },
+
+    // step 3
     done: {
-      on: {
-        ONBOARDING_STARTED: [
-          {
-            target: "signIn",
-            guard: "isSignedOut",
-            actions: "syncSession",
-          },
-          {
-            actions: "syncSession",
-          },
-        ],
-        RESET: {
-          target: "checkingSession",
-          actions: "resetContext",
-        },
-      },
+      type: "final" as const,
+    },
+    error: {
+      type: "final" as const,
     },
   },
 });
@@ -133,15 +111,15 @@ export const onboardingMachine = setup({
 type OnboardingSnapshot = SnapshotFrom<typeof onboardingMachine>;
 
 export const selectActiveStep = (snapshot: OnboardingSnapshot): number => {
-  if (snapshot.matches("checkingSession")) {
+  if (snapshot.matches("notConfigured") || snapshot.matches("session")) {
     return 0;
   }
 
-  if (snapshot.matches("generateKeys")) {
+  if (snapshot.matches("keys") || snapshot.matches("keysDone")) {
     return 1;
   }
 
-  if (snapshot.matches("createJourneys")) {
+  if (snapshot.matches("journeys") || snapshot.matches("journeysDone")) {
     return 2;
   }
 

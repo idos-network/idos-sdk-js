@@ -71,11 +71,11 @@ export async function action({ request }: Route.ActionArgs) {
     create: {
       walletAddress: profileData.walletAddress,
       walletType: profileData.walletType,
-      relayPublicEncryptionKey: profileData.recipientEncryptionPublicKey,
+      publicEncryptionKey: profileData.recipientEncryptionPublicKey,
     },
   });
 
-  if (!session.get("userId") || !session.get("proofMessage")) {
+  if (!user || !session.get("proofMessage")) {
     return Response.json({ error: "User ID or proof message not found" }, { status: 400 });
   }
 

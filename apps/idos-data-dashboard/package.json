@@ -44,6 +44,7 @@
     "clsx": "^2.1.1",
     "ethers": "catalog:ethereum",
     "isbot": "^5",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.577.0",
     "match-sorter": "^8.2.0",
     "near-api-js": "catalog:near",

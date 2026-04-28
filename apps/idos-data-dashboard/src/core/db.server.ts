@@ -9,10 +9,10 @@ const db = globalThis as typeof globalThis & {
 };
 
 function createDbClient(): PrismaClient {
-  const url = SERVER_ENV.LEGACY_APP_DB_URL;
+  const url = SERVER_ENV.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "LEGACY_APP_DB_URL is not set. Configure it in .env.local to use the legacy app database.",
+      "DATABASE_URL is not set. Configure it in .env.local to use the legacy app database.",
     );
   }
 
@@ -23,7 +23,7 @@ function createDbClient(): PrismaClient {
 /**
  * Returns the Prisma DB instance for the legacy app (Neon Postgres).
  * Use only in community-sale and leaderboard routes.
- * @throws Error if LEGACY_APP_DB_URL is not set
+ * @throws Error if DATABASE_URL is not set
  */
 export function getDb(): PrismaClient {
   if (!db.__client) {

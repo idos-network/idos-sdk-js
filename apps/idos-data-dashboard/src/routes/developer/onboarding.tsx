@@ -7,12 +7,14 @@ import {
   SparklesIcon,
 } from "lucide-react";
 import { useEffect } from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { sessionStorage } from "@/core/sessions.server";
 import { cn } from "@/lib/utils";
+import { useSelector as useDashboardSelector } from "@/machines/dashboard/provider";
+import { selectLoggedInClient } from "@/machines/dashboard/selectors";
 import {
   MachineProvider,
   selectActiveStep,
@@ -145,10 +147,19 @@ export async function loader({ request }: Route.LoaderArgs) {
 function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
   const actorRef = useActorRef();
   const activeStep = useSelector(selectActiveStep);
+  const idOSClient = useDashboardSelector(selectLoggedInClient);
+  const state = useSelector((s) => s.value);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    actorRef.send({ type: "INIT", userId });
+    actorRef.send({ type: "init", idOSClient });
   }, [actorRef, userId]);
+
+  useEffect(() => {
+    if (state === "done") {
+      navigate("/developer");
+    }
+  }, [state]);
 
   return (
     <div className="flex flex-1 flex-col items-stretch gap-5">

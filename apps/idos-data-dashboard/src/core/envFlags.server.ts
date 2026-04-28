@@ -5,7 +5,9 @@ export const serverEnvSchema = z.object({
   IDOS_ISSUER_ENCRYPTION_SECRET_KEY: z.string(),
   SECRET_KEY_BASE: z.string(),
   SECURE_AUTH_COOKIE: z.enum(["true", "false"]).transform((v) => v === "true"),
-  LEGACY_APP_DB_URL: z.url().optional(),
+  DATABASE_URL: z.url().optional(),
+  RELAY_URL: z.url(),
+  RELAY_API_KEY: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

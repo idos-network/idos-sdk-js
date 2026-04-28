@@ -22,7 +22,8 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
         walletAddress: client.walletIdentifier,
         walletPublicKey: client.walletPublicKey ?? "",
         walletType: client.walletType,
-        signature: hexEncode(signature as Uint8Array),
+        // @ts-expect-error - TODO: Fix this
+        signature: signature?.startsWith("0x") ? signature : `0x${signature}`,
       };
 
       // Call the API to create the profile
@@ -41,7 +42,7 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
 
       return {
         walletAddress: client.walletIdentifier,
-        walletPublicKey: client.walletPublicKey ?? "",
+        walletPublicKey: client.walletPublicKey ?? client.walletIdentifier,
         walletType: client.walletType,
         nearSelector: null,
       };

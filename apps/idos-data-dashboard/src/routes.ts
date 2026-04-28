@@ -11,6 +11,9 @@ export default [
       ...prefix("api", [
         route("profile", "routes/api/profile.ts"),
         route("login", "routes/api/login.ts"),
+        route("session", "routes/api/session.ts"),
+        route("keys", "routes/api/keys.ts"),
+        route("journeys", "routes/api/journeys.ts"),
       ]),
       ...prefix("developer", [
         index("routes/developer/index.tsx"),

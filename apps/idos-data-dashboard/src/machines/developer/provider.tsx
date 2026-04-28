@@ -14,4 +14,3 @@ export const useSelector = MachineContext.useSelector;
 export const useActorRef = MachineContext.useActorRef;
 
 export { selectActiveStep } from "./onboarding.machine";
-export type { OnboardingContext, OnboardingEvent } from "./onboarding.machine";
