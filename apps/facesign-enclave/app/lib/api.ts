@@ -21,7 +21,7 @@ export interface FaceSignResponse {
     ageV2GroupEnumInt: number;
   };
   error: boolean;
-  faceSignUserId: string;
+  userId: string;
 }
 
 export interface LoginResponse extends FaceSignResponse {
@@ -63,7 +63,7 @@ export async function login(requestBlob: string): Promise<LoginResponse | NewUse
   );
 
   // Store the userId in local storage
-  localStorage.setItem("faceSignUserId", response.data.faceSignUserId);
+  localStorage.setItem("faceSignUserId", response.data.userId);
 
   return response.data;
 }
@@ -86,10 +86,8 @@ export async function confirmNewUser(
   return response.data;
 }
 
-export async function getEntropy(
-  token: string,
-): Promise<{ entropy: string; faceSignUserId: string }> {
-  const response = await entropyService.post<{ entropy: string; faceSignUserId: string }>(
+export async function getEntropy(token: string): Promise<{ entropy: string }> {
+  const response = await entropyService.post<{ entropy: string }>(
     "/facesign/entropy",
     JSON.stringify({ token }),
     {
