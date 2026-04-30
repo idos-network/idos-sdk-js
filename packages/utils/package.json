@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/utils",
-  "version": "1.0.0-rc.1.1",
+  "version": "1.0.0-rc.1.3",
   "description": "idOS Utils for JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
