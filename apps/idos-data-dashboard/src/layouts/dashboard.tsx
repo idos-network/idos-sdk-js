@@ -68,7 +68,7 @@ export function ConnectedWallet() {
               src="/wallet.svg"
               width={50}
               height={50}
-              className="hidden h-[50px] w-[50px] dark:block"
+              className="hidden h-12.5 w-12.5 dark:block"
               loading="eager"
             />
           </>

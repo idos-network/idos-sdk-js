@@ -1,4 +1,3 @@
-import { hexEncode } from "@idos-network/utils/codecs";
 import { fromPromise } from "xstate";
 
 import type { ProfileData } from "@/routes/api/profile";

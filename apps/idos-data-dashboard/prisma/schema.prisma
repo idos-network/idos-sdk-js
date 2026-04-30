@@ -18,14 +18,19 @@ enum WalletType {
 model User {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  walletAddress String @unique @db.VarChar(255) @map("wallet_address")
-  walletType WalletType @map("wallet_type")
-  publicEncryptionKey String @db.Text @map("public_encryption_key")
+  walletAddress String     @unique @map("wallet_address") @db.VarChar(255)
+  walletType    WalletType @map("wallet_type")
 
-  relayClientId String? @db.Uuid @map("relay_client_id")
-  relayPrivateKey String? @db.Text @map("relay_private_key") /// @encrypted
-  relayPublicKey String? @db.Text @map("relay_public_key")
+  consumerAuthPublicKey String? @map("consumer_auth_public_key") @db.VarChar(255)
+  consumerAuthKey       String? @map("consumer_auth_key") @db.Text /// @encrypted
+  consumerEncPublicKey  String? @map("consumer_enc_public_key") @db.VarChar(255)
+  consumerEncKey        String? @map("consumer_enc_key") @db.Text /// @encrypted
 
-  createdAt DateTime @default(now()) @db.Timestamp(6) @map("created_at")
-  updatedAt DateTime @default(now()) @db.Timestamp(6) @map("updated_at")
+  relayClientId   String? @map("relay_client_id") @db.Uuid
+  relayName       String? @map("relay_name") @db.VarChar(255)
+  relayPrivateKey String? @map("relay_private_key") @db.Text /// @encrypted
+  relayPublicKey  String? @map("relay_public_key") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
 }

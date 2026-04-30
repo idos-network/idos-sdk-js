@@ -14,7 +14,6 @@ import {
   selectIsLoading,
   selectIsNoProfile,
   selectLoggedInClient,
-  selectWalletType,
 } from "@/machines/dashboard/selectors";
 
 export default function AppLayout() {
@@ -27,7 +26,6 @@ export default function AppLayout() {
   const isError = useSelector(selectIsError);
   const error = useSelector(selectError);
   const idOSClient = useSelector(selectLoggedInClient);
-  const walletType = useSelector(selectWalletType);
 
   if (isError) {
     return (

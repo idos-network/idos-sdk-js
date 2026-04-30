@@ -1,4 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
+import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 import { SERVER_ENV } from "@/core/envFlags.server";
 
@@ -17,7 +18,13 @@ function createDbClient(): PrismaClient {
   }
 
   const adapter = new PrismaPg({ connectionString: url });
-  return new PrismaClient({ adapter });
+  const client = new PrismaClient({ adapter });
+
+  return client.$extends(
+    fieldEncryptionExtension({
+      encryptionKey: SERVER_ENV.PRISMA_FIELD_ENCRYPTION_KEY,
+    }),
+  ) as PrismaClient;
 }
 
 /**

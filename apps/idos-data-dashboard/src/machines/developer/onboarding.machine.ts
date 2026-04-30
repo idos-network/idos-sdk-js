@@ -8,12 +8,10 @@ import {
   flow as journeysFlow,
 } from "./flows/journeys";
 import { actions as keysActions, actors as keysActors, flow as keysFlow } from "./flows/keys";
-import {
-  actions as sessionActions,
-  actors as sessionActors,
-  flow as sessionFlow,
-} from "./flows/session";
+import { actors as sessionActors, flow as sessionFlow } from "./flows/session";
 import { emptyContext, type Context } from "./types";
+
+const STEP_TRANSITION_DELAY_MS = 500;
 
 export const onboardingMachine = setup({
   types: {
@@ -33,7 +31,12 @@ export const onboardingMachine = setup({
       errorMessage: ({ event }) => event.error?.message ?? null,
     }),
 
-    ...sessionActions,
+    storeSession: assign({
+      userId: ({ event }) => event.output.userId,
+      hasKeys: ({ event }) => event.output.hasKeys,
+      relayClientId: ({ event }) => event.output.relayClientId,
+    }),
+
     ...keysActions,
     ...journeysActions,
   },
@@ -59,43 +62,49 @@ export const onboardingMachine = setup({
     // step 0
     session: sessionFlow,
     sessionDone: {
-      always: [
-        {
-          target: "error",
-          guard: "hasError",
-        },
-        {
-          target: "keys",
-        },
-      ],
+      after: {
+        [STEP_TRANSITION_DELAY_MS]: [
+          {
+            target: "error",
+            guard: "hasError",
+          },
+          {
+            target: "keys",
+          },
+        ],
+      },
     },
 
     // step 1
     keys: keysFlow,
     keysDone: {
-      always: [
-        {
-          target: "error",
-          guard: "hasError",
-        },
-        {
-          target: "journeys",
-        },
-      ],
+      after: {
+        [STEP_TRANSITION_DELAY_MS]: [
+          {
+            target: "error",
+            guard: "hasError",
+          },
+          {
+            target: "journeys",
+          },
+        ],
+      },
     },
 
     // step 2
     journeys: journeysFlow,
     journeysDone: {
-      always: [
-        {
-          target: "error",
-          guard: "hasError",
-        },
-        {
-          target: "done",
-        },
-      ],
+      after: {
+        [STEP_TRANSITION_DELAY_MS]: [
+          {
+            target: "error",
+            guard: "hasError",
+          },
+          {
+            target: "done",
+          },
+        ],
+      },
     },
 
     // step 3

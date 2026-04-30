@@ -8,6 +8,7 @@ export const serverEnvSchema = z.object({
   DATABASE_URL: z.url().optional(),
   RELAY_URL: z.url(),
   RELAY_API_KEY: z.string(),
+  PRISMA_FIELD_ENCRYPTION_KEY: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

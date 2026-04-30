@@ -83,7 +83,7 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 | `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.                                                                           |
 | `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup.                                                                    |
 | `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.                                                                       |
-| `LEGACY_APP_DB_URL`                  | No       | Runtime PostgreSQL URL for the legacy app DB (Neon). Used by community-sale and leaderboard. Set in `.env.local` (server-only). |
+| `DATABASE_URL`                  | No       | Runtime PostgreSQL URL for the the DB connection. |
 
 ## Available scripts
 

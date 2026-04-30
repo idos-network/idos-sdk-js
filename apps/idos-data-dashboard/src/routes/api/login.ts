@@ -71,7 +71,6 @@ export async function action({ request }: Route.ActionArgs) {
     create: {
       walletAddress: profileData.walletAddress,
       walletType: profileData.walletType,
-      publicEncryptionKey: profileData.recipientEncryptionPublicKey,
     },
   });
 

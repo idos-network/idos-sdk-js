@@ -157,7 +157,9 @@ function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
 
   useEffect(() => {
     if (state === "done") {
-      navigate("/developer");
+      setTimeout(() => {
+        navigate("/developer");
+      }, 2000);
     }
   }, [state]);
 
