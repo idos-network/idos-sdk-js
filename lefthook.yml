@@ -4,5 +4,5 @@ pre-commit:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: pnpx oxfmt --no-error-on-unmatched-pattern {staged_files} && git update-index --again
     lint:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
       run: pnpx oxlint --fix {staged_files} && git update-index --again
