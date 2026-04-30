@@ -29,6 +29,30 @@ jobs:
 
       - run: pnpm turbo run quality
 
+  changeset:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: "pnpm"
+
+      - run: pnpm install
+
+      - run: pnpm changeset status --since=origin/main
+
   cspell:
     runs-on: ubuntu-latest
     steps:

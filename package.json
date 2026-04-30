@@ -14,9 +14,12 @@
     "preinstall": "npx only-allow pnpm",
     "size": "size-limit",
     "test": "turbo run test",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "ci:publish": "pnpm publish -r",
+    "publint": "pnpm --filter './packages/**' run publint"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
     "lefthook": "1.13.6",
