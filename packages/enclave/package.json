@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/enclave",
-  "version": "1.0.0-rc.1.3",
+  "version": "1.0.0",
   "description": "idOS Enclave JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "facesign-enclave",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "idOS FaceSign Sign",
   "license": "MIT",
   "repository": "https://github.com/idos-network/idos-sdk-js",
