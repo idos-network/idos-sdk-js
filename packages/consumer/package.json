@@ -4,14 +4,15 @@
   "description": "idOS Consumer JavaScript SDK for server environments",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "repository": "github:idos-network/idos-sdk-js",
   "files": [
     "dist/**/*",
     "src/**/*"
   ],
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",

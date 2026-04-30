@@ -3,9 +3,12 @@
   "version": "1.0.0-rc.1.1",
   "description": "Infrastructure and wallets for idOS",
   "license": "MIT",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "repository": "github:idos-network/idos-sdk-js",
   "type": "module",
   "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     "./actions": {
       "types": "./dist/actions/index.d.mts",

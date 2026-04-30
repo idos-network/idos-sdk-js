@@ -4,7 +4,7 @@
   "description": "idOS Enclave JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "repository": "github:idos-network/idos-sdk-js",
   "files": [
     "dist/**/*",
     "src/**/*"
