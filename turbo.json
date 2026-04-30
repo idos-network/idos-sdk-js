@@ -8,7 +8,7 @@
     },
     "data-dashboard#build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", "dist/**"],
+      "outputs": ["build/**"],
       "env": ["DATABASE_URL"]
     },
     "build:packages": {
