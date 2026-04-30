@@ -60,7 +60,7 @@ More details on <https://github.com/idos-network/idos-sdk-js/tree/main/docs>.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (see [`.node_version`](.node_version) for the exact version)
+- [Node.js](https://nodejs.org/) (see [`.node-version`](.node-version) for the exact version)
 - [pnpm](https://pnpm.io/) v10+ (enforced via the `packageManager` field in `package.json`)
 
 ### Setup
