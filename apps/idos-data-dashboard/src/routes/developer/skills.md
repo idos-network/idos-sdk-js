@@ -56,8 +56,8 @@ This rule covers the idOS frontend **Client SDK** and backend **Consumer SDK** f
 ## 1) Dependencies
 
 - Install the SDK packages in the package that owns each runtime:
-  - Frontend/client runtime: `@idos-network/client`
-  - Backend/server runtime: `@idos-network/consumer`
+  - Frontend/client runtime: `@idos-network/client` from `https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/client@bcd08cf`
+  - Backend/server runtime: `@idos-network/consumer` from `https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/consumer@bcd08cf`
   - KYC relay JWT signing: `jsonwebtoken`
 
 - Add signer helper dependencies only when needed by the chosen backend signer type:
@@ -71,16 +71,16 @@ This rule covers the idOS frontend **Client SDK** and backend **Consumer SDK** f
 Examples:
 
 ```sh
-pnpm add @idos-network/client
-pnpm add @idos-network/consumer jsonwebtoken
+pnpm add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/client@bcd08cf
+pnpm add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/consumer@bcd08cf jsonwebtoken
 pnpm add -D @types/jsonwebtoken
 ```
 
 For a workspace, scope the install to the correct package. Example:
 
 ```sh
-pnpm --filter <frontend-package> add @idos-network/client
-pnpm --filter <backend-package> add @idos-network/consumer jsonwebtoken
+pnpm --filter <frontend-package> add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/client@bcd08cf
+pnpm --filter <backend-package> add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/consumer@bcd08cf jsonwebtoken
 pnpm --filter <backend-package> add -D @types/jsonwebtoken
 ```
 
