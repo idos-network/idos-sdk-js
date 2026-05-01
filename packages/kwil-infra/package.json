@@ -55,7 +55,7 @@
   "devDependencies": {
     "@gemwallet/api": "catalog:xrp",
     "@types/node": "catalog:build",
-    "jsdom": "^22.1.0",
+    "jsdom": "^29.0.0",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing",
