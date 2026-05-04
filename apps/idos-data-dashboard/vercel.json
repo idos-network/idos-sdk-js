@@ -2,14 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "react-router",
   "functions": {
-    "developer": {
-      "includeFiles": "prisma/**/*"
-    },
-    "api/developer": {
-      "includeFiles": "prisma/**/*"
-    },
-    "api/developer-credentials": {
-      "includeFiles": "prisma/**/*"
+    "**/*.js": {
+      "includeFiles": "prisma/schema.prisma"
     }
   }
 }
