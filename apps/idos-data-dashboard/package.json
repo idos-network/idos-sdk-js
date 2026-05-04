@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm run typecheck && pnpm prisma migrate deploy && react-router build",
+    "build": "pnpm run typecheck && prisma generate && pnpm prisma migrate deploy && react-router build",
     "dev": "pnpm run db:generate && react-router dev",
     "start": "NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "pnpm run db:generate && react-router typegen && tsc",
