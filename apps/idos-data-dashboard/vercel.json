@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "react-router",
   "functions": {
-    "**/*.js": {
+    "**/*.ts": {
       "includeFiles": "prisma/schema.prisma"
     }
   }
