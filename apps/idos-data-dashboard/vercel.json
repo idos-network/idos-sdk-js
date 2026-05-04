@@ -3,7 +3,7 @@
   "framework": "react-router",
   "functions": {
     "server/app.ts": {
-      "includeFiles": ["prisma/**/*"]
+      "includeFiles": "prisma/**/*"
     }
   }
 }
