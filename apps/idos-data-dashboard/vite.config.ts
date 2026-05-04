@@ -1,7 +1,9 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "vite";
+import { copyFile, mkdir } from "node:fs/promises";
+import { join } from "node:path";
+import { defineConfig, type Plugin } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
@@ -28,6 +30,21 @@ const sentryConfig: SentryReactRouterBuildOptions = {
   },
 };
 
+function copyPrismaSchemaPlugin(): Plugin {
+  return {
+    name: "copy-prisma-schema",
+    apply: "build",
+    async closeBundle() {
+      const appRoot = process.cwd();
+      const source = join(appRoot, "prisma", "schema.prisma");
+      const targetDir = join(appRoot, "build", "server", "prisma");
+
+      await mkdir(targetDir, { recursive: true });
+      await copyFile(source, join(targetDir, "schema.prisma"));
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(async (config) => {
   const plugins = [
@@ -48,6 +65,8 @@ export default defineConfig(async (config) => {
         },
       }),
     );
+  } else {
+    plugins.push(copyPrismaSchemaPlugin());
   }
 
   return {
