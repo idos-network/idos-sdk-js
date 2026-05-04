@@ -56,8 +56,8 @@ This rule covers the idOS frontend **Client SDK** and backend **Consumer SDK** f
 ## 1) Dependencies
 
 - Install the SDK packages in the package that owns each runtime:
-  - Frontend/client runtime: `@idos-network/client` from `https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/client@bcd08cf`
-  - Backend/server runtime: `@idos-network/consumer` from `https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/consumer@bcd08cf`
+  - Frontend/client runtime: `@idos-network/client`
+  - Backend/server runtime: `@idos-network/consumer`
   - KYC relay JWT signing: `jsonwebtoken`
 
 - Add signer helper dependencies only when needed by the chosen backend signer type:
@@ -71,16 +71,16 @@ This rule covers the idOS frontend **Client SDK** and backend **Consumer SDK** f
 Examples:
 
 ```sh
-pnpm add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/client@bcd08cf
-pnpm add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/consumer@bcd08cf jsonwebtoken
+pnpm add @idos-network/client
+pnpm add @idos-network/consumer jsonwebtoken
 pnpm add -D @types/jsonwebtoken
 ```
 
 For a workspace, scope the install to the correct package. Example:
 
 ```sh
-pnpm --filter <frontend-package> add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/client@bcd08cf
-pnpm --filter <backend-package> add https://pkg.pr.new/idos-network/idos-sdk-js/@idos-network/consumer@bcd08cf jsonwebtoken
+pnpm --filter <frontend-package> add @idos-network/client
+pnpm --filter <backend-package> add @idos-network/consumer jsonwebtoken
 pnpm --filter <backend-package> add -D @types/jsonwebtoken
 ```
 
@@ -99,7 +99,7 @@ pnpm --filter <backend-package> add -D @types/jsonwebtoken
   - `IDOS_CONSUMER_AUTH_KEY="REPLACE_WITH_CONSUMER_SIGNING_PRIVATE_KEY"`
   - `IDOS_CONSUMER_ENC_KEY="REPLACE_WITH_CONSUMER_ENCRYPTION_PRIVATE_KEY"`
   - `IDOS_ACCEPTED_ISSUER_PUBLIC_KEY="REPLACE_WITH_ACCEPTED_ISSUER_PUBLIC_KEY"`
-  - `IDOS_ACCEPTED_ISSUER_ID="REPLACE_WITH_ACCEPTED_ISSUER_ID_OR_URL"`
+  - `IDOS_ACCEPTED_ISSUER_ID="REPLACE_WITH_ACCEPTED_ISSUER_ID"`
   - `IDOS_CONSUMER_PUBLIC_IDENTIFIER="REPLACE_WITH_CONSUMER_WALLET_IDENTIFIER"`
 
 - Treat key formats carefully:
@@ -185,9 +185,7 @@ const credentials = await idosWithUser.filterCredentials({
 ```ts
 const grants = await idosWithUser.getAccessGrantsOwned();
 const existingGrant = grants.find(
-  (grant) =>
-    grant.ag_grantee_wallet_identifier ===
-    publicConfig.IDOS_CONSUMER_PUBLIC_IDENTIFIER,
+  (grant) => grant.ag_grantee_wallet_identifier === publicConfig.IDOS_CONSUMER_PUBLIC_IDENTIFIER,
 );
 ```
 
@@ -258,13 +256,15 @@ app.get("/kyc", requireAuth, (req, res) => {
 - Add a button/action that calls the backend KYC endpoint and opens the returned link in an iframe.
 
 ```tsx
-{kycLink ? (
-  <iframe
-    src={kycLink}
-    allow="camera fullscreen *"
-    sandbox="allow-forms allow-modals allow-popups allow-same-origin allow-scripts"
-  />
-) : null}
+{
+  kycLink ? (
+    <iframe
+      src={kycLink}
+      allow="camera fullscreen *"
+      sandbox="allow-forms allow-modals allow-popups allow-same-origin allow-scripts"
+    />
+  ) : null;
+}
 ```
 
 - Add a message receiver for iframe events. Derive the allowed origin from the configured relay URL.
@@ -378,8 +378,7 @@ await idosConsumer.createAccessGrantByDag({
 - Retrieve decrypted credential contents from an approved grant:
 
 ```ts
-const credentialContents =
-  await idosConsumer.getCredentialSharedContentDecrypted(grant.data_id);
+const credentialContents = await idosConsumer.getCredentialSharedContentDecrypted(grant.data_id);
 ```
 
 - Parse credential contents as structured data only after confirming the expected format. Handle malformed data as a failed credential read.
@@ -399,10 +398,7 @@ const allowedIssuers = [
   },
 ];
 
-const verificationResults = await idosConsumer.verifyCredential(
-  credentialContents,
-  allowedIssuers,
-);
+const verificationResults = await idosConsumer.verifyCredential(credentialContents, allowedIssuers);
 
 const [verificationResult] = verificationResults;
 

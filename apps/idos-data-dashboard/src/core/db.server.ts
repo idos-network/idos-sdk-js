@@ -1,4 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
+import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 import { SERVER_ENV } from "@/core/envFlags.server";
 
@@ -19,14 +20,12 @@ function createDbClient(): PrismaClient {
   const adapter = new PrismaPg({ connectionString: url });
   const client = new PrismaClient({ adapter });
 
-  return client;
-
   // TODO: Fix this on vercel
-  /*return client.$extends(
+  return client.$extends(
     fieldEncryptionExtension({
       encryptionKey: SERVER_ENV.PRISMA_FIELD_ENCRYPTION_KEY,
     }),
-  ) as PrismaClient;*/
+  ) as PrismaClient;
 }
 
 /**

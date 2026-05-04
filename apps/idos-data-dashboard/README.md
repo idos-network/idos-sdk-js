@@ -75,15 +75,15 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 
 ## Environment variables
 
-| Variable                             | Required | Description                                                                                                                     |
-| ------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections.                                                                    |
-| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                                                                                    |
-| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.                                                                       |
-| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.                                                                           |
-| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup.                                                                    |
-| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.                                                                       |
-| `DATABASE_URL`                  | No       | Runtime PostgreSQL URL for the the DB connection. |
+| Variable                             | Required | Description                                                  |
+| ------------------------------------ | -------- | ------------------------------------------------------------ |
+| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections. |
+| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                 |
+| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.    |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.        |
+| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup. |
+| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.    |
+| `DATABASE_URL`                       | No       | Runtime PostgreSQL URL for the the DB connection.            |
 
 ## Available scripts
 
