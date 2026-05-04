@@ -2,7 +2,7 @@ import { reactRouter } from "@react-router/dev/vite";
 import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
 import tailwindcss from "@tailwindcss/vite";
 import { copyFile, mkdir } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
@@ -30,17 +30,27 @@ const sentryConfig: SentryReactRouterBuildOptions = {
   },
 };
 
-function copyPrismaSchemaPlugin(): Plugin {
-  return {
-    name: "copy-prisma-schema",
-    apply: "build",
-    async closeBundle() {
-      const appRoot = process.cwd();
-      const source = join(appRoot, "prisma", "schema.prisma");
-      const targetDir = join(appRoot, "build", "server", "prisma");
+function copyPrismaSchemaToServerBuild(): Plugin {
+  let root = "";
+  let outDir = "";
 
-      await mkdir(targetDir, { recursive: true });
-      await copyFile(source, join(targetDir, "schema.prisma"));
+  async function copySchema(schemaSource: string, schemaDestination: string) {
+    await mkdir(dirname(schemaDestination), { recursive: true });
+    await copyFile(schemaSource, schemaDestination);
+  }
+
+  return {
+    name: "copy-prisma-schema-to-server-build",
+    apply: "build",
+    configResolved(config) {
+      root = config.root;
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    async closeBundle() {
+      const schemaSource = resolve(root, "prisma/schema.prisma");
+      console.log(schemaSource);
+      console.log(outDir);
+      copySchema(schemaSource, resolve(outDir, "prisma/schema.prisma"));
     },
   };
 }
@@ -56,6 +66,10 @@ export default defineConfig(async (config) => {
     ...((await sentryReactRouter(sentryConfig, config)) as any[]),
   ];
 
+  if (config.isSsrBuild) {
+    plugins.push(copyPrismaSchemaToServerBuild());
+  }
+
   if (!config.isSsrBuild) {
     plugins.push(
       nodePolyfills({
@@ -65,8 +79,6 @@ export default defineConfig(async (config) => {
         },
       }),
     );
-  } else {
-    plugins.push(copyPrismaSchemaPlugin());
   }
 
   return {
