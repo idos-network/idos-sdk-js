@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "react-router",
   "functions": {
-    "apps/idos-data-dashboard/api/index.js": {
+    "src/entry.server.tsx": {
       "includeFiles": "prisma/schema.prisma"
     }
   }
