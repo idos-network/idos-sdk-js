@@ -1,9 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "react-router",
-  "functions": {
-    "src/entry.server.tsx": {
-      "includeFiles": "prisma/schema.prisma"
-    }
-  }
+  "framework": "react-router"
 }
