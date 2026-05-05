@@ -71,9 +71,6 @@
   "pnpm": {
     "overrides": {
       "chevrotain": "10.5.0"
-    },
-    "patchedDependencies": {
-      "prisma-field-encryption@0.0.0-preview.022c9f5af13ecb482b190a0d24775c67e505f632": "patches/prisma-field-encryption@0.0.0-preview.022c9f5af13ecb482b190a0d24775c67e505f632.patch"
     }
   }
 }

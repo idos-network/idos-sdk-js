@@ -3,6 +3,7 @@ import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 import { SERVER_ENV } from "@/core/envFlags.server";
 
+import schemaSource from "../../prisma/schema.prisma?raw";
 import { PrismaClient } from "../generated/prisma/client";
 
 const db = globalThis as typeof globalThis & {
@@ -24,6 +25,7 @@ function createDbClient(): PrismaClient {
   return client.$extends(
     fieldEncryptionExtension({
       encryptionKey: SERVER_ENV.PRISMA_FIELD_ENCRYPTION_KEY,
+      schemaSource,
     }),
   ) as PrismaClient;
 }
