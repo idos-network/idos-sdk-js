@@ -1,35 +1,23 @@
 diff --git a/dist/index.js b/dist/index.js
-index 7384b2cad1a35e937187808b66b847ec354e90b1..70beb733e72749f553f85a81550067ae26da51ac 100644
+index 7384b2cad1a35e937187808b66b847ec354e90b1..90e911ea08ad36523836924ce320b45a05dff162 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -403,9 +403,19 @@ function findSchemaPath() {
+@@ -403,8 +403,17 @@ function findSchemaPath() {
  		node_path.default.resolve("prisma/schema.prisma"),
  		node_path.default.resolve("schema.prisma"),
  		node_path.default.resolve("prisma/schema"),
 -		node_path.default.resolve("prisma")
 +		node_path.default.resolve("prisma"),
-+    node_path.default.resolve(process.cwd(), "prisma/schema.prisma")
++    node_path.default.resolve(process.cwd(), "apps/idos-data-dashboard/prisma/schema.prisma")
  	];
++
 +  console.log(process.cwd());
-+  try {
-+    const files = node_fs.default.readdirSync(process.cwd());
-+    console.log('Files in directory:', files);
-+  } catch (error) {
-+    console.error('Error:', error);
-+  }
++   try {
++     const files = node_fs.default.readdirSync(node_path.default.resolve(process.cwd(), "apps/idos-data-dashboard"));
++     console.log('Files in directory:', files);
++   } catch (error) {
++     console.error('Error:', error);
++   }
  	for (const candidate of candidates) {
-+    console.log(candidate);
-+    console.log(node_fs.default.existsSync(candidate));
  		if (!node_fs.default.existsSync(candidate)) continue;
  		const stat = node_fs.default.statSync(candidate);
- 		if (stat.isFile()) return candidate;
-@@ -634,7 +644,9 @@ function isOrderBy(path, field, value) {
- //#endregion
- //#region src/extension.ts
- function resolveModels$1(config) {
-+  console.log(config.schemaSource);
- 	if (config.schemaSource) return analyseSchema(config.schemaSource);
-+  console.log(config.schemaPath);
- 	if (config.schemaPath) return analyseSchemaFile(config.schemaPath);
- 	if (config.dmmf) return analyseDMMF(config.dmmf);
- 	const detectedPath = findSchemaPath();
