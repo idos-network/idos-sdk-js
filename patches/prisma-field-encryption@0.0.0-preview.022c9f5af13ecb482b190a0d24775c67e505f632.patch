@@ -1,8 +1,8 @@
 diff --git a/dist/index.js b/dist/index.js
-index 7384b2cad1a35e937187808b66b847ec354e90b1..a38dc9901af3059f085c078e2cdb772c39595ddd 100644
+index 7384b2cad1a35e937187808b66b847ec354e90b1..a6414233577eb43ae14d3cfcdc2ec746b3a0e884 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -403,8 +403,17 @@ function findSchemaPath() {
+@@ -403,9 +403,24 @@ function findSchemaPath() {
  		node_path.default.resolve("prisma/schema.prisma"),
  		node_path.default.resolve("schema.prisma"),
  		node_path.default.resolve("prisma/schema"),
@@ -15,9 +15,16 @@ index 7384b2cad1a35e937187808b66b847ec354e90b1..a38dc9901af3059f085c078e2cdb772c
 +  try {
 +    const files = node_fs.default.readdirSync(node_path.default.resolve(process.cwd(), "apps/idos-data-dashboard/build/server"));
 +    console.log('Files in directory:', files);
++    const dir = files[0];
++    const dataFiles = node_fs.default.readdirSync(node_path.default.resolve(process.cwd(), "apps/idos-data-dashboard/build/server", dir));
++    console.log('Data files:', dataFiles);
++    candidates.push(node_path.default.resolve(process.cwd(), "apps/idos-data-dashboard/build/server", dir, "prisma/schema.prisma"));
 +  } catch (error) {
 +    console.error('Error:', error);
 +  }
  	for (const candidate of candidates) {
++    console.log('Candidate:', candidate);
++    console.log('Exists:', node_fs.default.existsSync(candidate));
  		if (!node_fs.default.existsSync(candidate)) continue;
  		const stat = node_fs.default.statSync(candidate);
+ 		if (stat.isFile()) return candidate;

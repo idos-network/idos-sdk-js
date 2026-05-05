@@ -201,7 +201,7 @@ overrides:
 
 patchedDependencies:
   prisma-field-encryption@0.0.0-preview.022c9f5af13ecb482b190a0d24775c67e505f632:
-    hash: 4e362e29befba9e93673568fe1c47f5be92e2d72d43df99f325e03edc682bafd
+    hash: 4a181fa00c28db56405cde92bc70f10d7f898897619c78d5547b376b6f6cdedf
     path: patches/prisma-field-encryption@0.0.0-preview.022c9f5af13ecb482b190a0d24775c67e505f632.patch
 
 importers:
@@ -533,7 +533,7 @@ importers:
         version: 8.20.0
       prisma-field-encryption:
         specifier: https://pkg.pr.new/prisma-field-encryption@151
-        version: https://pkg.pr.new/prisma-field-encryption@151(patch_hash=4e362e29befba9e93673568fe1c47f5be92e2d72d43df99f325e03edc682bafd)(@prisma/client@7.7.0(prisma@7.7.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3))
+        version: https://pkg.pr.new/prisma-field-encryption@151(patch_hash=4a181fa00c28db56405cde92bc70f10d7f898897619c78d5547b376b6f6cdedf)(@prisma/client@7.7.0(prisma@7.7.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3))
       react:
         specifier: catalog:react
         version: 19.2.5
@@ -23766,7 +23766,7 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prisma-field-encryption@https://pkg.pr.new/prisma-field-encryption@151(patch_hash=4e362e29befba9e93673568fe1c47f5be92e2d72d43df99f325e03edc682bafd)(@prisma/client@7.7.0(prisma@7.7.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)):
+  prisma-field-encryption@https://pkg.pr.new/prisma-field-encryption@151(patch_hash=4a181fa00c28db56405cde92bc70f10d7f898897619c78d5547b376b6f6cdedf)(@prisma/client@7.7.0(prisma@7.7.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)):
     dependencies:
       '@47ng/cloak': 1.2.0
       '@47ng/codec': 1.1.0
