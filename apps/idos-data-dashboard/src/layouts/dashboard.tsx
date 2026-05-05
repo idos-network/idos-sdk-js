@@ -2,6 +2,7 @@ import {
   ArrowUpRightFromSquare,
   CircleDollarSignIcon,
   ClockIcon,
+  CodeSquareIcon,
   CogIcon,
   ExternalLinkIcon,
   LogOutIcon,
@@ -25,8 +26,8 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
-import { useActorRef, useSelector } from "@/machines/provider";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
+import { useActorRef, useSelector } from "@/machines/dashboard/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/dashboard/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
@@ -67,7 +68,7 @@ export function ConnectedWallet() {
               src="/wallet.svg"
               width={50}
               height={50}
-              className="hidden h-[50px] w-[50px] dark:block"
+              className="hidden h-12.5 w-12.5 dark:block"
               loading="eager"
             />
           </>
@@ -171,6 +172,12 @@ export function MainNavLinks() {
 export function FooterNavLinks() {
   return (
     <ul className="flex flex-1 flex-col gap-1.5">
+      <li>
+        <ListItemLink to="/developer">
+          <CodeSquareIcon size={24} strokeWidth="1" />
+          <span>Developer console</span>
+        </ListItemLink>
+      </li>
       <li>
         <ListItemLink to="/settings">
           <CogIcon size={24} strokeWidth="1" />

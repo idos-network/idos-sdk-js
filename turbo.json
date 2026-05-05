@@ -6,6 +6,11 @@
       "dependsOn": ["^build"],
       "outputs": ["build/**", "dist/**"]
     },
+    "data-dashboard#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["build/**"],
+      "env": ["DATABASE_URL"]
+    },
     "build:packages": {
       "dependsOn": ["^build"],
       "outputs": ["build/**", "dist/**"]

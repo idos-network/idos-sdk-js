@@ -6,7 +6,7 @@ import { fromPromise } from "xstate";
 import { getEvmAccount, wagmiConfig } from "@/core/wagmi";
 import { createFaceSignProvider } from "@/lib/facesign";
 
-import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.machine";
+import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard/machine";
 
 const EVM_RECONNECT_TIMEOUT_MS = 5000;
 

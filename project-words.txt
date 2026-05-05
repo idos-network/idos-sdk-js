@@ -60,6 +60,7 @@ insertable
 isbot
 jsigs
 jsonld
+jsonwebtoken
 keccak
 keypair
 keypairs

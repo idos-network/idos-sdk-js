@@ -1,0 +1,349 @@
+/**
+ * idOS integration — TypeScript / TSX examples
+ *
+ * Extracted from: apps/idos-data-dashboard/src/routes/developer/skills.md
+ * These snippets are illustrative: split between browser (client SDK) and
+ * server (consumer SDK, JWT). Do not paste wholesale into one file without
+ * adapting paths, env access, and framework wiring.
+ */
+
+/*
+ * =============================================================================
+ * .env.development.local — copy/paste templates (REPLACE_* placeholders)
+ * =============================================================================
+ *
+ * Use one gitignored local env file (e.g. `.env.development.local`) per your
+ * framework. Adjust prefixes: Vite uses `VITE_`, Next.js uses `NEXT_PUBLIC_`,
+ * etc. Only *public* values get that prefix; secrets stay server-only (no
+ * public prefix) so they never ship in the browser bundle.
+ *
+ * --- Public (browser-exposed via framework; safe to disclose) ---
+ *
+ * IDOS_NETWORK_URL=https://nodes.playground.idos.network
+ * VITE_IDOS_NETWORK_URL=https://nodes.playground.idos.network
+ *
+ * IDOS_RELAY_URL=https://verify.staging.sandbox.fractal.id
+ * VITE_IDOS_RELAY_URL=https://verify.staging.sandbox.fractal.id
+ *
+ * IDOS_ACCEPTED_ISSUER_PUBLIC_KEY=REPLACE_WITH_ACCEPTED_ISSUER_PUBLIC_KEY
+ * VITE_IDOS_ACCEPTED_ISSUER_PUBLIC_KEY=REPLACE_WITH_ACCEPTED_ISSUER_PUBLIC_KEY
+ *
+ * IDOS_ACCEPTED_ISSUER_ID=REPLACE_WITH_ACCEPTED_ISSUER_ID
+ * VITE_IDOS_ACCEPTED_ISSUER_ID=REPLACE_WITH_ACCEPTED_ISSUER_ID
+ *
+ * IDOS_CONSUMER_PUBLIC_IDENTIFIER=REPLACE_WITH_CONSUMER_WALLET_IDENTIFIER
+ * VITE_IDOS_CONSUMER_PUBLIC_IDENTIFIER=REPLACE_WITH_CONSUMER_WALLET_IDENTIFIER
+ *
+ * --- Server-only (same file is OK for local dev if vars are NOT public-prefixed;
+ *     never duplicate these with VITE_/NEXT_PUBLIC_) ---
+ *
+ * IDOS_NETWORK_URL=https://nodes.playground.idos.network
+ * IDOS_RELAY_URL=https://verify.staging.sandbox.fractal.id
+ * IDOS_RELAY_PRIVATE_KEY="REPLACE_WITH_RELAY_PRIVATE_KEY"
+ * IDOS_CONSUMER_AUTH_KEY="REPLACE_WITH_CONSUMER_SIGNING_PRIVATE_KEY"
+ * IDOS_CONSUMER_ENC_KEY="REPLACE_WITH_CONSUMER_ENCRYPTION_PRIVATE_KEY"
+ * IDOS_ACCEPTED_ISSUER_PUBLIC_KEY=REPLACE_WITH_ACCEPTED_ISSUER_PUBLIC_KEY
+ * IDOS_ACCEPTED_ISSUER_ID=REPLACE_WITH_ACCEPTED_ISSUER_ID
+ * IDOS_CONSUMER_PUBLIC_IDENTIFIER=REPLACE_WITH_CONSUMER_WALLET_IDENTIFIER
+ *
+ * Next.js example (same keys, different public prefix):
+ *
+ * NEXT_PUBLIC_IDOS_NETWORK_URL=https://nodes.playground.idos.network
+ * NEXT_PUBLIC_IDOS_RELAY_URL=https://verify.staging.sandbox.fractal.id
+ * NEXT_PUBLIC_IDOS_ACCEPTED_ISSUER_PUBLIC_KEY=REPLACE_WITH_ACCEPTED_ISSUER_PUBLIC_KEY
+ * NEXT_PUBLIC_IDOS_ACCEPTED_ISSUER_ID=REPLACE_WITH_ACCEPTED_ISSUER_ID_OR_URL
+ * NEXT_PUBLIC_IDOS_CONSUMER_PUBLIC_IDENTIFIER=REPLACE_WITH_CONSUMER_WALLET_IDENTIFIER
+ *
+ * Also add the same REPLACE lines to `.env.example` (without real secrets) so
+ * teammates know what to fill in.
+ */
+
+// =============================================================================
+// Config placeholders (map from import.meta.env / process.env in real code)
+// =============================================================================
+
+declare const publicConfig: {
+  IDOS_NETWORK_URL: string;
+  IDOS_RELAY_URL: string;
+  IDOS_ACCEPTED_ISSUER_PUBLIC_KEY: string;
+  IDOS_ACCEPTED_ISSUER_ID: string;
+  IDOS_CONSUMER_PUBLIC_IDENTIFIER: string;
+};
+
+// =============================================================================
+// [ frontend ] idOS client + enclave
+// =============================================================================
+
+import { createIDOSClient, type idOSClient } from "@idos-network/client";
+
+// `existingWalletSigner` = whatever your app already uses (e.g. ethers Signer).
+declare const existingWalletSigner: { getAddress(): Promise<string> };
+
+export async function createIdosClientForApp(): Promise<idOSClient> {
+  return createIDOSClient({
+    nodeUrl: publicConfig.IDOS_NETWORK_URL,
+    enclaveOptions: { container: "#idOS-enclave" },
+  });
+}
+
+export async function bindUserSigner(idosClient: idOSClient) {
+  return idosClient.withUserSigner(existingWalletSigner as never);
+}
+
+// In JSX/TSX layout (React example):
+// <div id="idOS-enclave" />
+
+// =============================================================================
+// [ frontend ] profile, credentials, grants
+// =============================================================================
+
+export async function checkProfile(idosClient: idOSClient) {
+  const address = await existingWalletSigner.getAddress();
+  const hasProfile = await idosClient.addressHasProfile(address);
+  return { address, hasProfile };
+}
+
+// After `withUserSigner`, use the bound client for credential/grant APIs.
+import type { idOSClient as IdosClientType } from "@idos-network/client";
+
+type IdosWithUser = Awaited<ReturnType<idOSClient["withUserSigner"]>>;
+
+export async function filterAndGrantFlow(idosWithUser: IdosWithUser) {
+  const credentials = await idosWithUser.filterCredentials({
+    acceptedIssuers: [
+      {
+        authPublicKey: publicConfig.IDOS_ACCEPTED_ISSUER_PUBLIC_KEY,
+      },
+    ],
+    publicNotesFieldFilters: {
+      pick: {},
+      omit: {},
+    },
+    privateFieldFilters: {
+      pick: {},
+      omit: {},
+    },
+  });
+
+  const grants = await idosWithUser.getAccessGrantsOwned();
+  const existingGrant = grants.find(
+    (grant) =>
+      grant.ag_grantee_wallet_identifier ===
+      publicConfig.IDOS_CONSUMER_PUBLIC_IDENTIFIER,
+  );
+
+  return { credentials, grants, existingGrant };
+}
+
+declare const selectedCredential: { id: string };
+declare const userWalletIdentifier: string;
+declare const lockedUntilUnixTimestamp: number;
+
+export async function requestGrantIfNeeded(idosWithUser: IdosWithUser) {
+  const accessGrant = await idosWithUser.requestAccessGrant(selectedCredential.id);
+  return accessGrant;
+}
+
+export async function requestDelegatedGrantMessage(idosWithUser: IdosWithUser) {
+  const dag = await idosWithUser.requestDAGMessage({
+    dag_owner_wallet_identifier: userWalletIdentifier,
+    dag_grantee_wallet_identifier: publicConfig.IDOS_CONSUMER_PUBLIC_IDENTIFIER,
+    dag_data_id: selectedCredential.id,
+    dag_locked_until: lockedUntilUnixTimestamp,
+  });
+  return dag;
+}
+
+// =============================================================================
+// [ backend ] KYC relay JWT → link (Express-style; adapt to your framework)
+// =============================================================================
+
+import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
+declare function requireAuth(
+  req: Request,
+  res: Response,
+  next: () => void,
+): void;
+
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      relayClientId: string;
+      walletAddress: string;
+    }
+  }
+}
+
+export function registerKycRoute(app: import("express").Express) {
+  app.get("/kyc", requireAuth, (req, res) => {
+    const user = req.user!;
+
+    const token = jwt.sign(
+      {
+        clientId: user.relayClientId,
+        level: "plus+liveness+idos",
+        walletAddress: user.walletAddress,
+        externalUserId: user.id,
+        kyc: true,
+      },
+      process.env.IDOS_RELAY_PRIVATE_KEY!,
+      { algorithm: "ES512", expiresIn: "1h" },
+    );
+
+    res.json({
+      link: `${process.env.IDOS_RELAY_URL}/kyc?token=${encodeURIComponent(token)}`,
+    });
+  });
+}
+
+// =============================================================================
+// [ frontend ] KYC iframe + postMessage (React)
+// =============================================================================
+
+import { useCallback, useEffect, useState } from "react";
+
+export function useKycIframeRelay() {
+  const [kycLink, setKycLink] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const relayOrigin = new URL(publicConfig.IDOS_RELAY_URL).origin;
+
+  const messageReceiver = useCallback(
+    (ev: MessageEvent) => {
+      if (ev.origin !== relayOrigin) return;
+
+      if (ev.data?.error) {
+        setMessage(`KYC process failed with: ${JSON.stringify(ev.data.error)}`);
+        setKycLink(null);
+        return;
+      }
+
+      if (ev.data?.open) {
+        window.open(ev.data.open, ev.data.target, ev.data.features);
+        return;
+      }
+
+      setMessage("KYC process is completed.");
+      setKycLink(null);
+    },
+    [relayOrigin],
+  );
+
+  useEffect(() => {
+    window.addEventListener("message", messageReceiver);
+    return () => window.removeEventListener("message", messageReceiver);
+  }, [messageReceiver]);
+
+  return { kycLink, setKycLink, message };
+}
+
+// Example iframe JSX (inside a component that has `kycLink` from state):
+/*
+{kycLink ? (
+  <iframe
+    src={kycLink}
+    allow="camera fullscreen *"
+    sandbox="allow-forms allow-modals allow-popups allow-same-origin allow-scripts"
+  />
+) : null}
+*/
+
+// =============================================================================
+// [ backend ] Consumer SDK init — Ed25519 / Nacl
+// =============================================================================
+
+import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+import { hexDecode } from "@idos-network/utils/codecs";
+import nacl from "tweetnacl";
+
+export async function initIdosConsumerNacl() {
+  const secretKey = hexDecode(process.env.IDOS_CONSUMER_AUTH_KEY!);
+  const consumerSigner = nacl.sign.keyPair.fromSecretKey(secretKey);
+
+  return idOSConsumerClass.init({
+    consumerSigner,
+    recipientEncryptionPrivateKey: process.env.IDOS_CONSUMER_ENC_KEY!,
+    nodeUrl: process.env.IDOS_NETWORK_URL,
+  });
+}
+
+// =============================================================================
+// [ backend ] Consumer SDK init — EVM (only if app already uses ethers)
+// =============================================================================
+
+import { Wallet } from "ethers";
+
+export async function initIdosConsumerEvm() {
+  const consumerSigner = new Wallet(process.env.IDOS_CONSUMER_AUTH_KEY!);
+
+  return idOSConsumerClass.init({
+    consumerSigner,
+    recipientEncryptionPrivateKey: process.env.IDOS_CONSUMER_ENC_KEY!,
+    nodeUrl: process.env.IDOS_NETWORK_URL,
+  });
+}
+
+// =============================================================================
+// [ backend ] Grants + credential read
+// =============================================================================
+
+declare const idosConsumer: Awaited<ReturnType<typeof idOSConsumerClass.init>>;
+declare const idosUserId: string;
+
+export async function listGrantsExample() {
+  const { grants, totalCount } = await idosConsumer.getAccessGrants({
+    user_id: idosUserId,
+    page: 1,
+    size: 20,
+  });
+  return { grants, totalCount };
+}
+
+declare const dagPayload: {
+  dag_data_id: string;
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_signature: string;
+  dag_locked_until: number;
+};
+
+export async function insertDagGrantExample() {
+  await idosConsumer.createAccessGrantByDag(dagPayload);
+}
+
+declare const grant: { data_id: string };
+
+export async function readCredentialFromGrantExample() {
+  const credentialContents =
+    await idosConsumer.getCredentialSharedContentDecrypted(grant.data_id);
+  return credentialContents;
+}
+
+// =============================================================================
+// [ backend ] Credential verification
+// =============================================================================
+
+export async function verifyCredentialExample(credentialContents: string) {
+  const allowedIssuers = [
+    {
+      issuer: process.env.IDOS_ACCEPTED_ISSUER_ID!,
+      publicKeyMultibase: process.env.IDOS_ACCEPTED_ISSUER_PUBLIC_KEY!,
+    },
+  ];
+
+  const verificationResults = await idosConsumer.verifyCredential(
+    credentialContents,
+    allowedIssuers,
+  );
+
+  const [verificationResult] = verificationResults;
+
+  if (!verificationResult?.verified) {
+    throw new Error("idOS credential verification failed");
+  }
+
+  return verificationResult;
+}

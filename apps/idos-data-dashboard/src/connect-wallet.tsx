@@ -4,7 +4,7 @@ import Arbitrum from "@/assets/arbitrum.webp";
 import Ethereum from "@/assets/ethereum.webp";
 import WalletConnect from "@/assets/wallet-connect.webp";
 import { Button } from "@/components/ui/button";
-import { useActorRef } from "@/machines/provider";
+import { useActorRef } from "@/machines/dashboard/provider";
 
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
 import { COMMON_ENV } from "./core/envFlags.common";

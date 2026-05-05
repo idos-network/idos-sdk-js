@@ -20,7 +20,7 @@ export type DashboardEvent =
   | { type: "CONNECT_XRPL" }
   | { type: "CONNECT_FACESIGN" }
   | { type: "DISCONNECT" }
-  | { type: "CREATE_FACESIGN_PROFILE" }
+  | { type: "CREATE_PROFILE" }
   | { type: "RETRY" }
   | {
       type: "WALLET_CONNECTED";
@@ -42,11 +42,11 @@ export type InitializeIdOSInput = {
   nearSelector: WalletSelector | null;
 };
 
-export type CreateFacesignProfileInput = {
+export type CreateProfileInput = {
   client: idOSClientWithUserSigner;
 };
 
-export type CreateFacesignProfileOutput = {
+export type CreateProfileOutput = {
   walletAddress: string;
   walletPublicKey: string;
   walletType: WalletType;
@@ -145,11 +145,8 @@ const noopReconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletIn
   throw new Error("reconnectWallet actor not provided");
 });
 
-const noopCreateFacesignProfile = fromPromise<
-  CreateFacesignProfileOutput,
-  CreateFacesignProfileInput
->(async () => {
-  throw new Error("createFacesignProfile actor not provided");
+const noopCreateProfile = fromPromise<CreateProfileOutput, CreateProfileInput>(async () => {
+  throw new Error("createProfile actor not provided");
 });
 
 export const dashboardMachine = setup({
@@ -162,7 +159,7 @@ export const dashboardMachine = setup({
     initializeIdOS: noopInitializeIdOS,
     disconnectWallet: noopDisconnectWallet,
     reconnectWallet: noopReconnectWallet,
-    createFacesignProfile: noopCreateFacesignProfile,
+    createProfile: noopCreateProfile,
   },
   guards: {
     hasPersistedWallet: () => getPersistedWallet() !== null,
@@ -398,14 +395,14 @@ export const dashboardMachine = setup({
     noProfile: {
       on: {
         DISCONNECT: "disconnecting",
-        CREATE_FACESIGN_PROFILE: "creatingFacesignProfile",
+        CREATE_PROFILE: "creatingProfile",
       },
     },
 
-    creatingFacesignProfile: {
+    creatingProfile: {
       invoke: {
-        src: "createFacesignProfile",
-        input: ({ context }): CreateFacesignProfileInput => {
+        src: "createProfile",
+        input: ({ context }): CreateProfileInput => {
           if (!context.idOSClient) {
             throw new Error("idOS client not available");
           }
