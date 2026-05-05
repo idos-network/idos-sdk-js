@@ -90,5 +90,6 @@
     "vite-plugin-mkcert": "^1.17.5",
     "vite-plugin-node-polyfills": "catalog:build",
     "vitest": "catalog:testing"
-  }
+  },
+  "packageManager": "pnpm@10.33.0"
 }
