@@ -12,11 +12,19 @@ const isReactRouterNoRouteMatch = (error) => {
     return false;
   }
 
-  return (
-    error.status === 404 &&
-    error.internal === true &&
-    isNoRouteMatchMessage(error.data instanceof Error ? error.data.message : error.data?.message)
-  );
+  if (error.status !== 404 || error.internal !== true) {
+    return false;
+  }
+
+  if (error.data instanceof Error) {
+    return isNoRouteMatchMessage(error.data.message);
+  }
+
+  if (typeof error.data === "string") {
+    return isNoRouteMatchMessage(error.data);
+  }
+
+  return isNoRouteMatchMessage(error.data?.message);
 };
 
 Sentry.init({
