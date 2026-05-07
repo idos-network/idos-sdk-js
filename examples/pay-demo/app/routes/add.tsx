@@ -72,7 +72,7 @@ export default function AddFunds() {
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
     if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "chooseType") {
-      send({ type: "startKYC", kycType: "persona" });
+      send({ type: "start", kycType: "persona" });
     }
   }, [state, send]);
 
