@@ -1,5 +1,11 @@
 # facesign-enclave
 
+## 0.1.3
+
+### Patch Changes
+
+- 7468451: Security updates of axios
+
 ## 0.1.2
 
 ### Patch Changes
