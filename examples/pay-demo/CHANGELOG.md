@@ -1,5 +1,11 @@
 # pay-demo
 
+## 0.1.1
+
+### Patch Changes
+
+- 384902e: Start KYC in add flow
+
 ## 0.1.0
 
 ### Minor Changes
