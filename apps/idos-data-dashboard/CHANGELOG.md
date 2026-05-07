@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 0.1.1
+
+### Patch Changes
+
+- 5e13678: Ignore 404 errors in sentry
+
 ## 0.1.0
 
 ### Minor Changes
