@@ -6,6 +6,7 @@ import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
+
 import { COMMON_ENV } from "./envFlags.common";
 
 declare global {

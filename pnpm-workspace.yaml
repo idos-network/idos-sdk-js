@@ -26,8 +26,8 @@ onlyBuiltDependencies:
 
 overrides:
   web-streams-polyfill: "3.3.3"
-  "@idos-network/kwil-js>lru-cache": "11.3.6"
-  "path-scurry>lru-cache": "11.3.6"
+  "@idos-network/kwil-js>lru-cache": "11.2.7"
+  "path-scurry>lru-cache": "11.2.7"
 
 strictDepBuilds: true
 
