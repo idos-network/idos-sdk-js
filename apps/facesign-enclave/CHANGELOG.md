@@ -1,5 +1,13 @@
 # facesign-enclave
 
+## 0.1.4
+
+### Patch Changes
+
+- e5df318: Upgrade dependencies
+- Updated dependencies [e5df318]
+  - @idos-network/utils@1.1.1
+
 ## 0.1.3
 
 ### Patch Changes
