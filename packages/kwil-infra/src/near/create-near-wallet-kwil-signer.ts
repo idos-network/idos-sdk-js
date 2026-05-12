@@ -3,6 +3,9 @@ import type {
   SignedMessage,
   SignMessageParams,
 } from "@hot-labs/near-connect";
+import type { Store } from "@idos-network/utils/store";
+import type { BlockReference, JsonRpcProvider, ViewAccessKeyListRequest } from "near-api-js";
+
 import { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -13,9 +16,9 @@ import {
   hexEncode,
   utf8Decode,
 } from "@idos-network/utils/codecs";
-import type { Store } from "@idos-network/utils/store";
-import type { BlockReference, JsonRpcProvider, ViewAccessKeyListRequest } from "near-api-js";
+
 import type { KwilActionClient } from "../create-kwil-client";
+
 import { getNearNodeUrl } from "./get-config";
 
 // Near copy & paste types
@@ -97,8 +100,6 @@ function createNearWalletSigner(
     const {
       nonce = nonceSuggestion,
       signature,
-      // @ts-expect-error Signatures don't seem to be updated for NEP413 yet.
-      callbackUrl,
       // oxlint-disable-next-line typescript/no-non-null-assertion -- Only non-signing wallets return void.
     } = (await (
       wallet.signMessage as (_: SignMessageParams) => Promise<SignedMessage & { nonce: Uint8Array }>

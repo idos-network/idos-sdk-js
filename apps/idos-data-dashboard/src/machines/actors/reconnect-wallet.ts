@@ -1,4 +1,3 @@
-import type { NearWalletBase } from "@hot-labs/near-connect";
 import { reconnect } from "@wagmi/core";
 import { fromPromise } from "xstate";
 
@@ -9,7 +8,7 @@ import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.m
 
 const EVM_RECONNECT_TIMEOUT_MS = 5000;
 
-async function ensureEvmConnected(): Promise<void> {
+export async function ensureEvmConnected(): Promise<void> {
   if (getEvmAccount().isConnected) return;
 
   try {
@@ -47,15 +46,9 @@ async function ensureEvmConnected(): Promise<void> {
 export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(
   async ({ input }) => {
     const { walletType } = input;
-    const nearWallet: NearWalletBase | null = null;
 
     switch (walletType) {
       case "EVM": {
-        const account = getEvmAccount();
-        if (account.isConnected && account.address) {
-          return { nearWallet: null };
-        }
-
         const account = getEvmAccount();
         if (!account.isConnected || !account.address) {
           throw new Error("EVM reconnection failed");

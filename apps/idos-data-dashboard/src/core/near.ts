@@ -1,4 +1,5 @@
 import { NearConnector } from "@hot-labs/near-connect";
+
 import { COMMON_ENV } from "./envFlags.common";
 
 // const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;

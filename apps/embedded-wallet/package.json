@@ -12,9 +12,9 @@
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "catalog:xrp",
+    "@hot-labs/near-connect": "catalog:near",
     "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/utils": "workspace:*",
-    "@hot-labs/near-connect": "catalog:near",
     "@reown/appkit": "catalog:reown",
     "@reown/appkit-adapter-wagmi": "catalog:reown",
     "@stellar/stellar-base": "catalog:stellar",

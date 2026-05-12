@@ -1,6 +1,7 @@
 import type { NearWalletBase } from "@hot-labs/near-connect";
 import type { Wallet } from "@idos-network/kwil-infra";
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
+
 import { getWalletClient } from "@wagmi/core";
 
 import { wagmiConfig } from "./wagmi";

@@ -24,10 +24,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button, buttonVariants } from "@/components/ui/button";
 import useDisclosure from "@/hooks/use-disclosure";
-import { COMMON_ENV } from "@/core/envFlags.common";
 import { cn } from "@/lib/utils";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 import { useActorRef, useSelector } from "@/machines/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
