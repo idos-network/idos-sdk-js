@@ -1,5 +1,5 @@
+import type { NearWalletBase } from "@hot-labs/near-connect";
 import type { idOSClient, idOSClientWithUserSigner } from "@idos-network/client";
-import type { WalletSelector } from "@near-wallet-selector/core";
 
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import { assign, fromPromise, setup } from "xstate";
@@ -9,7 +9,7 @@ export interface DashboardContext {
   walletAddress: string | null;
   walletPublicKey: string | null;
   idOSClient: idOSClient | idOSClientWithUserSigner | null;
-  nearSelector: WalletSelector | null;
+  nearWallet: NearWalletBase | null;
   error: string | null;
 }
 
@@ -26,20 +26,20 @@ export type DashboardEvent =
       type: "WALLET_CONNECTED";
       walletAddress: string;
       walletPublicKey: string;
-      nearSelector: WalletSelector | null;
+      // nearWallet: NearWalletBase | null;
     }
   | { type: "WALLET_CONNECT_ERROR"; error: string };
 
 export type ConnectWalletInput = {
   walletType: WalletType;
-  nearSelector: WalletSelector | null;
+  // nearWallet: NearWalletBase | null;
 };
 
 export type InitializeIdOSInput = {
   walletType: WalletType;
   walletAddress: string;
   walletPublicKey: string;
-  nearSelector: WalletSelector | null;
+  // nearWallet: NearWalletBase | null;
 };
 
 export type CreateFacesignProfileInput = {
@@ -50,7 +50,7 @@ export type CreateFacesignProfileOutput = {
   walletAddress: string;
   walletPublicKey: string;
   walletType: WalletType;
-  nearSelector: WalletSelector | null;
+  nearSelector: NearWalletBase | null;
 };
 
 export type InitializeIdOSOutput = {
@@ -60,14 +60,14 @@ export type InitializeIdOSOutput = {
 
 export type DisconnectWalletInput = {
   walletType: WalletType | null;
-  nearSelector: WalletSelector | null;
   idOSClient: idOSClient | null;
 };
 
 export type ConnectWalletOutput = {
   walletAddress: string;
   walletPublicKey: string;
-  nearSelector: WalletSelector | null;
+  // nearWallet: NearWalletBase | null;
+  // idOSClient: idOSClient;
 };
 
 export type ReconnectWalletInput = {
@@ -77,7 +77,7 @@ export type ReconnectWalletInput = {
 };
 
 export type ReconnectWalletOutput = {
-  nearSelector: WalletSelector | null;
+  // nearWallet: NearWalletBase | null;
 };
 
 const STORAGE_KEY = "dashboard-wallet";
@@ -179,7 +179,7 @@ export const dashboardMachine = setup({
       walletType: () => null,
       walletAddress: () => null,
       walletPublicKey: () => null,
-      nearSelector: () => null,
+      nearWallet: () => null,
       error: () => null,
       idOSClient: () => null,
     }),
@@ -192,7 +192,7 @@ export const dashboardMachine = setup({
     walletAddress: null,
     walletPublicKey: null,
     idOSClient: null,
-    nearSelector: null,
+    nearWallet: null,
     error: null,
   },
   states: {
@@ -241,7 +241,7 @@ export const dashboardMachine = setup({
 
           return {
             walletType: context.walletType,
-            nearSelector: context.nearSelector,
+            // nearWallet: context.nearWallet,
           };
         },
         onDone: {
@@ -250,7 +250,7 @@ export const dashboardMachine = setup({
             assign({
               walletAddress: ({ event }) => event.output.walletAddress,
               walletPublicKey: ({ event }) => event.output.walletPublicKey,
-              nearSelector: ({ event }) => event.output.nearSelector,
+              // nearSelector: ({ event }) => event.output.nearSelector,
             }),
             "persistWalletToStorage",
           ],
@@ -281,7 +281,7 @@ export const dashboardMachine = setup({
             assign({
               walletAddress: ({ event }) => event.walletAddress,
               walletPublicKey: ({ event }) => event.walletPublicKey,
-              nearSelector: ({ event }) => event.nearSelector,
+              // nearWallet: ({ event }) => event.nearWallet,
             }),
             "persistWalletToStorage",
           ],
@@ -342,7 +342,7 @@ export const dashboardMachine = setup({
         onDone: {
           target: "initializingIdOS",
           actions: assign({
-            nearSelector: ({ event }) => event.output.nearSelector,
+            // nearWallet: ({ event }) => event.output.nearWallet,
           }),
         },
         onError: {
@@ -363,7 +363,6 @@ export const dashboardMachine = setup({
             walletType: context.walletType,
             walletAddress: context.walletAddress,
             walletPublicKey: context.walletPublicKey,
-            nearSelector: context.nearSelector,
           };
         },
         onDone: [
@@ -424,7 +423,7 @@ export const dashboardMachine = setup({
             assign({
               walletAddress: ({ event }) => event.output.walletAddress,
               walletPublicKey: ({ event }) => event.output.walletPublicKey,
-              nearSelector: ({ event }) => event.output.nearSelector,
+              // nearSelector: ({ event }) => event.output.nearSelector,
             }),
             "persistWalletToStorage",
           ],
@@ -464,7 +463,7 @@ export const dashboardMachine = setup({
         src: "disconnectWallet",
         input: ({ context }): DisconnectWalletInput => ({
           walletType: context.walletType,
-          nearSelector: context.nearSelector,
+          // nearWallet: context.nearWallet,
           idOSClient: context.idOSClient,
         }),
         onDone: {

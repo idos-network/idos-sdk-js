@@ -8,6 +8,7 @@ export const commonEnvSchema = z.object({
   EMBEDDED_WALLET_APP_URLS: z.string(),
   WALLET_CONNECT_PROJECT_ID: z.string(),
   IDOS_NEAR_DEFAULT_CONTRACT_ID: z.string(),
+  NEAR_NETWORK: z.enum(["testnet", "mainnet"]),
   DEV: z.boolean().default(false),
 });
 

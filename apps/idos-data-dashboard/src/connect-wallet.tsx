@@ -132,6 +132,15 @@ export function ConnectWallet() {
               Connect with Stellar
               <img alt="Stellar logo" src="/stellar.svg" width={32} height={32} />
             </Button>
+            <Button
+              className="justify-between"
+              size="xl"
+              variant="secondary"
+              onClick={() => send({ type: "CONNECT_NEAR" })}
+            >
+              Connect with NEAR
+              <img alt="NEAR logo" src="/near.svg" width={32} height={32} />
+            </Button>
           </div>
         </div>
         <div className="flex flex-col items-stretch justify-center gap-4 text-center">

@@ -1,5 +1,5 @@
+import type { NearWalletBase as NearWallet } from "@hot-labs/near-connect";
 import type { Store } from "@idos-network/utils/store";
-import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair as NearKeyPair } from "near-api-js";

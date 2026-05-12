@@ -62,7 +62,7 @@
     "xumm": "catalog:xrp"
   },
   "peerDependencies": {
-    "@near-wallet-selector/core": "catalog:near",
+    "@hot-labs/near-connect": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
     "@wagmi/core": "catalog:ethereum",
     "ethers": "catalog:ethereum",
@@ -74,7 +74,7 @@
     "near-api-js": {
       "optional": true
     },
-    "@near-wallet-selector/core": {
+    "@hot-labs/near-connect": {
       "optional": true
     },
     "@stellar/stellar-sdk": {

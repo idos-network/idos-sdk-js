@@ -1,5 +1,3 @@
-import type { WalletSelector } from "@near-wallet-selector/core";
-
 import { reconnect } from "@wagmi/core";
 import { fromPromise } from "xstate";
 
@@ -10,7 +8,7 @@ import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.m
 
 const EVM_RECONNECT_TIMEOUT_MS = 5000;
 
-async function ensureEvmConnected(): Promise<void> {
+export async function ensureEvmConnected(): Promise<void> {
   if (getEvmAccount().isConnected) return;
 
   try {
@@ -48,12 +46,9 @@ async function ensureEvmConnected(): Promise<void> {
 export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(
   async ({ input }) => {
     const { walletType } = input;
-    let nearSelector: WalletSelector | null = null;
 
     switch (walletType) {
       case "EVM": {
-        await ensureEvmConnected();
-
         const account = getEvmAccount();
         if (!account.isConnected || !account.address) {
           throw new Error("EVM reconnection failed");
@@ -63,21 +58,23 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
             `EVM reconnection address mismatch: expected ${input.walletAddress}, got ${account.address}`,
           );
         }
-        return { nearSelector: null };
+        return { nearWallet: null };
       }
 
       case "NEAR": {
-        const { initializeNearSelector } = await import("@/core/near");
-        nearSelector = await initializeNearSelector();
-        if (!nearSelector.isSignedIn()) {
+        const { connector } = await import("@/core/near");
+
+        const wallet = await connector.getConnectedWallet();
+
+        if (!wallet) {
           throw new Error("NEAR wallet session expired");
         }
-        return { nearSelector };
+        return { nearWallet: wallet };
       }
 
       case "Stellar":
       case "XRPL":
-        return { nearSelector: null };
+        return { nearWallet: null };
 
       case "FaceSign": {
         const { setFaceSignProvider } = await import("@/core/signers");
@@ -99,7 +96,7 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
         }
 
         setFaceSignProvider(provider);
-        return { nearSelector: null };
+        return { nearWallet: null };
       }
 
       default:

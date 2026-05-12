@@ -67,11 +67,8 @@ catalogs:
     "@reown/appkit-adapter-wagmi": "1.7.20"
 
   near:
-    "near-api-js": "4.0.4"
-    "@near-wallet-selector/core": "8.10.2"
-    "@near-wallet-selector/here-wallet": "8.10.2"
-    "@near-wallet-selector/meteor-wallet": "8.10.2"
-    "@near-wallet-selector/modal-ui": "8.10.2"
+    "near-api-js": "7.1.1"
+    "@hot-labs/near-connect": "0.11.2"
 
   stellar:
     "@stellar/stellar-sdk": "^13.3.0"
