@@ -58,6 +58,7 @@ export async function createNearSigner(): Promise<NearWalletBase> {
 
 export async function createXrplSigner(): Promise<Wallet> {
   const GemWallet = await import("@gemwallet/api");
+  // @ts-expect-error GemWallet type mismatch between versions
   return GemWallet as Wallet;
 }
 
