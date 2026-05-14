@@ -30,7 +30,7 @@ describe("verifyEvmSignature", () => {
   });
 
   it("returns false when a signature is invalid", async () => {
-    const result = await verifyEvmSignature("goodbye", "0xinvalidsignature", account.address);
+    const result = await verifyEvmSignature("goodbye", "0x00", account.address);
 
     expect(result).toBe(false);
   });
@@ -42,8 +42,8 @@ describe("verifyEvmSignature", () => {
 
     const { verifyEvmSignature } = await import("./evm.js");
 
-    await expect(verifyEvmSignature("hello", "0xsignature", "0xaddress")).rejects.toThrow(
-      "Can't load viem",
-    );
+    await expect(
+      verifyEvmSignature("hello", "0xsignature", "0x0000000000000000000000000000000000000000"),
+    ).rejects.toThrow("Can't load viem");
   });
 });
