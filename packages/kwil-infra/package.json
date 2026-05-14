@@ -64,10 +64,10 @@
   "peerDependencies": {
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
-    "@wagmi/core": "catalog:ethereum",
     "ethers": "catalog:ethereum",
     "near-api-js": "catalog:near",
     "ripple-keypairs": "catalog:xrp",
+    "viem": "catalog:ethereum",
     "xrpl": "catalog:xrp"
   },
   "peerDependenciesMeta": {
@@ -83,7 +83,7 @@
     "ripple-keypairs": {
       "optional": true
     },
-    "@wagmi/core": {
+    "viem": {
       "optional": true
     },
     "xrpl": {

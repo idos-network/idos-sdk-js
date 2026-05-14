@@ -32,7 +32,7 @@ pnpm add @idos-network/kwil-infra
 
 Some features require optional peer dependencies:
 
-- `@wagmi/core` (EVM)
+- `viem` (EVM)
 - `near-api-js`, `@near-wallet-selector/core` (NEAR)
 - `@stellar/stellar-sdk` (Stellar)
 - `ripple-keypairs`, `xrpl` (XRPL)
