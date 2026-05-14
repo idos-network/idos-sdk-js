@@ -1,5 +1,11 @@
 # @idos-network/credentials
 
+## 1.2.0
+
+### Patch Changes
+
+- @idos-network/utils@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes

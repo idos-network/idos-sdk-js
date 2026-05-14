@@ -1,5 +1,14 @@
 # pay-demo
 
+## 0.1.3
+
+### Patch Changes
+
+- @idos-network/client@1.2.0
+- @idos-network/consumer@1.2.0
+- @idos-network/credentials@1.2.0
+- @idos-network/utils@1.2.0
+
 ## 0.1.2
 
 ### Patch Changes

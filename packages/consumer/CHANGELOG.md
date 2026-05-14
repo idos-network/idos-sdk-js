@@ -1,5 +1,14 @@
 # @idos-network/consumer
 
+## 1.2.0
+
+### Patch Changes
+
+- Updated dependencies [a9a7547]
+  - @idos-network/kwil-infra@1.2.0
+  - @idos-network/credentials@1.2.0
+  - @idos-network/utils@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes
