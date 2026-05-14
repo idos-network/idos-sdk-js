@@ -215,9 +215,6 @@ function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
   const state = useSelector((s) => s.value);
   const navigate = useNavigate();
 
-  console.log(state);
-  console.log(actorRef.getSnapshot().context);
-
   useEffect(() => {
     actorRef.send({ type: "init", idOSClient });
   }, [actorRef, idOSClient, userId]);
