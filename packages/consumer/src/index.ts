@@ -25,6 +25,7 @@ import {
   type idOSGrant,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
+import { BlobGateway } from "@idos-network/utils/blob-gateway";
 import { base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
@@ -33,6 +34,7 @@ export type idOSConsumerConfig = {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
+  blobGatewayUrl?: string;
   consumerSigner: KwilSignerType;
 };
 
@@ -41,11 +43,13 @@ export class idOSConsumer {
   #kwilClient: KwilActionClient;
   #noncedBox: NoncedBox;
   #signer: KwilSigner;
+  #blobGateway?: BlobGateway;
 
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
+    blobGatewayUrl,
     consumerSigner,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
@@ -61,6 +65,7 @@ export class idOSConsumer {
       kwilClient,
       address,
       signer,
+      blobGatewayUrl ? new BlobGateway({ url: blobGatewayUrl }) : undefined,
     );
   }
 
@@ -69,11 +74,13 @@ export class idOSConsumer {
     kwilClient: KwilActionClient,
     address: string,
     signer: KwilSigner,
+    blobGateway?: BlobGateway,
   ) {
     this.#noncedBox = noncedBox;
     this.#kwilClient = kwilClient;
     this.address = address;
     this.#signer = signer;
+    this.#blobGateway = blobGateway;
   }
 
   get signer(): KwilSigner {
@@ -94,7 +101,7 @@ export class idOSConsumer {
     invariant(credentialCopy, `Credential with id ${dataId} not found`);
 
     return await this.#noncedBox.decrypt(
-      credentialCopy.content,
+      await this.#getCredentialEncryptedContent(credentialCopy),
       credentialCopy.encryptor_public_key,
     );
   }
@@ -146,6 +153,28 @@ export class idOSConsumer {
     issuers: AvailableIssuerType[],
   ): Promise<VerifyCredentialResult> {
     return verifyCredential<K>(credentials, issuers);
+  }
+
+  async #getCredentialEncryptedContent(credential: idOSCredential): Promise<string> {
+    if (credential.content) {
+      return credential.content;
+    }
+
+    invariant(credential.content_uri, `Credential with id ${credential.id} has no content_uri`);
+    invariant(
+      this.#blobGateway,
+      `Credential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
+    );
+
+    const content = await this.#blobGateway.fetchBlob({ contentUri: credential.content_uri });
+    if (credential.content_size !== null && credential.content_size !== undefined) {
+      invariant(
+        content.byteLength === credential.content_size,
+        `Credential with id ${credential.id} blob size does not match content_size`,
+      );
+    }
+
+    return base64Encode(content);
   }
 }
 

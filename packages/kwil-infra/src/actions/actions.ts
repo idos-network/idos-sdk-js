@@ -413,6 +413,104 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  create_prelim_credentials_by_dwg: [
+    {
+      name: "request_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "original_encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "original_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_content_uri",
+      type: DataType.Text,
+    },
+    {
+      name: "original_content_size",
+      type: DataType.Int,
+    },
+    {
+      name: "original_public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "original_public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "original_broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "copy_content_uri",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_content_size",
+      type: DataType.Int,
+    },
+    {
+      name: "copy_public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_owner",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_grantee",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_issuer_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dwg_access_grant_timelock",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_not_before",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_not_after",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_signature",
+      type: DataType.Text,
+    },
+  ],
   credential_exist_as_inserter: [
     {
       name: "id",
@@ -1347,6 +1445,75 @@ export async function createCredentialsByDwg(
   });
 }
 
+export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
+  request_id: z.ZodUUID;
+  issuer_auth_public_key: z.ZodString;
+  original_encryptor_public_key: z.ZodString;
+  original_id: z.ZodUUID;
+  original_content_uri: z.ZodString;
+  original_content_size: z.ZodNumber;
+  original_public_notes: z.ZodString;
+  original_public_notes_signature: z.ZodString;
+  original_broader_signature: z.ZodString;
+  copy_encryptor_public_key: z.ZodString;
+  copy_id: z.ZodUUID;
+  copy_content_uri: z.ZodString;
+  copy_content_size: z.ZodNumber;
+  copy_public_notes_signature: z.ZodString;
+  copy_broader_signature: z.ZodString;
+  content_hash: z.ZodString;
+  dwg_owner: z.ZodString;
+  dwg_grantee: z.ZodString;
+  dwg_issuer_public_key: z.ZodString;
+  dwg_id: z.ZodUUID;
+  dwg_access_grant_timelock: z.ZodString;
+  dwg_not_before: z.ZodString;
+  dwg_not_after: z.ZodString;
+  dwg_signature: z.ZodString;
+}> = z.object({
+  request_id: z.uuid(),
+  issuer_auth_public_key: z.string(),
+  original_encryptor_public_key: z.string(),
+  original_id: z.uuid(),
+  original_content_uri: z.string(),
+  original_content_size: z.number(),
+  original_public_notes: z.string(),
+  original_public_notes_signature: z.string(),
+  original_broader_signature: z.string(),
+  copy_encryptor_public_key: z.string(),
+  copy_id: z.uuid(),
+  copy_content_uri: z.string(),
+  copy_content_size: z.number(),
+  copy_public_notes_signature: z.string(),
+  copy_broader_signature: z.string(),
+  content_hash: z.string(),
+  dwg_owner: z.string(),
+  dwg_grantee: z.string(),
+  dwg_issuer_public_key: z.string(),
+  dwg_id: z.uuid(),
+  dwg_access_grant_timelock: z.string(),
+  dwg_not_before: z.string(),
+  dwg_not_after: z.string(),
+  dwg_signature: z.string(),
+});
+
+export type CreatePreliminaryCredentialsByDwgInput = z.infer<
+  typeof CreatePreliminaryCredentialsByDwgInputSchema
+>;
+
+export async function createPreliminaryCredentialsByDwg(
+  kwilClient: KwilActionClient,
+  params: CreatePreliminaryCredentialsByDwgInput,
+): Promise<void> {
+  const inputs = CreatePreliminaryCredentialsByDwgInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "create_prelim_credentials_by_dwg",
+    inputs,
+    description:
+      "Create preliminary original and copy credentials with AG on behalf of a user (using delegated write grant given by the user)",
+  });
+}
+
 export const CredentialExistAsInserterInputSchema: z.ZodObject<{
   id: z.ZodUUID;
 }> = z.object({
@@ -1388,18 +1555,24 @@ export const GetCredentialOwnedOutputSchema: z.ZodObject<{
   id: z.ZodUUID;
   user_id: z.ZodUUID;
   public_notes: z.ZodString;
-  content: z.ZodString;
+  content: z.ZodNullable<z.ZodString>;
+  content_uri: z.ZodNullable<z.ZodString>;
+  content_size: z.ZodNullable<z.ZodNumber>;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodNullable<z.ZodString>;
+  inserter_type: z.ZodNullable<z.ZodString>;
+  inserter_id: z.ZodNullable<z.ZodString>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   public_notes: z.string(),
-  content: z.string(),
+  content: z.string().nullable(),
+  content_uri: z.string().nullable(),
+  content_size: z.number().nullable(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string().nullable(),
+  inserter_type: z.string().nullable(),
+  inserter_id: z.string().nullable(),
 });
 
 export type GetCredentialOwnedOutput = z.infer<typeof GetCredentialOwnedOutputSchema>;
@@ -1427,18 +1600,24 @@ export const GetCredentialSharedOutputSchema: z.ZodObject<{
   id: z.ZodUUID;
   user_id: z.ZodUUID;
   public_notes: z.ZodString;
-  content: z.ZodString;
+  content: z.ZodNullable<z.ZodString>;
+  content_uri: z.ZodNullable<z.ZodString>;
+  content_size: z.ZodNullable<z.ZodNumber>;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodNullable<z.ZodString>;
+  inserter_type: z.ZodNullable<z.ZodString>;
+  inserter_id: z.ZodNullable<z.ZodString>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   public_notes: z.string(),
-  content: z.string(),
+  content: z.string().nullable(),
+  content_uri: z.string().nullable(),
+  content_size: z.number().nullable(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string().nullable(),
+  inserter_type: z.string().nullable(),
+  inserter_id: z.string().nullable(),
 });
 
 export type GetCredentialSharedOutput = z.infer<typeof GetCredentialSharedOutputSchema>;
