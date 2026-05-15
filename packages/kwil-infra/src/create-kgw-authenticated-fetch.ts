@@ -50,18 +50,79 @@ export function createKgwAuthenticatedFetch({
     return refreshPromise;
   };
 
-  const ensureCookie = async (): Promise<string> => nodeKwil.getKgwCookie() ?? refreshCookie();
+  const ensureCookie = async (): Promise<{ cookie: string; refreshed: boolean }> => {
+    const existingCookie = nodeKwil.getKgwCookie();
+    if (existingCookie) {
+      return { cookie: existingCookie, refreshed: false };
+    }
+
+    return { cookie: await refreshCookie(), refreshed: true };
+  };
 
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const cookie = await ensureCookie();
+    const { cookie, refreshed } = await ensureCookie();
+    const requestUrl = requestUrlFromInput(input);
+    console.log("kgw authenticated fetch request");
+    console.log(
+      JSON.stringify(
+        {
+          url: requestUrl,
+          had_cookie_before_request: !refreshed,
+          refreshed_before_request: refreshed,
+          sends_cookie_header: true,
+        },
+        null,
+        2,
+      ),
+    );
     const response = await fetchFn(...withCookie(input, init, cookie));
 
     if (!(await isAuthFailure(response.clone()))) {
+      console.log("kgw authenticated fetch response");
+      console.log(
+        JSON.stringify(
+          {
+            url: requestUrl,
+            status: response.status,
+            ok: response.ok,
+            reauthenticated: false,
+          },
+          null,
+          2,
+        ),
+      );
       return response;
     }
 
+    console.log("kgw authenticated fetch auth failure");
+    console.log(
+      JSON.stringify(
+        {
+          url: requestUrl,
+          status: response.status,
+          action: "reauthenticate_and_retry",
+        },
+        null,
+        2,
+      ),
+    );
     const refreshedCookie = await refreshCookie();
-    return fetchFn(...withCookie(input, init, refreshedCookie));
+    const retryResponse = await fetchFn(...withCookie(input, init, refreshedCookie));
+    console.log("kgw authenticated fetch retry response");
+    console.log(
+      JSON.stringify(
+        {
+          url: requestUrl,
+          status: retryResponse.status,
+          ok: retryResponse.ok,
+          reauthenticated: true,
+        },
+        null,
+        2,
+      ),
+    );
+
+    return retryResponse;
   };
 }
 
@@ -102,6 +163,14 @@ function withCookie(
   headers.set("Cookie", cookie);
 
   return [input, { ...init, headers }];
+}
+
+function requestUrlFromInput(input: RequestInfo | URL): string {
+  if (typeof input === "string") {
+    return input;
+  }
+
+  return input instanceof URL ? input.toString() : input.url;
 }
 
 async function defaultKgwAuthFailurePredicate(response: Response): Promise<boolean> {
