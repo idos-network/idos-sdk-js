@@ -10,6 +10,7 @@ import type { KwilSigner } from "@idos-network/kwil-js";
 
 import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
 import {
+  createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
   createServerKwilSigner,
   type KwilActionClient,
@@ -61,13 +62,16 @@ export class idOSConsumer {
 
     const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
+    const blobGateway = blobGatewayUrl
+      ? createKgwAuthenticatedBlobGateway({ url: blobGatewayUrl, kwilClient, signer })
+      : undefined;
 
     return new idOSConsumer(
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
       address,
       signer,
-      blobGatewayUrl ? new BlobGateway({ url: blobGatewayUrl }) : undefined,
+      blobGateway,
     );
   }
 
@@ -169,15 +173,46 @@ export class idOSConsumer {
     );
 
     const content = await this.#blobGateway.fetchBlob({ contentUri: credential.content_uri });
-    if (credential.content_size !== null && credential.content_size !== undefined) {
+    const expectedContentSize = normalizeCredentialContentSize(credential.content_size);
+    if (expectedContentSize !== undefined) {
+      console.log("credential blob size check");
+      console.log(
+        JSON.stringify(
+          {
+            credential_id: credential.id,
+            content_uri: credential.content_uri,
+            content_size: credential.content_size,
+            content_size_type: typeof credential.content_size,
+            expected_content_size: expectedContentSize,
+            fetched_byte_length: content.byteLength,
+          },
+          null,
+          2,
+        ),
+      );
       invariant(
-        content.byteLength === credential.content_size,
+        content.byteLength === expectedContentSize,
         `Credential with id ${credential.id} blob size does not match content_size`,
       );
     }
 
     return base64Encode(content);
   }
+}
+
+function normalizeCredentialContentSize(contentSize: unknown): number | undefined {
+  if (contentSize === null || contentSize === undefined) {
+    return undefined;
+  }
+
+  const size = typeof contentSize === "bigint" ? Number(contentSize) : Number(contentSize);
+
+  invariant(
+    Number.isSafeInteger(size) && size >= 0,
+    `Invalid credential content_size value: ${String(contentSize)}`,
+  );
+
+  return size;
 }
 
 export type {

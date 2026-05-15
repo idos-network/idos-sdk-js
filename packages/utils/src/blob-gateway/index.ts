@@ -143,15 +143,68 @@ export class BlobGateway {
 
   async fetchBlob({ contentUri }: FetchBlobParams): Promise<Uint8Array> {
     const cid = rootCidFromContentUri(contentUri);
-    const response = await this.#fetch(`${this.#url}/blob/v1/ipfs/${encodeURIComponent(cid)}`);
+    const fetchUrl = `${this.#url}/blob/v1/ipfs/${encodeURIComponent(cid)}`;
+    const startedAt = Date.now();
+
+    console.log("blob-gateway fetch request");
+    console.log(
+      JSON.stringify(
+        {
+          cid,
+          content_uri: contentUri,
+          url: fetchUrl,
+        },
+        null,
+        2,
+      ),
+    );
+
+    const response = await this.#fetch(fetchUrl);
+    const contentLength = response.headers.get("content-length");
 
     if (!response.ok) {
-      throw new Error(
-        `blob gateway fetch failed with ${response.status}: ${await response.text()}`,
+      const responseText = await response.text();
+
+      console.log("blob-gateway fetch response");
+      console.log(
+        JSON.stringify(
+          {
+            cid,
+            url: fetchUrl,
+            elapsed_ms: Date.now() - startedAt,
+            status: response.status,
+            ok: response.ok,
+            content_length_header: contentLength,
+            body: responseText,
+          },
+          null,
+          2,
+        ),
       );
+
+      throw new Error(`blob gateway fetch failed with ${response.status}: ${responseText}`);
     }
 
-    return new Uint8Array(await response.arrayBuffer());
+    const content = new Uint8Array(await response.arrayBuffer());
+
+    console.log("blob-gateway fetch response");
+    console.log(
+      JSON.stringify(
+        {
+          cid,
+          url: fetchUrl,
+          elapsed_ms: Date.now() - startedAt,
+          status: response.status,
+          ok: response.ok,
+          content_length_header: contentLength,
+          body_byte_length: content.byteLength,
+        },
+        null,
+        2,
+      ),
+    );
+
+    return content;
   }
 }
 
