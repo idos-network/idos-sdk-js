@@ -1,9 +1,11 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredential, idOSCredential2 } from "@idos-network/credentials/types";
 import type { KwilActionClient } from "@idos-network/kwil-infra";
 
 import {
   type CreateCredentialsByDwgInput,
+  type CreatePreliminaryCredentialsByDwgInput,
   createCredentialsByDwg,
+  createPreliminaryCredentialsByDwg,
   dwgMessage,
   type EditPublicNotesAsIssuerInput,
   editPublicNotesAsIssuer,
@@ -11,6 +13,7 @@ import {
   getSiblingCredentialId,
   type idOSDelegatedWriteGrant,
 } from "@idos-network/kwil-infra/actions";
+import { BlobGateway, createBlobContentReference } from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
   base64Encode,
@@ -22,8 +25,12 @@ import { encryptContent } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
+type InsertableIDOSCredential = Omit<
+  idOSCredential,
+  "id" | "original_id" | "content" | "content_uri" | "content_size"
+> & {
   id?: idOSCredential["id"];
+  content: string;
   content_hash?: string;
   public_notes_signature: string;
   broader_signature: string;
@@ -57,19 +64,36 @@ export type DelegatedWriteGrantParams = {
   signature: string;
 };
 
+export type CredentialByDelegatedWriteGrant2BaseParams = Omit<DelegatedWriteGrantBaseParams, "id">;
+
+type PreliminaryIDOSCredential = {
+  id: string;
+  contentUri: string;
+  contentSize: number;
+  encryptedContent: Uint8Array;
+  publicNotes: string;
+  publicNotesSignature: string;
+  broaderSignature: string;
+  issuerAuthPublicKey: string;
+  encryptorPublicKey: string;
+};
+
 export class CredentialService {
   readonly #kwilClient: KwilActionClient;
   readonly #signingKeyPair: nacl.SignKeyPair;
   readonly #encryptionSecretKey: Uint8Array;
+  readonly #blobGateway: BlobGateway;
 
   constructor(
     kwilClient: KwilActionClient,
     signingKeyPair: nacl.SignKeyPair,
     encryptionSecretKey: Uint8Array,
+    blobGatewayUrl: string,
   ) {
     this.#kwilClient = kwilClient;
     this.#signingKeyPair = signingKeyPair;
     this.#encryptionSecretKey = encryptionSecretKey;
+    this.#blobGateway = new BlobGateway({ url: blobGatewayUrl });
   }
 
   #buildInsertableIDOSCredential({
@@ -114,6 +138,58 @@ export class CredentialService {
       (entity as T & { id: string }).id = crypto.randomUUID();
     }
     return entity as T & { id: string };
+  }
+
+  #buildIDOSCredential2(credential: PreliminaryIDOSCredential): Omit<idOSCredential2, "user_id"> {
+    return {
+      id: credential.id,
+      content_uri: credential.contentUri,
+      content_size: credential.contentSize,
+      public_notes: credential.publicNotes,
+      issuer_auth_public_key: credential.issuerAuthPublicKey,
+      encryptor_public_key: credential.encryptorPublicKey,
+    };
+  }
+
+  async #buildInsertableIDOSCredential2({
+    publicNotes,
+    plaintextContent,
+    recipientEncryptionPublicKey,
+  }: Omit<BuildInsertableIDOSCredentialArgs, "userId">): Promise<
+    Omit<PreliminaryIDOSCredential, "id">
+  > {
+    const ephemeralKeyPair = nacl.box.keyPair();
+    const encryptedContent = encryptContent(
+      plaintextContent,
+      recipientEncryptionPublicKey,
+      ephemeralKeyPair.secretKey,
+    );
+    const contentReference = await createBlobContentReference(encryptedContent);
+
+    const publicNotesSignature = base64Encode(
+      nacl.sign.detached(utf8Encode(publicNotes), this.#signingKeyPair.secretKey),
+    );
+
+    return {
+      contentUri: contentReference.uri,
+      contentSize: contentReference.size,
+      encryptedContent,
+      publicNotes,
+      publicNotesSignature,
+
+      broaderSignature: base64Encode(
+        nacl.sign.detached(
+          Uint8Array.from([
+            ...base64Decode(publicNotesSignature),
+            ...utf8Encode(contentReference.uri),
+          ]),
+          this.#signingKeyPair.secretKey,
+        ),
+      ),
+
+      issuerAuthPublicKey: hexEncode(this.#signingKeyPair.publicKey, true),
+      encryptorPublicKey: base64Encode(ephemeralKeyPair.publicKey),
+    };
   }
 
   async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
@@ -176,6 +252,74 @@ export class CredentialService {
     await createCredentialsByDwg(this.#kwilClient, payload);
 
     return { originalCredential, copyCredential };
+  }
+
+  async createCredentialByDelegatedWriteGrant2(
+    credentialParams: CredentialByDelegatedWriteGrant2BaseParams,
+    delegatedWriteGrant: DelegatedWriteGrantParams,
+    consumerEncryptionPublicKey: Uint8Array,
+  ): Promise<{
+    originalCredential: Omit<idOSCredential2, "user_id">;
+    copyCredential: Omit<idOSCredential2, "user_id">;
+  }> {
+    const originalCredential: PreliminaryIDOSCredential = {
+      ...(await this.#buildInsertableIDOSCredential2(credentialParams)),
+      id: crypto.randomUUID(),
+    };
+
+    const contentHash = hexEncodeSha256Hash(credentialParams.plaintextContent);
+
+    const copyCredential: PreliminaryIDOSCredential = {
+      ...(await this.#buildInsertableIDOSCredential2({
+        publicNotes: "",
+        plaintextContent: credentialParams.plaintextContent,
+        recipientEncryptionPublicKey: consumerEncryptionPublicKey,
+      })),
+      id: crypto.randomUUID(),
+    };
+
+    const requestId = crypto.randomUUID();
+    const payload: CreatePreliminaryCredentialsByDwgInput = {
+      request_id: requestId,
+      issuer_auth_public_key: originalCredential.issuerAuthPublicKey,
+      original_encryptor_public_key: originalCredential.encryptorPublicKey,
+      original_id: originalCredential.id,
+      original_content_uri: originalCredential.contentUri,
+      original_content_size: originalCredential.contentSize,
+      original_public_notes: originalCredential.publicNotes,
+      original_public_notes_signature: originalCredential.publicNotesSignature,
+      original_broader_signature: originalCredential.broaderSignature,
+      copy_encryptor_public_key: copyCredential.encryptorPublicKey,
+      copy_id: copyCredential.id,
+      copy_content_uri: copyCredential.contentUri,
+      copy_content_size: copyCredential.contentSize,
+      copy_public_notes_signature: copyCredential.publicNotesSignature,
+      copy_broader_signature: copyCredential.broaderSignature,
+      content_hash: contentHash,
+      dwg_owner: delegatedWriteGrant.ownerWalletIdentifier,
+      dwg_grantee: delegatedWriteGrant.consumerWalletIdentifier,
+      dwg_issuer_public_key: delegatedWriteGrant.issuerPublicKey,
+      dwg_id: delegatedWriteGrant.id,
+      dwg_access_grant_timelock: delegatedWriteGrant.accessGrantTimelock,
+      dwg_not_before: delegatedWriteGrant.notUsableBefore,
+      dwg_not_after: delegatedWriteGrant.notUsableAfter,
+      dwg_signature: delegatedWriteGrant.signature,
+    };
+
+    console.log("create_preliminary_credentials_by_dwg payload");
+    console.log(JSON.stringify(payload, null, 2));
+
+    await createPreliminaryCredentialsByDwg(this.#kwilClient, payload);
+    await this.#blobGateway.uploadCredentialBlobs({
+      requestId,
+      original: originalCredential.encryptedContent,
+      copy: copyCredential.encryptedContent,
+    });
+
+    return {
+      originalCredential: this.#buildIDOSCredential2(originalCredential),
+      copyCredential: this.#buildIDOSCredential2(copyCredential),
+    };
   }
 
   async editCredentialAsIssuer(

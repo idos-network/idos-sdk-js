@@ -31,6 +31,10 @@
       "types": "./dist/cryptography/index.d.mts",
       "import": "./dist/cryptography/index.mjs"
     },
+    "./blob-gateway": {
+      "types": "./dist/blob-gateway/index.d.mts",
+      "import": "./dist/blob-gateway/index.mjs"
+    },
     "./encryption": {
       "types": "./dist/encryption/index.d.mts",
       "import": "./dist/encryption/index.mjs"
@@ -61,6 +65,7 @@
     "@stablelib/utf8": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
+    "ipfs-only-hash": "^4.0.0",
     "tiny-invariant": "catalog:core",
     "tweetnacl": "catalog:core"
   },

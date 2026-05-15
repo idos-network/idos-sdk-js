@@ -52,6 +52,7 @@ import {
   shareCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
+import { BlobGateway } from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
   base64Encode,
@@ -80,6 +81,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
   readonly state: "configuration";
   readonly chainId?: string;
   readonly nodeUrl: string;
+  readonly blobGatewayUrl?: string;
   readonly enclaveOptions: Omit<Provider["options"], "mode">;
   readonly store: Store;
   readonly enclaveProvider: BaseProvider;
@@ -87,6 +89,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
   constructor(params: {
     chainId?: string;
     nodeUrl: string;
+    blobGatewayUrl?: string;
     enclaveOptions: Omit<Provider["options"], "mode">;
     enclaveProvider?: new (options: Omit<Provider["options"], "mode">) => Provider;
     store?: Store;
@@ -94,6 +97,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
     this.state = "configuration";
     this.chainId = params.chainId;
     this.nodeUrl = params.nodeUrl;
+    this.blobGatewayUrl = params.blobGatewayUrl;
     this.enclaveOptions = params.enclaveOptions;
     this.store = params.store ?? new LocalStorageStore();
 
@@ -120,12 +124,19 @@ export class idOSClientIdle {
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
+  readonly blobGateway?: BlobGateway;
 
-  constructor(store: Store, kwilClient: KwilActionClient, enclaveProvider: BaseProvider) {
+  constructor(
+    store: Store,
+    kwilClient: KwilActionClient,
+    enclaveProvider: BaseProvider,
+    blobGateway?: BlobGateway,
+  ) {
     this.state = "idle";
     this.store = store;
     this.kwilClient = kwilClient;
     this.enclaveProvider = enclaveProvider;
+    this.blobGateway = blobGateway;
   }
 
   static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
@@ -136,7 +147,11 @@ export class idOSClientIdle {
 
     await params.enclaveProvider.load();
 
-    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
+    const blobGateway = params.blobGatewayUrl
+      ? new BlobGateway({ url: params.blobGatewayUrl })
+      : undefined;
+
+    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
@@ -188,6 +203,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
+  readonly blobGateway?: BlobGateway;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -206,13 +222,14 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
+    this.blobGateway = idOSClientIdle.blobGateway;
     // @ts-expect-error - TODO: Fix this
     this.enclaveProvider.setSigner(this.signer);
   }
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
+    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
   }
 
   async hasProfile(): Promise<boolean> {
@@ -268,6 +285,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
   readonly user: idOSUser;
+  readonly blobGateway?: BlobGateway;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
     this.state = "logged-in";
@@ -280,11 +298,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.walletPublicKey = idOSClientWithUserSigner.walletPublicKey;
     this.walletType = idOSClientWithUserSigner.walletType;
     this.user = user;
+    this.blobGateway = idOSClientWithUserSigner.blobGateway;
   }
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
+    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
   }
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
@@ -326,13 +345,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const credential = await this.getCredentialById(id);
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
-
-    await this.enclaveProvider.ensureUserEncryptionProfile();
-
-    const plaintext = await this.enclaveProvider.decrypt(
-      base64Decode(credential.content),
-      base64Decode(credential.encryptor_public_key),
-    );
+    const plaintext = await this.#decryptCredentialContent(credential);
 
     return hexEncodeSha256Hash(plaintext);
   }
@@ -341,13 +354,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const credential = await this.getCredentialById(id);
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
-
-    await this.enclaveProvider.ensureUserEncryptionProfile();
-
-    const plaintext = await this.enclaveProvider.decrypt(
-      base64Decode(credential.content),
-      base64Decode(credential.encryptor_public_key),
-    );
+    const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
   }
@@ -563,7 +570,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       );
 
       const matches = await this.enclaveProvider.filterCredentials(
-        fullCredentials,
+        await Promise.all(
+          fullCredentials.map((credential) => this.#credentialWithInlineContent(credential)),
+        ),
         privateFieldFilters,
       );
 
@@ -591,13 +600,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
-
-    const plaintextContent = utf8Decode(
-      await this.enclaveProvider.decrypt(
-        base64Decode(credential.content),
-        base64Decode(credential.encryptor_public_key),
-      ),
-    );
+    const plaintextContent = utf8Decode(await this.#decryptCredentialContent(credential));
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
 
@@ -625,6 +628,51 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     return insertableCredential;
   }
+
+  async #credentialWithInlineContent(credential: idOSCredential): Promise<idOSCredential> {
+    if (credential.content) {
+      return credential;
+    }
+
+    return {
+      ...credential,
+      content: base64Encode(await this.#getCredentialEncryptedContent(credential)),
+    };
+  }
+
+  async #decryptCredentialContent(credential: idOSCredential): Promise<Uint8Array> {
+    await this.enclaveProvider.ensureUserEncryptionProfile();
+
+    return this.enclaveProvider.decrypt(
+      await this.#getCredentialEncryptedContent(credential),
+      base64Decode(credential.encryptor_public_key),
+    );
+  }
+
+  async #getCredentialEncryptedContent(credential: idOSCredential): Promise<Uint8Array> {
+    if (credential.content) {
+      return base64Decode(credential.content);
+    }
+
+    invariant(
+      credential.content_uri,
+      `"idOSCredential" with id ${credential.id} has no content or content_uri`,
+    );
+    invariant(
+      this.blobGateway,
+      `"idOSCredential" with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
+    );
+
+    const content = await this.blobGateway.fetchBlob({ contentUri: credential.content_uri });
+    if (credential.content_size !== null && credential.content_size !== undefined) {
+      invariant(
+        content.byteLength === credential.content_size,
+        `"idOSCredential" with id ${credential.id} blob size does not match content_size`,
+      );
+    }
+
+    return content;
+  }
 }
 
 export type {
@@ -641,10 +689,12 @@ export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;
+  blobGatewayUrl?: string;
   enclaveOptions: Omit<IframeEnclave["options"], "mode">;
 }): idOSClientConfiguration<IframeEnclave> {
   return new idOSClientConfiguration({
     nodeUrl: params.nodeUrl,
+    blobGatewayUrl: params.blobGatewayUrl,
     enclaveOptions: params.enclaveOptions,
   });
 }

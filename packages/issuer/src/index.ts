@@ -4,6 +4,7 @@ import type {
   CredentialSubject,
   CredentialSubjectFaceId,
   idOSCredential,
+  idOSCredential2,
 } from "@idos-network/credentials/types";
 import type {
   EditPublicNotesAsIssuerInput,
@@ -23,9 +24,11 @@ import {
 } from "@idos-network/credentials/builder";
 import { deriveLevel } from "@idos-network/credentials/utils";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
+import { BlobGateway } from "@idos-network/utils/blob-gateway";
 
 import {
   CredentialService,
+  type CredentialByDelegatedWriteGrant2BaseParams,
   type DelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
@@ -40,6 +43,7 @@ import {
 type CreateIssuerParams = {
   chainId?: string;
   nodeUrl: string;
+  blobGatewayUrl?: string;
   signingKeyPair: SignKeyPair;
   encryptionSecretKey: Uint8Array;
 };
@@ -58,13 +62,16 @@ export class idOSIssuer {
     const [signer] = await createServerKwilSigner(params.signingKeyPair);
     kwilClient.setSigner(signer);
 
+    const blobGateway = new BlobGateway({ url: params.blobGatewayUrl ?? params.nodeUrl });
+
     const credentialService = new CredentialService(
       kwilClient,
       params.signingKeyPair,
       params.encryptionSecretKey,
+      params.blobGatewayUrl ?? params.nodeUrl,
     );
 
-    const grantService = new GrantService(kwilClient, params.encryptionSecretKey);
+    const grantService = new GrantService(kwilClient, params.encryptionSecretKey, blobGateway);
     const userService = new UserService(kwilClient);
 
     return new idOSIssuer(credentialService, grantService, userService);
@@ -123,6 +130,21 @@ export class idOSIssuer {
     );
   }
 
+  async createCredentialByDelegatedWriteGrant2(
+    credentialParams: CredentialByDelegatedWriteGrant2BaseParams,
+    delegatedWriteGrant: DelegatedWriteGrantParams,
+    consumerEncryptionPublicKey: Uint8Array,
+  ): Promise<{
+    originalCredential: Omit<idOSCredential2, "user_id">;
+    copyCredential: Omit<idOSCredential2, "user_id">;
+  }> {
+    return this.#credentialService.createCredentialByDelegatedWriteGrant2(
+      credentialParams,
+      delegatedWriteGrant,
+      consumerEncryptionPublicKey,
+    );
+  }
+
   async editCredentialAsIssuer(
     publicNotesId: string,
     publicNotes: string,
@@ -173,6 +195,7 @@ export class idOSIssuer {
 
 export type {
   idOSCredential,
+  idOSCredential2,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
@@ -184,4 +207,5 @@ export type {
   Credential,
   CredentialSubjectFaceId,
   FaceIdCredential,
+  CredentialByDelegatedWriteGrant2BaseParams,
 };

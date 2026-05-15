@@ -4,14 +4,27 @@ export type idOSCredential = {
   id: string;
   user_id: string;
   public_notes: string;
-  content: string;
+  content: string | null;
+  content_uri?: string | null;
+  content_size?: number | null;
   encryptor_public_key: string;
   issuer_auth_public_key: string;
   original_id?: string | null;
+  inserter_type?: string | null;
+  inserter_id?: string | null;
 };
 
-export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
+export type idOSCredential2 = Omit<idOSCredential, "content" | "content_uri" | "content_size"> & {
+  content_uri: string;
+  content_size: number;
+};
+
+export type InsertableIDOSCredential = Omit<
+  idOSCredential,
+  "id" | "original_id" | "content_uri" | "content_size"
+> & {
   id?: idOSCredential["id"];
+  content: string;
   content_hash?: string;
   public_notes_signature: string;
   broader_signature: string;
