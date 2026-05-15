@@ -88,12 +88,12 @@ export class CredentialService {
     kwilClient: KwilActionClient,
     signingKeyPair: nacl.SignKeyPair,
     encryptionSecretKey: Uint8Array,
-    blobGatewayUrl: string,
+    blobGateway: BlobGateway,
   ) {
     this.#kwilClient = kwilClient;
     this.#signingKeyPair = signingKeyPair;
     this.#encryptionSecretKey = encryptionSecretKey;
-    this.#blobGateway = new BlobGateway({ url: blobGatewayUrl });
+    this.#blobGateway = blobGateway;
   }
 
   #buildInsertableIDOSCredential({

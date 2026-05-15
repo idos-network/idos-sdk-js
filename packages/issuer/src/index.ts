@@ -12,9 +12,11 @@ import type {
   idOSWallet,
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
-
-import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
-import { BlobGateway } from "@idos-network/utils/blob-gateway";
+import {
+  createKgwAuthenticatedBlobGateway,
+  createNodeKwilClient,
+  createServerKwilSigner,
+} from "@idos-network/kwil-infra";
 
 import {
   CredentialService,
@@ -52,13 +54,17 @@ export class idOSIssuer {
     const [signer] = await createServerKwilSigner(params.signingKeyPair);
     kwilClient.setSigner(signer);
 
-    const blobGateway = new BlobGateway({ url: params.blobGatewayUrl ?? params.nodeUrl });
+    const blobGateway = createKgwAuthenticatedBlobGateway({
+      url: params.blobGatewayUrl ?? params.nodeUrl,
+      kwilClient,
+      signer,
+    });
 
     const credentialService = new CredentialService(
       kwilClient,
       params.signingKeyPair,
       params.encryptionSecretKey,
-      params.blobGatewayUrl ?? params.nodeUrl,
+      blobGateway,
     );
 
     const grantService = new GrantService(kwilClient, params.encryptionSecretKey, blobGateway);
