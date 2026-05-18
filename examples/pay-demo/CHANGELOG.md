@@ -1,5 +1,11 @@
 # pay-demo
 
+## 0.2.0
+
+### Minor Changes
+
+- fcdf54b: Fix relay urls
+
 ## 0.1.3
 
 ### Patch Changes
