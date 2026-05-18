@@ -15,7 +15,7 @@ export const fetchSharedToken = async (
   credentialId: string,
   forClientId: string,
 ): Promise<SharedTokenResponse> => {
-  const response = await fetch(`${SERVER_ENV.KRAKEN_API_URL}/public/kyc/sharedToken`, {
+  const response = await fetch(`${SERVER_ENV.KRAKEN_API_URL}/providers/sumsub/sharedToken`, {
     method: "POST",
     body: JSON.stringify({
       credentialId,
@@ -45,7 +45,7 @@ export const fetchSharedToken = async (
 
 export const fetchCredentialStatus = async (credentialId: string): Promise<SharedTokenResponse> => {
   const response = await fetch(
-    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/sharedToken/${credentialId}`,
+    `${SERVER_ENV.KRAKEN_API_URL}/providers/sumsub/sharedToken/${credentialId}`,
     {
       method: "GET",
       headers: {
