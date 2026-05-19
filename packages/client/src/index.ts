@@ -637,6 +637,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return {
       ...credential,
       content: base64Encode(await this.#getCredentialEncryptedContent(credential)),
+      content_uri: null,
+      content_size: null,
     };
   }
 
