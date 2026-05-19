@@ -42,7 +42,7 @@ describe("BlobGateway", () => {
 
   it("fetches blobs through the initialized gateway URL", async () => {
     const content = utf8Encode("content");
-    const { uri } = await createBlobContentReference(content);
+    const { size, uri } = await createBlobContentReference(content);
     const calls: Parameters<typeof fetch>[] = [];
     const gateway = new BlobGateway({
       url: "https://blob.example",
@@ -52,7 +52,7 @@ describe("BlobGateway", () => {
       },
     });
 
-    const result = await gateway.fetchBlob({ contentUri: uri });
+    const result = await gateway.fetchBlob({ contentUri: uri, expectedSize: size });
 
     expect(result).toEqual(content);
     expect(calls[0]?.[0]).toBe(
@@ -69,6 +69,35 @@ describe("BlobGateway", () => {
 
     await expect(gateway.fetchBlob({ contentUri: uri })).rejects.toThrow(
       /blob gateway returned content with CID .+, expected .+/,
+    );
+  });
+
+  it("rejects fetched blobs larger than the expected size while reading", async () => {
+    const content = utf8Encode("content");
+    const { uri } = await createBlobContentReference(content);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(content),
+    });
+
+    await expect(
+      gateway.fetchBlob({ contentUri: uri, expectedSize: content.byteLength - 1 }),
+    ).rejects.toThrow("blob gateway fetch exceeded maximum size of 6 bytes");
+  });
+
+  it("rejects content-length values larger than the configured fetch maximum", async () => {
+    const content = utf8Encode("content");
+    const { uri } = await createBlobContentReference(content);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () =>
+        new Response(content, {
+          headers: { "content-length": String(content.byteLength) },
+        }),
+    });
+
+    await expect(gateway.fetchBlob({ contentUri: uri, maxBytes: 6 })).rejects.toThrow(
+      "blob gateway response content-length 7 exceeds maximum fetch size 6",
     );
   });
 });

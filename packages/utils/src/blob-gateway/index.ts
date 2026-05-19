@@ -16,6 +16,7 @@ export type BlobGatewayUploadResponse = {
 export type BlobGatewayParams = {
   url: string;
   fetchFn?: typeof fetch;
+  maxFetchBytes?: number;
 };
 
 export type UploadCredentialBlobsParams = {
@@ -26,9 +27,12 @@ export type UploadCredentialBlobsParams = {
 
 export type FetchBlobParams = {
   contentUri: string;
+  expectedSize?: number | string | bigint | null;
+  maxBytes?: number;
 };
 
 const IPFS_URI_PREFIX = "ipfs://";
+export const DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES: number = 32 * 1024 * 1024;
 
 const CID_IMPORT_POLICY = {
   cidVersion: 1,
@@ -55,10 +59,16 @@ export async function createBlobContentReference(
 export class BlobGateway {
   readonly #url: string;
   readonly #fetch: typeof fetch;
+  readonly #maxFetchBytes: number;
 
-  constructor({ url, fetchFn = fetch }: BlobGatewayParams) {
+  constructor({
+    url,
+    fetchFn = fetch,
+    maxFetchBytes = DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES,
+  }: BlobGatewayParams) {
     this.#url = url.replace(/\/$/, "");
     this.#fetch = fetchFn;
+    this.#maxFetchBytes = normalizeByteCount(maxFetchBytes, "maxFetchBytes") ?? maxFetchBytes;
   }
 
   async uploadCredentialBlobs({
@@ -141,8 +151,23 @@ export class BlobGateway {
     return JSON.parse(responseText) as BlobGatewayUploadResponse;
   }
 
-  async fetchBlob({ contentUri }: FetchBlobParams): Promise<Uint8Array> {
+  async fetchBlob({ contentUri, expectedSize, maxBytes }: FetchBlobParams): Promise<Uint8Array> {
     const cid = rootCidFromContentUri(contentUri);
+    const expectedByteLength = normalizeByteCount(expectedSize, "expectedSize");
+    const explicitMaxBytes = normalizeByteCount(maxBytes, "maxBytes");
+    const maxFetchBytes = explicitMaxBytes ?? this.#maxFetchBytes;
+
+    if (
+      expectedByteLength !== undefined &&
+      explicitMaxBytes !== undefined &&
+      expectedByteLength > explicitMaxBytes
+    ) {
+      throw new Error(
+        `blob gateway expected size ${expectedByteLength} exceeds maximum fetch size ${explicitMaxBytes}`,
+      );
+    }
+
+    const maxResponseBytes = expectedByteLength ?? maxFetchBytes;
     const fetchUrl = `${this.#url}/blob/v1/ipfs/${encodeURIComponent(cid)}`;
     const startedAt = Date.now();
 
@@ -153,6 +178,8 @@ export class BlobGateway {
           cid,
           content_uri: contentUri,
           url: fetchUrl,
+          expected_size: expectedByteLength,
+          max_response_bytes: maxResponseBytes,
         },
         null,
         2,
@@ -161,6 +188,7 @@ export class BlobGateway {
 
     const response = await this.#fetch(fetchUrl);
     const contentLength = response.headers.get("content-length");
+    const declaredContentLength = parseContentLength(contentLength);
 
     if (!response.ok) {
       const responseText = await response.text();
@@ -185,7 +213,20 @@ export class BlobGateway {
       throw new Error(`blob gateway fetch failed with ${response.status}: ${responseText}`);
     }
 
-    const content = new Uint8Array(await response.arrayBuffer());
+    if (declaredContentLength !== undefined && declaredContentLength > maxResponseBytes) {
+      throw new Error(
+        `blob gateway response content-length ${declaredContentLength} exceeds maximum fetch size ${maxResponseBytes}`,
+      );
+    }
+
+    const content = await readResponseBytes(response, maxResponseBytes);
+
+    if (expectedByteLength !== undefined && content.byteLength !== expectedByteLength) {
+      throw new Error(
+        `blob gateway returned ${content.byteLength} bytes, expected ${expectedByteLength}`,
+      );
+    }
+
     const contentCid = await ipfsOnlyHash(content, CID_IMPORT_POLICY);
 
     if (contentCid.toString() !== cid) {
@@ -204,6 +245,8 @@ export class BlobGateway {
           status: response.status,
           ok: response.ok,
           content_length_header: contentLength,
+          expected_size: expectedByteLength,
+          max_response_bytes: maxResponseBytes,
           body_byte_length: content.byteLength,
         },
         null,
@@ -227,4 +270,78 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   const buffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(buffer).set(bytes);
   return buffer;
+}
+
+function normalizeByteCount(value: unknown, label: string): number | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value === "string" && value.trim() === "") {
+    throw new Error(`${label} must be a non-negative safe integer`);
+  }
+
+  const size =
+    typeof value === "bigint" ? Number(value) : typeof value === "string" ? Number(value) : value;
+
+  if (typeof size !== "number" || !Number.isSafeInteger(size) || size < 0) {
+    throw new Error(`${label} must be a non-negative safe integer`);
+  }
+
+  return size;
+}
+
+function parseContentLength(contentLength: string | null): number | undefined {
+  if (contentLength === null) {
+    return undefined;
+  }
+
+  const size = Number(contentLength);
+
+  if (!Number.isSafeInteger(size) || size < 0) {
+    return undefined;
+  }
+
+  return size;
+}
+
+async function readResponseBytes(response: Response, maxBytes: number): Promise<Uint8Array> {
+  if (response.body === null) {
+    return new Uint8Array();
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let receivedBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      receivedBytes += value.byteLength;
+
+      if (receivedBytes > maxBytes) {
+        await reader.cancel();
+        throw new Error(`blob gateway fetch exceeded maximum size of ${maxBytes} bytes`);
+      }
+
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const content = new Uint8Array(receivedBytes);
+  let offset = 0;
+
+  for (const chunk of chunks) {
+    content.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return content;
 }
