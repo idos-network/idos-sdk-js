@@ -8,6 +8,7 @@ import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   buildInsertableIDOSCredential,
   matchLevelOrHigher,
+  normalizeCredentialContentSize,
   recordFilter,
 } from "@idos-network/credentials/utils";
 import {
@@ -665,13 +666,14 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       `"idOSCredential" with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
     );
 
+    const expectedContentSize = normalizeCredentialContentSize(credential.content_size);
     const content = await this.blobGateway.fetchBlob({
       contentUri: credential.content_uri,
-      expectedSize: credential.content_size,
+      expectedSize: expectedContentSize,
     });
-    if (credential.content_size !== null && credential.content_size !== undefined) {
+    if (expectedContentSize !== undefined) {
       invariant(
-        content.byteLength === credential.content_size,
+        content.byteLength === expectedContentSize,
         `"idOSCredential" with id ${credential.id} blob size does not match content_size`,
       );
     }

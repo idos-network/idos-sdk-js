@@ -9,6 +9,7 @@ import type {
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import { normalizeCredentialContentSize } from "@idos-network/credentials/utils";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
@@ -201,21 +202,6 @@ export class idOSConsumer {
 
     return base64Encode(content);
   }
-}
-
-function normalizeCredentialContentSize(contentSize: unknown): number | undefined {
-  if (contentSize === null || contentSize === undefined) {
-    return undefined;
-  }
-
-  const size = typeof contentSize === "bigint" ? Number(contentSize) : Number(contentSize);
-
-  invariant(
-    Number.isSafeInteger(size) && size >= 0,
-    `Invalid credential content_size value: ${String(contentSize)}`,
-  );
-
-  return size;
 }
 
 export type {

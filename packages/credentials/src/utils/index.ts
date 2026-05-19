@@ -242,6 +242,21 @@ export function recordFilter(
   return true;
 }
 
+export function normalizeCredentialContentSize(contentSize: unknown): number | undefined {
+  if (contentSize === null || contentSize === undefined) {
+    return undefined;
+  }
+
+  const size = Number(contentSize);
+
+  invariant(
+    Number.isSafeInteger(size) && size >= 0,
+    `Invalid credential content_size value: ${String(contentSize)}`,
+  );
+
+  return size;
+}
+
 export function buildInsertableIDOSCredential(
   userId: string,
   publicNotes: string,
