@@ -1,5 +1,5 @@
 import { type KwilSigner, NodeKwil } from "@idos-network/kwil-js";
-import { BlobGateway } from "@idos-network/utils/blob-gateway";
+import { BlobGateway, type BlobGatewayParams } from "@idos-network/utils/blob-gateway";
 
 import type { KwilActionClient } from "./create-kwil-client";
 
@@ -16,6 +16,7 @@ export type CreateKgwAuthenticatedFetchParams = {
 
 export type CreateKgwAuthenticatedBlobGatewayParams = CreateKgwAuthenticatedFetchParams & {
   url: string;
+  maxFetchBytes?: BlobGatewayParams["maxFetchBytes"];
 };
 
 type KgwSessionNodeKwil = NodeKwil & {
@@ -25,10 +26,12 @@ type KgwSessionNodeKwil = NodeKwil & {
 
 export function createKgwAuthenticatedBlobGateway({
   url,
+  maxFetchBytes,
   ...fetchParams
 }: CreateKgwAuthenticatedBlobGatewayParams): BlobGateway {
   return new BlobGateway({
     url,
+    maxFetchBytes,
     fetchFn: createKgwAuthenticatedFetch(fetchParams),
   });
 }

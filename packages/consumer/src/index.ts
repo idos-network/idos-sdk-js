@@ -172,8 +172,11 @@ export class idOSConsumer {
       `Credential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
     );
 
-    const content = await this.#blobGateway.fetchBlob({ contentUri: credential.content_uri });
     const expectedContentSize = normalizeCredentialContentSize(credential.content_size);
+    const content = await this.#blobGateway.fetchBlob({
+      contentUri: credential.content_uri,
+      expectedSize: expectedContentSize,
+    });
     if (expectedContentSize !== undefined) {
       console.log("credential blob size check");
       console.log(

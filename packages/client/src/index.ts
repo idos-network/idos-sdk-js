@@ -663,7 +663,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       `"idOSCredential" with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
     );
 
-    const content = await this.blobGateway.fetchBlob({ contentUri: credential.content_uri });
+    const content = await this.blobGateway.fetchBlob({
+      contentUri: credential.content_uri,
+      expectedSize: credential.content_size,
+    });
     if (credential.content_size !== null && credential.content_size !== undefined) {
       invariant(
         content.byteLength === credential.content_size,
