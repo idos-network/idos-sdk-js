@@ -186,6 +186,13 @@ export class BlobGateway {
     }
 
     const content = new Uint8Array(await response.arrayBuffer());
+    const contentCid = await ipfsOnlyHash(content, CID_IMPORT_POLICY);
+
+    if (contentCid.toString() !== cid) {
+      throw new Error(
+        `blob gateway returned content with CID ${contentCid.toString()}, expected ${cid}`,
+      );
+    }
 
     console.log("blob-gateway fetch response");
     console.log(
