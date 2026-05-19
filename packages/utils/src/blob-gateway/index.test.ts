@@ -41,18 +41,34 @@ describe("BlobGateway", () => {
   });
 
   it("fetches blobs through the initialized gateway URL", async () => {
+    const content = utf8Encode("content");
+    const { uri } = await createBlobContentReference(content);
     const calls: Parameters<typeof fetch>[] = [];
     const gateway = new BlobGateway({
       url: "https://blob.example",
       fetchFn: async (...args) => {
         calls.push(args);
-        return new Response(utf8Encode("content"));
+        return new Response(content);
       },
     });
 
-    const result = await gateway.fetchBlob({ contentUri: "ipfs://bafk:test" });
+    const result = await gateway.fetchBlob({ contentUri: uri });
 
-    expect(result).toEqual(utf8Encode("content"));
-    expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/ipfs/bafk%3Atest");
+    expect(result).toEqual(content);
+    expect(calls[0]?.[0]).toBe(
+      `https://blob.example/blob/v1/ipfs/${encodeURIComponent(uri.slice("ipfs://".length))}`,
+    );
+  });
+
+  it("rejects fetched blobs whose bytes do not match the content URI CID", async () => {
+    const { uri } = await createBlobContentReference(utf8Encode("expected"));
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(utf8Encode("tampered")),
+    });
+
+    await expect(gateway.fetchBlob({ contentUri: uri })).rejects.toThrow(
+      /blob gateway returned content with CID .+, expected .+/,
+    );
   });
 });
