@@ -2,8 +2,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { BlobGateway, createBlobContentReference } from ".";
-import { utf8Encode } from "../codecs";
+import { BlobGateway, createBlobContentReference, resolveCredentialEncryptedContent } from ".";
+import { base64Encode, utf8Encode } from "../codecs";
 
 describe("createBlobContentReference", () => {
   it("creates a blob-gateway compatible content reference", async () => {
@@ -14,6 +14,40 @@ describe("createBlobContentReference", () => {
       uri: "ipfs://bafkreiepinbumzepnoln7co5vea4kf3lcctnqolb3u6bvsellgznymt2uq",
       size: 2,
     });
+  });
+});
+
+describe("resolveCredentialEncryptedContent", () => {
+  it("returns inline credential content bytes", async () => {
+    const content = utf8Encode("inline content");
+
+    await expect(
+      resolveCredentialEncryptedContent({
+        id: "credential-1",
+        content: base64Encode(content),
+      }),
+    ).resolves.toEqual(content);
+  });
+
+  it("fetches blob-backed content with normalized content_size", async () => {
+    const content = utf8Encode("blob content");
+    const { size, uri } = await createBlobContentReference(content);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(content),
+    });
+
+    await expect(
+      resolveCredentialEncryptedContent(
+        {
+          id: "credential-1",
+          content: null,
+          content_uri: uri,
+          content_size: String(size),
+        },
+        gateway,
+      ),
+    ).resolves.toEqual(content);
   });
 });
 

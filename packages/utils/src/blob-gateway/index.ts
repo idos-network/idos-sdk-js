@@ -1,5 +1,7 @@
 import { of as ipfsOnlyHash } from "ipfs-only-hash";
 
+import { base64Decode } from "../codecs";
+
 export type BlobContentReference = {
   cid: string;
   uri: string;
@@ -31,6 +33,13 @@ export type FetchBlobParams = {
   maxBytes?: number;
 };
 
+export type BlobBackedCredentialContent = {
+  id: string;
+  content?: string | null;
+  content_uri?: string | null;
+  content_size?: number | string | bigint | null;
+};
+
 const IPFS_URI_PREFIX = "ipfs://";
 export const DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES: number = 32 * 1024 * 1024;
 
@@ -54,6 +63,30 @@ export async function createBlobContentReference(
     uri: `${IPFS_URI_PREFIX}${cidString}`,
     size: encryptedContent.byteLength,
   };
+}
+
+export async function resolveCredentialEncryptedContent(
+  credential: BlobBackedCredentialContent,
+  blobGateway?: BlobGateway,
+): Promise<Uint8Array> {
+  if (credential.content) {
+    return base64Decode(credential.content);
+  }
+
+  if (!credential.content_uri) {
+    throw new Error(`Credential with id ${credential.id} has no content or content_uri`);
+  }
+
+  if (!blobGateway) {
+    throw new Error(
+      `Credential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
+    );
+  }
+
+  return blobGateway.fetchBlob({
+    contentUri: credential.content_uri,
+    expectedSize: normalizeByteCount(credential.content_size, "content_size"),
+  });
 }
 
 export class BlobGateway {

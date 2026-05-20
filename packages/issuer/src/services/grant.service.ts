@@ -2,7 +2,7 @@ import type { idOSCredential } from "@idos-network/credentials/types";
 import type { KwilActionClient } from "@idos-network/kwil-infra";
 
 import { createAgByDagForCopy as _createAgByDagForCopy } from "@idos-network/kwil-infra/actions";
-import { BlobGateway } from "@idos-network/utils/blob-gateway";
+import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
@@ -65,27 +65,6 @@ export class GrantService {
   }
 
   async #getCredentialEncryptedContent(credential: idOSCredential): Promise<string> {
-    if (credential.content) {
-      return credential.content;
-    }
-
-    invariant(credential.content_uri, `idOSCredential with id ${credential.id} has no content_uri`);
-    invariant(
-      this.#blobGateway,
-      `idOSCredential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
-    );
-
-    const content = await this.#blobGateway.fetchBlob({
-      contentUri: credential.content_uri,
-      expectedSize: credential.content_size,
-    });
-    if (credential.content_size !== null && credential.content_size !== undefined) {
-      invariant(
-        content.byteLength === credential.content_size,
-        `idOSCredential with id ${credential.id} blob size does not match content_size`,
-      );
-    }
-
-    return base64Encode(content);
+    return base64Encode(await resolveCredentialEncryptedContent(credential, this.#blobGateway));
   }
 }
