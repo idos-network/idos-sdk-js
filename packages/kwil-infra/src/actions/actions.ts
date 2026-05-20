@@ -18,6 +18,10 @@ export const encryptionPasswordStoreSchema: z.ZodType<EncryptionPasswordStore> =
   ENCRYPTION_PASSWORD_STORES,
 );
 
+const IPFS_URI_PREFIX = "ipfs://";
+const ipfsContentUriSchema = z.string().startsWith(IPFS_URI_PREFIX);
+const contentSizeSchema = z.number().int().nonnegative();
+
 export type ActionSchemaElement = {
   name: string;
   type: typeof DataType.Uuid | typeof DataType.Text | typeof DataType.Int | typeof DataType.Boolean;
@@ -1475,15 +1479,15 @@ export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   issuer_auth_public_key: z.string(),
   original_encryptor_public_key: z.string(),
   original_id: z.uuid(),
-  original_content_uri: z.string(),
-  original_content_size: z.number(),
+  original_content_uri: ipfsContentUriSchema,
+  original_content_size: contentSizeSchema,
   original_public_notes: z.string(),
   original_public_notes_signature: z.string(),
   original_broader_signature: z.string(),
   copy_encryptor_public_key: z.string(),
   copy_id: z.uuid(),
-  copy_content_uri: z.string(),
-  copy_content_size: z.number(),
+  copy_content_uri: ipfsContentUriSchema,
+  copy_content_size: contentSizeSchema,
   copy_public_notes_signature: z.string(),
   copy_broader_signature: z.string(),
   content_hash: z.string(),
