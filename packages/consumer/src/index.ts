@@ -27,7 +27,7 @@ import {
   type idOSGrant,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
-import { BlobGateway } from "@idos-network/utils/blob-gateway";
+import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
 import { base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
@@ -161,44 +161,7 @@ export class idOSConsumer {
   }
 
   async #getCredentialEncryptedContent(credential: idOSCredential): Promise<string> {
-    if (credential.content) {
-      return credential.content;
-    }
-
-    invariant(credential.content_uri, `Credential with id ${credential.id} has no content_uri`);
-    invariant(
-      this.#blobGateway,
-      `Credential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
-    );
-
-    const expectedContentSize = normalizeCredentialContentSize(credential.content_size);
-    const content = await this.#blobGateway.fetchBlob({
-      contentUri: credential.content_uri,
-      expectedSize: expectedContentSize,
-    });
-    if (expectedContentSize !== undefined) {
-      console.log("credential blob size check");
-      console.log(
-        JSON.stringify(
-          {
-            credential_id: credential.id,
-            content_uri: credential.content_uri,
-            content_size: credential.content_size,
-            content_size_type: typeof credential.content_size,
-            expected_content_size: expectedContentSize,
-            fetched_byte_length: content.byteLength,
-          },
-          null,
-          2,
-        ),
-      );
-      invariant(
-        content.byteLength === expectedContentSize,
-        `Credential with id ${credential.id} blob size does not match content_size`,
-      );
-    }
-
-    return base64Encode(content);
+    return base64Encode(await resolveCredentialEncryptedContent(credential, this.#blobGateway));
   }
 }
 

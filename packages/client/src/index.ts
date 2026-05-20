@@ -8,7 +8,6 @@ import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   buildInsertableIDOSCredential,
   matchLevelOrHigher,
-  normalizeCredentialContentSize,
   recordFilter,
   type BaseLevel,
   type Addon,
@@ -55,7 +54,7 @@ import {
   shareCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
-import { BlobGateway } from "@idos-network/utils/blob-gateway";
+import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
   base64Encode,
@@ -655,32 +654,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async #getCredentialEncryptedContent(credential: idOSCredential): Promise<Uint8Array> {
-    if (credential.content) {
-      return base64Decode(credential.content);
-    }
-
-    invariant(
-      credential.content_uri,
-      `"idOSCredential" with id ${credential.id} has no content or content_uri`,
-    );
-    invariant(
-      this.blobGateway,
-      `"idOSCredential" with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
-    );
-
-    const expectedContentSize = normalizeCredentialContentSize(credential.content_size);
-    const content = await this.blobGateway.fetchBlob({
-      contentUri: credential.content_uri,
-      expectedSize: expectedContentSize,
-    });
-    if (expectedContentSize !== undefined) {
-      invariant(
-        content.byteLength === expectedContentSize,
-        `"idOSCredential" with id ${credential.id} blob size does not match content_size`,
-      );
-    }
-
-    return content;
+    return resolveCredentialEncryptedContent(credential, this.blobGateway);
   }
 }
 
