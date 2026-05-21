@@ -35,8 +35,12 @@ await idOSIssuer.createUser(user, wallet);
 // Build and issue a W3C Verifiable Credential
 const credential = await idOSIssuer.buildCredential(credentialFields, credentialSubject, issuer);
 
-// Write credential using delegated write grant
-await idOSIssuer.createCredentialByDelegatedWriteGrant(credentialPayload, delegatedWriteGrant);
+// Write blob-backed credential using delegated write grant
+await idOSIssuer.createCredentialByDelegatedWriteGrant(
+  credentialPayload,
+  delegatedWriteGrant,
+  consumerEncryptionPublicKey,
+);
 ```
 
 ## Documentation

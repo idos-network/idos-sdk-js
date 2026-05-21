@@ -328,26 +328,31 @@ const credentialsPublicNotes = {
 const credentialContent = JSON.stringify(credential);
 
 const credentialPayload = {
-  id: crypto.randomUUID(),
-  user_id: userId,
   plaintextContent: Utf8Codec.encode(credentialContent),
   recipientEncryptionPublicKey: Utf8Codec.encode(userEncryptionPublicKey),
   publicNotes: JSON.stringify(credentialsPublicNotes),
 };
 
-await idOSIssuer.createCredentialByDelegatedWriteGrant(credentialPayload, {
-  id: delegatedWriteGrant.id,
-  ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
-  consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
-  issuerPublicKey: delegatedWriteGrant.issuer_public_key,
-  accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
-  notUsableBefore: delegatedWriteGrant.not_usable_before,
-  notUsableAfter: delegatedWriteGrant.not_usable_after,
-  signature,
-});
+// The copy credential is encrypted to the delegated write grant grantee.
+const copyEncryptionPublicKey = Utf8Codec.encode(granteeEncryptionPublicKey);
+
+await idOSIssuer.createCredentialByDelegatedWriteGrant(
+  credentialPayload,
+  {
+    id: delegatedWriteGrant.id,
+    ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
+    consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
+    issuerPublicKey: delegatedWriteGrant.issuer_public_key,
+    accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
+    notUsableBefore: delegatedWriteGrant.not_usable_before,
+    notUsableAfter: delegatedWriteGrant.not_usable_after,
+    signature,
+  },
+  copyEncryptionPublicKey,
+);
 ```
 
-This will create a credential for the user in the idOS and a copy for you.
+This will create blob-backed original and copy credentials in idOS.
 
 ### [ backend ] Revoking and editing credentials
 

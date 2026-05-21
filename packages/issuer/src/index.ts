@@ -1,6 +1,7 @@
 import type {
   AvailableIssuerType,
   idOSCredential,
+  idOSCredentialRecord,
 } from "@idos-network/credentials/types";
 
 import type {
@@ -20,8 +21,7 @@ import {
 
 import {
   CredentialService,
-  type CredentialByDelegatedWriteGrant2BaseParams,
-  type DelegatedWriteGrantBaseParams,
+  type CredentialByDelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
 import { type CreateAccessGrantFromDAGParams, GrantService } from "./services/grant.service";
@@ -60,12 +60,7 @@ export class idOSIssuer {
       signer,
     });
 
-    const credentialService = new CredentialService(
-      kwilClient,
-      params.signingKeyPair,
-      params.encryptionSecretKey,
-      blobGateway,
-    );
+    const credentialService = new CredentialService(kwilClient, params.signingKeyPair, blobGateway);
 
     const grantService = new GrantService(kwilClient, params.encryptionSecretKey, blobGateway);
     const userService = new UserService(kwilClient);
@@ -112,29 +107,14 @@ export class idOSIssuer {
   }
 
   async createCredentialByDelegatedWriteGrant(
-    credentialParams: DelegatedWriteGrantBaseParams,
+    credentialParams: CredentialByDelegatedWriteGrantBaseParams,
     delegatedWriteGrant: DelegatedWriteGrantParams,
-    consumerEncryptionPublicKey?: Uint8Array,
+    consumerEncryptionPublicKey: Uint8Array,
   ): Promise<{
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
   }> {
     return this.#credentialService.createCredentialByDelegatedWriteGrant(
-      credentialParams,
-      delegatedWriteGrant,
-      consumerEncryptionPublicKey,
-    );
-  }
-
-  async createCredentialByDelegatedWriteGrant2(
-    credentialParams: CredentialByDelegatedWriteGrant2BaseParams,
-    delegatedWriteGrant: DelegatedWriteGrantParams,
-    consumerEncryptionPublicKey: Uint8Array,
-  ): Promise<{
-    originalCredential: Omit<idOSCredential2, "user_id">;
-    copyCredential: Omit<idOSCredential2, "user_id">;
-  }> {
-    return this.#credentialService.createCredentialByDelegatedWriteGrant2(
       credentialParams,
       delegatedWriteGrant,
       consumerEncryptionPublicKey,
@@ -152,7 +132,7 @@ export class idOSIssuer {
     return this.#credentialService.getCredentialIdByContentHash(contentHash);
   }
 
-  async getCredentialShared(id: string): Promise<idOSCredential | null> {
+  async getCredentialShared(id: string): Promise<idOSCredentialRecord | null> {
     return this.#credentialService.getCredentialShared(id);
   }
 
@@ -175,5 +155,5 @@ export type {
   idOSDelegatedWriteGrant,
   idOSWallet,
   AvailableIssuerType,
-  CredentialByDelegatedWriteGrant2BaseParams,
+  CredentialByDelegatedWriteGrantBaseParams,
 };

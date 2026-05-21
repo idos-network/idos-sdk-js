@@ -21,11 +21,14 @@ export type BlobGatewayParams = {
   maxFetchBytes?: number;
 };
 
+type CredentialBlobParts =
+  | { original: Uint8Array; copy: Uint8Array }
+  | { original: Uint8Array; copy?: undefined }
+  | { original?: undefined; copy: Uint8Array };
+
 export type UploadCredentialBlobsParams = {
   requestId: string;
-  original: Uint8Array;
-  copy: Uint8Array;
-};
+} & CredentialBlobParts;
 
 export type FetchBlobParams = {
   contentUri: string;
@@ -41,7 +44,7 @@ export type BlobBackedCredentialContent = {
 };
 
 const IPFS_URI_PREFIX = "ipfs://";
-export const DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES: number = 32 * 1024 * 1024;
+export const DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES: number = 20 * 1024 * 1024;
 
 const CID_IMPORT_POLICY = {
   cidVersion: 1,
@@ -118,8 +121,8 @@ export class BlobGateway {
         {
           request_id: requestId,
           url: uploadUrl,
-          original_size: original.byteLength,
-          copy_size: copy.byteLength,
+          original_size: original?.byteLength,
+          copy_size: copy?.byteLength,
         },
         null,
         2,
@@ -127,8 +130,12 @@ export class BlobGateway {
     );
 
     const body = new FormData();
-    body.append("original", new Blob([toArrayBuffer(original)]), "original.blob");
-    body.append("copy", new Blob([toArrayBuffer(copy)]), "copy.blob");
+    if (original) {
+      body.append("original", new Blob([toArrayBuffer(original)]), "original.blob");
+    }
+    if (copy) {
+      body.append("copy", new Blob([toArrayBuffer(copy)]), "copy.blob");
+    }
 
     let response: Response;
     try {

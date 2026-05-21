@@ -3,9 +3,8 @@ export type idOSCredential = {
   id: string;
   user_id: string;
   public_notes: string;
-  content: string | null;
-  content_uri?: string | null;
-  content_size?: number | null;
+  content_uri: string;
+  content_size: number;
   encryptor_public_key: string;
   issuer_auth_public_key: string;
   original_id?: string | null;
@@ -13,20 +12,22 @@ export type idOSCredential = {
   inserter_id?: string | null;
 };
 
-export type idOSCredential2 = Omit<idOSCredential, "content" | "content_uri" | "content_size"> & {
-  content_uri: string;
-  content_size: number;
+export type idOSCredentialRecord = Omit<idOSCredential, "content_uri" | "content_size"> & {
+  content: string | null;
+  content_uri?: string | null;
+  content_size?: number | null;
 };
 
-export type InsertableIDOSCredential = Omit<
-  idOSCredential,
-  "id" | "original_id" | "content_uri" | "content_size"
-> & {
-  id?: idOSCredential["id"];
-  content: string;
-  content_hash?: string;
+export type SignedCredentialContentReference = {
+  public_notes: string;
   public_notes_signature: string;
   broader_signature: string;
+  issuer_auth_public_key: string;
+};
+
+export type CredentialSigningKeyPair = {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
 };
 
 // TODO: This is a stub of the types for @digitalbazaar/vc

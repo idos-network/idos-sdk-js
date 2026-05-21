@@ -28,6 +28,7 @@ import {
 
 const idOSClientWithoutSigner = await createIDOSClient({
   nodeUrl: "https://nodes.idos.network",
+  blobGatewayUrl: "https://blob-gateway.idos.network",
   enclaveOptions: {
     container: "#idosContainer",
   },
@@ -53,11 +54,12 @@ const credentials = await loggedInClient.filterCredentials({
   },
 });
 
-// If we found a credentials which we can use, we will ask user for AccessGrant
-// which we later can use in our consumer to get the users data
+// If we found a credential which we can use, ask the user to share a
+// blob-backed copy that the consumer can later read.
 const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
   consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
   consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
+  issuerSigningKeyPair, // Must match the credential issuer_auth_public_key
   lockedUntil: lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 

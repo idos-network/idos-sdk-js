@@ -1,9 +1,12 @@
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+
 import { every, get } from "es-toolkit/compat";
-import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-import type { InsertableIDOSCredential } from "../types";
+import type {
+  CredentialSigningKeyPair,
+  SignedCredentialContentReference,
+} from "../types";
 
 // Proxying functions
 export * from "./issuer";
@@ -160,36 +163,27 @@ export function recordFilter(
   return true;
 }
 
-export function buildInsertableIDOSCredential(
-  userId: string,
+export function buildSignedCredentialContentReference(
   publicNotes: string,
-  content: string,
-  encryptorPublicKey: string,
-): InsertableIDOSCredential {
-  invariant(encryptorPublicKey, "Missing `encryptorPublicKey`");
-
-  const ephemeralAuthenticationKeyPair = nacl.sign.keyPair();
-
+  contentUri: string,
+  issuerSigningKeyPair: CredentialSigningKeyPair,
+): SignedCredentialContentReference {
   const publicNotesSignature = nacl.sign.detached(
     utf8Encode(publicNotes),
-    ephemeralAuthenticationKeyPair.secretKey,
+    issuerSigningKeyPair.secretKey,
   );
 
   return {
-    user_id: userId,
-    content,
-
     public_notes: publicNotes,
     public_notes_signature: base64Encode(publicNotesSignature),
 
     broader_signature: base64Encode(
       nacl.sign.detached(
-        Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
-        ephemeralAuthenticationKeyPair.secretKey,
+        Uint8Array.from([...publicNotesSignature, ...utf8Encode(contentUri)]),
+        issuerSigningKeyPair.secretKey,
       ),
     ),
 
-    issuer_auth_public_key: hexEncode(ephemeralAuthenticationKeyPair.publicKey, true),
-    encryptor_public_key: encryptorPublicKey,
+    issuer_auth_public_key: hexEncode(issuerSigningKeyPair.publicKey, true),
   };
 }

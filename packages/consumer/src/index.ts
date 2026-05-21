@@ -1,6 +1,11 @@
 import type {
   AvailableIssuerType,
+<<<<<<< HEAD
   idOSCredential,
+=======
+  IDDocumentType,
+  idOSCredentialRecord as idOSCredential,
+>>>>>>> 649a140e (Migrate share_credential to new blob content model. Refactor  names and cleanup.)
   VerifiableCredential,
 } from "@idos-network/credentials/types";
 import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";

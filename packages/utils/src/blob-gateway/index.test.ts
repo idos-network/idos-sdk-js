@@ -74,6 +74,25 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
   });
 
+  it("uploads a copy blob without requiring an original blob", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return Response.json({ request_id: "request-1", copy_cid: "copy-cid" });
+      },
+    });
+
+    const result = await gateway.uploadCredentialBlobs({
+      requestId: "request-1",
+      copy: utf8Encode("copy"),
+    });
+
+    expect(result).toEqual({ request_id: "request-1", copy_cid: "copy-cid" });
+    expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
+  });
+
   it("fetches blobs through the initialized gateway URL", async () => {
     const content = utf8Encode("content");
     const { size, uri } = await createBlobContentReference(content);

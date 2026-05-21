@@ -336,10 +336,14 @@ This will return a list of `idOSCredentials` that match the filtering criteria.
 
 ### [ frontend ] Requesting access grant
 
-The simplest way to do this is to ask the user to create and insert an access grant for you.
+The simplest way to do this is to ask the user to create and insert a blob-backed access grant for you.
 
 ```typescript
-const accessGrant: idOSGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID");
+const accessGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID", {
+  consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
+  consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
+  issuerSigningKeyPair,
+});
 ```
 
 Alternatively, you can ask for a delegated access grant, which the user creates:
