@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialRecord } from "@idos-network/credentials/types";
 import type { KwilActionClient } from "@idos-network/kwil-infra";
 
 import { createAgByDagForCopy as _createAgByDagForCopy } from "@idos-network/kwil-infra/actions";
@@ -34,7 +34,7 @@ export class GrantService {
   async createAccessGrantFromDAG(
     params: CreateAccessGrantFromDAGParams,
     getCredentialIdByContentHash: (contentHash: string) => Promise<string | null>,
-    getCredentialShared: (id: string) => Promise<idOSCredential | null>,
+    getCredentialShared: (id: string) => Promise<idOSCredentialRecord | null>,
   ): Promise<CreateAccessGrantFromDAGParams | null> {
     const credentialId = await getCredentialIdByContentHash(params.dag_content_hash);
 
@@ -64,7 +64,7 @@ export class GrantService {
     return result ?? null;
   }
 
-  async #getCredentialEncryptedContent(credential: idOSCredential): Promise<string> {
+  async #getCredentialEncryptedContent(credential: idOSCredentialRecord): Promise<string> {
     return base64Encode(await resolveCredentialEncryptedContent(credential, this.#blobGateway));
   }
 }

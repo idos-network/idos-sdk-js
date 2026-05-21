@@ -1,3 +1,4 @@
+import type { CredentialSigningKeyPair } from "@idos-network/credentials/types";
 import type {
   BaseProvider,
   EncryptionPasswordStore,
@@ -6,7 +7,7 @@ import type {
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import {
-  buildInsertableIDOSCredential,
+  buildSignedCredentialContentReference,
   matchLevelOrHigher,
   recordFilter,
 } from "@idos-network/credentials/utils";
@@ -52,10 +53,15 @@ import {
   shareCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
-import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
+import {
+  BlobGateway,
+  createBlobContentReference,
+  resolveCredentialEncryptedContent,
+} from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
   base64Encode,
+  hexEncode,
   hexEncodeSha256Hash,
   utf8Decode,
   utf8Encode,
@@ -589,10 +595,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     {
       consumerEncryptionPublicKey,
       consumerAuthPublicKey,
+      issuerSigningKeyPair,
       lockedUntil = 0,
     }: {
       consumerEncryptionPublicKey: string;
       consumerAuthPublicKey: string;
+      issuerSigningKeyPair?: CredentialSigningKeyPair;
       lockedUntil?: number;
     },
   ): Promise<ShareCredentialInput> {
@@ -600,6 +608,16 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
+    invariant(this.blobGateway, "Blob gateway is required to request an access grant");
+    invariant(
+      issuerSigningKeyPair,
+      "`issuerSigningKeyPair` is required to sign the shared credential copy",
+    );
+    invariant(
+      hexEncode(issuerSigningKeyPair.publicKey, true).toLowerCase() ===
+        credential.issuer_auth_public_key.toLowerCase(),
+      "`issuerSigningKeyPair` does not match the credential issuer_auth_public_key",
+    );
     const plaintextContent = utf8Decode(await this.#decryptCredentialContent(credential));
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
@@ -609,24 +627,28 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(consumerEncryptionPublicKey),
     );
 
-    const insertableCredential: ShareCredentialInput = {
-      ...credential,
-      ...buildInsertableIDOSCredential(
-        credential.user_id,
-        "",
-        base64Encode(content),
-        base64Encode(encryptorPublicKey),
-      ),
-      original_credential_id: credential.id,
-      id: crypto.randomUUID(),
+    const copyReference = await createBlobContentReference(content);
+
+    const preliminaryCredential: ShareCredentialInput = {
+      ...buildSignedCredentialContentReference("", copyReference.uri, issuerSigningKeyPair),
+      request_id: crypto.randomUUID(),
+      copy_id: crypto.randomUUID(),
+      original_id: credential.id,
+      content_uri: copyReference.uri,
+      content_size: copyReference.size,
+      encryptor_public_key: base64Encode(encryptorPublicKey),
       grantee_wallet_identifier: consumerAuthPublicKey,
       locked_until: lockedUntil,
       content_hash: contentHash,
     };
 
-    await this.shareCredential(insertableCredential);
+    await this.shareCredential(preliminaryCredential);
+    await this.blobGateway.uploadCredentialBlobs({
+      requestId: preliminaryCredential.request_id,
+      copy: content,
+    });
 
-    return insertableCredential;
+    return preliminaryCredential;
   }
 
   async #credentialWithInlineContent(credential: idOSCredential): Promise<idOSCredential> {

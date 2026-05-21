@@ -20,7 +20,7 @@ export const encryptionPasswordStoreSchema: z.ZodType<EncryptionPasswordStore> =
 
 const IPFS_URI_PREFIX = "ipfs://";
 const ipfsContentUriSchema = z.string().startsWith(IPFS_URI_PREFIX);
-const contentSizeSchema = z.number().int().nonnegative();
+const contentSizeSchema = z.number().int().positive();
 
 export type ActionSchemaElement = {
   name: string;
@@ -285,13 +285,17 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
-  share_credential: [
+  share_preliminary_credential: [
     {
-      name: "id",
+      name: "request_id",
       type: DataType.Uuid,
     },
     {
-      name: "original_credential_id",
+      name: "copy_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_id",
       type: DataType.Uuid,
     },
     {
@@ -307,8 +311,12 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
     {
-      name: "content",
+      name: "content_uri",
       type: DataType.Text,
+    },
+    {
+      name: "content_size",
+      type: DataType.Int,
     },
     {
       name: "content_hash",
@@ -329,92 +337,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     {
       name: "locked_until",
       type: DataType.Int,
-    },
-  ],
-  create_credentials_by_dwg: [
-    {
-      name: "issuer_auth_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "original_encryptor_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "original_credential_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "original_content",
-      type: DataType.Text,
-    },
-    {
-      name: "original_public_notes",
-      type: DataType.Text,
-    },
-    {
-      name: "original_public_notes_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "original_broader_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "copy_encryptor_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "copy_credential_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "copy_content",
-      type: DataType.Text,
-    },
-    {
-      name: "copy_public_notes_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "copy_broader_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "content_hash",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_owner",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_grantee",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_issuer_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "dwg_access_grant_timelock",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_not_before",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_not_after",
-      type: DataType.Text,
-    },
-    {
-      name: "dwg_signature",
-      type: DataType.Text,
     },
   ],
   create_prelim_credentials_by_dwg: [
@@ -1335,29 +1257,33 @@ export async function rescindSharedCredential(
 }
 
 export const ShareCredentialInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-  original_credential_id: z.ZodUUID;
+  request_id: z.ZodUUID;
+  copy_id: z.ZodUUID;
+  original_id: z.ZodUUID;
   public_notes: z.ZodString;
   public_notes_signature: z.ZodString;
   broader_signature: z.ZodString;
-  content: z.ZodString;
+  content_uri: z.ZodString;
+  content_size: z.ZodNumber;
   content_hash: z.ZodString;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
   grantee_wallet_identifier: z.ZodString;
   locked_until: z.ZodNumber;
 }> = z.object({
-  id: z.uuid(),
-  original_credential_id: z.uuid(),
+  request_id: z.uuid(),
+  copy_id: z.uuid(),
+  original_id: z.uuid(),
   public_notes: z.string(),
   public_notes_signature: z.string(),
   broader_signature: z.string(),
-  content: z.string(),
+  content_uri: ipfsContentUriSchema,
+  content_size: contentSizeSchema,
   content_hash: z.string(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
   grantee_wallet_identifier: z.string(),
-  locked_until: z.number(),
+  locked_until: z.number().int().nonnegative(),
 });
 
 export type ShareCredentialInput = z.infer<typeof ShareCredentialInputSchema>;
@@ -1368,59 +1294,11 @@ export async function shareCredential(
 ): Promise<void> {
   const inputs = ShareCredentialInputSchema.parse(params);
   await kwilClient.execute({
-    name: "share_credential",
+    name: "share_preliminary_credential",
     inputs,
     description: "Share a credential with creating AG",
   });
 }
-
-export const CreateCredentialsByDwgInputSchema: z.ZodObject<{
-  issuer_auth_public_key: z.ZodString;
-  original_encryptor_public_key: z.ZodString;
-  original_credential_id: z.ZodUUID;
-  original_content: z.ZodString;
-  original_public_notes: z.ZodString;
-  original_public_notes_signature: z.ZodString;
-  original_broader_signature: z.ZodString;
-  copy_encryptor_public_key: z.ZodString;
-  copy_credential_id: z.ZodUUID;
-  copy_content: z.ZodString;
-  copy_public_notes_signature: z.ZodString;
-  copy_broader_signature: z.ZodString;
-  content_hash: z.ZodString;
-  dwg_owner: z.ZodString;
-  dwg_grantee: z.ZodString;
-  dwg_issuer_public_key: z.ZodString;
-  dwg_id: z.ZodUUID;
-  dwg_access_grant_timelock: z.ZodString;
-  dwg_not_before: z.ZodString;
-  dwg_not_after: z.ZodString;
-  dwg_signature: z.ZodString;
-}> = z.object({
-  issuer_auth_public_key: z.string(),
-  original_encryptor_public_key: z.string(),
-  original_credential_id: z.uuid(),
-  original_content: z.string(),
-  original_public_notes: z.string(),
-  original_public_notes_signature: z.string(),
-  original_broader_signature: z.string(),
-  copy_encryptor_public_key: z.string(),
-  copy_credential_id: z.uuid(),
-  copy_content: z.string(),
-  copy_public_notes_signature: z.string(),
-  copy_broader_signature: z.string(),
-  content_hash: z.string(),
-  dwg_owner: z.string(),
-  dwg_grantee: z.string(),
-  dwg_issuer_public_key: z.string(),
-  dwg_id: z.uuid(),
-  dwg_access_grant_timelock: z.string(),
-  dwg_not_before: z.string(),
-  dwg_not_after: z.string(),
-  dwg_signature: z.string(),
-});
-
-export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgInputSchema>;
 
 /**
  *  Delegated write credential actions
@@ -1436,20 +1314,7 @@ export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgI
  *  Insert original credential
  *  Insert copy credential
  */
-export async function createCredentialsByDwg(
-  kwilClient: KwilActionClient,
-  params: CreateCredentialsByDwgInput,
-): Promise<void> {
-  const inputs = CreateCredentialsByDwgInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "create_credentials_by_dwg",
-    inputs,
-    description:
-      "Add original credential and copy credential with AG on behalf of a user (using delegated write grant given by the user)",
-  });
-}
-
-export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
+export const CreateCredentialsByDwgInputSchema: z.ZodObject<{
   request_id: z.ZodUUID;
   issuer_auth_public_key: z.ZodString;
   original_encryptor_public_key: z.ZodString;
@@ -1501,15 +1366,13 @@ export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   dwg_signature: z.string(),
 });
 
-export type CreatePreliminaryCredentialsByDwgInput = z.infer<
-  typeof CreatePreliminaryCredentialsByDwgInputSchema
->;
+export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgInputSchema>;
 
-export async function createPreliminaryCredentialsByDwg(
+export async function createCredentialsByDwg(
   kwilClient: KwilActionClient,
-  params: CreatePreliminaryCredentialsByDwgInput,
+  params: CreateCredentialsByDwgInput,
 ): Promise<void> {
-  const inputs = CreatePreliminaryCredentialsByDwgInputSchema.parse(params);
+  const inputs = CreateCredentialsByDwgInputSchema.parse(params);
   await kwilClient.execute({
     name: "create_prelim_credentials_by_dwg",
     inputs,

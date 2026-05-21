@@ -2,7 +2,7 @@ import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
 import type {
   AvailableIssuerType,
   IDDocumentType,
-  idOSCredential,
+  idOSCredentialRecord as idOSCredential,
   VerifiableCredential,
   VerifiableCredentialSubject,
 } from "@idos-network/credentials/types";

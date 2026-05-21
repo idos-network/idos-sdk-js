@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CreatePreliminaryCredentialsByDwgInputSchema } from "./actions";
+import { CreateCredentialsByDwgInputSchema, ShareCredentialInputSchema } from "./actions";
 
 const validPreliminaryCredentialsByDwgInput = {
   request_id: "00000000-0000-4000-8000-000000000001",
@@ -29,39 +29,97 @@ const validPreliminaryCredentialsByDwgInput = {
   dwg_signature: "dwg-signature",
 };
 
-describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
-  it("accepts IPFS content URIs and non-negative integer sizes", () => {
+const validShareCredentialInput = {
+  request_id: "00000000-0000-4000-8000-000000000005",
+  copy_id: "00000000-0000-4000-8000-000000000006",
+  original_id: "00000000-0000-4000-8000-000000000007",
+  public_notes: "",
+  public_notes_signature: "public-notes-signature",
+  broader_signature: "broader-signature",
+  content_uri: "ipfs://bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+  content_size: 456,
+  content_hash: "content-hash",
+  encryptor_public_key: "encryptor-public-key",
+  issuer_auth_public_key: "issuer-auth-public-key",
+  grantee_wallet_identifier: "grantee-wallet-identifier",
+  locked_until: 0,
+};
+
+describe("CreateCredentialsByDwgInputSchema", () => {
+  it("accepts IPFS content URIs and positive integer sizes", () => {
     expect(() =>
-      CreatePreliminaryCredentialsByDwgInputSchema.parse(validPreliminaryCredentialsByDwgInput),
+      CreateCredentialsByDwgInputSchema.parse(validPreliminaryCredentialsByDwgInput),
     ).not.toThrow();
   });
 
   it("rejects non-IPFS content URIs", () => {
     expect(() =>
-      CreatePreliminaryCredentialsByDwgInputSchema.parse({
+      CreateCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
         original_content_uri: "https://example.com/blob",
       }),
     ).toThrow();
     expect(() =>
-      CreatePreliminaryCredentialsByDwgInputSchema.parse({
+      CreateCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
         copy_content_uri: "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
       }),
     ).toThrow();
   });
 
-  it("rejects negative and non-integer content sizes", () => {
+  it("rejects zero, negative, and non-integer content sizes", () => {
     expect(() =>
-      CreatePreliminaryCredentialsByDwgInputSchema.parse({
+      CreateCredentialsByDwgInputSchema.parse({
+        ...validPreliminaryCredentialsByDwgInput,
+        original_content_size: 0,
+      }),
+    ).toThrow();
+    expect(() =>
+      CreateCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
         original_content_size: -1,
       }),
     ).toThrow();
     expect(() =>
-      CreatePreliminaryCredentialsByDwgInputSchema.parse({
+      CreateCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
         copy_content_size: 1.5,
+      }),
+    ).toThrow();
+  });
+});
+
+describe("ShareCredentialInputSchema", () => {
+  it("accepts IPFS content URIs and positive integer sizes", () => {
+    expect(() => ShareCredentialInputSchema.parse(validShareCredentialInput)).not.toThrow();
+  });
+
+  it("rejects non-IPFS content URIs", () => {
+    expect(() =>
+      ShareCredentialInputSchema.parse({
+        ...validShareCredentialInput,
+        content_uri: "https://example.com/blob",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects zero, negative, and non-integer content sizes", () => {
+    expect(() =>
+      ShareCredentialInputSchema.parse({
+        ...validShareCredentialInput,
+        content_size: 0,
+      }),
+    ).toThrow();
+    expect(() =>
+      ShareCredentialInputSchema.parse({
+        ...validShareCredentialInput,
+        content_size: -1,
+      }),
+    ).toThrow();
+    expect(() =>
+      ShareCredentialInputSchema.parse({
+        ...validShareCredentialInput,
+        content_size: 1.5,
       }),
     ).toThrow();
   });
