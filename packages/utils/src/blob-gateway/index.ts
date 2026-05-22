@@ -103,7 +103,8 @@ export class BlobGateway {
     maxFetchBytes = DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES,
   }: BlobGatewayParams) {
     this.#url = url.replace(/\/$/, "");
-    this.#fetch = fetchFn;
+    // Native `fetch` must not be stored unbound — calling it as this.#fetch() throws in browsers.
+    this.#fetch = (input, init) => fetchFn(input, init);
     this.#maxFetchBytes = normalizeByteCount(maxFetchBytes, "maxFetchBytes") ?? maxFetchBytes;
   }
 
