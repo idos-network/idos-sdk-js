@@ -54,7 +54,7 @@ catalogs:
     "borsh": "^2.0.0"
     "bs58": "^6.0.0"
     "es-toolkit": "^1.39.0"
-    "qs": "6.15.1"
+    "qs": "6.15.2"
 
   ethereum:
     "wagmi": "2.19.5"
@@ -126,3 +126,5 @@ catalogs:
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
+  # Renovate security update: qs@6.15.2
+  - qs@6.15.2
