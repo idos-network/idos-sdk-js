@@ -91,6 +91,9 @@ export const actors = {
         walletPublicKey: input.walletPublicKey ?? "",
         walletType: input.walletType,
       }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     if (!loginResponse.ok) {

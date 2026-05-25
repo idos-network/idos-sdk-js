@@ -133,7 +133,7 @@ export const onboardingMachine = setup({
       },
     },
 
-    // step 3
+    // step 4
     done: {
       type: "final" as const,
     },

@@ -90,10 +90,6 @@ export async function action({ request }: Route.ActionArgs) {
     },
   });
 
-  if (!user) {
-    return Response.json({ error: "Failed to create user" }, { status: 500 });
-  }
-
   session.unset("proofMessage");
   session.set("userId", user.id);
 

@@ -86,9 +86,6 @@
     "viem": {
       "optional": true
     },
-    "viem": {
-      "optional": true
-    },
     "xrpl": {
       "optional": true
     }

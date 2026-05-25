@@ -68,7 +68,7 @@ const setupSteps = [
   },
 ] as const;
 
-const TERMS_AND_CONDITIONS_URL = "https://www.idos.network/legal/user-agreement";
+const TERMS_AND_CONDITIONS_URL = "/dc-tc.pdf";
 
 type StepStatus = "complete" | "current" | "upcoming";
 
@@ -148,6 +148,7 @@ function SetupStepCard({
                   disabled={isAcceptingTerms}
                   onChange={(event) => setTermsAccepted(event.target.checked)}
                   type="checkbox"
+                  aria-label="Accept Terms & Conditions"
                 />
                 <span className="text-muted-foreground leading-6">
                   I have read and accept the{" "}
