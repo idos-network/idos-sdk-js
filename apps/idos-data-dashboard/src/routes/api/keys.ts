@@ -28,35 +28,37 @@ export async function action({ request }: Route.ActionArgs) {
 
   const db = await getDb();
 
-  const updatedUser = await db.user.update({
-    where: { id: session.get("userId"), relayPrivateKey: null },
-    data: {
-      relayPrivateKey: privateKey,
-      relayPublicKey: publicKey,
-      // Signing keys use hex encoding; decoded via Buffer.from(..., "hex") before nacl.sign operations
-      consumerAuthPublicKey: Buffer.from(signKey.publicKey).toString("hex"),
-      consumerAuthKey: Buffer.from(signKey.secretKey).toString("hex"),
-      // Encryption keys use base64 encoding; passed directly to idOSConsumerClass which expects this format
-      consumerEncPublicKey: Buffer.from(encKey.publicKey).toString("base64"),
-      consumerEncKey: Buffer.from(encKey.secretKey).toString("base64"),
-    },
-  });
+  try {
+    await db.user.update({
+      where: { id: session.get("userId"), relayPrivateKey: null },
+      data: {
+        relayPrivateKey: privateKey,
+        relayPublicKey: publicKey,
+        // Signing keys use hex encoding; decoded via Buffer.from(..., "hex") before nacl.sign operations
+        consumerAuthPublicKey: Buffer.from(signKey.publicKey).toString("hex"),
+        consumerAuthKey: Buffer.from(signKey.secretKey).toString("hex"),
+        // Encryption keys use base64 encoding; passed directly to idOSConsumerClass which expects this format
+        consumerEncPublicKey: Buffer.from(encKey.publicKey).toString("base64"),
+        consumerEncKey: Buffer.from(encKey.secretKey).toString("base64"),
+      },
+    });
 
-  if (!updatedUser) {
+    return Response.json(
+      {
+        keysGenerated: true,
+      },
+      {
+        headers: {
+          "Set-Cookie": await sessionStorage.commitSession(session),
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Failed to generate keys", error);
+
     return Response.json(
       { error: "Keys already generated or user does not exist" },
       { status: 400 },
     );
   }
-
-  return Response.json(
-    {
-      keysGenerated: true,
-    },
-    {
-      headers: {
-        "Set-Cookie": await sessionStorage.commitSession(session),
-      },
-    },
-  );
 }

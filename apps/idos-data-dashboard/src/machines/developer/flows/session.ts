@@ -76,10 +76,18 @@ export const actors = {
   }),
 
   login: fromPromise(async ({ input }: { input: idOSClientLoggedIn }) => {
-    const response = await fetch("/api/login").then((res) => res.json());
+    const challengeResponse = await fetch("/api/login");
+    if (!challengeResponse.ok) {
+      throw new Error("Failed to fetch login challenge");
+    }
+
+    const challenge = await challengeResponse.json();
 
     // Send the proof message to signer
-    const signature = await input.signer?.signMessage?.(response.proofMessage);
+    const signature = await input.signer?.signMessage?.(challenge.proofMessage);
+    if (!signature) {
+      throw new Error("Failed to sign message");
+    }
 
     const loginResponse = await fetch("/api/login", {
       method: "POST",

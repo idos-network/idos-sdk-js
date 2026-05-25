@@ -37,6 +37,8 @@ export function CredentialAccessSection() {
     data: credentials,
     isFetching,
     refetch,
+    isError,
+    error,
   } = useQuery({
     queryKey: ["developer", "access-grants"],
     queryFn: async (): Promise<Credential[]> => {
@@ -44,7 +46,14 @@ export function CredentialAccessSection() {
       if (!res.ok) {
         throw new Error("Failed to load grants");
       }
-      return res.json().then((data) => data.credentials);
+      const data: unknown = await res.json();
+      const credentials = (data as { credentials?: unknown })?.credentials;
+
+      if (!Array.isArray(credentials)) {
+        throw new Error("Invalid credentials payload");
+      }
+
+      return credentials as Credential[];
     },
     initialData: [],
     refetchInterval: 10000,
@@ -84,6 +93,11 @@ export function CredentialAccessSection() {
       </div>
 
       <div className="flex flex-col gap-4">
+        {isError ? (
+          <div className="border-border bg-background flex flex-col items-center gap-2 rounded-xl border border-dashed p-6 text-center">
+            <p className="text-red-500">{error.message}</p>
+          </div>
+        ) : null}
         {credentials.length > 0 ? (
           <ul className="flex flex-col gap-3">
             {credentials.map((credential) => (

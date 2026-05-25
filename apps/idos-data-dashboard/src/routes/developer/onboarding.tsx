@@ -8,12 +8,11 @@ import {
   SparklesIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useLoaderData, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { sessionStorage } from "@/core/sessions.server";
 import { cn } from "@/lib/utils";
 import { useSelector as useDashboardSelector } from "@/machines/dashboard/provider";
 import { selectLoggedInClient } from "@/machines/dashboard/selectors";
@@ -23,8 +22,6 @@ import {
   useActorRef,
   useSelector,
 } from "@/machines/developer/provider";
-
-import type { Route } from "../+types";
 
 export const handle = { breadcrumb: "Developer console" };
 
@@ -200,16 +197,7 @@ function SetupStepCard({
   );
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const userId = session.get("userId");
-
-  return {
-    userId,
-  };
-}
-
-function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
+function DeveloperOnboardingContent() {
   const actorRef = useActorRef();
   const activeStep = useSelector(selectActiveStep);
   const idOSClient = useDashboardSelector(selectLoggedInClient);
@@ -217,15 +205,25 @@ function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    actorRef.send({ type: "init", idOSClient });
-  }, [actorRef, idOSClient, userId]);
+    if (idOSClient && state === "notConfigured") {
+      actorRef.send({ type: "init", idOSClient });
+    }
+  }, [actorRef, idOSClient]);
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     if (state === "done") {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         navigate("/developer");
       }, 2000);
     }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [navigate, state]);
 
   return (
@@ -259,11 +257,9 @@ function DeveloperOnboardingContent({ userId }: { userId: string | null }) {
 }
 
 export default function Developer() {
-  const { userId } = useLoaderData<typeof loader>();
-
   return (
     <MachineProvider>
-      <DeveloperOnboardingContent userId={userId ?? null} />
+      <DeveloperOnboardingContent />
     </MachineProvider>
   );
 }
