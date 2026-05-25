@@ -40,3 +40,20 @@ export async function loader({ request }: Route.LoaderArgs) {
     },
   );
 }
+
+export async function action({ request }: Route.ActionArgs) {
+  if (request.method !== "DELETE") {
+    return Response.json({ error: "Method not allowed" }, { status: 405 });
+  }
+
+  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+
+  return Response.json(
+    { sessionCleared: true },
+    {
+      headers: {
+        "Set-Cookie": await sessionStorage.destroySession(session),
+      },
+    },
+  );
+}

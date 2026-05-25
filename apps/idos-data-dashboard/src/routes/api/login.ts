@@ -54,6 +54,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   const proofMessage = session.get("proofMessage");
+  console.log("proofMessage", proofMessage);
+
   if (!proofMessage) {
     return Response.json({ error: "Proof message not found" }, { status: 400 });
   }

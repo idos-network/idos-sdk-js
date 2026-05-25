@@ -3,10 +3,15 @@ import { fromPromise } from "xstate";
 import { disconnectEvm } from "@/core/wagmi";
 import { queryClient } from "@/query-client";
 
-import type { DisconnectWalletInput } from "../dashboard/machine";
+import type { DisconnectInput } from "../dashboard/machine";
 
-export const disconnectWallet = fromPromise<void, DisconnectWalletInput>(async ({ input }) => {
+export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) => {
   const { walletType, nearSelector, idOSClient } = input;
+
+  // Clear the session (we are fine to ignore errors in here)
+  await fetch("/api/session", {
+    method: "DELETE",
+  });
 
   try {
     if (walletType === "Stellar") {

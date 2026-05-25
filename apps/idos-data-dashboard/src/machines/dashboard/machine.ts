@@ -58,7 +58,7 @@ export type InitializeIdOSOutput = {
   hasProfile: boolean;
 };
 
-export type DisconnectWalletInput = {
+export type DisconnectInput = {
   walletType: WalletType | null;
   nearSelector: WalletSelector | null;
   idOSClient: idOSClient | null;
@@ -137,8 +137,8 @@ const noopInitializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSInput
   throw new Error("initializeIdOS actor not provided");
 });
 
-const noopDisconnectWallet = fromPromise<void, DisconnectWalletInput>(async () => {
-  throw new Error("disconnectWallet actor not provided");
+const noopDisconnect = fromPromise<void, DisconnectInput>(async () => {
+  throw new Error("disconnect actor not provided");
 });
 
 const noopReconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(async () => {
@@ -157,7 +157,7 @@ export const dashboardMachine = setup({
   actors: {
     connectWallet: noopConnectWallet,
     initializeIdOS: noopInitializeIdOS,
-    disconnectWallet: noopDisconnectWallet,
+    disconnect: noopDisconnect,
     reconnectWallet: noopReconnectWallet,
     createProfile: noopCreateProfile,
   },
@@ -458,8 +458,8 @@ export const dashboardMachine = setup({
 
     disconnecting: {
       invoke: {
-        src: "disconnectWallet",
-        input: ({ context }): DisconnectWalletInput => ({
+        src: "disconnect",
+        input: ({ context }): DisconnectInput => ({
           walletType: context.walletType,
           nearSelector: context.nearSelector,
           idOSClient: context.idOSClient,

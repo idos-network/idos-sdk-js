@@ -2,7 +2,7 @@ import { createActorContext } from "@xstate/react";
 
 import { connectWallet } from "../actors/connect-wallet";
 import { createProfile } from "../actors/create-profile";
-import { disconnectWallet } from "../actors/disconnect-wallet";
+import { disconnect } from "../actors/disconnect-wallet";
 import { initializeIdOS } from "../actors/initialize-idos";
 import { reconnectWallet } from "../actors/reconnect-wallet";
 import { dashboardMachine } from "./machine";
@@ -12,7 +12,7 @@ export const MachineContext = createActorContext(
     actors: {
       connectWallet,
       initializeIdOS,
-      disconnectWallet,
+      disconnect,
       reconnectWallet,
       createProfile,
     },
