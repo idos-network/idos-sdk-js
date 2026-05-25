@@ -2,169 +2,229 @@ import type { EncryptionPasswordStore } from "@idos-network/enclave";
 import type { PropsWithChildren } from "preact/compat";
 
 import { effect, useSignal } from "@preact/signals";
-import { useCallback, useRef } from "preact/hooks";
+import { LoaderCircleIcon, XIcon } from "lucide-preact";
+import { useCallback, useEffect, useRef } from "preact/hooks";
 
-import type { AllowedIntent, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
+import type { Enclave } from "@/lib/enclave";
+import type { AllowedIntent, Theme, UIMode } from "@/types";
 
 import { Header } from "@/components/header";
+import { Button } from "@/components/ui/button";
 import Auth from "@/features/auth";
 import BackupPasswordContext from "@/features/backup";
 import Confirmation from "@/features/confirmation";
 
-export interface EventData {
-  intent: AllowedIntent;
-  // oxlint-disable-next-line typescript/no-explicit-any -- The message will be a bit hard to narrow. Using `any` is fine in this case.
-  message: Record<string, any>;
-  configuration: idOSEnclaveConfiguration;
-}
+type LayoutProps = PropsWithChildren & {
+  onClose: () => void;
+  showClose?: boolean;
+};
 
-const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordContext"];
+function Layout({ children, onClose, showClose = true }: LayoutProps) {
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
 
-function Layout({ children }: PropsWithChildren) {
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (!dialog.open && dialog.showModal) {
+      dialog.showModal();
+    }
+
+    const handleCancel = (event: Event) => {
+      event.preventDefault();
+      onClose();
+    };
+
+    dialog.addEventListener("cancel", handleCancel);
+
+    return () => {
+      dialog.removeEventListener("cancel", handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, [onClose]);
+
   return (
-    <div className="mx-auto grid max-w-[360px] grid-rows-[auto_1fr] gap-6 p-6">
-      <Header />
-      <main>{children}</main>
-    </div>
+    <dialog ref={dialogRef} className="m-0 border-none bg-transparent p-0">
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <div className="animate-slideIn border-border bg-background relative flex w-full max-w-[380px] flex-col gap-6 rounded-xl border p-6 shadow-2xl">
+          {showClose && (
+            <button
+              type="button"
+              aria-label="Close idOS enclave"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground focus:ring-muted-foreground focus:ring-offset-background absolute top-4 right-4 flex size-8 items-center justify-center rounded-md p-1 focus:ring-2 focus:ring-offset-2 focus:outline-none"
+              onClick={onClose}
+            >
+              <XIcon className="size-5" />
+            </button>
+          )}
+          <Header />
+          <main>{children}</main>
+        </div>
+      </div>
+    </dialog>
   );
 }
 
 type AppProps = {
-  enclave: Window;
+  enclave: Enclave;
 };
 
 export function App({ enclave }: AppProps) {
-  // App configuration
   const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
-  const responsePort = useRef<MessagePort | null>(null);
 
-  // Password context configuration
+  const activeIntent = useSignal<AllowedIntent | null>(null);
+  const hasUserActivated = useSignal(false);
+
+  // Password context
   const mode = useSignal<UIMode>("existing");
   const allowedEncryptionStores = useSignal<EncryptionPasswordStore[] | null>(null);
   const encryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
   const expectedUserEncryptionPublicKey = useSignal<string | null>(null);
 
   // Confirmation
-  const confirm = useSignal<boolean>(false);
-  const origin = useSignal<string | null>(null);
-  const message = useSignal<string | null>(null);
+  const confirmOrigin = useSignal<string | null>(null);
+  const confirmMessage = useSignal<string | null>(null);
 
-  // User ID is in search params, not like a message
-  const userId = useSignal<string | null>(
-    new URLSearchParams(window.location.search).get("userId"),
-  );
-
-  // Backup secret mode
-  const isBackupMode = useSignal(false);
+  // Backup
   const backupEncryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
   const backupPassword = useSignal<string | null>(null);
 
-  const respondToEnclave = useCallback((data: unknown) => {
-    if (responsePort.current) {
-      responsePort.current.postMessage(data);
-      window.removeEventListener("beforeunload", onBeforeUnload);
-      responsePort.current.close();
-    }
-  }, []);
+  const intentResolver = useRef<{
+    resolve: (result: unknown) => void;
+    reject: (error: unknown) => void;
+  } | null>(null);
 
   const onSuccess = useCallback(
     (result: unknown) => {
-      respondToEnclave({ result });
+      intentResolver.current?.resolve(result);
+      intentResolver.current = null;
+      activeIntent.value = null;
+      hasUserActivated.value = false;
     },
-    [respondToEnclave],
+    [activeIntent, hasUserActivated],
   );
 
-  const onError = useCallback(
-    (error: unknown) => {
-      respondToEnclave({ error: (error as Error).toString() });
-    },
-    [respondToEnclave],
-  );
+  const onCancel = useCallback(() => {
+    intentResolver.current?.reject(new Error("closed"));
+    intentResolver.current = null;
+    activeIntent.value = null;
+    hasUserActivated.value = false;
 
-  const onBeforeUnload = useCallback(
-    (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      onError("closed");
-    },
-    [onError],
-  );
-
-  const messageReceiver = useCallback(
-    (event: MessageEvent<EventData>) => {
-      if (event.source !== enclave) return;
-
-      const { data: requestData, ports } = event;
-
-      if (!allowedIntents.includes(requestData.intent)) {
-        window.close();
-        throw new Error(`Unexpected request from parent: ${requestData.intent}`);
-      }
-
-      responsePort.current = ports[0];
-
-      switch (requestData.intent) {
-        case "getPasswordContext":
-          allowedEncryptionStores.value = requestData.message?.allowedEncryptionStores;
-          encryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
-          expectedUserEncryptionPublicKey.value =
-            requestData.message?.expectedUserEncryptionPublicKey;
-          break;
-
-        case "confirm":
-          confirm.value = true;
-          origin.value = requestData.message?.origin;
-          message.value = requestData.message?.message;
-          break;
-
-        case "backupPasswordContext":
-          isBackupMode.value = true;
-          backupEncryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
-          backupPassword.value = requestData.message?.password;
-          break;
-      }
-
-      if (requestData.configuration.mode) mode.value = requestData.configuration.mode;
-      if (requestData.configuration.theme) theme.value = requestData.configuration.theme;
-    },
-    [
-      enclave,
-      isBackupMode,
-      confirm,
-      message,
-      origin,
-      theme,
-      mode,
-      allowedEncryptionStores,
-      encryptionPasswordStore,
-      expectedUserEncryptionPublicKey,
-      backupEncryptionPasswordStore,
-      backupPassword,
-    ],
-  );
+    window.parent.postMessage({ type: "idOS:enclaveClose" }, enclave.parentOrigin);
+  }, [activeIntent, hasUserActivated, enclave.parentOrigin]);
 
   effect(() => {
-    window.addEventListener("message", messageReceiver);
-    window.addEventListener("beforeunload", onBeforeUnload);
+    enclave.setIntentHandler((intent, message, configuration) => {
+      return new Promise((resolve, reject) => {
+        intentResolver.current = { resolve, reject };
 
-    window.dispatchEvent(new Event("idOS-Enclave:ready"));
+        switch (intent) {
+          case "getPasswordContext":
+            allowedEncryptionStores.value = message?.allowedEncryptionStores;
+            encryptionPasswordStore.value = message?.encryptionPasswordStore;
+            expectedUserEncryptionPublicKey.value = message?.expectedUserEncryptionPublicKey;
+            break;
 
-    return () => {
-      window.removeEventListener("message", messageReceiver);
-      window.removeEventListener("beforeunload", onBeforeUnload);
-    };
+          case "confirm":
+            confirmOrigin.value = message?.origin;
+            confirmMessage.value = message?.message;
+            break;
+
+          case "backupPasswordContext":
+            backupEncryptionPasswordStore.value = message?.encryptionPasswordStore;
+            backupPassword.value = message?.password;
+            break;
+        }
+
+        if (configuration.mode) mode.value = configuration.mode;
+        if (configuration.theme) theme.value = configuration.theme;
+
+        hasUserActivated.value = false;
+        activeIntent.value = intent;
+      });
+    });
   });
 
-  if (confirm.value && message.value) {
+  if (!activeIntent.value) return null;
+
+  if (activeIntent.value === "pending") {
     return (
-      <Layout>
-        <Confirmation message={message.value} origin={origin.value} onSuccess={onSuccess} />
+      <Layout onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-4 py-4 text-center">
+          <LoaderCircleIcon className="text-primary size-8 animate-spin" />
+          <p className="text-muted-foreground text-sm">Processing...</p>
+        </div>
       </Layout>
     );
   }
 
-  if (isBackupMode.value && backupEncryptionPasswordStore.value && backupPassword.value) {
+  // Confirmation intent
+  if (activeIntent.value === "confirm" && confirmMessage.value) {
+    if (!hasUserActivated.value) {
+      return (
+        <Layout onClose={onCancel}>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-muted-foreground text-sm">
+              {confirmOrigin.value
+                ? `A request from ${confirmOrigin.value} needs your approval.`
+                : "A request needs your approval."}
+            </p>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => {
+                hasUserActivated.value = true;
+              }}
+            >
+              See request
+            </Button>
+          </div>
+        </Layout>
+      );
+    }
+
     return (
-      <Layout>
+      <Layout onClose={onCancel}>
+        <Confirmation
+          message={confirmMessage.value}
+          origin={confirmOrigin.value}
+          onSuccess={onSuccess}
+        />
+      </Layout>
+    );
+  }
+
+  // Backup intent
+  if (
+    activeIntent.value === "backupPasswordContext" &&
+    backupEncryptionPasswordStore.value &&
+    backupPassword.value
+  ) {
+    if (!hasUserActivated.value) {
+      return (
+        <Layout onClose={onCancel}>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-muted-foreground text-sm">
+              Back up your idOS key so you don't lose access to your data.
+            </p>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => {
+                hasUserActivated.value = true;
+              }}
+            >
+              Back up idOS key
+            </Button>
+          </div>
+        </Layout>
+      );
+    }
+
+    return (
+      <Layout onClose={onCancel}>
         <BackupPasswordContext
           encryptionPasswordStore={backupEncryptionPasswordStore.value}
           password={backupPassword.value}
@@ -174,15 +234,39 @@ export function App({ enclave }: AppProps) {
     );
   }
 
+  // getPasswordContext intent (unlock/create)
+  if (!hasUserActivated.value) {
+    const isNew = mode.value === "new";
+
+    return (
+      <Layout onClose={onCancel}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-muted-foreground text-sm">
+            {isNew ? "Create your idOS key to continue." : "Unlock your idOS key to continue."}
+          </p>
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => {
+              hasUserActivated.value = true;
+            }}
+          >
+            {isNew ? "Create idOS key" : "Unlock idOS"}
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout>
+    <Layout onClose={onCancel}>
       <Auth
         allowedEncryptionStores={allowedEncryptionStores.value ?? []}
         encryptionPasswordStore={encryptionPasswordStore.value}
         mode={mode.value}
         onSuccess={onSuccess}
         encryptionPublicKey={expectedUserEncryptionPublicKey.value ?? undefined}
-        userId={userId.value}
+        userId={enclave.userId ?? null}
       />
     </Layout>
   );

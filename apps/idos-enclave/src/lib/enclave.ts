@@ -1,26 +1,27 @@
-import type {
-  EncryptionPasswordStore,
-  MPCPasswordContext,
-  PasswordContext,
-} from "@idos-network/enclave";
+import type { MPCPasswordContext, PasswordContext } from "@idos-network/enclave";
 
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/enclave/local";
 
+import type { AllowedIntent, idOSEnclaveConfiguration } from "@/types";
+
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
+// oxlint-disable-next-line typescript/no-explicit-any -- Intent messages vary per intent type.
+export type IntentHandler = (
+  intent: AllowedIntent,
+  message: Record<string, any>,
+  configuration: idOSEnclaveConfiguration,
+) => Promise<any>;
+
 export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
-  // Origins
   private authorizedOrigins: string[] = [];
-  private parentOrigin: string;
+  readonly parentOrigin: string;
+  private intentHandler: IntentHandler | null = null;
 
-  // Buttons & UI
-  private dialog: Window | null;
-  private unlockButton: HTMLButtonElement;
-  private confirmButton: HTMLButtonElement;
-  private backupButton: HTMLButtonElement;
-
-  // Signer resolver
-  private signTypeDataResponseResolver: ((signature: string) => void)[] = [];
+  private signTypeDataResponseResolver: {
+    resolve: (signature: string) => void;
+    reject: (error: Error) => void;
+  }[] = [];
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
     super({
@@ -40,13 +41,20 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
     this.parentOrigin = parentOrigin;
 
-    this.unlockButton = document.querySelector("button#unlock") as HTMLButtonElement;
-    this.confirmButton = document.querySelector("button#confirm") as HTMLButtonElement;
-    this.backupButton = document.querySelector("button#backup") as HTMLButtonElement;
-
-    this.dialog = null;
-
     this.listenToRequests();
+  }
+
+  setIntentHandler(handler: IntentHandler): void {
+    this.intentHandler = handler;
+  }
+
+  private async requestUI(
+    intent: AllowedIntent,
+    // oxlint-disable-next-line typescript/no-explicit-any -- Intent messages vary per intent type.
+    message: Record<string, any>,
+  ): Promise<any> {
+    if (!this.intentHandler) throw new Error("No intent handler registered");
+    return this.intentHandler(intent, message, this.options);
   }
 
   /** @see LocalEnclave#load */
@@ -86,85 +94,50 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
   /** @see LocalEnclave#getPasswordContext */
   async getPasswordContext(): Promise<PasswordContext | MPCPasswordContext> {
-    this.unlockButton.style.display = "block";
-    this.unlockButton.disabled = false;
+    if (this.options.encryptionPasswordStore === "mpc") {
+      await this.acceptParentOrigin();
+      return { encryptionPasswordStore: this.options.encryptionPasswordStore };
+    }
 
-    return new Promise((resolve, reject) => {
-      this.unlockButton.addEventListener("click", async () => {
-        this.unlockButton.disabled = true;
+    const { encryptionPasswordStore, password, duration } = await this.requestUI(
+      "getPasswordContext",
+      {
+        allowedEncryptionStores: this.allowedEncryptionStores,
+        encryptionPasswordStore: this.options.encryptionPasswordStore,
+        expectedUserEncryptionPublicKey: this.options.expectedUserEncryptionPublicKey,
+      },
+    );
 
-        if (this.options.encryptionPasswordStore === "mpc") {
-          // We are skipping the dialog for MPC
-          // so the line below is skipped, and the user will be asked
-          // to asked during encryption again... so we should accept origin.
-          await this.acceptParentOrigin();
-          return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
-        }
+    if (!encryptionPasswordStore) {
+      throw new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`);
+    }
 
-        let encryptionPasswordStore: EncryptionPasswordStore | undefined;
-        let password: string | undefined;
-        let duration: number | undefined;
+    await this.acceptParentOrigin();
 
-        try {
-          // Don't remove the empty object, it's used to trigger the dialog
-          ({ encryptionPasswordStore, password, duration } = await this.openDialog(
-            "getPasswordContext",
-            {
-              allowedEncryptionStores: this.allowedEncryptionStores,
-              encryptionPasswordStore: this.options.encryptionPasswordStore,
-              expectedUserEncryptionPublicKey: this.options.expectedUserEncryptionPublicKey,
-            },
-          ));
-
-          if (!encryptionPasswordStore) {
-            return reject(new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`));
-          }
-        } catch (e) {
-          return reject(e);
-        }
-
-        // User providing the password also means that they want to authorize the origin
-        await this.acceptParentOrigin();
-
-        // oxlint-disable-next-line typescript/no-non-null-assertion -- This needs to be properly typed.
-        return resolve({ encryptionPasswordStore, password: password!, duration });
-      });
-    });
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- password is defined when encryptionPasswordStore is "user".
+    return { encryptionPasswordStore, password: password!, duration };
   }
 
   /** @see LocalEnclave#confirm */
   async confirm(message: string): Promise<boolean> {
-    this.confirmButton.style.display = "block";
-    this.confirmButton.disabled = false;
+    const { confirmed } = await this.requestUI("confirm", {
+      message,
+      origin: this.parentOrigin,
+    });
 
-    return new Promise((resolve) =>
-      this.confirmButton.addEventListener("click", async () => {
-        this.confirmButton.disabled = true;
-
-        const { confirmed } = await this.openDialog("confirm", {
-          message,
-          origin: this.parentOrigin,
-        });
-
-        resolve(confirmed ?? false);
-      }),
-    );
+    return confirmed ?? false;
   }
 
   async reconfigure(options: Partial<LocalEnclaveOptions> = {}) {
     await super.reconfigure(options);
-
-    if (this.options.mode === "new") {
-      this.unlockButton.classList.add("create");
-    } else {
-      this.unlockButton.classList.remove("create");
-    }
   }
 
   // oxlint-disable-next-line typescript/no-explicit-any -- TODO: Change this when we know how to MPC & other chains
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
-    return new Promise((resolve, _reject) => {
-      this.signTypeDataResponseResolver.push(resolve);
+    window.parent.postMessage({ type: "idOS:enclaveHide" }, this.parentOrigin);
+
+    return new Promise((resolve, reject) => {
+      this.signTypeDataResponseResolver.push({ resolve, reject });
 
       window.parent.postMessage(
         { type: "idOS:signTypedData", payload: { domain, types, value } },
@@ -174,52 +147,34 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   }
 
   async signTypedDataResponse(signature: string): Promise<void> {
+    this.requestUI("pending", { message: "Processing..." }).catch(() => {});
+    window.parent.postMessage({ type: "idOS:enclaveShow" }, this.parentOrigin);
+
     const resolver = this.signTypeDataResponseResolver.pop();
-
     if (!resolver) throw new Error("No resolver found");
+    resolver.resolve(signature);
+  }
 
-    resolver(signature);
+  async signTypedDataError(error: string): Promise<void> {
+    const resolver = this.signTypeDataResponseResolver.pop();
+    if (!resolver) throw new Error("No resolver found");
+    resolver.reject(new Error(error));
   }
 
   /** @see LocalEnclave#backupUserEncryptionProfile */
   async backupUserEncryptionProfile(): Promise<void> {
-    this.backupButton.style.display = "block";
-    this.backupButton.disabled = false;
+    const profile = await this.getPrivateEncryptionProfile(true);
 
-    return new Promise((resolve, reject) => {
-      this.backupButton.addEventListener("click", async () => {
-        try {
-          this.backupButton.disabled = true;
+    if (!profile) {
+      throw new Error("No secrets were found for backup");
+    }
 
-          // We need to get the private profile to get the password
-          // also we want to skip the guard check for now, because
-          // the page actually won't be able to use the keys.
-          const profile = await this.getPrivateEncryptionProfile(true);
-
-          if (!profile) {
-            throw new Error("No secrets were found for backup");
-          }
-
-          await this.openDialog("backupPasswordContext", {
-            password: profile.password,
-            encryptionPasswordStore: profile.encryptionPasswordStore,
-          });
-
-          resolve();
-        } catch (error) {
-          reject(error);
-        } finally {
-          this.backupButton.style.display = "none";
-          this.backupButton.disabled = false;
-        }
-      });
+    await this.requestUI("backupPasswordContext", {
+      password: profile.password,
+      encryptionPasswordStore: profile.encryptionPasswordStore,
     });
   }
 
-  /**
-   * Accepts the parent origin and stores it in the authorized origins.
-   * So next time enclave won't ask for permission again.
-   */
   private async acceptParentOrigin(): Promise<void> {
     this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
 
@@ -235,7 +190,6 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       try {
         const { method, data } = event.data;
 
-        // Whitelisted methods
         const allowedMethods: (keyof this)[] = [
           "load",
           "reconfigure",
@@ -245,6 +199,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           "reset",
           "ensureUserEncryptionProfile",
           "signTypedDataResponse",
+          "signTypedDataError",
           "backupUserEncryptionProfile",
           "filterCredentials",
           "addAddressMessageToSign",
@@ -260,7 +215,6 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           return;
         }
 
-        // Type assertion for method call
         const methodFn = this[method as keyof this] as (...args: unknown[]) => Promise<unknown>;
         const response = await methodFn.bind(this)(...data);
         event.ports[0].postMessage({ result: response });
@@ -268,69 +222,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         console.error("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
-        this.unlockButton.style.display = "none";
-        this.confirmButton.style.display = "none";
         event.ports[0].close();
       }
-    });
-  }
-
-  private async openDialog(
-    intent: string,
-    // oxlint-disable-next-line typescript/no-explicit-any -- any is fine here.
-    message?: any,
-  ): Promise<{
-    encryptionPasswordStore?: EncryptionPasswordStore;
-    password?: string;
-    duration?: number;
-    confirmed?: boolean;
-  }> {
-    const width = 360;
-    const height =
-      this.options?.mode === "new" ? 480 : intent === "backupUserEncryptionProfile" ? 520 : 450;
-    const left = window.screen.width - width;
-
-    const popupConfig = Object.entries({
-      height,
-      left,
-      top: 0,
-      popup: 1,
-      width,
-    })
-      .map((feat) => feat.join("="))
-      .join(",");
-
-    const dialogURL = new URL(`/dialog.html?userId=${this.userId}`, window.location.origin);
-    this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
-
-    await new Promise((resolve) =>
-      this.dialog?.addEventListener("idOS-Enclave:ready", resolve, { once: true }),
-    );
-
-    return new Promise((resolve, reject) => {
-      const { port1, port2 } = new MessageChannel();
-      port1.onmessage = async ({ data: { error, result } }) => {
-        if (error) {
-          console.error(error);
-          this.unlockButton.disabled = false;
-          this.confirmButton.disabled = false;
-          this.backupButton.disabled = false;
-          port1.close();
-          this.dialog?.close();
-          return reject(error);
-        }
-
-        port1.close();
-        this.dialog?.close();
-
-        return resolve(result);
-      };
-
-      this.dialog?.postMessage(
-        { intent, message, configuration: this.options },
-        this.dialog?.origin,
-        [port2],
-      );
     });
   }
 }

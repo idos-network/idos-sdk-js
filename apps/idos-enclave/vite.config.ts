@@ -27,7 +27,6 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        dialog: resolve(__dirname, "dialog.html"),
       },
     },
   },

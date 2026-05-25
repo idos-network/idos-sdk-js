@@ -15,42 +15,30 @@ import {
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
-  container: string;
+  container?: string;
   url?: string;
   throwOnUserCancelUnlock?: boolean;
 }
 
 export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
-  private container: string;
   private iframe: HTMLIFrameElement;
   private hostUrl: URL;
   private bound = false;
+  private boundOnMessage?: (message: MessageEvent) => Promise<void>;
 
   constructor(options: IframeEnclaveOptions) {
     super(options);
 
-    if (!this.options.container) {
-      throw new Error("container is required");
-    }
-
-    this.container = this.options.container;
     this.hostUrl = new URL(this.options.url ?? "https://enclave.idos.network");
     this.iframe = document.createElement("iframe");
-    this.iframe.id = "idos-enclave-iframe";
+    this.iframe.id = `idos-enclave-iframe-${crypto.randomUUID()}`;
   }
 
   /** @see parent method */
   async load(): Promise<void> {
-    // First we have to create and load the iframe
     await this.createAndLoadIframe();
-
-    // Load the enclave from the store (trigger load() method in the iframe)
     await this.requestToEnclave("load");
-
-    // Pass current options
     await this.reconfigure();
-
-    // Bind the message listener to the iframe (in case iframe -> enclave comm)
     await this.bindMessageListener();
   }
 
@@ -164,53 +152,59 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     return this.requestToEnclave("removeAddressFromMpcSecret", userId, message, signature);
   }
 
-  private async createAndLoadIframe(): Promise<void> {
-    const container = document.querySelector(this.container);
-
-    if (!container) {
-      throw new Error(`Can't find container with selector ${this.container}`);
+  destroy(): void {
+    if (this.boundOnMessage) {
+      window.removeEventListener("message", this.boundOnMessage);
+      this.bound = false;
     }
+    this.iframe.remove();
+  }
 
+  private async createAndLoadIframe(): Promise<void> {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox
-    const liftedSandboxRestrictions = [
-      "forms",
-      "modals",
-      "popups",
-      "popups-to-escape-sandbox",
-      "same-origin",
-      "scripts",
-    ].map((toLift) => `allow-${toLift}`);
+    const liftedSandboxRestrictions = ["forms", "modals", "same-origin", "scripts"].map(
+      (toLift) => `allow-${toLift}`,
+    );
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
     const referrerPolicy = "origin";
 
-    const styles = {
-      "aspect-ratio": "4/1",
-      "background-color": "transparent",
-      border: "none",
-      display: "block",
-      overflow: "hidden",
+    const iframeStyles: Record<string, string> = {
+      position: "fixed",
+      inset: "0",
       width: "100%",
+      height: "100%",
+      border: "none",
+      "background-color": "transparent",
+      "z-index": "2147483647",
+      opacity: "0",
+      "pointer-events": "none",
+      transition: "opacity 0.3s ease",
+      display: "block",
+      outline: "none",
     };
 
     this.iframe.allow = permissionsPolicies.join("; ");
     this.iframe.referrerPolicy = referrerPolicy;
     this.iframe.sandbox.add(...liftedSandboxRestrictions);
     this.iframe.src = this.hostUrl.toString();
-    for (const [k, v] of Object.entries(styles)) {
+    this.iframe.tabIndex = -1;
+    this.iframe.setAttribute("aria-hidden", "true");
+
+    for (const [k, v] of Object.entries(iframeStyles)) {
       this.iframe.style.setProperty(k, v);
     }
 
-    let el: HTMLElement | null;
+    let existingIframe: HTMLElement | null;
     // oxlint-disable-next-line no-cond-assign -- it's on purpose
-    while ((el = document.getElementById(this.iframe.id))) {
-      console.log("reinstalling idOS iframe...");
-      container.removeChild(el);
+    while ((existingIframe = document.getElementById(this.iframe.id))) {
+      existingIframe.remove();
     }
-    container.appendChild(this.iframe);
+
+    document.body.appendChild(this.iframe);
 
     return new Promise((resolve) =>
       this.iframe.addEventListener(
@@ -224,13 +218,19 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private showEnclave(): void {
-    // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.
-    this.iframe.parentElement!.classList.add("visible");
+    this.iframe.style.opacity = "1";
+    this.iframe.style.pointerEvents = "auto";
+    this.iframe.tabIndex = 0;
+    this.iframe.removeAttribute("aria-hidden");
+    this.iframe.setAttribute("aria-modal", "true");
   }
 
   private hideEnclave(): void {
-    // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.
-    this.iframe.parentElement!.classList.remove("visible");
+    this.iframe.style.opacity = "0";
+    this.iframe.style.pointerEvents = "none";
+    this.iframe.tabIndex = -1;
+    this.iframe.setAttribute("aria-hidden", "true");
+    this.iframe.removeAttribute("aria-modal");
   }
 
   private async requestToEnclave<TMethod extends keyof BaseProviderMethodArgs>(
@@ -242,11 +242,14 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
       port1.onmessage = ({ data }) => {
         port1.close();
-        // oxlint-disable-next-line no-unused-expressions
-        data.error ? reject(data.error) : resolve(data.result);
+        if (data.error) {
+          reject(data.error);
+        } else {
+          resolve(data.result);
+        }
       };
 
-      // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- iframe contentWindow exists after load.
       this.iframe.contentWindow!.postMessage(
         {
           method,
@@ -259,20 +262,42 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private bindMessageListener(): void {
-    if (!this.bound) window.addEventListener("message", this.onMessage.bind(this));
+    if (!this.bound) {
+      this.boundOnMessage = this.onMessage.bind(this);
+      window.addEventListener("message", this.boundOnMessage);
+    }
     this.bound = true;
   }
 
   private async onMessage(message: MessageEvent): Promise<void> {
-    // We can't be sure about the message and the content
-    // so we have to validate it carefully.
     if (!message || !message.data || typeof message.data !== "object") return;
+    if (message.origin !== this.hostUrl.origin) return;
+    if (message.source !== this.iframe.contentWindow) return;
 
-    if (message.data.type !== "idOS:signTypedData" || message.origin !== this.hostUrl.origin)
+    if (message.data.type === "idOS:enclaveHide") {
+      this.hideEnclave();
       return;
+    }
 
-    const payload = message.data.payload;
-    const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
-    await this.requestToEnclave("signTypedDataResponse", signature);
+    if (message.data.type === "idOS:enclaveShow") {
+      this.showEnclave();
+      return;
+    }
+
+    if (message.data.type === "idOS:signTypedData") {
+      const payload = message.data.payload;
+      try {
+        const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
+        await this.requestToEnclave("signTypedDataResponse", signature);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        await this.requestToEnclave("signTypedDataError", errorMessage);
+      }
+      return;
+    }
+
+    if (message.data.type === "idOS:enclaveClose") {
+      this.hideEnclave();
+    }
   }
 }

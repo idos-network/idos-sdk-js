@@ -1,6 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
-import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
@@ -30,18 +28,7 @@ export function SharedCredentialDetails({
   credentialId,
   onClose,
 }: SharedCredentialDetailsProps) {
-  const queryClient = useQueryClient();
   const credential = useFetchSharedCredentialDetails({ credentialId });
-
-  useEffect(() => {
-    const dismiss = () => {
-      queryClient.cancelQueries({ queryKey: ["credential_details", "shared", credentialId] });
-      queryClient.removeQueries({ queryKey: ["credential_details", "shared", credentialId] });
-      onClose();
-    };
-    document.addEventListener("idos:enclave-dismissed", dismiss);
-    return () => document.removeEventListener("idos:enclave-dismissed", dismiss);
-  }, [onClose, credentialId, queryClient]);
 
   const credentialContent = credential.data?.content
     ? (() => {
