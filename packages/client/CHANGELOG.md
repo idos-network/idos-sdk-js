@@ -1,5 +1,16 @@
 # @idos-network/client
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [772319f]
+- Updated dependencies [772319f]
+  - @idos-network/credentials@1.2.1
+  - @idos-network/enclave@1.2.1
+  - @idos-network/utils@1.2.1
+  - @idos-network/kwil-infra@1.2.1
+
 ## 1.2.0
 
 ### Patch Changes
