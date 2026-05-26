@@ -6,7 +6,7 @@ import { fromPromise } from "xstate";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import { createFaceSignProvider } from "@/lib/facesign";
 
-import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
+import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard/machine";
 
 export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(
   async ({ input }) => {

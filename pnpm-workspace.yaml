@@ -25,9 +25,15 @@ onlyBuiltDependencies:
   - "utf-8-validate"
 
 overrides:
+  # We are including a lot of those, but we need just this one
   web-streams-polyfill: "3.3.3"
+
+  # LRU-cache includes now forced dependency to node:diagnostic internal library
   "@idos-network/kwil-js>lru-cache": "11.2.7"
   "path-scurry>lru-cache": "11.2.7"
+
+  # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
+  "chevrotain": "10.5.0"
 
 strictDepBuilds: true
 
