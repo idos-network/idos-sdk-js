@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.0.3
+
+### Patch Changes
+
+- d0c923e: Small fixes for account creation and AG date formatting.
+
 ## 1.0.2
 
 ### Patch Changes

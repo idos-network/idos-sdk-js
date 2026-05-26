@@ -1,5 +1,11 @@
 # pay-demo
 
+## 0.2.2
+
+### Patch Changes
+
+- d0c923e: Fix iframe permissions
+
 ## 0.2.1
 
 ### Patch Changes
