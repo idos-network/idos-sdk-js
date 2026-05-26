@@ -24,18 +24,15 @@ function generateGrantId(grant: idOSGrant): string {
   return [data_id, ag_grantee_wallet_identifier, locked_until].join("-");
 }
 
-const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
+// const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
 
 function timelockToDate(timelock: number): string {
   if (!timelock) return "No timelock";
-  if (!Number.isFinite(timelock) || timelock > MAX_REPRESENTABLE_TIMELOCK) {
-    return "Permanently locked";
-  }
 
   const milliseconds = timelockToMs(timelock);
   const date = new Date(milliseconds);
 
-  if (Number.isNaN(date.getTime())) return "Permanently locked";
+  if (Number.isNaN(date.getTime())) return timelock.toString();
 
   return new Intl.DateTimeFormat(["ban", "id"], {
     dateStyle: "short",

@@ -92,12 +92,13 @@ export const actors = {
     const loginResponse = await fetch("/api/login", {
       method: "POST",
       body: JSON.stringify({
-        signature: signature,
         recipientEncryptionPublicKey: input.user.recipient_encryption_public_key,
         encryptionPasswordStore: input.user.encryption_password_store,
         walletAddress: input.walletIdentifier,
         walletPublicKey: input.walletPublicKey ?? "",
         walletType: input.walletType,
+        // @ts-expect-error - TODO: Fix this
+        signature: signature?.startsWith("0x") ? signature : `0x${signature}`,
       }),
       headers: {
         "Content-Type": "application/json",
