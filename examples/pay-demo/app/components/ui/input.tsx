@@ -6,7 +6,7 @@ import type * as React from "react";
 import { cn } from "~/lib/utils";
 
 type InputProps = Omit<
-  InputPrimitive.Props & React.RefAttributes<HTMLInputElement>,
+  InputPrimitive.Props & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
   "size"
 > & {
   size?: "sm" | "default" | "lg" | number;

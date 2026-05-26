@@ -57,6 +57,7 @@ function DurationField({ duration }: DurationFieldProps) {
             onInput={() => {
               duration.value = 7;
             }}
+            aria-label="Remember for 1 week"
           />
           <span class="text-sm">1 week</span>
         </label>
@@ -70,6 +71,7 @@ function DurationField({ duration }: DurationFieldProps) {
             onInput={() => {
               duration.value = 30;
             }}
+            aria-label="Remember for 1 month"
           />
           <span class="text-sm">1 month</span>
         </label>
