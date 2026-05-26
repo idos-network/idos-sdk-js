@@ -2,4 +2,4 @@
 "data-dashboard": patch
 ---
 
-Small fixes with creation account or dates in AGs
+Small fixes for account creation and AG date formatting.
