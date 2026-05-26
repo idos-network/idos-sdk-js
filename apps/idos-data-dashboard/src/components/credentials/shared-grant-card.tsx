@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRevokeGrant } from "@/lib/mutations/credentials";
-import { timelockToMs } from "@/lib/time";
+import { timelockToMs, timelockToDate } from "@/lib/time";
 
 import type { SharedGrant } from "./types";
 
@@ -18,26 +18,6 @@ const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "
   revoked: "destructive",
   invalid: "destructive",
 };
-
-const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
-
-function formatTimelock(lockedUntil: number): string {
-  if (!lockedUntil) return "No timelock";
-  if (!Number.isFinite(lockedUntil) || lockedUntil > MAX_REPRESENTABLE_TIMELOCK) {
-    return "Permanently locked";
-  }
-
-  const ms = timelockToMs(lockedUntil);
-  const date = new Date(ms);
-
-  if (Number.isNaN(date.getTime())) return "Permanently locked";
-
-  return new Intl.DateTimeFormat(["ban", "id"], {
-    dateStyle: "short",
-    timeStyle: "short",
-    hour12: true,
-  }).format(date);
-}
 
 function formatType(type: string): string {
   const typeMap: Record<string, string> = {
@@ -67,7 +47,7 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
     ["Grant ID", grant.id],
     ["Cred ID", grant.data_id],
     ["Recipient", grant.ag_grantee_wallet_identifier],
-    ["Time-lock", formatTimelock(Number(grant.locked_until))],
+    ["Time-lock", timelockToDate(Number(grant.locked_until))],
   ];
 
   return (

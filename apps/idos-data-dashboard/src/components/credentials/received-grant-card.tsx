@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { safeParse } from "@/lib/credential-utils";
 import { useFetchSharedCredentialPublicNotes } from "@/lib/queries/credentials";
-import { timelockToMs } from "@/lib/time";
+import { timelockToMs, timelockToDate } from "@/lib/time";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -19,26 +19,6 @@ const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "
   revoked: "destructive",
   invalid: "destructive",
 };
-
-const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
-
-function formatTimelock(lockedUntil: number): string {
-  if (!lockedUntil) return "No timelock";
-  if (!Number.isFinite(lockedUntil) || lockedUntil > MAX_REPRESENTABLE_TIMELOCK) {
-    return "Permanently locked";
-  }
-
-  const ms = timelockToMs(lockedUntil);
-  const date = new Date(ms);
-
-  if (Number.isNaN(date.getTime())) return "Permanently locked";
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "short",
-    timeStyle: "short",
-    hour12: true,
-  }).format(date);
-}
 
 function formatType(type: string): string {
   const typeMap: Record<string, string> = {
@@ -69,7 +49,7 @@ export function ReceivedGrantCard({ grant, onViewDetails }: ReceivedGrantCardPro
     ["Grant ID", grant.id],
     ["Data ID", grant.data_id],
     ["Owner", grant.ag_owner_user_id],
-    ["Time-lock", formatTimelock(Number(grant.locked_until))],
+    ["Time-lock", timelockToDate(Number(grant.locked_until))],
   ];
 
   return (

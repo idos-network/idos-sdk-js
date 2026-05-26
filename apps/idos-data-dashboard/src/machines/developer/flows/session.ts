@@ -1,5 +1,6 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
 
+import { hexEncode } from "@idos-network/utils/codecs";
 import { fromPromise } from "xstate";
 
 export interface Context {
@@ -84,9 +85,17 @@ export const actors = {
     const challenge = await challengeResponse.json();
 
     // Send the proof message to signer
-    const signature = await input.signer?.signMessage?.(challenge.proofMessage);
+    let signature = await input.signer?.signMessage?.(challenge.proofMessage);
+
     if (!signature) {
       throw new Error("Failed to sign message");
+    }
+
+    if (signature instanceof Uint8Array) {
+      // FaceSign returns an array of bytes
+      signature = hexEncode(signature);
+    } else if (typeof signature === "string" && !signature.startsWith("0x")) {
+      signature = `0x${signature}`;
     }
 
     const loginResponse = await fetch("/api/login", {
@@ -97,8 +106,7 @@ export const actors = {
         walletAddress: input.walletIdentifier,
         walletPublicKey: input.walletPublicKey ?? "",
         walletType: input.walletType,
-        // @ts-expect-error - TODO: Fix this
-        signature: signature?.startsWith("0x") ? signature : `0x${signature}`,
+        signature,
       }),
       headers: {
         "Content-Type": "application/json",

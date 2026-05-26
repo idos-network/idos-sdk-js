@@ -22,6 +22,7 @@
     "@changesets/cli": "^2.31.0",
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
+    "audit-ci": "^7.1.0",
     "lefthook": "1.13.6",
     "oxfmt": "^0.48.0",
     "oxlint": "^1.66.0",

@@ -96,7 +96,7 @@ export default function AddFunds() {
               title="KYC"
               className="rounded-2xl"
               sandbox="allow-popups allow-forms allow-scripts allow-same-origin"
-              allow="camera; microphone; geolocation; clipboard-write"
+              allow="camera *;microphone *;fullscreen *;geolocation *;clipboard-write *"
             />
           </CardContent>
         </Card>
@@ -128,10 +128,10 @@ export default function AddFunds() {
             <iframe
               id="transakIframe"
               src={transakWidgetUrl}
-              allow="camera;microphone;payment"
               referrerPolicy="strict-origin-when-cross-origin"
               className="h-[70dvh] w-full border-none"
               title="Transak"
+              allow="camera *;microphone *;fullscreen *;geolocation *;clipboard-write *;payment *"
             />
           </CardContent>
         </Card>

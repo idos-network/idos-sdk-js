@@ -123,6 +123,13 @@ overrides:
   "@idos-network/kwil-js>lru-cache": "11.2.7"
   "path-scurry>lru-cache": "11.2.7"
 
+  # Overrides for security-updates
+  axios: ">=1.15.2"
+  base-x: ">=3.0.11"
+  lodash: ">=4.18.0"
+  protobufjs: ">=7.5.5"
+  secp256k1: ">=5.0.1"
+
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
 

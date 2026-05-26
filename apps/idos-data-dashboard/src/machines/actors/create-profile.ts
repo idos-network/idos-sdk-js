@@ -1,3 +1,4 @@
+import { hexEncode } from "@idos-network/utils/codecs";
 import { fromPromise } from "xstate";
 
 import type { ProfileData } from "@/routes/api/profile";
@@ -12,8 +13,19 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
       // Fetch the user ID and a proof message from the server
       const { userId, proofMessage } = await fetch("/api/profile").then((res) => res.json());
 
-      const signature = await client.signer?.signMessage?.(proofMessage);
+      let signature = await client.signer?.signMessage?.(proofMessage);
       const encryptionProfile = await client.createUserEncryptionProfile(userId);
+
+      if (!signature) {
+        throw new Error("Failed to sign proof message");
+      }
+
+      if (signature instanceof Uint8Array) {
+        // FaceSign returns an array of bytes
+        signature = hexEncode(signature);
+      } else if (typeof signature === "string" && !signature.startsWith("0x")) {
+        signature = `0x${signature}`;
+      }
 
       const profileData: ProfileData = {
         recipientEncryptionPublicKey: encryptionProfile.userEncryptionPublicKey,
@@ -23,8 +35,7 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
         // for idOS this is mandatory, for UI we need public key...
         walletPublicKey: client.walletPublicKey ?? "",
         walletType: client.walletType,
-        // @ts-expect-error - TODO: Fix this
-        signature: signature?.startsWith("0x") ? signature : `0x${signature}`,
+        signature: signature as string,
       };
 
       // Call the API to create the profile

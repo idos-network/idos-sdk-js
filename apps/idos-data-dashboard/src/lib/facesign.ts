@@ -11,7 +11,7 @@ export async function createFaceSignProvider() {
   return new FaceSignSignerProvider({
     metadata: {
       name: "idOS Dashboard",
-      description: "Add FaceSign to your idOS profile",
+      description: "FaceSign signer for idOS Dashboard",
     },
     enclaveUrl,
   });
