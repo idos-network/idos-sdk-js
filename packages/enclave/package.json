@@ -47,7 +47,7 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@types/chrome": "^0.1.0",
+    "@types/chrome": "^0.1.42",
     "@types/node": "catalog:build",
     "jsdom": "^22.1.0",
     "tsdown": "catalog:build",

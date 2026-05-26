@@ -3,7 +3,103 @@ packages:
   - "examples/*"
   - "packages/*"
 
+catalogs:
+
+  build:
+    "@types/node": "25.6.2"
+    "tsdown": "^0.22.0"
+    "typescript": "^5.8.3"
+    "vite": "8.0.11"
+    "vite-plugin-node-polyfills": "0.26.0"
+  core:
+    "@digitalbazaar/ed25519-signature-2020": "^5.4.0"
+    "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0"
+    "@digitalbazaar/vc": "^7.2.0"
+    "@idos-network/kwil-js": "0.1.3"
+    "jsonld-document-loader": "^2.3.0"
+    "tiny-invariant": "^1.3.3"
+    "tweetnacl": "^1.0.3"
+    "web-streams-polyfill": "3.3.3"
+    "zod": "4.4.3"
+
+  ethereum:
+    "@wagmi/core": "2.22.1"
+    "ethers": "^6.14.0"
+    "viem": "2.48.11"
+    "wagmi": "2.19.5"
+
+  near:
+    "@near-wallet-selector/core": "8.10.2"
+    "@near-wallet-selector/here-wallet": "8.10.2"
+    "@near-wallet-selector/meteor-wallet": "8.10.2"
+    "@near-wallet-selector/modal-ui": "8.10.2"
+    "near-api-js": "4.0.4"
+
+  preact:
+    "@preact/signals": "^2.9.1"
+    "preact": "^10.29.2"
+
+  react:
+    "@types/react": "^19.2.15"
+    "@types/react-dom": "^19.2.3"
+    "react": "^19.2.6"
+    "react-dom": "^19.2.6"
+
+  react-router:
+    "@react-router/dev": "^7.15.1"
+    "@react-router/fs-routes": "^7.14.0"
+    "@react-router/node": "^7.15.1"
+    "@react-router/serve": "^7.15.1"
+    "@vercel/react-router": "^1.3.0"
+    "react-router": "^7.15.1"
+
+  reown:
+    "@reown/appkit": "1.7.20"
+    "@reown/appkit-adapter-wagmi": "1.7.20"
+
+  stellar:
+    "@creit.tech/stellar-wallets-kit": "^1.7.5"
+    "@stellar/freighter-api": "^4.1.0"
+    "@stellar/stellar-base": "^13.1.0"
+    "@stellar/stellar-sdk": "^13.3.0"
+
+  tanstack:
+    "@tanstack/query-sync-storage-persister": "^5.72.1"
+    "@tanstack/react-query": "^5.100.14"
+    "@tanstack/react-query-devtools": "^5.100.14"
+    "@tanstack/react-query-persist-client": "^5.72.1"
+    "@tanstack/react-router": "^1.115.2"
+    "@tanstack/react-router-devtools": "^1.115.2"
+    "@tanstack/react-table": "^8.20.0"
+    "@tanstack/router-plugin": "^1.115.2"
+
+  testing:
+    "vitest": "4.1.5"
+
+  utils:
+    "@stablelib/base64": "^2.0.1"
+    "@stablelib/binary": "^2.0.1"
+    "@stablelib/bytes": "^2.0.1"
+    "@stablelib/hex": "^2.0.1"
+    "@stablelib/sha256": "^2.0.1"
+    "@stablelib/utf8": "^2.0.1"
+    "base85": "^3.1.0"
+    "borsh": "^2.0.0"
+    "bs58": "^6.0.0"
+    "es-toolkit": "^1.46.1"
+    "qs": "6.15.1"
+
+  xrp:
+    "@gemwallet/api": "^3.8.0"
+    "ripple-binary-codec": "^2.4.0"
+    "ripple-keypairs": "^2.0.0"
+    "xrpl": "^4.3.0"
+    "xumm": "^1.8.0"
+
 minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  # Renovate security update: axios@1.15.2
+  - axios@1.15.2
 
 onlyBuiltDependencies:
   - "@swc/core"
@@ -26,109 +122,13 @@ onlyBuiltDependencies:
 
 overrides:
   # We are including a lot of those, but we need just this one
-  web-streams-polyfill: "3.3.3"
 
   # LRU-cache includes now forced dependency to node:diagnostic internal library
   "@idos-network/kwil-js>lru-cache": "11.2.7"
-  "path-scurry>lru-cache": "11.2.7"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
+  "path-scurry>lru-cache": "11.2.7"
+  web-streams-polyfill: "3.3.3"
 
 strictDepBuilds: true
-
-catalogs:
-  core:
-    "@digitalbazaar/ed25519-signature-2020": "^5.4.0"
-    "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0"
-    "@digitalbazaar/vc": "^7.2.0"
-    "@idos-network/kwil-js": "0.1.3"
-    "jsonld-document-loader": "^2.3.0"
-    "tweetnacl": "^1.0.3"
-    "tiny-invariant": "^1.3.3"
-    "web-streams-polyfill": "3.3.3"
-    "zod": "4.4.3"
-
-  utils:
-    "@stablelib/base64": "^2.0.1"
-    "@stablelib/binary": "^2.0.1"
-    "@stablelib/bytes": "^2.0.1"
-    "@stablelib/hex": "^2.0.1"
-    "@stablelib/sha256": "^2.0.1"
-    "@stablelib/utf8": "^2.0.1"
-    "base85": "^3.1.0"
-    "borsh": "^2.0.0"
-    "bs58": "^6.0.0"
-    "es-toolkit": "^1.39.0"
-    "qs": "6.15.1"
-
-  ethereum:
-    "wagmi": "2.19.5"
-    "@wagmi/core": "2.22.1"
-    "viem": "2.48.11"
-    "ethers": "^6.14.0"
-
-  reown:
-    "@reown/appkit": "1.7.20"
-    "@reown/appkit-adapter-wagmi": "1.7.20"
-
-  near:
-    "near-api-js": "4.0.4"
-    "@near-wallet-selector/core": "8.10.2"
-    "@near-wallet-selector/here-wallet": "8.10.2"
-    "@near-wallet-selector/meteor-wallet": "8.10.2"
-    "@near-wallet-selector/modal-ui": "8.10.2"
-
-  stellar:
-    "@stellar/stellar-sdk": "^13.3.0"
-    "@stellar/stellar-base": "^13.1.0"
-    "@creit.tech/stellar-wallets-kit": "^1.7.5"
-    "@stellar/freighter-api": "^4.1.0"
-
-  xrp:
-    "xrpl": "^4.3.0"
-    "xumm": "^1.8.0"
-    "ripple-binary-codec": "^2.4.0"
-    "ripple-keypairs": "^2.0.0"
-    "@gemwallet/api": "^3.8.0"
-
-  build:
-    "vite": "8.0.11"
-    "typescript": "^5.8.3"
-    "tsdown": "^0.22.0"
-    "vite-plugin-node-polyfills": "0.26.0"
-    "@types/node": "25.6.2"
-
-  testing:
-    "vitest": "4.1.5"
-
-  react:
-    "react": "^19.2.5"
-    "react-dom": "^19.2.5"
-    "@types/react": "^19.2.5"
-    "@types/react-dom": "^19.2.3"
-
-  react-router:
-    "react-router": "^7.14.0"
-    "@react-router/node": "^7.14.0"
-    "@react-router/serve": "^7.14.0"
-    "@vercel/react-router": "^1.2.6"
-    "@react-router/dev": "^7.14.0"
-    "@react-router/fs-routes": "^7.14.0"
-
-  preact:
-    "preact": "^10.28.2"
-    "@preact/signals": "^2.5.1"
-
-  tanstack:
-    "@tanstack/react-query": "^5.72.1"
-    "@tanstack/react-query-devtools": "^5.72.1"
-    "@tanstack/react-query-persist-client": "^5.72.1"
-    "@tanstack/query-sync-storage-persister": "^5.72.1"
-    "@tanstack/react-router": "^1.115.2"
-    "@tanstack/react-router-devtools": "^1.115.2"
-    "@tanstack/router-plugin": "^1.115.2"
-    "@tanstack/react-table": "^8.20.0"
-minimumReleaseAgeExclude:
-  # Renovate security update: axios@1.15.2
-  - axios@1.15.2
