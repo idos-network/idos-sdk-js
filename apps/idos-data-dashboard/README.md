@@ -84,6 +84,7 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 | `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup. |
 | `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.    |
 | `DATABASE_URL`                       | Yes      | Runtime PostgreSQL URL for the DB connection.                |
+| `DEVELOPER_CONSOLE_IDOS_NODE_URL`    | Yes      | Nodes for developer console (they should be playground.)     |  
 
 ## Available scripts
 

@@ -27,7 +27,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const consumerSigner = nacl.sign.keyPair.fromSecretKey(Buffer.from(user.consumerAuthKey, "hex"));
 
   const consumer = await idOSConsumerClass.init({
-    nodeUrl: COMMON_ENV.IDOS_NODE_URL,
+    nodeUrl: COMMON_ENV.DEVELOPER_CONSOLE_IDOS_NODE_URL,
     consumerSigner,
     recipientEncryptionPrivateKey: user.consumerEncKey,
   });
