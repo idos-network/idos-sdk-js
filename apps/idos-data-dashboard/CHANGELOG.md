@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.0.0
+
+### Major Changes
+
+- bf442ef: Adding a developer dashboard
+
 ## 0.1.3
 
 ### Patch Changes
