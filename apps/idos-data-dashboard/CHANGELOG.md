@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.0.1
+
+### Patch Changes
+
+- c6aa7e0: Fix developer console idos node (which is different than the current one)
+
 ## 1.0.0
 
 ### Major Changes
