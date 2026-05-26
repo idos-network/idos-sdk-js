@@ -69,6 +69,7 @@ function StepOverview() {
               "bg-card flex min-h-44 flex-col justify-between rounded-2xl border p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3",
               step.status === "Current" && "border-primary/40 bg-primary/5",
             )}
+            aria-label={`Go to step ${index + 1}`}
           >
             <div className="flex items-start justify-between gap-4">
               <div

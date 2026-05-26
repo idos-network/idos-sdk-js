@@ -73,7 +73,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
             <tr className="border-b">
               <th className="text-accent-foreground text-left">Consumer</th>
               <th className="text-accent-foreground text-left">Locked until</th>
-              <th />
+              <th aria-label="Actions" />
             </tr>
           </thead>
           <tbody>
@@ -82,6 +82,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 key={generateGrantId(grant)}
                 id={`grant-${generateGrantId(grant)}`}
                 data-grant={JSON.stringify(grant)}
+                aria-label={`Grant for ${grant.ag_grantee_wallet_identifier}`}
               >
                 <td className="w-full max-w-0">
                   <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>

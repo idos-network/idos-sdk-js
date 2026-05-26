@@ -61,6 +61,7 @@ export function Journeys() {
               }),
               className,
             )}
+            aria-label={`Launch ${title} in a new tab`}
           >
             <div className="flex w-full flex-col gap-5 p-5">
               <div className="flex items-start justify-between gap-4">

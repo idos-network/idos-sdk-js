@@ -55,6 +55,7 @@ export default function Sign() {
   }
 
   return (
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Backdrop dismiss
     <div
       role="dialog"
       className="bg-background fixed inset-0 flex items-center justify-center p-6"
