@@ -18,6 +18,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       acceptedTermsAndConditions: true,
       id: true,
       relayPrivateKey: true,
+      consumerAuthKey: true,
+      consumerEncKey: true,
       relayClientId: true,
     },
   });
@@ -30,7 +32,10 @@ export async function loader({ request }: Route.LoaderArgs) {
     {
       userId: session.get("userId"),
       acceptedTermsAndConditions: user.acceptedTermsAndConditions,
-      hasKeys: user.relayPrivateKey !== null,
+      hasKeys:
+        user.relayPrivateKey !== null &&
+        user.consumerAuthKey !== null &&
+        user.consumerEncKey !== null,
       relayClientId: user.relayClientId,
     },
     {

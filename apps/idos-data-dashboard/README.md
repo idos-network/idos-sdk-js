@@ -105,7 +105,7 @@ Run these from the `apps/idos-data-dashboard` directory:
 
 This app is the repo's first Prisma consumer and its local setup is the reference point for future migrations.
 
-- Runtime reads continue to use `LEGACY_APP_DB_URL`.
+- Runtime reads continue to use `DATABASE_URL`.
 - Prisma files live in `prisma/`, with the generated client committed under `generated/prisma/`.
 - The initial Prisma baseline migration lives in `prisma/migrations/20260416113000_prisma_baseline/`.
 - For an existing deployed database, baseline Prisma with `prisma migrate resolve --applied 20260416113000_prisma_baseline` instead of re-running the baseline SQL against live tables.

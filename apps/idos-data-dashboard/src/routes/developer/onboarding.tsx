@@ -208,7 +208,7 @@ function DeveloperOnboardingContent() {
     if (idOSClient && state === "notConfigured") {
       actorRef.send({ type: "init", idOSClient });
     }
-  }, [actorRef, idOSClient]);
+  }, [actorRef, idOSClient, state]);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;

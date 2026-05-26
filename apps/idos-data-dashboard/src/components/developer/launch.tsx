@@ -12,7 +12,7 @@ const launchChecklist = [
   {
     title: "Configure production environment",
     description:
-      "idOS offers more than this few steps, are you interested in credential reusability? facesign? more?",
+      "idOS offers more capabilities beyond these steps—would you like to enable credential reusability, FaceSign, or other features?",
   },
   {
     title: "Send a compliance brief",
