@@ -132,3 +132,5 @@ catalogs:
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
+  # Renovate security update: turbo@2.9.14
+  - turbo@2.9.14
