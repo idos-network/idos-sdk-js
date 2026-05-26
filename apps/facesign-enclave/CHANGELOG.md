@@ -1,5 +1,15 @@
 # facesign-enclave
 
+## 0.1.6
+
+### Patch Changes
+
+- 772319f: Minor and patch dependency upgrades
+- 772319f: Minor and patch dependency upgrades
+- Updated dependencies [772319f]
+- Updated dependencies [772319f]
+  - @idos-network/utils@1.2.1
+
 ## 0.1.5
 
 ### Patch Changes
