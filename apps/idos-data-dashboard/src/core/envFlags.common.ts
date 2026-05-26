@@ -9,6 +9,7 @@ export const commonEnvSchema = z.object({
   WALLET_CONNECT_PROJECT_ID: z.string(),
   IDOS_NEAR_DEFAULT_CONTRACT_ID: z.string(),
   DEV: z.boolean().default(false),
+  DEVELOPER_CONSOLE_IDOS_NODE_URL: z.string(),
 });
 
 export type CommonEnv = z.infer<typeof commonEnvSchema>;
