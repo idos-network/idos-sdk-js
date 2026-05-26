@@ -20,7 +20,7 @@ export function DueKyc({ kycUrl }: DueKycProps) {
         src={kycUrl}
         title="Due KYC"
         className="h-[70dvh] w-full rounded-2xl"
-        allow="camera;microphone"
+        allow="camera *;microphone *;fullscreen *;geolocation *;clipboard-write *"
         sandbox="allow-popups allow-forms allow-scripts allow-same-origin"
       />
     </div>

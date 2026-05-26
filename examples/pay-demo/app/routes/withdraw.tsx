@@ -148,7 +148,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
               title="KYC"
               className="rounded-2xl"
               sandbox="allow-popups allow-forms allow-scripts allow-same-origin"
-              allow="camera; microphone; geolocation; clipboard-write"
+              allow="camera *;microphone *;fullscreen *;geolocation *;clipboard-write *"
             />
           </CardContent>
         </Card>
