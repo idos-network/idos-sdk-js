@@ -91,7 +91,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   } else if (error && error instanceof Error) {
     Sentry.captureException(error);
 
-    if (COMMON_ENV.DEV) {
+    if (COMMON_ENV.NODE_ENV === "development") {
       details = error.message;
       stack = error.stack;
     }

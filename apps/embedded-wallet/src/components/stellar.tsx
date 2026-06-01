@@ -14,10 +14,11 @@ import { TokenXLM } from "@web3icons/react";
 import { useEffect, useState } from "react";
 
 import { message, useWalletState } from "../state";
+import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
 export const stellarKit: StellarWalletsKit = new StellarWalletsKit({
-  network: import.meta.env.DEV ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
+  network: COMMON_ENV.STELLAR_NETWORK === "testnet" ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
   selectedWalletId: FREIGHTER_ID,
   modules: [new FreighterModule(), new xBullModule()],
 });

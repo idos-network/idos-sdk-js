@@ -28,7 +28,8 @@
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "viem": "catalog:ethereum",
-    "wagmi": "catalog:ethereum"
+    "wagmi": "catalog:ethereum",
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",

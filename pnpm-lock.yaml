@@ -298,6 +298,9 @@ importers:
       wagmi:
         specifier: catalog:ethereum
         version: 2.19.5(@tanstack/query-core@5.100.14)(@tanstack/react-query@5.100.14(react@19.2.6))(@types/react@19.2.15)(@upstash/redis@1.38.0)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(immer@10.2.0)(react@19.2.6)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.48.11(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.4.3))(zod@4.4.3)
+      zod:
+        specifier: catalog:core
+        version: 4.4.3
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.0

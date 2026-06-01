@@ -9,7 +9,7 @@
     "data-dashboard#build": {
       "dependsOn": ["^build"],
       "outputs": ["build/**"],
-      "env": ["DATABASE_URL"],
+      "env": ["DATABASE_URL", "SENTRY_AUTH_TOKEN"],
       "cache": false
     },
     "build:packages": {

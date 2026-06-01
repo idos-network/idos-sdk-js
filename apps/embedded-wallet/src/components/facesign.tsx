@@ -4,6 +4,7 @@ import { hexEncode } from "@idos-network/utils/codecs";
 import { useRef, useState } from "react";
 
 import { useWalletState } from "../state";
+import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
 const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profile";
@@ -17,17 +18,12 @@ type Step = "button" | "consent" | "running";
 async function createProvider() {
   const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
 
-  const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
-  if (!enclaveUrl) {
-    throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
-  }
-
   return new FaceSignSignerProvider({
     metadata: {
       name: "idOS Embedded Wallet",
       description: "Add FaceSign to your idOS profile",
     },
-    enclaveUrl,
+    enclaveUrl: COMMON_ENV.FACESIGN_ENCLAVE_URL,
   });
 }
 

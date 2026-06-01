@@ -2,19 +2,11 @@ import * as z from "zod";
 
 export const commonEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
-  PUBLIC_URL: z.string(),
-  IDOS_NODE_URL: z.string(),
-  IDOS_ENCLAVE_URL: z.string(),
-  FACESIGN_ENCLAVE_URL: z.string().optional(),
-  EMBEDDED_WALLET_APP_URLS: z.string(),
   WALLET_CONNECT_PROJECT_ID: z.string(),
-  IDOS_NEAR_DEFAULT_CONTRACT_ID: z.string(),
-  STELLAR_NETWORK: z.enum(["testnet", "public"]),
+  FACESIGN_ENCLAVE_URL: z.string(),
   NEAR_NETWORK: z.enum(["testnet", "mainnet"]),
-  SENTRY_DSN: z.string().optional(),
-  DEVELOPER_CONSOLE_IDOS_NODE_URL: z.string(),
-  SENTRY_RELEASE: z.string().optional(),
-  SENTRY_ENVIRONMENT: z.string().optional(),
+  STELLAR_NETWORK: z.enum(["testnet", "public"]),
+  DATA_DASHBOARD_URL: z.string().optional(),
 });
 
 export type CommonEnv = z.infer<typeof commonEnvSchema>;

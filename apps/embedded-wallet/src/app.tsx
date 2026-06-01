@@ -2,6 +2,7 @@ import type { WalletType } from "@idos-network/kwil-infra/actions";
 
 import { useEffect } from "react";
 
+import { COMMON_ENV } from "./components/envFlags.common";
 import { EVMConnector } from "./components/evm";
 import { FaceSignConnector } from "./components/facesign";
 import { NearConnector } from "./components/near";
@@ -48,7 +49,7 @@ export function App() {
 
   useEffect(() => {
     if (walletPayload && connectedWalletType) {
-      if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
+      if (!COMMON_ENV.DATA_DASHBOARD_URL) {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
       }
@@ -72,7 +73,7 @@ export function App() {
                 disconnect: undefined,
               },
             },
-            import.meta.env.VITE_DATA_DASHBOARD_URL,
+            COMMON_ENV.DATA_DASHBOARD_URL,
           );
 
           // Close the popup window after sending the data
