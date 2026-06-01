@@ -126,9 +126,9 @@ overrides:
   # Overrides for security-updates
   axios: ">=1.15.2"
   base-x: ">=3.0.11"
-  lodash: ">=4.18.0"
   protobufjs: ">=7.5.5"
   secp256k1: ">=5.0.1"
+  lodash-es: ">= 4.18.0"
 
   # We are including a lot of those, but we need just this one
   web-streams-polyfill: "3.3.3"
