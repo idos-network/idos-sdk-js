@@ -32,6 +32,7 @@ createAppKit({
   networks: [mainnet, sepolia],
   metadata,
   projectId,
+  enableCoinbase: false,
 });
 
 const { useStepper } = defineStepper(

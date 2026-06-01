@@ -130,10 +130,11 @@ overrides:
   protobufjs: ">=7.5.5"
   secp256k1: ">=5.0.1"
 
-  # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
-  "chevrotain": "10.5.0"
-
   # We are including a lot of those, but we need just this one
   web-streams-polyfill: "3.3.3"
+
+  # Bs58 is broken < 6.0.0 together with vite 8.x
+  # but the import is the same
+  bs58: "6.0.0"
 
 strictDepBuilds: true
