@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.1.0
+
+### Minor Changes
+
+- eb304b7: ENV vars cleanups
+
 ## 1.0.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # pay-demo
 
+## 0.3.0
+
+### Minor Changes
+
+- eb304b7: ENV vars cleanups
+
 ## 0.2.2
 
 ### Patch Changes

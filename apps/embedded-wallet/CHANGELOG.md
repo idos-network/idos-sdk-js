@@ -1,5 +1,11 @@
 # embedded-wallet
 
+## 0.2.0
+
+### Minor Changes
+
+- eb304b7: ENV vars cleanups
+
 ## 0.1.3
 
 ### Patch Changes
