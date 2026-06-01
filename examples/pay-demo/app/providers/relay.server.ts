@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import https from "node:https";
 
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
@@ -51,11 +50,6 @@ export const fetchCredentialStatus = async (credentialId: string): Promise<Share
       headers: {
         Authorization: `Bearer ${await getRelayToken()}`,
       },
-      // @ts-expect-error - Node.js specific option
-      agent: new https.Agent({
-        rejectUnauthorized: false,
-        checkServerIdentity: () => undefined,
-      }),
     },
   );
 

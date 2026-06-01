@@ -8,6 +8,9 @@ on:
       - playground
       - main
 
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
