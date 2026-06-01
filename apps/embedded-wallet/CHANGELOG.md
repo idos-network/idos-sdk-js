@@ -1,5 +1,11 @@
 # embedded-wallet
 
+## 0.2.1
+
+### Patch Changes
+
+- c07a201: Disable coinbase and fix b58 version compatible with vite
+
 ## 0.2.0
 
 ### Minor Changes
