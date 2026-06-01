@@ -126,14 +126,15 @@ overrides:
   # Overrides for security-updates
   axios: ">=1.15.2"
   base-x: ">=3.0.11"
-  lodash: ">=4.18.0"
   protobufjs: ">=7.5.5"
   secp256k1: ">=5.0.1"
-
-  # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
-  "chevrotain": "10.5.0"
+  lodash-es: ">= 4.18.0"
 
   # We are including a lot of those, but we need just this one
   web-streams-polyfill: "3.3.3"
+
+  # Bs58 is broken < 6.0.0 together with vite 8.x
+  # but the import is the same
+  bs58: "6.0.0"
 
 strictDepBuilds: true
