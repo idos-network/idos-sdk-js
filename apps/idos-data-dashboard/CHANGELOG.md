@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.1.1
+
+### Patch Changes
+
+- 57e7ce9: Revert back chevrotain
+
 ## 1.1.0
 
 ### Minor Changes
