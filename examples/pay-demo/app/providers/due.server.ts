@@ -1,5 +1,3 @@
-import https from "node:https";
-
 import { SERVER_ENV } from "./envFlags.server";
 
 export interface CreateAccountRequest {
@@ -59,11 +57,6 @@ export const createAccount = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${SERVER_ENV.DUE_API_KEY}`,
     },
-    // @ts-expect-error - Node.js specific option
-    agent: new https.Agent({
-      rejectUnauthorized: false,
-      checkServerIdentity: () => undefined,
-    }),
   });
 
   if (!response.ok) {
@@ -89,11 +82,6 @@ export const getAccount = async (accountId: string): Promise<CreateAccountRespon
       "Content-Type": "application/json",
       Authorization: `Bearer ${SERVER_ENV.DUE_API_KEY}`,
     },
-    // @ts-expect-error - Node.js specific option
-    agent: new https.Agent({
-      rejectUnauthorized: false,
-      checkServerIdentity: () => undefined,
-    }),
   });
 
   if (!response.ok) {
