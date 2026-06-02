@@ -1,5 +1,11 @@
 # pay-demo
 
+## 0.4.0
+
+### Minor Changes
+
+- e4dda64: Change kraken to relay
+
 ## 0.3.0
 
 ### Minor Changes
