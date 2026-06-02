@@ -7,15 +7,15 @@ import type { Route } from "../+types/link";
 export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const credentialId = url.searchParams.get("credentialId");
-  const krakenDAG = url.searchParams.get("krakenDAG");
+  const relayDAG = url.searchParams.get("relayDAG");
   const user = context.get(userContext);
 
-  if (!credentialId || !krakenDAG) {
-    return Response.json({ error: "credentialId and krakenDAG are required" }, { status: 400 });
+  if (!credentialId || !relayDAG) {
+    return Response.json({ error: "credentialId and relayDAG are required" }, { status: 400 });
   }
 
   try {
-    const tokenData = await fetchSharedToken(krakenDAG, "noah.com_61413");
+    const tokenData = await fetchSharedToken(relayDAG, "noah.com_61413");
 
     await prefillNoahUser(user.address, tokenData.token);
 

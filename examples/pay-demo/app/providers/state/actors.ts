@@ -46,8 +46,8 @@ export const actors = {
       }
 
       return input.client.requestAccessGrant(input.credentialId, {
-        consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
-        consumerAuthPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
+        consumerEncryptionPublicKey: COMMON_ENV.RELAY_ENCRYPTION_PUBLIC_KEY,
+        consumerAuthPublicKey: COMMON_ENV.RELAY_PUBLIC_KEY,
       });
     },
   ),

@@ -14,7 +14,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   }
 
   try {
-    // Call kraken to get the full token response (id, kycStatus, token, forClientId)
+    // Call relay to get the full token response (id, kycStatus, token, forClientId)
     const tokenData = await fetchSharedToken(credentialId, provider);
 
     return Response.json(tokenData);

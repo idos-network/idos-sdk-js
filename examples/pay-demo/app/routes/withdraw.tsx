@@ -80,7 +80,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
     // oxlint-disable-next-line typescript/no-explicit-any -- message event type
     (message: any) => {
       // KYC iframe messages
-      if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {
+      if (message.origin.replace(/\/$/, "") === COMMON_ENV.RELAY_API_URL.replace(/\/$/, "")) {
         if (message.data.error) {
           console.error(message.data.error);
         } else if (message.data.open) {
@@ -128,7 +128,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
     }
   }, [transferStep, transferStatus]);
 
-  // --- KYC iframe (Kraken/Persona identity verification) ---
+  // --- KYC iframe (Relay/Persona identity verification) ---
   if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "waitForKYC" && kycUrl) {
     return (
       <div className="space-y-6">
