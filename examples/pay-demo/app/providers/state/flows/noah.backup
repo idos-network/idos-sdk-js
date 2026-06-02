@@ -11,19 +11,19 @@ export const emptyContext: NoahContext = {
 
 // Noah Flow
 export const flow = {
-  initial: "requestKrakenDAG",
+  initial: "requestRelayDAG",
   states: {
-    requestKrakenDAG: {
+    requestRelayDAG: {
       invoke: {
-        id: "requestKrakenDAG",
-        src: "requestKrakenDAG",
+        id: "requestRelayDAG",
+        src: "requestRelayDAG",
         input: ({ context }: { context: Context }) => ({
           client: context.loggedInClient,
           credential: context.credential,
         }),
         onDone: {
           target: "createCustomer",
-          actions: ["setKrakenDAG"],
+          actions: ["setRelayDAG"],
         },
         onError: {
           target: "error",
@@ -35,7 +35,7 @@ export const flow = {
         id: "createNoahCustomer",
         src: "createNoahCustomer",
         input: ({ context }: { context: Context }) => ({
-          krakenDAG: context.krakenDAG,
+          relayDAG: context.relayDAG,
           sharedCredential: context.sharedCredential,
         }),
         onDone: {
@@ -75,15 +75,15 @@ export const actors = {
     }: {
       input: {
         sharedCredential: Context["sharedCredential"];
-        krakenDAG: Context["krakenDAG"];
+        relayDAG: Context["relayDAG"];
       };
     }) => {
-      if (!input?.sharedCredential || !input?.krakenDAG) {
+      if (!input?.sharedCredential || !input?.relayDAG) {
         throw new Error("Credential not found");
       }
 
       const customer = await fetch(
-        `/app/kyc/noah/link?credentialId=${input.sharedCredential.id}&krakenDAG=${input.krakenDAG.id}`,
+        `/app/kyc/noah/link?credentialId=${input.sharedCredential.id}&relayDAG=${input.relayDAG.id}`,
       );
 
       if (customer.status !== 200) {

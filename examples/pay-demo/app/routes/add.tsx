@@ -37,7 +37,7 @@ export default function AddFunds() {
     // oxlint-disable-next-line typescript/no-explicit-any -- message event type
     (message: any) => {
       // KYC iframe messages
-      if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {
+      if (message.origin.replace(/\/$/, "") === COMMON_ENV.RELAY_API_URL.replace(/\/$/, "")) {
         if (message.data.error) {
           console.error(message.data.error);
         } else if (message.data.open) {

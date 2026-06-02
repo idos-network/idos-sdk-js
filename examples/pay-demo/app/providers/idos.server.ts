@@ -41,8 +41,8 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   const data = JSON.parse(credentialContents) as Credential;
 
   const issuer = {
-    issuer: SERVER_ENV.KRAKEN_ISSUER,
-    publicKeyMultibase: SERVER_ENV.KRAKEN_PUBLIC_KEY_MULTIBASE,
+    issuer: SERVER_ENV.RELAY_ISSUER,
+    publicKeyMultibase: SERVER_ENV.RELAY_PUBLIC_KEY_MULTIBASE,
   };
 
   // Verify the credential
@@ -62,7 +62,7 @@ export async function getUsableCredentialByUser(
 
   const credentials = await idOSConsumer.getCredentialsSharedByUser(userId);
 
-  const { base, addons } = parseLevel(COMMON_ENV.KRAKEN_LEVEL.replace("+idos", ""));
+  const { base, addons } = parseLevel(COMMON_ENV.RELAY_LEVEL.replace("+idos", ""));
 
   const credential = highestMatchingCredential(credentials, base, {
     addons,

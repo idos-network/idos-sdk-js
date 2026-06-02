@@ -236,13 +236,13 @@ export const actors = {
       throw new Error("Client not found");
     }
 
-    const { base: level, addons } = parseLevel(COMMON_ENV.KRAKEN_LEVEL);
+    const { base: level, addons } = parseLevel(COMMON_ENV.RELAY_LEVEL);
 
     const credentials = await input.filterCredentials({
       acceptedIssuers: [
         {
-          // Kraken
-          authPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
+          // Relay
+          authPublicKey: COMMON_ENV.RELAY_PUBLIC_KEY,
         },
       ],
       credentialLevelOrHigherFilter: {
