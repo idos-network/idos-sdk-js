@@ -14,7 +14,7 @@ export const fetchSharedToken = async (
   credentialId: string,
   forClientId: string,
 ): Promise<SharedTokenResponse> => {
-  const response = await fetch(`${SERVER_ENV.RELAY_API_URL}/providers/sumsub/sharedToken`, {
+  const response = await fetch(`${COMMON_ENV.RELAY_API_URL}/providers/sumsub/sharedToken`, {
     method: "POST",
     body: JSON.stringify({
       credentialId,
@@ -44,7 +44,7 @@ export const fetchSharedToken = async (
 
 export const fetchCredentialStatus = async (credentialId: string): Promise<SharedTokenResponse> => {
   const response = await fetch(
-    `${SERVER_ENV.RELAY_API_URL}/providers/sumsub/sharedToken/${credentialId}`,
+    `${COMMON_ENV.RELAY_API_URL}/providers/sumsub/sharedToken/${credentialId}`,
     {
       method: "GET",
       headers: {
@@ -74,7 +74,7 @@ export const generateRelayUrl = async (type: string, walletAddress: string) => {
 
   const token = jwt.sign(payload, SERVER_ENV.RELAY_PRIVATE_KEY, { algorithm: "ES512" });
 
-  return `${SERVER_ENV.RELAY_API_URL}/kyc?token=${token}&provider=${type}&walletAddress=${encodeURIComponent(walletAddress)}`;
+  return `${COMMON_ENV.RELAY_API_URL}/kyc?token=${token}&provider=${type}&walletAddress=${encodeURIComponent(walletAddress)}`;
 };
 
 export async function getRelayToken(): Promise<string> {

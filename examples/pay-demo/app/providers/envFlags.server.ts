@@ -6,7 +6,6 @@ export const serverEnvSchema = z.object({
   NOAH_API_URL: z.string(),
   NOAH_API_KEY: z.string(),
   NOAH_PRIVATE_KEY: z.string(),
-  RELAY_API_URL: z.string(),
   RELAY_CLIENT_ID: z.string(),
   RELAY_ISSUER: z.string(),
   RELAY_PRIVATE_KEY: z.string(),
