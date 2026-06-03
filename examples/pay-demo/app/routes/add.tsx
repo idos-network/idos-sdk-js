@@ -37,7 +37,7 @@ export default function AddFunds() {
     // oxlint-disable-next-line typescript/no-explicit-any -- message event type
     (message: any) => {
       // KYC iframe messages
-      if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {
+      if (message.origin.replace(/\/$/, "") === COMMON_ENV.RELAY_API_URL.replace(/\/$/, "")) {
         if (message.data.error) {
           console.error(message.data.error);
         } else if (message.data.open) {
@@ -72,7 +72,7 @@ export default function AddFunds() {
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
     if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "chooseType") {
-      send({ type: "startKYC", kycType: "persona" });
+      send({ type: "start", kycType: "persona" });
     }
   }, [state, send]);
 
@@ -96,7 +96,7 @@ export default function AddFunds() {
               title="KYC"
               className="rounded-2xl"
               sandbox="allow-popups allow-forms allow-scripts allow-same-origin"
-              allow="camera; microphone; geolocation; clipboard-write"
+              allow="camera *;microphone *;fullscreen *;geolocation *;clipboard-write *"
             />
           </CardContent>
         </Card>
@@ -128,10 +128,10 @@ export default function AddFunds() {
             <iframe
               id="transakIframe"
               src={transakWidgetUrl}
-              allow="camera;microphone;payment"
               referrerPolicy="strict-origin-when-cross-origin"
               className="h-[70dvh] w-full border-none"
               title="Transak"
+              allow="camera *;microphone *;fullscreen *;geolocation *;clipboard-write *;payment *"
             />
           </CardContent>
         </Card>

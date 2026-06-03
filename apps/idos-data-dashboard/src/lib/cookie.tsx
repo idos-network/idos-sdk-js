@@ -1,8 +1,9 @@
 import * as Sentry from "@sentry/react-router";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
-import { useSelector } from "@/machines/provider";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
+import { COMMON_ENV } from "@/core/envFlags.common";
+import { useSelector } from "@/machines/dashboard/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/dashboard/selectors";
 
 // Version for cookie consent localStorage format
 const COOKIE_CONSENT_VERSION = "1.0";
@@ -77,15 +78,15 @@ export function CookieProvider({ children }: CookieProviderProps) {
   useEffect(() => {
     if (consent === null || consent === 0) return;
 
-    if (!sentryInitialized.current && import.meta.env.VITE_SENTRY_DSN) {
+    if (!sentryInitialized.current && COMMON_ENV.SENTRY_DSN) {
       sentryInitialized.current = true;
 
       Sentry.init({
-        dsn: import.meta.env.VITE_SENTRY_DSN,
+        dsn: COMMON_ENV.SENTRY_DSN,
         sendDefaultPii: true,
         tracesSampleRate: 1.0,
-        release: import.meta.env.VITE_SENTRY_RELEASE ?? "unknown",
-        environment: import.meta.env.VITE_SENTRY_ENVIRONMENT ?? "unknown",
+        release: COMMON_ENV.SENTRY_RELEASE ?? "unknown",
+        environment: COMMON_ENV.SENTRY_ENVIRONMENT ?? "unknown",
         beforeSend(event, hint) {
           const error = hint?.originalException;
 

@@ -8,6 +8,7 @@ import { TokenNEAR } from "@web3icons/react";
 import { useEffect, useState } from "react";
 
 import { message, useWalletState } from "../state";
+import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
 const { useStepper } = defineStepper(
@@ -24,7 +25,8 @@ const { useStepper } = defineStepper(
 );
 
 const selector = await setupWalletSelector({
-  network: (import.meta.env.VITE_NEAR_NETWORK as "testnet" | "mainnet") || "testnet",
+  network: COMMON_ENV.NEAR_NETWORK,
+  debug: COMMON_ENV.NODE_ENV === "development",
   // oxlint-disable-next-line typescript/no-explicit-any -- false positive
   modules: [setupMeteorWallet() as any],
 });

@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import https from "node:https";
 
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
@@ -15,7 +14,7 @@ export const fetchSharedToken = async (
   credentialId: string,
   forClientId: string,
 ): Promise<SharedTokenResponse> => {
-  const response = await fetch(`${SERVER_ENV.KRAKEN_API_URL}/public/kyc/sharedToken`, {
+  const response = await fetch(`${COMMON_ENV.RELAY_API_URL}/providers/sumsub/sharedToken`, {
     method: "POST",
     body: JSON.stringify({
       credentialId,
@@ -45,17 +44,12 @@ export const fetchSharedToken = async (
 
 export const fetchCredentialStatus = async (credentialId: string): Promise<SharedTokenResponse> => {
   const response = await fetch(
-    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/sharedToken/${credentialId}`,
+    `${COMMON_ENV.RELAY_API_URL}/providers/sumsub/sharedToken/${credentialId}`,
     {
       method: "GET",
       headers: {
         Authorization: `Bearer ${await getRelayToken()}`,
       },
-      // @ts-expect-error - Node.js specific option
-      agent: new https.Agent({
-        rejectUnauthorized: false,
-        checkServerIdentity: () => undefined,
-      }),
     },
   );
 
@@ -72,24 +66,24 @@ export const fetchCredentialStatus = async (credentialId: string): Promise<Share
 
 export const generateRelayUrl = async (type: string, walletAddress: string) => {
   const payload = {
-    clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
+    clientId: SERVER_ENV.RELAY_CLIENT_ID,
     kyc: true,
-    level: `${COMMON_ENV.KRAKEN_LEVEL}+idos`,
+    level: `${COMMON_ENV.RELAY_LEVEL}+idos`,
     state: Date.now().toString(),
   };
 
-  const token = jwt.sign(payload, SERVER_ENV.KRAKEN_PRIVATE_KEY, { algorithm: "ES512" });
+  const token = jwt.sign(payload, SERVER_ENV.RELAY_PRIVATE_KEY, { algorithm: "ES512" });
 
-  return `${SERVER_ENV.KRAKEN_API_URL}/kyc?token=${token}&provider=${type}&walletAddress=${encodeURIComponent(walletAddress)}`;
+  return `${COMMON_ENV.RELAY_API_URL}/kyc?token=${token}&provider=${type}&walletAddress=${encodeURIComponent(walletAddress)}`;
 };
 
 export async function getRelayToken(): Promise<string> {
   const payload = {
     api: true,
-    clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
+    clientId: SERVER_ENV.RELAY_CLIENT_ID,
   };
 
-  return jwt.sign(payload, SERVER_ENV.KRAKEN_PRIVATE_KEY, {
+  return jwt.sign(payload, SERVER_ENV.RELAY_PRIVATE_KEY, {
     algorithm: "ES512",
     expiresIn: "600s",
   });

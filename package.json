@@ -19,14 +19,15 @@
     "publint": "pnpm --filter './packages/**' run publint"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.30.0",
+    "@changesets/cli": "^2.31.0",
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
+    "audit-ci": "^7.1.0",
     "lefthook": "1.13.6",
-    "oxfmt": "^0.44.0",
-    "oxlint": "^1.52.0",
-    "size-limit": "^11.1.6",
-    "turbo": "^2.7.3",
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.66.0",
+    "size-limit": "^11.2.0",
+    "turbo": "^2.9.14",
     "vite-plugin-node-polyfills": "catalog:build"
   },
   "size-limit": [
@@ -67,5 +68,5 @@
       "limit": "20 KB"
     }
   ],
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.4"
 }

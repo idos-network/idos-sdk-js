@@ -11,7 +11,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useRevokeGrant } from "@/lib/mutations/credentials";
 import { useFetchGrants } from "@/lib/queries/credentials";
-import { timelockToMs } from "@/lib/time";
+import { timelockToMs, timelockToDate } from "@/lib/time";
 
 interface GrantsCenterProps {
   credentialId: string;
@@ -22,26 +22,6 @@ interface GrantsCenterProps {
 function generateGrantId(grant: idOSGrant): string {
   const { data_id, ag_grantee_wallet_identifier, locked_until } = grant;
   return [data_id, ag_grantee_wallet_identifier, locked_until].join("-");
-}
-
-const MAX_REPRESENTABLE_TIMELOCK = 8.64e12;
-
-function timelockToDate(timelock: number): string {
-  if (!timelock) return "No timelock";
-  if (!Number.isFinite(timelock) || timelock > MAX_REPRESENTABLE_TIMELOCK) {
-    return "Permanently locked";
-  }
-
-  const milliseconds = timelockToMs(timelock);
-  const date = new Date(milliseconds);
-
-  if (Number.isNaN(date.getTime())) return "Permanently locked";
-
-  return new Intl.DateTimeFormat(["ban", "id"], {
-    dateStyle: "short",
-    timeStyle: "short",
-    hour12: true,
-  }).format(date);
 }
 
 function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) {
@@ -73,7 +53,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
             <tr className="border-b">
               <th className="text-accent-foreground text-left">Consumer</th>
               <th className="text-accent-foreground text-left">Locked until</th>
-              <th />
+              <th aria-label="Actions" />
             </tr>
           </thead>
           <tbody>
@@ -82,6 +62,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 key={generateGrantId(grant)}
                 id={`grant-${generateGrantId(grant)}`}
                 data-grant={JSON.stringify(grant)}
+                aria-label={`Grant for ${grant.ag_grantee_wallet_identifier}`}
               >
                 <td className="w-full max-w-0">
                   <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>

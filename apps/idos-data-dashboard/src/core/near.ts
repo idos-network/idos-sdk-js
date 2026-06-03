@@ -6,6 +6,7 @@ import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
+
 import { COMMON_ENV } from "./envFlags.common";
 
 declare global {
@@ -26,8 +27,8 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
   }
 
   _selector = await setupWalletSelector({
-    network: COMMON_ENV.DEV ? "testnet" : "mainnet",
-    debug: COMMON_ENV.DEV,
+    network: COMMON_ENV.NEAR_NETWORK,
+    debug: COMMON_ENV.NODE_ENV === "development",
     // @ts-expect-error - WalletModuleFactory<InjectedWallet> can't be assigned to WalletModuleFactory<Wallet>
     modules: [setupMeteorWallet(), setupHereWallet()],
   });
@@ -37,7 +38,7 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
     methodNames: [],
   });
 
-  if (COMMON_ENV.DEV) {
+  if (COMMON_ENV.NODE_ENV === "development") {
     window.selector = _selector;
     window.modal = _modal;
   }

@@ -3,31 +3,22 @@ export const verifyEvmSignature = async (
   signature: `0x${string}`,
   address: `0x${string}`,
 ): Promise<boolean> => {
-  let wagmi: typeof import("@wagmi/core");
+  let verifyMessage: typeof import("viem").verifyMessage;
 
   try {
-    wagmi = await import("@wagmi/core");
+    verifyMessage = (await import("viem")).verifyMessage;
   } catch (_e) {
-    throw new Error("Can't load @wagmi/core");
+    throw new Error("Can't load viem");
   }
 
-  let chains: typeof import("@wagmi/core/chains");
   try {
-    chains = await import("@wagmi/core/chains");
-  } catch (_e) {
-    throw new Error("Can't load @wagmi/core/chains");
+    return await verifyMessage({
+      address,
+      message,
+      signature,
+    });
+  } catch (e) {
+    console.warn("EVM signature verification failed:", e);
+    return false;
   }
-
-  const wagmiConfig = wagmi.createConfig({
-    chains: [chains.mainnet],
-    transports: {
-      [chains.mainnet.id]: wagmi.http(),
-    },
-  });
-
-  return wagmi.verifyMessage(wagmiConfig, {
-    address,
-    message,
-    signature,
-  });
 };

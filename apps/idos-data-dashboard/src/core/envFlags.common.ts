@@ -2,13 +2,19 @@ import * as z from "zod";
 
 export const commonEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
+  PUBLIC_URL: z.string(),
   IDOS_NODE_URL: z.string(),
   IDOS_ENCLAVE_URL: z.string(),
   FACESIGN_ENCLAVE_URL: z.string().optional(),
   EMBEDDED_WALLET_APP_URLS: z.string(),
   WALLET_CONNECT_PROJECT_ID: z.string(),
   IDOS_NEAR_DEFAULT_CONTRACT_ID: z.string(),
-  DEV: z.boolean().default(false),
+  STELLAR_NETWORK: z.enum(["testnet", "public"]),
+  NEAR_NETWORK: z.enum(["testnet", "mainnet"]),
+  SENTRY_DSN: z.string().optional(),
+  DEVELOPER_CONSOLE_IDOS_NODE_URL: z.string(),
+  SENTRY_RELEASE: z.string().optional(),
+  SENTRY_ENVIRONMENT: z.string().optional(),
 });
 
 export type CommonEnv = z.infer<typeof commonEnvSchema>;
@@ -27,10 +33,7 @@ function buildEnv(): CommonEnv {
       {} as Record<string, string>,
     );
 
-    return commonEnvSchema.parse({
-      ...envWithoutPrefix,
-      DEV: envWithoutPrefix.NODE_ENV === "development" || envWithoutPrefix.DEV,
-    });
+    return commonEnvSchema.parse(envWithoutPrefix);
   } catch (error: unknown) {
     console.error("Warning: invalid client env vars!");
     console.error(error);

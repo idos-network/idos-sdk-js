@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/kwil-infra",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Infrastructure and wallets for idOS",
   "license": "MIT",
   "repository": "github:idos-network/idos-sdk-js",
@@ -64,10 +64,10 @@
   "peerDependencies": {
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
-    "@wagmi/core": "catalog:ethereum",
     "ethers": "catalog:ethereum",
     "near-api-js": "catalog:near",
     "ripple-keypairs": "catalog:xrp",
+    "viem": "catalog:ethereum",
     "xrpl": "catalog:xrp"
   },
   "peerDependenciesMeta": {
@@ -83,7 +83,7 @@
     "ripple-keypairs": {
       "optional": true
     },
-    "@wagmi/core": {
+    "viem": {
       "optional": true
     },
     "xrpl": {

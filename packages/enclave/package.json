@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/enclave",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "idOS Enclave JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
@@ -47,7 +47,7 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@types/chrome": "^0.1.0",
+    "@types/chrome": "^0.1.42",
     "@types/node": "catalog:build",
     "jsdom": "^22.1.0",
     "tsdown": "catalog:build",

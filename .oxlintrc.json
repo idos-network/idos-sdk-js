@@ -19,7 +19,8 @@
     "typescript/prefer-enum-initializers": "error",
     "react/self-closing-comp": "error",
     "unicorn/prefer-number-properties": "error",
-    "typescript/no-inferrable-types": "warn"
+    "typescript/no-inferrable-types": "warn",
+    "jsx-a11y/prefer-tag-over-role": "warn"
   },
   "ignorePatterns": [
     "**/*.gen.ts",

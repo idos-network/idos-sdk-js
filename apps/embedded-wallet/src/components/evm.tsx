@@ -8,10 +8,10 @@ import { useEffect } from "react";
 import { useSignMessage, WagmiProvider } from "wagmi";
 
 import { message, useWalletState } from "../state";
+import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
-const projectId =
-  import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "b56e18d47c72ab683b10814fe9495694";
+const projectId = COMMON_ENV.WALLET_CONNECT_PROJECT_ID;
 
 export const networks = [mainnet, sepolia];
 
@@ -32,6 +32,7 @@ createAppKit({
   networks: [mainnet, sepolia],
   metadata,
   projectId,
+  enableCoinbase: false,
 });
 
 const { useStepper } = defineStepper(

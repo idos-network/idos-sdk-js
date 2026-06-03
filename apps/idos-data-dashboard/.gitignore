@@ -5,3 +5,4 @@
 /.react-router/
 /build/
 /src/generated/
+.vercel

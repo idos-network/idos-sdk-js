@@ -12,7 +12,7 @@ import {
   createXrplSigner,
 } from "@/core/signers";
 
-import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard.machine";
+import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard/machine";
 
 let config: idOSClientConfiguration | null = null;
 

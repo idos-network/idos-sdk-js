@@ -75,15 +75,16 @@ Both apps must run over HTTPS (handled automatically by `mkcert`).
 
 ## Environment variables
 
-| Variable                             | Required | Description                                                                                                                     |
-| ------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections.                                                                    |
-| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                                                                                    |
-| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.                                                                       |
-| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.                                                                           |
-| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup.                                                                    |
-| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.                                                                       |
-| `LEGACY_APP_DB_URL`                  | No       | Runtime PostgreSQL URL for the legacy app DB (Neon). Used by community-sale and leaderboard. Set in `.env.local` (server-only). |
+| Variable                             | Required | Description                                                  |
+| ------------------------------------ | -------- | ------------------------------------------------------------ |
+| `VITE_WALLET_CONNECT_PROJECT_ID`     | Yes      | Reown (WalletConnect) project ID for EVM wallet connections. |
+| `VITE_IDOS_NODE_URL`                 | Yes      | URL of the idOS node the client connects to.                 |
+| `VITE_IDOS_ENCLAVE_URL`              | Yes      | URL of the idOS secure enclave for credential decryption.    |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes      | NEAR contract ID for the idOS access grants contract.        |
+| `VITE_EMBEDDED_WALLET_APP_URLS`      | Yes      | Comma-separated URLs for the embedded wallet add flow popup. |
+| `VITE_FACESIGN_ENCLAVE_URL`          | No       | URL of the FaceSign enclave for biometric authentication.    |
+| `DATABASE_URL`                       | Yes      | Runtime PostgreSQL URL for the DB connection.                |
+| `DEVELOPER_CONSOLE_IDOS_NODE_URL`    | Yes      | Nodes for developer console (they should be playground.)     |
 
 ## Available scripts
 
@@ -105,7 +106,7 @@ Run these from the `apps/idos-data-dashboard` directory:
 
 This app is the repo's first Prisma consumer and its local setup is the reference point for future migrations.
 
-- Runtime reads continue to use `LEGACY_APP_DB_URL`.
+- Runtime reads continue to use `DATABASE_URL`.
 - Prisma files live in `prisma/`, with the generated client committed under `generated/prisma/`.
 - The initial Prisma baseline migration lives in `prisma/migrations/20260416113000_prisma_baseline/`.
 - For an existing deployed database, baseline Prisma with `prisma migrate resolve --applied 20260416113000_prisma_baseline` instead of re-running the baseline SQL against live tables.
