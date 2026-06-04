@@ -142,4 +142,7 @@ overrides:
   # but the import is the same
   bs58: "6.0.0"
 
+  basic-ftp: ">=5.3.1"
+  fast-uri: ">=3.1.2"
+
 strictDepBuilds: true
