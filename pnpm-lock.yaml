@@ -199,6 +199,7 @@ overrides:
   brace-expansion: '>= 5.0.9'
   nanoid: '>= 5.1.11'
   toml: '>= 4.1.2'
+  basic-ftp: '>=5.3.1'
   chevrotain: 10.5.0
   web-streams-polyfill: 3.3.3
   bs58: 6.0.0
