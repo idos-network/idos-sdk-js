@@ -32,8 +32,8 @@ catalogs:
       specifier: ^7.3.0
       version: 7.3.0
     '@idos-network/kwil-js':
-      specifier: 0.1.3
-      version: 0.1.3
+      specifier: 0.1.4
+      version: 0.1.4
     jsonld-document-loader:
       specifier: ^2.3.0
       version: 2.3.0
@@ -902,7 +902,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.3(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        version: 0.1.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -924,7 +924,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.3(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        version: 0.1.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1053,7 +1053,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.3(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        version: 0.1.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1078,7 +1078,7 @@ importers:
     dependencies:
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.3(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        version: 0.1.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1812,8 +1812,8 @@ packages:
   '@hot-wallet/sdk@1.0.11':
     resolution: {integrity: sha512-qRDH/4yqnRCnk7L/Qd0/LDOKDUKWcFgvf6eRELJkP0OgxIe65i/iXaG+u2lL0mLbTGkiWYk67uAvEerNUv2gzA==}
 
-  '@idos-network/kwil-js@0.1.3':
-    resolution: {integrity: sha512-0XZw/4AiPT7PMitNcajtQgmBRCMQ88sayVmMNZ0zMKEbEPQwMU/X9hZj6SrJw9dNY7b3iXBVSFrYExnxU5aYfw==}
+  '@idos-network/kwil-js@0.1.4':
+    resolution: {integrity: sha512-kptEk4RTOz8QBuPQPm9c0wdnxaTvUqMOgKVb6pey3D+JZFpOmP7AhG3N8cfJn8Ggi1fTFKB7JlL76kCHG3Pf9g==}
     engines: {node: '>=18.0.0'}
 
   '@inquirer/ansi@1.0.2':
@@ -2068,12 +2068,6 @@ packages:
 
   '@multiformats/base-x@4.0.1':
     resolution: {integrity: sha512-eMk0b9ReBbV23xXU693TAIrLyeO5iTgBZGSJfpqriG8UkYvr/hC9u9pyMlAakDNHWmbhMZCDs6KQO0jzKD8OTw==}
-
-  '@napi-rs/wasm-runtime@1.1.3':
-    resolution: {integrity: sha512-xK9sGVbJWYb08+mTJt3/YV24WxvxpXcXtP6B172paPZ+Ts69Re9dAr7lKwJoeIx8OoeuimEiRZ7umkiUVClmmQ==}
-    peerDependencies:
-      '@emnapi/core': ^1.7.1
-      '@emnapi/runtime': ^1.7.1
 
   '@napi-rs/wasm-runtime@1.1.4':
     resolution: {integrity: sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow==}
@@ -9229,9 +9223,6 @@ packages:
   preact@10.24.2:
     resolution: {integrity: sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==}
 
-  preact@10.29.1:
-    resolution: {integrity: sha512-gQCLc/vWroE8lIpleXtdJhTFDogTdZG9AjMUpVkDf2iTCNwYNWA+u16dL41TqUDJO4gm2IgrcMv3uTpjd4Pwmg==}
-
   preact@10.29.2:
     resolution: {integrity: sha512-7tNmwg/7mzzAoB/8kSg6Hl37JraAZw3Z3A0JSY7VXlZwo82Xn0G7wKbNNs2qoF4ZEEsQGTwDAroNdqKs1ofJxQ==}
 
@@ -11800,7 +11791,7 @@ snapshots:
       eth-json-rpc-filters: 6.0.1
       eventemitter3: 5.0.1
       keccak: 3.0.4
-      preact: 10.29.1
+      preact: 10.29.2
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
@@ -12302,7 +12293,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@idos-network/kwil-js@0.1.3(bufferutil@4.1.0)(utf-8-validate@6.0.6)':
+  '@idos-network/kwil-js@0.1.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)':
     dependencies:
       axios: 1.16.1
       ethers: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -12627,7 +12618,7 @@ snapshots:
       debug: 4.4.3
       lodash: 4.18.1
       pony-cause: 2.1.11
-      semver: 7.7.4
+      semver: 7.8.1
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -12637,7 +12628,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.13
       debug: 4.4.3
-      semver: 7.7.4
+      semver: 7.8.1
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -12651,7 +12642,7 @@ snapshots:
       '@types/debug': 4.1.13
       debug: 4.4.3
       pony-cause: 2.1.11
-      semver: 7.7.4
+      semver: 7.8.1
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -12665,7 +12656,7 @@ snapshots:
       '@types/debug': 4.1.13
       debug: 4.4.3
       pony-cause: 2.1.11
-      semver: 7.7.4
+      semver: 7.8.1
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -12765,13 +12756,6 @@ snapshots:
       strict-event-emitter: 0.5.1
 
   '@multiformats/base-x@4.0.1': {}
-
-  '@napi-rs/wasm-runtime@1.1.3(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
-    dependencies:
-      '@emnapi/core': 1.10.0
-      '@emnapi/runtime': 1.10.0
-      '@tybys/wasm-util': 0.10.1
-    optional: true
 
   '@napi-rs/wasm-runtime@1.1.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
@@ -13507,7 +13491,7 @@ snapshots:
       extract-zip: 2.0.1
       progress: 2.0.3
       proxy-agent: 6.5.0
-      semver: 7.7.4
+      semver: 7.8.1
       tar-fs: 3.1.2
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -15654,7 +15638,7 @@ snapshots:
 
   '@rolldown/binding-wasm32-wasi@1.0.0-rc.12(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.3(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -23222,7 +23206,7 @@ snapshots:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.16.1
-      semver: 7.7.4
+      semver: 7.8.1
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -23858,8 +23842,6 @@ snapshots:
   powershell-utils@0.1.0: {}
 
   preact@10.24.2: {}
-
-  preact@10.29.1: {}
 
   preact@10.29.2: {}
 
