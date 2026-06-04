@@ -365,6 +365,15 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return utf8Decode(plaintext);
   }
 
+  async getCredentialSharedContent(id: string): Promise<string> {
+    const credential = await this.getCredentialShared(id);
+
+    invariant(credential, `Shared credential with id ${id} not found`);
+    const plaintext = await this.#decryptCredentialContent(credential);
+
+    return utf8Decode(plaintext);
+  }
+
   async requestDAGMessage(params: DagMessageInput): Promise<string> {
     return dagMessage(this.kwilClient, params).then((res) => res.message);
   }
