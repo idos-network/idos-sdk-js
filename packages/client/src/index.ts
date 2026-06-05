@@ -155,6 +155,8 @@ export class idOSClientIdle {
 
     const blobGateway = new BlobGateway({
       url: params.blobGatewayUrl ?? params.nodeUrl,
+      // Kwil RPC uses withCredentials; blob reads need the same KGW session cookie cross-origin.
+      fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
     });
 
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
