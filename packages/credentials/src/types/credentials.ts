@@ -4,17 +4,31 @@ export type idOSCredential = {
   id: string;
   user_id: string;
   public_notes: string;
-  content: string;
+  content_uri: string;
+  content_size: number;
   encryptor_public_key: string;
   issuer_auth_public_key: string;
   original_id?: string | null;
+  inserter_type?: string | null;
+  inserter_id?: string | null;
 };
 
-export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
-  id?: idOSCredential["id"];
-  content_hash?: string;
+export type idOSCredentialRecord = Omit<idOSCredential, "content_uri" | "content_size"> & {
+  content: string | null;
+  content_uri?: string | null;
+  content_size?: number | null;
+};
+
+export type SignedCredentialContentReference = {
+  public_notes: string;
   public_notes_signature: string;
   broader_signature: string;
+  issuer_auth_public_key: string;
+};
+
+export type CredentialSigningKeyPair = {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
 };
 
 // https://github.com/colinhacks/zod/issues/3751
