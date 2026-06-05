@@ -62,9 +62,11 @@ export class idOSConsumer {
 
     const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
-    const blobGateway = blobGatewayUrl
-      ? createKgwAuthenticatedBlobGateway({ url: blobGatewayUrl, kwilClient, signer })
-      : undefined;
+    const blobGateway = createKgwAuthenticatedBlobGateway({
+      url: blobGatewayUrl ?? nodeUrl,
+      kwilClient,
+      signer,
+    });
 
     return new idOSConsumer(
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),

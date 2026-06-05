@@ -153,9 +153,9 @@ export class idOSClientIdle {
 
     await params.enclaveProvider.load();
 
-    const blobGateway = params.blobGatewayUrl
-      ? new BlobGateway({ url: params.blobGatewayUrl })
-      : undefined;
+    const blobGateway = new BlobGateway({
+      url: params.blobGatewayUrl ?? params.nodeUrl,
+    });
 
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
   }

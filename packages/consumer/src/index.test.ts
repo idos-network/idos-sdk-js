@@ -53,6 +53,22 @@ describe("idOSConsumer", () => {
     });
   });
 
+  it("falls back to nodeUrl when blobGatewayUrl is omitted", async () => {
+    const { createKgwAuthenticatedBlobGateway } = await import("@idos-network/kwil-infra");
+
+    await idOSConsumer.init({
+      nodeUrl: "https://nodes.example",
+      consumerSigner: nacl.sign.keyPair(),
+      recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
+    });
+
+    expect(createKgwAuthenticatedBlobGateway).toHaveBeenCalledWith({
+      url: "https://nodes.example",
+      kwilClient: mocks.kwilClient,
+      signer: mocks.signer,
+    });
+  });
+
   it("normalizes string content_size before comparing blob byte length", async () => {
     const recipientKeyPair = nacl.box.keyPair();
     const encryptorKeyPair = nacl.box.keyPair();
