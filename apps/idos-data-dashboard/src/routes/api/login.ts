@@ -2,6 +2,8 @@ import { verifySignature } from "@idos-network/kwil-infra/signature-verification
 import crypto from "node:crypto";
 import { z } from "zod";
 
+import type { User } from "@/generated/prisma/client";
+
 import { getDb } from "@/core/db.server";
 import { sessionStorage } from "@/core/sessions.server";
 import { WalletType } from "@/generated/prisma/enums";
@@ -54,7 +56,6 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   const proofMessage = session.get("proofMessage");
-  console.log("proofMessage", proofMessage);
 
   if (!proofMessage) {
     return Response.json({ error: "Proof message not found" }, { status: 400 });
@@ -80,17 +81,40 @@ export async function action({ request }: Route.ActionArgs) {
   // Create or use existing user
   const db = await getDb();
 
-  let user = await db.user.upsert({
-    where: {
-      walletAddress: profileData.walletAddress,
-      walletType: profileData.walletType,
-    },
-    update: {},
-    create: {
-      walletAddress: profileData.walletAddress,
-      walletType: profileData.walletType,
-    },
-  });
+  // Non-EVM are verified by signature + public key
+  // Evm are signature + address
+  // same logic must be done for search in db
+  let user: User;
+
+  if (profileData.walletType === "EVM") {
+    user = await db.user.upsert({
+      where: {
+        walletAddress_walletType: {
+          walletAddress: profileData.walletAddress,
+          walletType: profileData.walletType,
+        },
+      },
+      update: {},
+      create: {
+        walletAddress: profileData.walletAddress,
+        walletType: profileData.walletType,
+      },
+    });
+  } else {
+    user = await db.user.upsert({
+      where: {
+        walletPublicKey_walletType: {
+          walletPublicKey: profileData.walletPublicKey,
+          walletType: profileData.walletType,
+        },
+      },
+      update: {},
+      create: {
+        walletType: profileData.walletType,
+        walletPublicKey: profileData.walletPublicKey,
+      },
+    });
+  }
 
   session.unset("proofMessage");
   session.set("userId", user.id);

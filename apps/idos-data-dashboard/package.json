@@ -5,14 +5,16 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run typecheck && prisma generate && pnpm prisma migrate deploy && react-router build",
-    "dev": "pnpm run db:generate && react-router dev",
+    "dev": "pnpm run db:generate && npx dotenv-cli -e .env.development.local -- react-router dev",
     "start": "NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "pnpm run db:generate && react-router typegen && tsc",
     "db:generate": "prisma generate",
     "db:pull": "prisma db pull",
     "db:validate": "prisma validate",
     "db:migrate:dev": "npx dotenv-cli -e .env.development.local -- npx prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:migrate:deploy": "prisma migrate deploy",
+    "test": "pnpm run db:generate && vitest run",
+    "test:watch": "pnpm run db:generate && vitest"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
