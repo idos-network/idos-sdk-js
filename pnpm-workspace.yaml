@@ -8,7 +8,7 @@ catalogs:
     "@types/node": "25.6.2"
     "tsdown": "^0.22.0"
     "typescript": "^5.9.3"
-    "vite": "8.0.11"
+    "vite": "8.0.16"
     "vite-plugin-node-polyfills": "0.26.0"
   core:
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0"
@@ -98,6 +98,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
+  # Renovate security update: vite@8.0.16
+  - vite@8.0.16
 
 onlyBuiltDependencies:
   - "@swc/core"
