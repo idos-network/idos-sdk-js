@@ -5,16 +5,16 @@ packages:
 
 catalogs:
   build:
-    "@types/node": "25.6.2"
+    "@types/node": "25.9.3"
     "tsdown": "^0.22.0"
     "typescript": "^5.9.3"
     "vite": "8.0.11"
-    "vite-plugin-node-polyfills": "0.26.0"
+    "vite-plugin-node-polyfills": "0.28.0"
   core:
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0"
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0"
     "@digitalbazaar/vc": "^7.3.0"
-    "@idos-network/kwil-js": "0.1.3"
+    "@idos-network/kwil-js": "0.1.5"
     "jsonld-document-loader": "^2.3.0"
     "tiny-invariant": "^1.3.3"
     "tweetnacl": "^1.0.3"
@@ -24,7 +24,7 @@ catalogs:
   ethereum:
     "@wagmi/core": "2.22.1"
     "ethers": "^6.16.0"
-    "viem": "2.48.11"
+    "viem": "2.52.2"
     "wagmi": "2.19.5"
 
   near:
@@ -52,8 +52,8 @@ catalogs:
     "react-router": "^7.15.1"
 
   reown:
-    "@reown/appkit": "1.7.20"
-    "@reown/appkit-adapter-wagmi": "1.7.20"
+    "@reown/appkit": "1.8.21"
+    "@reown/appkit-adapter-wagmi": "1.8.21"
 
   stellar:
     "@creit.tech/stellar-wallets-kit": "^1.9.5"
@@ -72,7 +72,7 @@ catalogs:
     "@tanstack/router-plugin": "^1.168.11"
 
   testing:
-    "vitest": "4.1.5"
+    "vitest": "4.1.9"
 
   utils:
     "@stablelib/base64": "^2.0.1"
@@ -120,8 +120,8 @@ onlyBuiltDependencies:
 
 overrides:
   # LRU-cache includes now forced dependency to node:diagnostic internal library
-  "@idos-network/kwil-js>lru-cache": "11.2.7"
-  "path-scurry>lru-cache": "11.2.7"
+  "@idos-network/kwil-js>lru-cache": "11.5.1"
+  "path-scurry>lru-cache": "11.5.1"
 
   # Overrides for security-updates
   axios: ">=1.15.2"

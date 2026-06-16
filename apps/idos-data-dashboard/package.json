@@ -71,7 +71,7 @@
     "@playwright/test": "^1.60.0",
     "@react-router/dev": "catalog:react-router",
     "@tailwindcss/vite": "^4.3.0",
-    "@tanstack/devtools-vite": "^0.6.1",
+    "@tanstack/devtools-vite": "^0.7.0",
     "@tanstack/react-devtools": "^0.10.5",
     "@tanstack/react-query-devtools": "catalog:tanstack",
     "@testing-library/react": "^14.3.1",
