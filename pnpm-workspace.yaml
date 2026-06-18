@@ -120,8 +120,8 @@ onlyBuiltDependencies:
 
 overrides:
   # LRU-cache includes now forced dependency to node:diagnostic internal library
-  "@idos-network/kwil-js>lru-cache": "11.5.1"
-  "path-scurry>lru-cache": "11.5.1"
+  "@idos-network/kwil-js>lru-cache": "11.2.7"
+  "path-scurry>lru-cache": "11.2.7"
 
   # Overrides for security-updates
   axios: ">=1.15.2"
@@ -129,6 +129,8 @@ overrides:
   protobufjs: ">=7.5.5"
   secp256k1: ">=5.0.1"
   lodash: ">= 4.18.0"
+  ws: ">= 8.21.0"
+  vite: ">= 8.0.11"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
