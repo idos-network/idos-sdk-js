@@ -4,9 +4,9 @@ packages:
   - "packages/*"
 
 allowBuilds:
-  '@prisma/engines': true
-  '@reown/appkit': false
-  '@sentry/cli': true
+  "@prisma/engines": true
+  "@reown/appkit": false
+  "@sentry/cli": true
   blake-hash: true
   bufferutil: true
   es5-ext: true
@@ -26,6 +26,7 @@ catalogs:
     "typescript": "^5.9.3"
     "vite": "8.0.11"
     "vite-plugin-node-polyfills": "0.28.0"
+
   core:
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0"
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0"
@@ -38,10 +39,10 @@ catalogs:
     "zod": "4.4.3"
 
   ethereum:
-    "@wagmi/core": "2.22.1"
+    "@wagmi/core": "3.5.0"
     "ethers": "^6.16.0"
     "viem": "2.52.2"
-    "wagmi": "2.19.5"
+    "wagmi": "3.6.16"
 
   near:
     "@near-wallet-selector/core": "8.10.2"
