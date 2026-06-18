@@ -98,6 +98,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
+  # Renovate security update: dompurify@3.4.9
+  - dompurify@3.4.9
 
 onlyBuiltDependencies:
   - "@swc/core"
