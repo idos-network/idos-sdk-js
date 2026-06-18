@@ -3,6 +3,22 @@ packages:
   - "examples/*"
   - "packages/*"
 
+allowBuilds:
+  '@prisma/engines': true
+  '@reown/appkit': false
+  '@sentry/cli': true
+  blake-hash: true
+  bufferutil: true
+  es5-ext: true
+  keccak: true
+  lefthook: true
+  msw: true
+  prisma: true
+  secp256k1: true
+  tiny-secp256k1: true
+  usb: true
+  utf-8-validate: true
+
 catalogs:
   build:
     "@types/node": "25.9.3"
