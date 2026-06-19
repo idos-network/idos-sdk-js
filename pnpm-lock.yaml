@@ -167,9 +167,6 @@ catalogs:
     es-toolkit:
       specifier: ^1.46.1
       version: 1.47.1
-    qs:
-      specifier: 6.15.2
-      version: 6.15.2
   xrp:
     '@gemwallet/api':
       specifier: ^3.8.0
@@ -197,6 +194,7 @@ overrides:
   lodash: '>= 4.18.0'
   ws: '>= 8.21.0'
   vite: '>= 8.0.11'
+  qs: '>= 6.15.2'
   chevrotain: 10.5.0
   web-streams-polyfill: 3.3.3
   bs58: 6.0.0
@@ -281,7 +279,7 @@ importers:
         specifier: ^4.0.14
         version: 4.1.17(react@19.2.7)(typescript@5.9.3)
       qs:
-        specifier: catalog:utils
+        specifier: '>= 6.15.2'
         version: 6.15.2
       react:
         specifier: catalog:react
