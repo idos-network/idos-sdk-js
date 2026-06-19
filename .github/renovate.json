@@ -1,12 +1,9 @@
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "prConcurrentLimit": 5,
-  "baseBranches": ["main"],
+  "baseBranchPatterns": ["main"],
   "assignees": ["@strnadj", "@pkoch"],
   "schedule": ["before 6am on the first day of the month"],
-  "docker": {
-    "enabled": false
-  },
   "vulnerabilityAlerts": {
     "labels": ["dependencies", "security"],
     "assignees": ["@strnadj", "@pkoch"],
@@ -14,20 +11,24 @@
   },
   "packageRules": [
     {
-      "matchPackagePatterns": ["*"],
+      "matchCategories": ["docker"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["major", "minor", "patch"],
       "groupName": "js all dependencies",
       "groupSlug": "js-all-dependencies",
-      "labels": ["dependencies", "JavaScript"]
+      "labels": ["dependencies", "JavaScript"],
+      "matchPackageNames": ["*"]
     },
     {
-      "matchPackagePatterns": ["*"],
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["major", "minor", "patch"],
       "groupName": "github actions all dependencies",
       "groupSlug": "gh-all-dependencies",
-      "labels": ["dependencies", "github-actions"]
+      "labels": ["dependencies", "github-actions"],
+      "matchPackageNames": ["*"]
     }
   ]
 }
