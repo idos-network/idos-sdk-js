@@ -105,7 +105,7 @@ catalogs:
     "borsh": "^2.0.0"
     "bs58": "^6.0.0"
     "es-toolkit": "^1.46.1"
-    "qs": "6.15.1"
+    "qs": "6.15.2"
 
   xrp:
     "@gemwallet/api": "^3.8.0"
@@ -118,6 +118,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
+  # Renovate security update: qs@6.15.2
+  - qs@6.15.2
 
 onlyBuiltDependencies:
   - "@swc/core"
