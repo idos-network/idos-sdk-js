@@ -1,5 +1,16 @@
 # @idos-network/credentials
 
+## 1.3.0
+
+### Minor Changes
+
+- 5afaf1a: Dependency updates
+
+### Patch Changes
+
+- Updated dependencies [5afaf1a]
+  - @idos-network/utils@1.3.0
+
 ## 1.2.1
 
 ### Patch Changes

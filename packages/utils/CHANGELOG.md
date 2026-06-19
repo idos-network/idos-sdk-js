@@ -1,5 +1,11 @@
 # @idos-network/utils
 
+## 1.3.0
+
+### Minor Changes
+
+- 5afaf1a: Dependency updates
+
 ## 1.2.1
 
 ### Patch Changes
