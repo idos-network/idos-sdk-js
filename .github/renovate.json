@@ -1,9 +1,7 @@
 {
   "extends": ["config:recommended"],
   "prConcurrentLimit": 5,
-  "baseBranchPatterns": [
-    "main"
-  ],
+  "baseBranchPatterns": ["main"],
   "assignees": ["@strnadj", "@pkoch"],
   "schedule": ["before 6am on the first day of the month"],
   "vulnerabilityAlerts": {
@@ -13,9 +11,7 @@
   },
   "packageRules": [
     {
-      "matchCategories": [
-        "docker"
-      ],
+      "matchCategories": ["docker"],
       "enabled": false
     },
     {
@@ -23,10 +19,8 @@
       "matchUpdateTypes": ["major", "minor", "patch"],
       "groupName": "js all dependencies",
       "groupSlug": "js-all-dependencies",
-      "labels": ["dependencies","JavaScript"],
-      "matchPackageNames": [
-        "*"
-      ]
+      "labels": ["dependencies", "JavaScript"],
+      "matchPackageNames": ["*"]
     },
     {
       "matchManagers": ["github-actions"],
