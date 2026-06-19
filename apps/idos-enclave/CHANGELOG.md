@@ -1,5 +1,18 @@
 # idos-enclave
 
+## 0.2.0
+
+### Minor Changes
+
+- 5afaf1a: Dependency updates
+
+### Patch Changes
+
+- Updated dependencies [5afaf1a]
+  - @idos-network/credentials@1.3.0
+  - @idos-network/enclave@1.3.0
+  - @idos-network/utils@1.3.0
+
 ## 0.1.5
 
 ### Patch Changes

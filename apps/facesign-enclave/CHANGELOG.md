@@ -1,5 +1,16 @@
 # facesign-enclave
 
+## 0.2.0
+
+### Minor Changes
+
+- 5afaf1a: Dependency updates
+
+### Patch Changes
+
+- Updated dependencies [5afaf1a]
+  - @idos-network/utils@1.3.0
+
 ## 0.1.6
 
 ### Patch Changes
