@@ -105,7 +105,6 @@ catalogs:
     "borsh": "^2.0.0"
     "bs58": "^6.0.0"
     "es-toolkit": "^1.46.1"
-    "qs": "6.15.2"
 
   xrp:
     "@gemwallet/api": "^3.8.0"
@@ -153,7 +152,7 @@ overrides:
   lodash: ">= 4.18.0"
   ws: ">= 8.21.0"
   vite: ">= 8.0.11"
-  qs: ">= 6.15.2"
+  qs: ">=6.15.2"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
