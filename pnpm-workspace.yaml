@@ -10,6 +10,7 @@ allowBuilds:
   blake-hash: true
   bufferutil: true
   es5-ext: true
+  esbuild: true
   keccak: true
   lefthook: true
   msw: true
