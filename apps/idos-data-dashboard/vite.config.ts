@@ -45,6 +45,7 @@ export default defineConfig(async (config) => {
         include: ["buffer"],
         globals: {
           Buffer: true,
+          process: false,
         },
       }),
     );

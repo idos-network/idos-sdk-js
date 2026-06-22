@@ -22,8 +22,10 @@ creit
 crxjs
 cryptosuite
 ctznd
+curations
 DAG
 Datil
+dawidd
 devnet
 digitalbazaar
 dijkstrajs
@@ -144,6 +146,7 @@ tweetnacl
 txjson
 typesafety
 uidotdev
+unstub
 Upserts
 usehooks
 vaul
@@ -165,5 +168,3 @@ xsignature
 xstate
 XUMM
 ziif
-curations
-dawidd
