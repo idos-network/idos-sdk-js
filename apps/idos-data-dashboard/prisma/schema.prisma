@@ -18,8 +18,9 @@ enum WalletType {
 model User {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  walletAddress String     @unique @map("wallet_address") @db.VarChar(255)
-  walletType    WalletType @map("wallet_type")
+  walletType      WalletType @map("wallet_type")
+  walletAddress   String?    @map("wallet_address") @db.VarChar(255)
+  walletPublicKey String?    @map("wallet_public_key") @db.VarChar(255)
 
   acceptedTermsAndConditions Boolean @default(false) @map("accepted_terms_and_conditions")
 
@@ -34,7 +35,8 @@ model User {
   relayPublicKey  String? @map("relay_public_key") @db.Text
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6) @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
 
   @@unique([walletAddress, walletType])
+  @@unique([walletPublicKey, walletType])
 }

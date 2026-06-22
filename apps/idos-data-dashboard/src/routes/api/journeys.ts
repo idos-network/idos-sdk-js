@@ -1,6 +1,8 @@
 import * as Sentry from "@sentry/react-router";
 import crypto from "node:crypto";
 
+import type { User } from "@/generated/prisma/client";
+
 import { getDb } from "@/core/db.server";
 import { createRelayClient } from "@/core/relay.server";
 import { sessionStorage } from "@/core/sessions.server";
@@ -10,11 +12,19 @@ import type { Route } from "./+types/journeys";
 const integrationAdjectives = ["Aurora", "Nimbus", "Vertex", "Signal", "Orbit", "Nova"];
 const integrationNouns = ["Relay", "Gateway", "Console", "Bridge", "Passport", "Launchpad"];
 
-function createIntegrationName(user: { id: string; walletAddress: string }) {
-  const hash = crypto.createHash("sha256").update(`${user.id}:${user.walletAddress}`).digest();
+function createIntegrationName(user: User) {
+  const address = user.walletPublicKey ?? user.walletAddress;
+
+  if (!address) {
+    throw new Error(
+      `Integration name cannot be created for user with no wallet address or public key.`,
+    );
+  }
+
+  const hash = crypto.createHash("sha256").update(`${user.id}:${address}`).digest();
   const adjective = integrationAdjectives[hash[0] % integrationAdjectives.length];
   const noun = integrationNouns[hash[1] % integrationNouns.length];
-  const suffix = user.walletAddress.replace(/^0x/, "").slice(0, 6).toUpperCase();
+  const suffix = address.replace(/^0x/, "").slice(0, 6).toUpperCase();
   return `${adjective} ${noun} ${suffix}`;
 }
 

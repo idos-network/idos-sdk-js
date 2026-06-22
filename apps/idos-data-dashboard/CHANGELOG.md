@@ -1,5 +1,27 @@
 # data-dashboard
 
+## 1.3.0
+
+### Minor Changes
+
+- f0918a7: Add unique indexes for wallet type paired with wallet address and wallet type paired with public key (non-EVM wallets use them to check ownership)
+
+## 1.2.0
+
+### Minor Changes
+
+- 5afaf1a: Dependency updates
+
+### Patch Changes
+
+- Updated dependencies [5afaf1a]
+  - @idos-network/client@1.3.0
+  - @idos-network/consumer@1.3.0
+  - @idos-network/credentials@1.3.0
+  - @idos-network/issuer@1.3.0
+  - @idos-network/kwil-infra@1.3.0
+  - @idos-network/utils@1.3.0
+
 ## 1.1.1
 
 ### Patch Changes
