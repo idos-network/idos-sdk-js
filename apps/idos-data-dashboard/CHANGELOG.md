@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.3.0
+
+### Minor Changes
+
+- f0918a7: Add unique indexes for wallet type paired with wallet address and wallet type paired with public key (non-EVM wallets use them to check ownership)
+
 ## 1.2.0
 
 ### Minor Changes
