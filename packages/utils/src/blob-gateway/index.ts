@@ -115,21 +115,6 @@ export class BlobGateway {
   }: UploadCredentialBlobsParams): Promise<BlobGatewayUploadResponse> {
     const uploadUrl = `${this.#url}/blob/v1/requests/${encodeURIComponent(requestId)}/upload`;
     const startedAt = Date.now();
-
-    console.log("blob-gateway upload request");
-    console.log(
-      JSON.stringify(
-        {
-          request_id: requestId,
-          url: uploadUrl,
-          original_size: original?.byteLength,
-          copy_size: copy?.byteLength,
-        },
-        null,
-        2,
-      ),
-    );
-
     const body = new FormData();
     if (original) {
       body.append("original", new Blob([toArrayBuffer(original)]), "original.blob");
@@ -169,22 +154,6 @@ export class BlobGateway {
 
     const responseText = await response.text();
 
-    console.log("blob-gateway upload response");
-    console.log(
-      JSON.stringify(
-        {
-          request_id: requestId,
-          url: uploadUrl,
-          elapsed_ms: Date.now() - startedAt,
-          status: response.status,
-          ok: response.ok,
-          body: responseText,
-        },
-        null,
-        2,
-      ),
-    );
-
     if (!response.ok) {
       throw new Error(`blob gateway upload failed with ${response.status}: ${responseText}`);
     }
@@ -210,22 +179,6 @@ export class BlobGateway {
 
     const maxResponseBytes = expectedByteLength ?? maxFetchBytes;
     const fetchUrl = `${this.#url}/blob/v1/ipfs/${encodeURIComponent(cid)}`;
-    const startedAt = Date.now();
-
-    console.log("blob-gateway fetch request");
-    console.log(
-      JSON.stringify(
-        {
-          cid,
-          content_uri: contentUri,
-          url: fetchUrl,
-          expected_size: expectedByteLength,
-          max_response_bytes: maxResponseBytes,
-        },
-        null,
-        2,
-      ),
-    );
 
     const response = await this.#fetch(fetchUrl);
     const contentLength = response.headers.get("content-length");
@@ -233,23 +186,6 @@ export class BlobGateway {
 
     if (!response.ok) {
       const responseText = await response.text();
-
-      console.log("blob-gateway fetch response");
-      console.log(
-        JSON.stringify(
-          {
-            cid,
-            url: fetchUrl,
-            elapsed_ms: Date.now() - startedAt,
-            status: response.status,
-            ok: response.ok,
-            content_length_header: contentLength,
-            body: responseText,
-          },
-          null,
-          2,
-        ),
-      );
 
       throw new Error(`blob gateway fetch failed with ${response.status}: ${responseText}`);
     }
@@ -275,25 +211,6 @@ export class BlobGateway {
         `blob gateway returned content with CID ${contentCid.toString()}, expected ${cid}`,
       );
     }
-
-    console.log("blob-gateway fetch response");
-    console.log(
-      JSON.stringify(
-        {
-          cid,
-          url: fetchUrl,
-          elapsed_ms: Date.now() - startedAt,
-          status: response.status,
-          ok: response.ok,
-          content_length_header: contentLength,
-          expected_size: expectedByteLength,
-          max_response_bytes: maxResponseBytes,
-          body_byte_length: content.byteLength,
-        },
-        null,
-        2,
-      ),
-    );
 
     return content;
   }
