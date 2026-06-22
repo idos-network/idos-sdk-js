@@ -21,7 +21,7 @@ import {
   FaceTecSessionStatus,
   FaceTecInitializationError,
 } from "./FaceTecPublicApi";
-export declare var FaceTecSDK: {
+export declare const FaceTecSDK: {
   /**
    * Initialize SDK using a FaceTecSessionRequestProcessor.
    */
@@ -156,7 +156,6 @@ export declare var FaceTecSDK: {
   /**
    * Change the default location of the FaceTec SDK images to be loaded. Default is "./FaceTec_images".
    * Images must all exist in one flat directory in the directory specified.
-   * Please see the sample-custom-images-location for a working example of this API in action.
    **/
   setImagesDirectory: (directory: string) => void;
   /**
