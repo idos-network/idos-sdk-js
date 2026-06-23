@@ -525,6 +525,7 @@ export declare class FaceTecVocalGuidanceCustomization {
   constructor();
 }
 /**
+ * @public
  * Class used to customize the look and feel of the FaceTec Browser SDK Interface.
  * FaceTec Browser SDK ships with a default FaceTec Browser SDK theme but has a variety of variables that you can use to configure the FaceTec Browser SDK to your application's needs.
  * To customize the FaceTec Browser SDK Interface, simply create an instance of FaceTecCustomization and set some, or all, of the variables.
@@ -660,6 +661,7 @@ export declare class FaceTecCustomization {
     | string;
 }
 /**
+ * @public
  * Customize the FaceTec Session Frame exit animation.
  */
 export declare class FaceTecExitAnimationCustomization {
@@ -671,6 +673,7 @@ export declare class FaceTecExitAnimationCustomization {
   constructor();
 }
 /**
+ * @public
  * Customize the FaceTec Session Oval and the FaceTec Session Progress Spinner animations.
  */
 export declare class FaceTecOvalCustomization {
@@ -699,6 +702,7 @@ export declare class FaceTecOvalCustomization {
   constructor();
 }
 /**
+ * @public
  * Customize the FaceTec Session Frame.
  */
 export declare class FaceTecFrameCustomization {
@@ -732,6 +736,7 @@ export declare class FaceTecFrameCustomization {
   constructor();
 }
 /**
+ * @public
  * Customize the FaceTec Browser SDK Cancel Button.
  * Shown during FaceTec Browser SDK session, New User Guidance, Retry, and Photo ID Match Screens.
  */
@@ -767,6 +772,7 @@ export declare class FaceTecCancelButtonCustomization {
   setCustomLocation(x: number, y: number, width: number, height: number): void;
 }
 /**
+ * @public
  * Customize the FaceTec Session Feedback Bar.
  */
 export declare class FaceTecFeedbackBarCustomization {
@@ -805,6 +811,7 @@ export declare class FaceTecFeedbackBarCustomization {
   constructor();
 }
 /**
+ * @public
  * Customize the loading spinner and the text shown to the user while the camera loads.
  */
 export declare class FaceTecInitialLoadingAnimationCustomization {
@@ -851,11 +858,12 @@ export declare class FaceTecInitialLoadingAnimationCustomization {
   constructor();
 }
 /**
+ * @public
  * Customize the New User Guidance and Retry Screens.
  * New User Guidance Screens are shown before the FaceTec Browser SDK Session and Retry Screens are shown after an unsuccessful FaceTec Browser SDK Session.
  */
 export declare class FaceTecGuidanceCustomization {
-  private defaultLocationForImages;
+  private readonly defaultLocationForImages;
   /**
    * Thickness of the action button's border during the New User Guidance and Retry Screens.
    * Default is dynamically configured per device at runtime.
@@ -1066,11 +1074,12 @@ export declare class FaceTecGuidanceCustomization {
   constructor(directoryForImageFiles?: string);
 }
 /**
- * Customize the New User Guidance and Retry Screens.
- * New User Guidance Screens are shown before the FaceTec Browser SDK Session and Retry Screens are shown after an unsuccessful FaceTec Browser SDK Session.
+ * @public
+ * Customize the Enter Full Screen Page.
+ * This screen is shown when prompting user to launch SDK interface in Fullscreen Mode.
  */
 export declare class FaceTecEnterFullScreenCustomization {
-  private defaultLocationForImages;
+  private readonly defaultLocationForImages;
   /**
    * Thickness of the action button's border during the Enter Full Screen Page.
    * Default is dynamically configured per device at runtime.
@@ -1173,11 +1182,12 @@ export declare class FaceTecEnterFullScreenCustomization {
   constructor(directoryForImageFiles?: string);
 }
 /**
+ * @public
  * Customize the FaceTec Session Overlay.
  * The FaceTec Session Overlay separates the FaceTec Interface from the presenting application, covering the device's full screen.
  */
 export declare class FaceTecOverlayCustomization {
-  private defaultLocationForImages;
+  private readonly defaultLocationForImages;
   /**
    * Color of the FaceTec Browser SDK Overlay background.
    * Default is white.
@@ -1201,7 +1211,7 @@ export declare class FaceTecOverlayCustomization {
  * Shown when a mobile device is rotated to an unsupported orientation, such as landscape.
  */
 export declare class FaceTecOrientationScreenCustomization {
-  private defaultLocationForImages;
+  private readonly defaultLocationForImages;
   /**
    * Color of the Orientation Screen's background.
    * Default is white.
@@ -1415,7 +1425,7 @@ export declare class FaceTecResultScreenCustomization {
  *
  */
 export declare class FaceTecIDScanCustomization {
-  private defaultLocationForImages;
+  private readonly defaultLocationForImages;
   /**
    * Controls whether to show the 'FaceTec_document' image (or image configured with .selectionScreenDocumentImage) on the Identity Document Type Selection Screen.
    * Default is true (visible).
@@ -1966,9 +1976,7 @@ export declare class FaceTecCustomizations {
   static setLowLightCustomization: (llCustomization: FaceTecCustomization | null) => void;
   static setDynamicDimmingCustomization: (ddCustomization: FaceTecCustomization | null) => void;
   static setCustomization: (updatedCustomization: FaceTecCustomization) => void;
-  private static checkGuardRails;
-  private static isValueInAllowedRange;
-  private static userFeatureFlagsSearch;
+  private static readonly checkGuardRails;
   static getSuccessResultMessageOrOverrideResultScreenSuccessMessage: () => string;
   private static lowLightCustomization;
   private static dynamicDimmingCustomization;
@@ -1993,6 +2001,5 @@ export declare class FaceTecCustomizations {
   static setImagesDirectory: (directory: string) => void;
   private static verifyVoiceGuidanceCustomizations;
   static verifyColorCustomizations(latestCustomization: FaceTecCustomization): FaceTecCustomization;
-  private static getColorAsOpaque;
 }
 //# sourceMappingURL=FaceTecCustomization.d.ts.map

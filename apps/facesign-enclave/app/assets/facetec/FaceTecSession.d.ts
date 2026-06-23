@@ -1,4 +1,5 @@
 import { FaceTecSDKInstance, FaceTecSessionRequestProcessor } from "./FaceTecPublicApi";
+/** @public */
 export declare class FaceTecSDKInstanceImpl implements FaceTecSDKInstance {
   start3DLiveness(sessionRequestProcessor: FaceTecSessionRequestProcessor): void;
   start3DLivenessThen3DFaceMatch(sessionRequestProcessor: FaceTecSessionRequestProcessor): void;
