@@ -168,7 +168,6 @@ export class CredentialService {
     };
 
     console.log("create_preliminary_credentials_by_dwg payload");
-    console.log(JSON.stringify(payload, null, 2));
 
     await createCredentialsByDwg(this.#kwilClient, payload);
     await this.#blobGateway.uploadCredentialBlobs({
