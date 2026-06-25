@@ -72,24 +72,24 @@ export async function resolveCredentialEncryptedContent(
   credential: BlobBackedCredentialContent,
   blobGateway?: BlobGateway,
 ): Promise<Uint8Array> {
+  if (credential.content_uri) {
+    if (!blobGateway) {
+      throw new Error(
+        `Credential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
+      );
+    }
+
+    return blobGateway.fetchBlob({
+      contentUri: credential.content_uri,
+      expectedSize: normalizeByteCount(credential.content_size, "content_size"),
+    });
+  }
+
   if (credential.content) {
     return base64Decode(credential.content);
   }
 
-  if (!credential.content_uri) {
-    throw new Error(`Credential with id ${credential.id} has no content or content_uri`);
-  }
-
-  if (!blobGateway) {
-    throw new Error(
-      `Credential with id ${credential.id} is blob-backed, but blobGatewayUrl was not configured`,
-    );
-  }
-
-  return blobGateway.fetchBlob({
-    contentUri: credential.content_uri,
-    expectedSize: normalizeByteCount(credential.content_size, "content_size"),
-  });
+  throw new Error(`Credential with id ${credential.id} has no content or content_uri`);
 }
 
 export class BlobGateway {

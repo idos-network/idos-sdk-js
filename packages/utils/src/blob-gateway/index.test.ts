@@ -49,6 +49,28 @@ describe("resolveCredentialEncryptedContent", () => {
       ),
     ).resolves.toEqual(content);
   });
+
+  it("prefers CID-verified blob content over inline credential content", async () => {
+    const inlineContent = utf8Encode("inline content");
+    const blobContent = utf8Encode("blob content");
+    const { size, uri } = await createBlobContentReference(blobContent);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(blobContent),
+    });
+
+    await expect(
+      resolveCredentialEncryptedContent(
+        {
+          id: "credential-1",
+          content: base64Encode(inlineContent),
+          content_uri: uri,
+          content_size: size,
+        },
+        gateway,
+      ),
+    ).resolves.toEqual(blobContent);
+  });
 });
 
 describe("BlobGateway", () => {
