@@ -351,6 +351,13 @@ export class LocalEnclave<
 
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
+    const expectedPublicKey = this.options.expectedUserEncryptionPublicKey;
+    if (expectedPublicKey && base64Encode(keyPair.publicKey) !== expectedPublicKey) {
+      throw new Error(
+        "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+      );
+    }
+
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
     await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);

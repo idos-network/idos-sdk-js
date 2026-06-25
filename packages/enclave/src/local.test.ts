@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialRecord as idOSCredential } from "@idos-network/credentials/types";
 
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
@@ -18,8 +18,71 @@ class TestEnclave extends LocalEnclave {
   }
 }
 
+class MPCTestEnclave extends LocalEnclave {
+  mpcPassword = "super-secret";
+
+  async getPasswordContext() {
+    return {
+      encryptionPasswordStore: "mpc",
+    } as const;
+  }
+
+  protected async ensureMPCPassword() {
+    return this.mpcPassword;
+  }
+}
+
 describe("LocalEnclave", () => {
   const userId = "9f51b3b2-4cbe-4c2b-8ea3-0b0c1b2f1a11";
+
+  it("rejects passwords whose derived public key does not match expectedUserEncryptionPublicKey", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({
+      userId,
+      store,
+      expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+    } as LocalEnclaveOptions);
+
+    await expect(
+      enclave.createEncryptionProfileFromPassword("super-secret", userId, "user"),
+    ).rejects.toThrow(
+      "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+    );
+  });
+
+  it("accepts passwords whose derived public key matches expectedUserEncryptionPublicKey", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const { keyPair } = await enclave.createEncryptionProfileFromPassword(
+      "super-secret",
+      userId,
+      "user",
+    );
+
+    const matchingEnclave = new TestEnclave({
+      userId,
+      store: new MemoryStore(),
+      expectedUserEncryptionPublicKey: base64Encode(keyPair.publicKey),
+    } as LocalEnclaveOptions);
+
+    await expect(
+      matchingEnclave.createEncryptionProfileFromPassword("super-secret", userId, "user"),
+    ).resolves.toMatchObject({ userId, encryptionPasswordStore: "user" });
+  });
+
+  it("rejects MPC unlock when the downloaded password derives a mismatched public key", async () => {
+    const store = new MemoryStore();
+    const enclave = new MPCTestEnclave({
+      userId,
+      store,
+      mode: "existing",
+      expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+    } as LocalEnclaveOptions);
+
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+    );
+  });
 
   it("creates and exposes a public encryption profile", async () => {
     const store = new MemoryStore();

@@ -10,6 +10,7 @@ allowBuilds:
   blake-hash: true
   bufferutil: true
   es5-ext: true
+  esbuild: true
   keccak: true
   lefthook: true
   msw: true
@@ -118,6 +119,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
+  # KGW cookie helpers for blob gateway (feat/blob_gateway)
+  - "@idos-network/kwil-js@0.1.4"
 
 onlyBuiltDependencies:
   - "@swc/core"
@@ -161,5 +164,8 @@ overrides:
   # Bs58 is broken < 6.0.0 together with vite 8.x
   # but the import is the same
   bs58: "6.0.0"
+
+  basic-ftp: ">=5.3.1"
+  fast-uri: ">=3.1.2"
 
 strictDepBuilds: true

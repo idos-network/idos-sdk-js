@@ -7,6 +7,7 @@ export default defineConfig({
     "./src/store/index.ts",
     "./src/codecs/index.ts",
     "./src/cryptography/index.ts",
+    "./src/blob-gateway/index.ts",
     "./src/encryption/index.ts",
     "./src/facesign/index.ts",
   ],
