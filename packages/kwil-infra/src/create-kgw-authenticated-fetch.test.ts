@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { type KwilSigner, NodeKwil } from "@idos-network/kwil-js";
 import { describe, expect, it, vi } from "vitest";
 
@@ -43,6 +45,18 @@ function cookieHeader(call: Parameters<typeof fetch>): string | null {
   return new Headers(init?.headers).get("cookie");
 }
 
+async function readFormDataValue(value: FormDataEntryValue | null): Promise<string> {
+  if (value == null) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return new TextDecoder().decode(await new Response(value).arrayBuffer());
+}
+
 describe("createKgwAuthenticatedFetch", () => {
   it("authenticates before the first request when there is no cookie", async () => {
     const { authFetch, fetchFn, refresh } = createTestClient();
@@ -65,6 +79,55 @@ describe("createKgwAuthenticatedFetch", () => {
     expect(refresh).not.toHaveBeenCalled();
     expect(headers.get("cookie")).toBe("kgw_session=existing; Path=/");
     expect(headers.get("x-request-id")).toBe("request-1");
+  });
+
+  it("retries blob uploads with the same FormData body after an auth failure", async () => {
+    const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
+    const receivedBodies: FormData[] = [];
+
+    fetchFn.mockImplementation(async (_input, init) => {
+      const body = init?.body as FormData;
+      receivedBodies.push(body);
+
+      // Simulate fetch consuming multipart bodies on the first attempt.
+      await readFormDataValue(body.get("original"));
+
+      if (fetchFn.mock.calls.length === 1) {
+        return new Response("unauthorized", { status: 401 });
+      }
+
+      return new Response("ok");
+    });
+
+    const formData = new FormData();
+    formData.append(
+      "original",
+      new Blob(["blob-bytes"], { type: "application/octet-stream" }),
+      "original.blob",
+    );
+    formData.append("duplicate", new Blob(["first"]), "first.blob");
+    formData.append("duplicate", new Blob(["second"]), "second.blob");
+
+    const response = await authFetch("https://blob.example/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    expect(response.ok).toBe(true);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(receivedBodies).toHaveLength(2);
+
+    const firstEntry = receivedBodies[0]?.get("original");
+    const secondEntry = receivedBodies[1]?.get("original");
+
+    expect(firstEntry).toBeTruthy();
+    expect(secondEntry).toBeTruthy();
+    expect(await readFormDataValue(firstEntry)).toBe("blob-bytes");
+    expect(await readFormDataValue(secondEntry)).toBe("blob-bytes");
+    await expect(
+      Promise.all(receivedBodies[1]?.getAll("duplicate").map(readFormDataValue) ?? []),
+    ).resolves.toEqual(["first", "second"]);
   });
 
   it("refreshes and retries once after an auth failure", async () => {
