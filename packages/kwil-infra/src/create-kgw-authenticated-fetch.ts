@@ -64,15 +64,140 @@ export function createKgwAuthenticatedFetch({
 
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const { cookie } = await ensureCookie();
-    const response = await fetchFn(...withCookie(input, init, cookie));
+    const bufferedRequest = await bufferRequestBody(input, init);
+    const response = await fetchFn(
+      ...withCookie(input, withMaterializedBody(bufferedRequest), cookie),
+    );
 
     if (!(await isAuthFailure(response.clone()))) {
       return response;
     }
 
     const refreshedCookie = await refreshCookie();
-    return fetchFn(...withCookie(input, init, refreshedCookie));
+    return fetchFn(...withCookie(input, withMaterializedBody(bufferedRequest), refreshedCookie));
   };
+}
+
+type BufferedFormDataEntry =
+  | { key: string; value: string }
+  | { key: string; value: ArrayBuffer; fileName: string; type: string };
+
+type BufferedBody =
+  | { kind: "body"; value: BodyInit }
+  | { kind: "form-data"; entries: BufferedFormDataEntry[] };
+
+type BufferedRequestBody = {
+  requestInit: RequestInit | undefined;
+  bufferedBody?: BufferedBody;
+};
+
+async function bufferRequestBody(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<BufferedRequestBody> {
+  if (init?.body != null) {
+    return {
+      requestInit: init,
+      bufferedBody: await bufferBody(init.body),
+    };
+  }
+
+  if (input instanceof Request && input.body != null) {
+    return {
+      requestInit: {
+        ...init,
+        method: init?.method ?? input.method,
+      },
+      bufferedBody: await bufferBody(input.body),
+    };
+  }
+
+  return { requestInit: init };
+}
+
+function withMaterializedBody({
+  requestInit,
+  bufferedBody,
+}: BufferedRequestBody): RequestInit | undefined {
+  if (!bufferedBody) {
+    return requestInit;
+  }
+
+  return {
+    ...requestInit,
+    body: materializeBody(bufferedBody),
+  };
+}
+
+async function bufferBody(body: BodyInit): Promise<BufferedBody> {
+  if (
+    typeof body === "string" ||
+    body instanceof Blob ||
+    body instanceof ArrayBuffer ||
+    body instanceof URLSearchParams
+  ) {
+    return { kind: "body", value: body };
+  }
+
+  if (ArrayBuffer.isView(body)) {
+    return {
+      kind: "body",
+      value: new Uint8Array(body.buffer, body.byteOffset, body.byteLength),
+    };
+  }
+
+  if (body instanceof FormData) {
+    const entries: Promise<BufferedFormDataEntry>[] = [];
+
+    body.forEach((value, key) => {
+      entries.push(bufferFormDataEntry(key, value));
+    });
+
+    return { kind: "form-data", entries: await Promise.all(entries) };
+  }
+
+  if (body instanceof ReadableStream) {
+    return {
+      kind: "body",
+      value: await new Response(body).arrayBuffer(),
+    };
+  }
+
+  return { kind: "body", value: body };
+}
+
+async function bufferFormDataEntry(
+  key: string,
+  value: FormDataEntryValue,
+): Promise<BufferedFormDataEntry> {
+  if (typeof value === "string") {
+    return { key, value };
+  }
+
+  return {
+    key,
+    value: await new Response(value).arrayBuffer(),
+    fileName: value instanceof File ? value.name : "blob",
+    type: value.type || "application/octet-stream",
+  };
+}
+
+function materializeBody(bufferedBody: BufferedBody): BodyInit {
+  if (bufferedBody.kind === "body") {
+    return bufferedBody.value;
+  }
+
+  const formData = new FormData();
+
+  for (const entry of bufferedBody.entries) {
+    if ("fileName" in entry) {
+      formData.append(entry.key, new Blob([entry.value], { type: entry.type }), entry.fileName);
+    } else {
+      formData.append(entry.key, entry.value);
+    }
+  }
+
+  return formData;
 }
 
 function getNodeKwilClient(kwilClient: KwilActionClient): KgwSessionNodeKwil {
