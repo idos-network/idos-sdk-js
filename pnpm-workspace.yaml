@@ -23,7 +23,7 @@ catalogs:
   build:
     "@types/node": "25.9.3"
     "tsdown": "^0.22.0"
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.0"
     "vite": "8.0.11"
     "vite-plugin-node-polyfills": "0.28.0"
 
@@ -35,7 +35,7 @@ catalogs:
     "jsonld-document-loader": "^2.3.0"
     "tiny-invariant": "^1.3.3"
     "tweetnacl": "^1.0.3"
-    "web-streams-polyfill": "3.3.3"
+    "web-streams-polyfill": "4.3.0"
     "zod": "4.4.3"
 
   ethereum:
@@ -45,11 +45,11 @@ catalogs:
     "wagmi": "3.6.16"
 
   near:
-    "@near-wallet-selector/core": "8.10.2"
-    "@near-wallet-selector/here-wallet": "8.10.2"
-    "@near-wallet-selector/meteor-wallet": "8.10.2"
-    "@near-wallet-selector/modal-ui": "8.10.2"
-    "near-api-js": "4.0.4"
+    "@near-wallet-selector/core": "10.1.4"
+    "@near-wallet-selector/here-wallet": "10.1.4"
+    "@near-wallet-selector/meteor-wallet": "10.1.4"
+    "@near-wallet-selector/modal-ui": "10.1.4"
+    "near-api-js": "7.2.0"
 
   preact:
     "@preact/signals": "^2.9.1"
@@ -62,11 +62,11 @@ catalogs:
     "react-dom": "^19.2.6"
 
   react-router:
-    "@react-router/dev": "^7.15.1"
-    "@react-router/node": "^7.15.1"
-    "@react-router/serve": "^7.15.1"
+    "@react-router/dev": "^8.0.0"
+    "@react-router/node": "^8.0.0"
+    "@react-router/serve": "^8.0.0"
     "@vercel/react-router": "^1.3.0"
-    "react-router": "^7.15.1"
+    "react-router": "^8.0.0"
 
   reown:
     # This version needs to be 1.7.20 untill this
@@ -76,10 +76,10 @@ catalogs:
     "@reown/appkit-adapter-wagmi": "1.7.20"
 
   stellar:
-    "@creit.tech/stellar-wallets-kit": "^1.9.5"
-    "@stellar/freighter-api": "^4.1.0"
-    "@stellar/stellar-base": "^13.1.0"
-    "@stellar/stellar-sdk": "^13.3.0"
+    "@creit.tech/stellar-wallets-kit": "^2.0.0"
+    "@stellar/freighter-api": "^6.0.0"
+    "@stellar/stellar-base": "^15.0.0"
+    "@stellar/stellar-sdk": "^16.0.0"
 
   tanstack:
     "@tanstack/query-sync-storage-persister": "^5.100.14"
@@ -110,8 +110,8 @@ catalogs:
   xrp:
     "@gemwallet/api": "^3.8.0"
     "ripple-binary-codec": "^2.7.0"
-    "ripple-keypairs": "^2.0.0"
-    "xrpl": "^4.6.0"
+    "ripple-keypairs": "^3.0.0"
+    "xrpl": "^5.0.0"
     "xumm": "^1.8.0"
 
 minimumReleaseAge: 1440
@@ -153,10 +153,10 @@ overrides:
   vite: ">= 8.0.11"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
-  "chevrotain": "10.5.0"
+  "chevrotain": "12.0.0"
 
   # We are including a lot of those, but we need just this one
-  web-streams-polyfill: "3.3.3"
+  web-streams-polyfill: "4.3.0"
 
   # Bs58 is broken < 6.0.0 together with vite 8.x
   # but the import is the same
