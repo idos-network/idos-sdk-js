@@ -19,6 +19,12 @@ export const IDDocumentTypeSchema: z.ZodEnum<{
 ]);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
+export const ScreeningResultSchema: z.ZodEnum<{
+  CLEAR: "CLEAR";
+  NOT_CHECKED: "NOT_CHECKED";
+}> = z.enum(["CLEAR", "NOT_CHECKED"]);
+export type ScreeningResult = z.infer<typeof ScreeningResultSchema>;
+
 export const GenderSchema: z.ZodEnum<{
   M: "M";
   F: "F";
@@ -53,14 +59,14 @@ export type CredentialExpectedMonthlyTransactionVolume = z.infer<
   typeof CredentialExpectedMonthlyTransactionVolumeSchema
 >;
 
-export const CredentialSourceOfWealthSchema: z.ZodEnum<{
+export const SourceOfWealthTypeSchema: z.ZodEnum<{
   SALARY: "SALARY";
   SAVINGS: "SAVINGS";
   INVESTMENTS: "INVESTMENTS";
   CRYPTO_TRADING: "CRYPTO_TRADING";
   OTHER: "OTHER";
 }> = z.enum(["SALARY", "SAVINGS", "INVESTMENTS", "CRYPTO_TRADING", "OTHER"]);
-export type CredentialSourceOfWealth = z.infer<typeof CredentialSourceOfWealthSchema>;
+export type SourceOfWealthType = z.infer<typeof SourceOfWealthTypeSchema>;
 
 export const CredentialYearlyGrossIncomeSchema: z.ZodEnum<{
   LESS_THAN_20000: "LESS_THAN_20000";
@@ -122,7 +128,7 @@ export const CredentialApproximateNetWorthSchema: z.ZodEnum<{
 ]);
 export type CredentialApproximateNetWorth = z.infer<typeof CredentialApproximateNetWorthSchema>;
 
-export const CredentialOccupationSchema: z.ZodEnum<{
+export const OccupationSchema: z.ZodEnum<{
   AGRICULTURE: "AGRICULTURE";
   ARTS_AND_ENTERTAINMENT: "ARTS_AND_ENTERTAINMENT";
   CONSTRUCTION: "CONSTRUCTION";
@@ -155,4 +161,4 @@ export const CredentialOccupationSchema: z.ZodEnum<{
   "PUBLIC_SECTOR",
   "SENIOR_MANAGEMENT",
 ]);
-export type CredentialOccupation = z.infer<typeof CredentialOccupationSchema>;
+export type Occupation = z.infer<typeof OccupationSchema>;
