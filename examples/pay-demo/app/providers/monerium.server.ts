@@ -1,4 +1,4 @@
-import type { Credential } from "@idos-network/consumer";
+import type { CredentialSubjectKycV2, VerifiableCredential } from "@idos-network/credentials/types";
 
 import { base85ToFile } from "@idos-network/utils/codecs";
 
@@ -27,7 +27,7 @@ export const getClientToken = async () => {
   return await response.json().then((data) => data.access_token);
 };
 
-export const createUser = async (data: Credential) => {
+export const createUser = async (data: VerifiableCredential<CredentialSubjectKycV2>) => {
   if (!data.credentialSubject.email) {
     // Email is required, so you have to go to the auth page
     throw new Error("Email is required");
@@ -112,7 +112,10 @@ export interface IdDocument {
   kind: string;
 }
 
-export const createProfile = async (profileId: string, data: Credential) => {
+export const createProfile = async (
+  profileId: string,
+  data: VerifiableCredential<CredentialSubjectKycV2>,
+) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
@@ -135,8 +138,8 @@ export const createProfile = async (profileId: string, data: Credential) => {
     // oxlint-disable-next-line typescript/no-non-null-asserted-optional-chain -- This is ok (demo)
     birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
     idDocument: {
-      number: data.credentialSubject.idDocumentNumber,
-      kind: data.credentialSubject.idDocumentType.toLowerCase(),
+      number: data.credentialSubject.idDocumentNumber ?? "",
+      kind: data.credentialSubject.idDocumentType?.toLowerCase() ?? "",
     },
   };
 
@@ -317,7 +320,7 @@ export const statusAndIban = async (profileId: string) => {
   };
 };
 
-export const auth = async (data: Credential, url: URL) => {
+export const auth = async (data: VerifiableCredential<CredentialSubjectKycV2>, url: URL) => {
   // Generate PKCE code verifier and challenge
   const { codeChallenge, codeVerifier } = await generateCodeChallenge();
 

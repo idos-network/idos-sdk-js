@@ -33,7 +33,9 @@ export async function action({ request, context }: Route.ActionArgs) {
         category: "employed",
         name: `${data.credentialSubject.firstName} ${data.credentialSubject.familyName}`,
         email: data.credentialSubject.email as string,
-        country: data.credentialSubject.nationality ?? data.credentialSubject.idDocumentCountry,
+        country:
+          data.credentialSubject.nationality ??
+          (data.credentialSubject.idDocumentCountry as string),
       });
 
       if (!accountResponse) {

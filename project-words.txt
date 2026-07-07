@@ -12,6 +12,7 @@ betanet
 Blockhash
 Borsh
 bowser
+Bundesdruckerei
 CCPA
 ciphertext
 codegen
@@ -32,6 +33,7 @@ digitalbazaar
 dijkstrajs
 dompurify
 dotenvx
+DVLA
 encryptor
 facesign
 facetec
@@ -71,6 +73,7 @@ klass
 kwil
 kwild
 kwilteam
+KYCV
 LCVJ
 libc
 lucide
@@ -103,6 +106,7 @@ Payin
 PayinFiat
 permissioned
 Personhood
+PESEL
 Pipeable
 PKCE
 pkoch

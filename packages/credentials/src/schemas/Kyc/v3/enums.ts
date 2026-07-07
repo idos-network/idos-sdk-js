@@ -1,0 +1,183 @@
+import * as z from "zod";
+
+export const IntendedUseSchema: z.ZodEnum<{
+  INVESTING: "INVESTING";
+  PAYMENT_TO_FRIENDS_FAMILY_OR_OTHERS: "PAYMENT_TO_FRIENDS_FAMILY_OR_OTHERS";
+  PURCHASE_DIGITAL_ASSETS: "PURCHASE_DIGITAL_ASSETS";
+  ONLINE_PURCHASES_OF_GOODS_OR_SERVICES: "ONLINE_PURCHASES_OF_GOODS_OR_SERVICES";
+  TRADING: "TRADING";
+}> = z.enum([
+  "INVESTING",
+  "PAYMENT_TO_FRIENDS_FAMILY_OR_OTHERS",
+  "PURCHASE_DIGITAL_ASSETS",
+  "ONLINE_PURCHASES_OF_GOODS_OR_SERVICES",
+  "TRADING",
+]);
+export type IntendedUse = z.infer<typeof IntendedUseSchema>;
+
+export const IDDocumentTypeSchema: z.ZodEnum<{
+  PASSPORT: "PASSPORT";
+  DRIVERS: "DRIVERS";
+  ID_CARD: "ID_CARD";
+  VOTING_CARD: "VOTING_CARD";
+  PAN_CARD: "PAN_CARD";
+  INTERNAL_PASSPORT: "INTERNAL_PASSPORT";
+  RESIDENCE_PERMIT: "RESIDENCE_PERMIT";
+}> = z.enum([
+  "PASSPORT",
+  "DRIVERS",
+  "ID_CARD",
+  "VOTING_CARD",
+  "PAN_CARD",
+  "INTERNAL_PASSPORT",
+  "RESIDENCE_PERMIT",
+]);
+export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
+
+export const ScreeningResultSchema: z.ZodEnum<{
+  CLEAR: "CLEAR";
+  NOT_CHECKED: "NOT_CHECKED";
+}> = z.enum(["CLEAR", "NOT_CHECKED"]);
+export type ScreeningResult = z.infer<typeof ScreeningResultSchema>;
+
+export const GenderSchema: z.ZodEnum<{
+  M: "M";
+  F: "F";
+  OTHER: "OTHER";
+}> = z.enum(["M", "F", "OTHER"]);
+export type Gender = z.infer<typeof GenderSchema>;
+
+export const EmploymentStatusSchema: z.ZodEnum<{
+  EMPLOYED: "EMPLOYED";
+  SELF_EMPLOYED: "SELF_EMPLOYED";
+  UNEMPLOYED: "UNEMPLOYED";
+  RETIRED: "RETIRED";
+  STUDENT: "STUDENT";
+}> = z.enum(["EMPLOYED", "SELF_EMPLOYED", "UNEMPLOYED", "RETIRED", "STUDENT"]);
+export type EmploymentStatus = z.infer<typeof EmploymentStatusSchema>;
+
+export const ExpectedMonthlyTransactionCountSchema: z.ZodEnum<{
+  LESS_THAN_5: "LESS_THAN_5";
+  BETWEEN_5_AND_10: "BETWEEN_5_AND_10";
+  MORE_THAN_10: "MORE_THAN_10";
+}> = z.enum(["LESS_THAN_5", "BETWEEN_5_AND_10", "MORE_THAN_10"]);
+export type ExpectedMonthlyTransactionCount = z.infer<typeof ExpectedMonthlyTransactionCountSchema>;
+
+export const ExpectedMonthlyTransactionVolumeSchema: z.ZodEnum<{
+  LESS_THAN_500: "LESS_THAN_500";
+  MORE_THAN_500_LESS_THAN_2000: "MORE_THAN_500_LESS_THAN_2000";
+  MORE_THAN_2000: "MORE_THAN_2000";
+}> = z.enum(["LESS_THAN_500", "MORE_THAN_500_LESS_THAN_2000", "MORE_THAN_2000"]);
+export type ExpectedMonthlyTransactionVolume = z.infer<
+  typeof ExpectedMonthlyTransactionVolumeSchema
+>;
+
+export const SourceOfWealthTypeSchema: z.ZodEnum<{
+  SALARY: "SALARY";
+  SAVINGS: "SAVINGS";
+  INVESTMENTS: "INVESTMENTS";
+  CRYPTO_TRADING: "CRYPTO_TRADING";
+  OTHER: "OTHER";
+}> = z.enum(["SALARY", "SAVINGS", "INVESTMENTS", "CRYPTO_TRADING", "OTHER"]);
+export type SourceOfWealthType = z.infer<typeof SourceOfWealthTypeSchema>;
+
+export const YearlyGrossIncomeSchema: z.ZodEnum<{
+  LESS_THAN_20000: "LESS_THAN_20000";
+  FROM_20001_TO_30000: "FROM_20001_TO_30000";
+  FROM_30001_TO_40000: "FROM_30001_TO_40000";
+  FROM_40001_TO_50000: "FROM_40001_TO_50000";
+  FROM_50001_TO_60000: "FROM_50001_TO_60000";
+  FROM_60001_TO_70000: "FROM_60001_TO_70000";
+  FROM_70001_TO_80000: "FROM_70001_TO_80000";
+  FROM_80001_TO_90000: "FROM_80001_TO_90000";
+  FROM_90001_TO_100000: "FROM_90001_TO_100000";
+  FROM_100001_TO_110000: "FROM_100001_TO_110000";
+  FROM_110001_TO_120000: "FROM_110001_TO_120000";
+  FROM_120001_TO_130000: "FROM_120001_TO_130000";
+  FROM_130001_TO_140000: "FROM_130001_TO_140000";
+  FROM_140001_TO_150000: "FROM_140001_TO_150000";
+  FROM_150001_TO_200000: "FROM_150001_TO_200000";
+  FROM_200001_TO_500000: "FROM_200001_TO_500000";
+  MORE_THAN_500000: "MORE_THAN_500000";
+}> = z.enum([
+  "LESS_THAN_20000",
+  "FROM_20001_TO_30000",
+  "FROM_30001_TO_40000",
+  "FROM_40001_TO_50000",
+  "FROM_50001_TO_60000",
+  "FROM_60001_TO_70000",
+  "FROM_70001_TO_80000",
+  "FROM_80001_TO_90000",
+  "FROM_90001_TO_100000",
+  "FROM_100001_TO_110000",
+  "FROM_110001_TO_120000",
+  "FROM_120001_TO_130000",
+  "FROM_130001_TO_140000",
+  "FROM_140001_TO_150000",
+  "FROM_150001_TO_200000",
+  "FROM_200001_TO_500000",
+  "MORE_THAN_500000",
+]);
+export type YearlyGrossIncome = z.infer<typeof YearlyGrossIncomeSchema>;
+
+export const ApproximateNetWorthSchema: z.ZodEnum<{
+  UP_TO_25000: "UP_TO_25000";
+  BETWEEN_25001_AND_50000: "BETWEEN_25001_AND_50000";
+  BETWEEN_50001_AND_100000: "BETWEEN_50001_AND_100000";
+  BETWEEN_100001_AND_300000: "BETWEEN_100001_AND_300000";
+  BETWEEN_300001_AND_500000: "BETWEEN_300001_AND_500000";
+  BETWEEN_500001_AND_1000000: "BETWEEN_500001_AND_1000000";
+  OVER_1000001: "OVER_1000001";
+}> = z.enum([
+  "UP_TO_25000",
+  "BETWEEN_25001_AND_50000",
+  "BETWEEN_50001_AND_100000",
+  "BETWEEN_100001_AND_300000",
+  "BETWEEN_300001_AND_500000",
+  "BETWEEN_500001_AND_1000000",
+  "OVER_1000001",
+]);
+export type ApproximateNetWorth = z.infer<typeof ApproximateNetWorthSchema>;
+
+export const OccupationSchema: z.ZodEnum<{
+  AGRICULTURE: "AGRICULTURE";
+  ARTS_AND_ENTERTAINMENT: "ARTS_AND_ENTERTAINMENT";
+  CONSTRUCTION: "CONSTRUCTION";
+  EDUCATION: "EDUCATION";
+  FINANCIAL_SERVICES: "FINANCIAL_SERVICES";
+  INFORMATION_AND_TECHNOLOGY: "INFORMATION_AND_TECHNOLOGY";
+  RETAIL: "RETAIL";
+  REAL_ESTATE: "REAL_ESTATE";
+  OTHER: "OTHER";
+  BUSINESS_OWNER: "BUSINESS_OWNER";
+  HEALTHCARE: "HEALTHCARE";
+  INDUSTRIAL: "INDUSTRIAL";
+  LEGAL_SERVICES: "LEGAL_SERVICES";
+  PUBLIC_SECTOR: "PUBLIC_SECTOR";
+  SENIOR_MANAGEMENT: "SENIOR_MANAGEMENT";
+}> = z.enum([
+  "AGRICULTURE",
+  "ARTS_AND_ENTERTAINMENT",
+  "CONSTRUCTION",
+  "EDUCATION",
+  "FINANCIAL_SERVICES",
+  "INFORMATION_AND_TECHNOLOGY",
+  "RETAIL",
+  "REAL_ESTATE",
+  "OTHER",
+  "BUSINESS_OWNER",
+  "HEALTHCARE",
+  "INDUSTRIAL",
+  "LEGAL_SERVICES",
+  "PUBLIC_SECTOR",
+  "SENIOR_MANAGEMENT",
+]);
+export type Occupation = z.infer<typeof OccupationSchema>;
+
+export const CurrencySchema: z.ZodEnum<{
+  EUR: "EUR";
+  USD: "USD";
+  GBP: "GBP";
+  OTHER: "OTHER";
+}> = z.enum(["EUR", "USD", "GBP", "OTHER"]);
+export type Currency = z.infer<typeof CurrencySchema>;

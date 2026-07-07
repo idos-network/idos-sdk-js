@@ -1,4 +1,4 @@
-import type { Credential } from "@idos-network/consumer";
+import type { CredentialSubjectKycV2, VerifiableCredential } from "@idos-network/credentials/types";
 
 import countries2to3 from "countries-list/minimal/countries.2to3.min.json";
 
@@ -105,7 +105,7 @@ export interface UpdateKYCRequest extends Omit<CreateUserRequest, "signedAgreeme
 export const createUserAndKYC = async (
   signedAgreementId: string,
   credentialId: string,
-  data: Credential,
+  data: VerifiableCredential<CredentialSubjectKycV2>,
   url: URL,
 ) => {
   // stateProvinceRegion is required but we don't have it in the data
@@ -180,8 +180,8 @@ export const createUserAndKYC = async (
     phone: data.credentialSubject.phoneNumber ?? "+420606707808",
     // TODO: Get this from the data
     taxIdentificationNumber: "123456789",
-    govIdType: data.credentialSubject.idDocumentType.toUpperCase(),
-    govIdNumber: data.credentialSubject.idDocumentNumber,
+    govIdType: data.credentialSubject.idDocumentType?.toUpperCase() ?? "",
+    govIdNumber: data.credentialSubject.idDocumentNumber ?? "",
     // @ts-expect-error Demo
     govIdIssuanceDate: data.credentialSubject.idDocumentDateOfIssue?.toString()?.split("T")[0],
     govIdFrontUrl: generateFileUrl(url, credentialId, "idDocumentFrontFile"),

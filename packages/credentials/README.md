@@ -1,145 +1,345 @@
 # idOS Credentials JavaScript SDK
 
-This library is helper for VerifiableCredentials in idOS.
+`@idos-network/credentials` provides helpers for creating, verifying, parsing, and
+classifying idOS verifiable credentials. It wraps the W3C Verifiable Credentials
+data model with idOS-specific schemas for KYC and Face ID credential subjects.
 
-## Generate a Ed25519VerificationKey2020
+Credentials are built and read through versioned container classes. Each class
+holds structured `envelope` and `subject` data, validates sections with Zod, and
+can:
+
+- `serialize()` structured subject fields into the flat JSON-LD credential subject
+- `deserialize()` a signed verifiable credential back into structured fields
+- `issue()` a signed W3C verifiable credential from the current container state
+
+## Generated schemas
+
+The files in `src/schemas` are the source of truth for credential definitions.
+They are used to generate the JSON-LD assets in `assets` and the TypeScript/Zod
+types in `generated`.
+
+Do not edit `assets/*.json` or `generated/**` directly. Update the schema source
+and run the schema generator instead:
+
+```sh
+pnpm --filter @idos-network/credentials generate:schemas
+```
+
+Generated contexts are loaded by URL in issued credentials, for example:
+
+```text
+https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v2.json
+https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json
+```
+
+## Naming and versioning
+
+Credential data is versioned because the idOS credential format evolves over
+time. The package exports explicit versioned container classes and flat
+credential subject types.
+
+- `VerifiableCredentialKycV{n}`: versioned KYC credential container.
+- `VerifiableCredentialFaceIdV{n}`: versioned Face ID credential container.
+- `CredentialSubjectKycV{n}`: flat credential subject type for KYC data.
+- `CredentialSubjectFaceIdV{n}`: flat credential subject type for Face ID data.
+
+Use explicit versioned types when reading stored credentials with long-lived
+compatibility requirements. Use the latest versioned class when creating new
+credentials.
+
+```typescript
+import {
+  VerifiableCredentialKycV3,
+  type CredentialSubjectKycV3,
+  type VerifiableCredential,
+} from "@idos-network/credentials/types";
+```
+
+## Verifiable credentials
+
+idOS credentials are W3C verifiable credentials with an idOS envelope and a
+versioned credential subject.
+
+```typescript
+export interface VerifiableCredential<K> {
+  "@context": string[];
+  type: string[];
+  issuer: string;
+  id: string;
+  level: string;
+  kycLevel: number;
+  issued: string;
+  approvedAt: string;
+  expirationDate: string;
+  credentialSubject: K;
+  issuanceDate: string;
+  proof: VerifiedCredentialsProof;
+}
+```
+
+The full credential is what gets encrypted and stored in idOS. Always verify the
+credential proof before trusting or using its contents.
+
+Working with credentials usually means using a container class rather than
+editing the flat JSON-LD shape by hand:
+
+| Container field / method | Role                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| `envelope`               | Structured envelope fields (`id`, `level`, dates, …)       |
+| `subject`                | Structured subject sections (`person`, `idDocument`, …)    |
+| `serialize()`            | Flatten `subject` into the JSON-LD credential subject      |
+| `deserialize(vc)`        | Rebuild `envelope` and `subject` from an issued credential |
+| `issue(issuer)`          | Sign a full verifiable credential (`serialize()` + proof)  |
+| `level()` / `kycLevel()` | Derive level values from structured subject data           |
+
+Serialization converts `Date` values to ISO strings and `Buffer` files to
+base85. Deserialization reverses those conversions using the container schema.
+
+## Create an issuer key
+
+Credential containers sign credentials with Ed25519 keys. You can pass either an
+`Ed25519VerificationKey2020` instance or issuer key material that can be converted
+to one.
 
 ```javascript
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 
-const issuer = "https://my-issuer.id/";
+const issuer = "https://my-issuer.id";
 
 const key = await Ed25519VerificationKey2020.generate({
   id: `${issuer}/keys/1`,
   controller: `${issuer}/issuers/1`,
 });
-
-/* Ed25519VerificationKey2020 {
-  id: "https://my-issuer.id/keys/1",
-  controller: "https://my-issuer.id/issuers/1",
-  revoked: undefined,
-  type: 'Ed25519VerificationKey2020',
-  publicKeyMultibase: 'z6MkqozXNX5bbcs17yarKiwiZN1obZ3AR6evoubA2AyRnFnq',
-  privateKeyMultibase: 'zrv1yczBBXSupDwutYPAoi1fyZLi1cZTPdXHaJXLiKX68E4u1jRy7Npc4dp65hAbKuwTws79MoiAJFDs4XKscz7Sjh3'
-} */
 ```
 
-## Issue a credentials
+For verification, the public key is enough:
 
 ```javascript
-import { buildCredential } from "@idos-network/credentials/builder";
+const trustedIssuer = {
+  issuer: "https://my-issuer.id",
+  publicKeyMultibase: key.publicKeyMultibase,
+};
+```
+
+## Build a KYC credential
+
+Credential containers accept structured fields, validate each section with Zod,
+and produce the flat credential subject required by JSON-LD. Calling `issue()`
+builds and signs the full verifiable credential. For KYC v3, `level` and
+`kycLevel` can be omitted from the envelope; they are derived during
+`serialize()` / `issue()` from the subject data.
+
+```typescript
+import {
+  type AvailableIssuerType,
+  type CredentialSubjectKycV3,
+  type VerifiableCredential,
+  VerifiableCredentialKycV3,
+} from "@idos-network/credentials/types";
 
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 
-const data = await buildCredential(
-  {
-    id: `${issuer}/credentials/${id}`,
-    level: "human",
-    issued: new Date("2022-01-01"),
-    approvedAt: new Date("2022-01-01"),
-    expirationDate: new Date("2030-01-01"),
-  },
+const kycCredential = new VerifiableCredentialKycV3();
+
+kycCredential.setMandatoryEnvelopeFields({
+  id: `${issuer}/credentials/${id}`,
+  issued: new Date("2022-01-01").toISOString(),
+  approvedAt: new Date("2022-01-01").toISOString(),
+  expirationDate: new Date("2030-01-01").toISOString(),
+});
+
+kycCredential.setMandatoryFields(
   {
     id: `uuid:${id}`,
-    applicantId: "1234567890",
-    inquiryId: "1234567890",
-    firstName: "John",
-    familyName: "Lennon",
-    governmentIdType: "SSN",
-    governmentId: "123-45-6789",
-    dateOfBirth: new Date("1980-01-01"),
-    placeOfBirth: "New York, NY",
-    idDocumentCountry: "US",
-    idDocumentNumber: "123456789",
-    idDocumentType: "PASSPORT",
-    idDocumentDateOfIssue: new Date("2022-01-01"),
-    idDocumentDateOfExpiry: new Date("2025-01-01"),
-    idDocumentFrontFile: Buffer.from("Front of ID document"),
-    idDocumentBackFile: Buffer.from("Back of ID document"),
-    selfieFile: Buffer.from("Selfie"),
-    residentialAddress: {
-      street: "Main St",
-      houseNumber: "123",
-      additionalAddressInfo: "Apt 1",
-      city: "New York",
-      postalCode: "10001",
-      country: "US",
-    },
-    residentialAddressProofCategory: "Utility Bill",
-    residentialAddressProofDateOfIssue: new Date("2022-01-01"),
-    residentialAddressProofFile: Buffer.from("Proof of address"),
   },
-  key,
-  true, // Validation against schema
+  {
+    firstName: "John",
+    familyName: "Doe",
+    dateOfBirth: new Date("1990-01-01"),
+    nationality: "US",
+  },
+  {
+    type: "PASSPORT",
+    country: "US",
+    number: "123456789",
+    frontFile: Buffer.from("ID document front"),
+  },
 );
 
-console.log(data);
+kycCredential.add("contact", {
+  email: "john@example.com",
+});
+
+kycCredential.add("biometric", {
+  selfieFile: Buffer.from("Selfie"),
+});
+
+// Optional: inspect the flat subject or derived level without issuing
+const flatSubject: CredentialSubjectKycV3 = kycCredential.serialize();
+const level = kycCredential.level(); // "basic+liveness+email"
+
+const issuerKey: AvailableIssuerType = key;
+
+const credential: VerifiableCredential<CredentialSubjectKycV3> =
+  await kycCredential.issue(issuerKey);
 ```
 
-## Verify a credentials
+## Build a Face ID credential
+
+```typescript
+import { VerifiableCredentialFaceIdV1 } from "@idos-network/credentials/types";
+
+const faceIdCredential = new VerifiableCredentialFaceIdV1();
+
+faceIdCredential.setMandatoryEnvelopeFields({
+  id: `${issuer}/credentials/${id}`,
+  level: "human",
+  approvedAt: new Date("2022-01-01"),
+});
+
+faceIdCredential.setMandatoryFields({
+  faceSignUserId: "11111111-1111-1111-1111-111111111111",
+});
+
+const issuedFaceIdCredential = await faceIdCredential.issue(key);
+```
+
+## Serialize and deserialize
+
+Use `serialize()` when you need the flat credential subject. Use
+`deserialize()` when you already have a verifiable credential and want
+structured access to its fields.
+
+```typescript
+import { VerifiableCredentialKycV3 } from "@idos-network/credentials/types";
+
+const container = new VerifiableCredentialKycV3();
+
+// ... set envelope + subject fields ...
+
+const flatSubject = container.serialize();
+// Dates -> ISO strings, Buffers -> base85, sections -> prefixed keys
+// e.g. person.firstName -> personFirstName
+
+const roundTrip = new VerifiableCredentialKycV3();
+await roundTrip.deserialize(credential);
+
+console.log(roundTrip.envelope.id);
+console.log(roundTrip.subject.person?.firstName);
+console.log(roundTrip.subject.idDocument?.frontFile); // Buffer
+```
+
+## Verify a credential
+
+`verifyCredential` checks a credential against a list of trusted issuers. It
+returns as soon as one issuer verifies the credential successfully.
 
 ```javascript
-import { verifyCredential } from "@idos-network/credentials";
+import { verifyCredential } from "@idos-network/credentials/verifier";
 
-// We have a list of issuers we trust to
 const allowedIssuers = [
   {
-    issuer: "https://invalid-issuer.id/",
-    publicKeyMultibase: "z6MkfjxfHddp5Pf1GGUSJQ3m6PEycX2DFTVFruUMZsHPXoJx",
+    issuer: "https://my-issuer.id",
+    publicKeyMultibase: key.publicKeyMultibase,
   },
-  // Ed25519VerificationKey2020 instance, or issuer information are available
-  // You don't need a privateKeyMultibase for verification!
   key,
 ];
 
 const [verified, resultsByIssuer] = await verifyCredential(credential, allowedIssuers);
-console.log("Verified: ", verified);
-console.log("Results by issuer: ", resultsByIssuer);
+
+console.log("Verified:", verified);
+console.log("Results by issuer:", resultsByIssuer);
 ```
 
-## Derive level
+## Parse a credential
+
+`parseCredential` inspects the credential subject `@context`, constructs the
+matching versioned container, and calls `deserialize()` on it. Unknown contexts
+throw so callers can handle unsupported versions explicitly.
+
+```typescript
+import { parseCredential } from "@idos-network/credentials/parser";
+import { VerifiableCredentialKycV3 } from "@idos-network/credentials/types";
+
+const parsed = await parseCredential(credential);
+
+if (parsed instanceof VerifiableCredentialKycV3) {
+  console.log(parsed.subject.person?.firstName);
+  console.log(parsed.level());
+}
+```
+
+## Derive a level
+
+For KYC v3, call `level()` on the container. It derives the string level from
+structured subject data: address proof yields `plus`, and optional addons include
+`liveness`, `email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`.
 
 ```javascript
-import { deriveLevel } from "@idos-network/credentials/utils";
+import { VerifiableCredentialKycV3 } from "@idos-network/credentials/types";
 
-const level = deriveLevel({
-  id: "uuid:1234",
-  firstName: "John",
-  familyName: "Doe",
-  idDocumentType: "PASSPORT",
-  dateOfBirth: new Date("1990-01-01"),
-  idDocumentCountry: "US",
-  idDocumentNumber: "123456789",
-  idDocumentFrontFile: Buffer.from("ID Document Front"),
+const kycCredential = new VerifiableCredentialKycV3();
+
+kycCredential.setMandatoryFields(
+  { id: "uuid:1234" },
+  {
+    firstName: "John",
+    familyName: "Doe",
+    dateOfBirth: new Date("1990-01-01"),
+    nationality: "US",
+  },
+  {
+    type: "PASSPORT",
+    country: "US",
+    number: "123456789",
+    frontFile: Buffer.from("ID document front"),
+  },
+);
+
+kycCredential.add("contact", {
+  email: "john@example.com",
 });
 
-// level = "basic"
+kycCredential.add("biometric", {
+  selfieFile: Buffer.from("Selfie"),
+});
+
+const level = kycCredential.level();
+// level = "basic+liveness+email"
 ```
 
-## Filtering and matching levels
+## Match levels and credentials
+
+Use the matching helpers to check whether a credential level satisfies a required
+base level and set of addons, or to pick the strongest matching credential from a
+list.
 
 ```javascript
 import {
-  pickHighestMatchingLevel,
-  matchLevelOrHigher,
   highestMatchingCredential,
+  matchLevelOrHigher,
+  pickHighestMatchingLevel,
 } from "@idos-network/credentials/utils";
 
-const matched = matchLevelOrHigher("basic", ["liveness"], "basic+liveness");
-// matched = true
+const hasBasicLiveness = matchLevelOrHigher("basic", ["liveness"], "basic+liveness");
+// hasBasicLiveness = true
 
-const matched = matchLevelOrHigher("basic", ["liveness+email"], "basic+liveness");
-// matched = false
+const hasBasicLivenessAndEmail = matchLevelOrHigher(
+  "basic",
+  ["liveness", "email"],
+  "basic+liveness",
+);
+// hasBasicLivenessAndEmail = false
 
-const matched = matchLevelOrHigher("basic", ["liveness+email"], "plus+liveness");
-// matched = true
+const hasBasicLivenessFromPlus = matchLevelOrHigher("basic", ["liveness"], "plus+liveness");
+// hasBasicLivenessFromPlus = true
 
 const pickedLevel = pickHighestMatchingLevel(
   ["basic+liveness", "plus+liveness+email", "plus+liveness+email+phoneNumber"],
   "plus",
   ["liveness", "email"],
 );
-// pickedLevel = plus+liveness+email+phoneNumber
+// pickedLevel = "plus+liveness+email+phoneNumber"
 
 const pickedCredential = highestMatchingCredential([...idOSCredentials], "basic", {
   addons: ["email", "liveness"],
@@ -148,6 +348,6 @@ const pickedCredential = highestMatchingCredential([...idOSCredentials], "basic"
     type: "kyc",
   },
 });
-// pickedCredential => for example plus+email+liveness etc...
-// don't forget to verify credentials signature before usage!
+// pickedCredential is the highest-scoring credential that matches the level,
+// addons, and public notes constraints.
 ```
