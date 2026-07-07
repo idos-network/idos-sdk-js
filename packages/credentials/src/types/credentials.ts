@@ -1,5 +1,19 @@
 import * as z from "zod";
 
+import {
+  CredentialApproximateNetWorthSchema,
+  CredentialExpectedMonthlyTransactionCountSchema,
+  CredentialExpectedMonthlyTransactionVolumeSchema,
+  CredentialKycEmploymentStatusSchema,
+  CredentialOccupationSchema,
+  CredentialSourceOfWealthSchema,
+  CredentialYearlyGrossIncomeSchema,
+  GenderSchema,
+  IDDocumentTypeSchema,
+} from "./enums";
+
+export * from "./enums";
+
 export type idOSCredential = {
   id: string;
   user_id: string;
@@ -17,6 +31,7 @@ export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"
   broader_signature: string;
 };
 
+// @context = "idos-credentials-v1.json"
 // https://github.com/colinhacks/zod/issues/3751
 export const CredentialFieldsSchema: z.ZodObject<{
   id: z.ZodString;

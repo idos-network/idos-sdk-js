@@ -4,6 +4,7 @@ import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json"
 import idosCredentialSubjectFaceIdV1 from "../../assets/idos-credential-subject-face-id-v1.json";
 import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
 import idosCredentialSubjectV2 from "../../assets/idos-credential-subject-v2.json";
+import idosCredentialSubjectV3 from "../../assets/idos-credential-subject-v3.json";
 import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
 import v1 from "../../assets/v1.json";
 
@@ -17,13 +18,15 @@ export const CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v1.json";
 export const CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v2.json";
+export const CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT =
+  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json";
 
 export const CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-face-id-v1.json";
 
 // Latest contexts for builder
 export const CONTEXT_IDOS_CREDENTIAL: string = CONTEXT_IDOS_CREDENTIAL_V1;
-export const CONTEXT_IDOS_CREDENTIAL_SUBJECT: string = CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT;
+export const CONTEXT_IDOS_CREDENTIAL_SUBJECT: string = CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT;
 export const CONTEXT_IDOS_SIGNATURE: string = CONTEXT_ED25519_SIGNATURE_2020_V1;
 export const CONTEXT_IDOS_CREDENTIAL_FACE_ID: string = CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID;
 
@@ -37,6 +40,7 @@ export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   // plus / basic + liveness credentials
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT, idosCredentialSubjectV1);
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT, idosCredentialSubjectV2);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT, idosCredentialSubjectV3);
 
   // PoP
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID, idosCredentialSubjectFaceIdV1);

@@ -12,14 +12,27 @@ import {
 
 const defaultCredential: CredentialSubject = {
   id: "uuid:1234",
-  firstName: "John",
-  familyName: "Doe",
-  idDocumentType: "PASSPORT",
-  dateOfBirth: new Date("1990-01-01"),
-  idDocumentCountry: "US",
-  idDocumentNumber: "123456789",
-  idDocumentFrontFile: Buffer.from("ID Document Front"),
-  selfieFile: Buffer.alloc(0),
+  person: {
+    firstName: "John",
+    familyName: "Doe",
+    dateOfBirth: new Date("1990-01-01"),
+  },
+  idDocument: {
+    type: "PASSPORT",
+    country: "US",
+    number: "123456789",
+    frontFile: Buffer.from("ID Document Front"),
+  },
+  kycQuestionaire: {
+    employmentStatus: "EMPLOYED",
+    expectedMonthlyTransactionCount: "BETWEEN_5_AND_10",
+    expectedMonthlyTransactionVolume: "MORE_THAN_500_LESS_THAN_2000",
+    sourceOfWealth: "SALARY",
+    yearlyGrossIncome: "FROM_50001_TO_60000",
+  },
+  biometrics: {
+    selfieFile: Buffer.alloc(0),
+  },
 };
 
 describe("recordFilter", () => {
@@ -252,8 +265,7 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
-        // @ts-expect-error - to test absence of selfieFile
-        selfieFile: undefined,
+        biometrics: undefined,
       }),
     ).toBe("basic");
   });
@@ -275,8 +287,10 @@ describe("deriveLevel", () => {
           city: "Anytown",
           postalCode: "12345",
           country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
+          proof: {
+            category: "UTILITY_BILL",
+            file: Buffer.from("Utility Bill"),
+          },
         },
       }),
     ).toBe("plus+liveness");
@@ -286,16 +300,22 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
-        selfieFile: Buffer.from("Selfie"),
-        phoneNumber: "+1234567890",
-        email: "john.doe@example.com",
+        biometrics: {
+          selfieFile: Buffer.from("Selfie"),
+        },
+        contact: {
+          phoneNumber: "+1234567890",
+          email: "john.doe@example.com",
+        },
         residentialAddress: {
           street: "123 Main St",
           city: "Anytown",
           postalCode: "12345",
           country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
+          proof: {
+            category: "UTILITY_BILL",
+            file: Buffer.from("Utility Bill"),
+          },
         },
       }),
     ).toBe("plus+liveness+email+phoneNumber");
