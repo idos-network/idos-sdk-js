@@ -1,20 +1,14 @@
 import * as z from "zod";
 
-export * from "../schemas/CredentialSubjectV3/biometric";
-export * from "../schemas/CredentialSubjectV3/contact";
-export * from "../schemas/CredentialSubjectV3/idDocument";
-export * from "../schemas/CredentialSubjectV3/edd";
-export * from "../schemas/CredentialSubjectV3/enums";
-export * from "./entities/onboarding";
-export * from "../schemas/CredentialSubjectV3/person";
-export * from "../schemas/CredentialSubjectV3/residentialAddress";
-export * from "../schemas/CredentialSubjectV3/screening";
-export * from "../schemas/CredentialSubjectV3/sow";
-export {
-  CredentialSubjectSchema,
-  credentialSubjectEntityDescriptors,
-} from "./generated/credentialSubject";
-export type { CredentialSubject, VerifiableCredentialSubject } from "./generated/credentialSubject";
+// Current defaults
+import {
+  VerifiableCredentialV3Schema,
+  VerifiableCredentialV3,
+} from "./credentialSubjectV3.generated";
+
+// Reexported
+export type { VerifiableCredentialV3 };
+export { VerifiableCredentialV3 as VerifiableCredential };
 
 export type idOSCredential = {
   id: string;
@@ -88,6 +82,7 @@ export interface VerifiedCredentials<K> {
   issuer: string;
   id: string;
   level: string;
+  kycLevel: number;
   issued: string;
   approvedAt: string;
   expirationDate: string;
