@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialResidentialAddressSchema: z.ZodObject<{
+export const ResidentialAddressSchema: z.ZodObject<{
   street: z.ZodString;
   houseNumber: z.ZodOptional<z.ZodString>;
   additionalAddressInfo: z.ZodOptional<z.ZodString>;
@@ -48,4 +48,4 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
   ipCountry: z.string().min(2).max(2).optional(),
 });
 
-export type CredentialResidentialAddress = z.infer<typeof CredentialResidentialAddressSchema>;
+export type ResidentialAddress = z.infer<typeof ResidentialAddressSchema>;

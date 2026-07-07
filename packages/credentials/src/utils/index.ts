@@ -7,10 +7,7 @@ import nacl from "tweetnacl";
 
 import type {
   AvailableIssuerType,
-  CredentialFields,
-  CredentialResidentialAddress,
   CredentialSubject,
-  CredentialSubjectFaceId,
   CustomIssuerType,
   InsertableIDOSCredential,
 } from "../types";
@@ -24,7 +21,7 @@ export function base85ToFile(data: string): Buffer | false {
 }
 
 export function capitalizeFirstLetter(str: string): string {
-  return str[0].toUpperCase() + str.slice(1);
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function isIssuerKey(issuer: AvailableIssuerType): issuer is Ed25519VerificationKey2020 {
@@ -66,13 +63,10 @@ export async function issuerToKey(
   return await Ed25519VerificationKey2020.from({ ...issuer, type: "Ed25519VerificationKey2020" });
 }
 
-export function convertValues<
-  K extends
-    | CredentialFields
-    | CredentialSubject
-    | CredentialResidentialAddress
-    | CredentialSubjectFaceId,
->(fields: K, prefix?: string): Record<string, unknown> {
+export function convertValues<K extends Record<string, unknown>>(
+  fields: K,
+  prefix?: string,
+): Record<string, unknown> {
   const acc: Record<string, unknown> = {};
 
   for (const key in fields) {
@@ -106,15 +100,15 @@ export function deriveLevel(credential: CredentialSubject): string {
   }
 
   const addons: Addon[] = [];
-  if (credential.selfieFile) {
+  if (credential.biometrics?.selfieFile) {
     addons.push("liveness");
   }
 
-  if (credential.email) {
+  if (credential.contact?.email) {
     addons.push("email");
   }
 
-  if (credential.phoneNumber) {
+  if (credential.contact?.phoneNumber) {
     addons.push("phoneNumber");
   }
 

@@ -9,6 +9,7 @@ import {
   CredentialFieldsSchema,
   type CredentialSubject,
   type CredentialSubjectFaceId,
+  credentialSubjectEntityDescriptors,
   CredentialSubjectFaceIdSchema,
   CredentialSubjectSchema,
   type VerifiableCredential,

@@ -23,11 +23,11 @@ const defaultCredential: CredentialSubject = {
     number: "123456789",
     frontFile: Buffer.from("ID Document Front"),
   },
-  kycQuestionaire: {
+  onboarding: {
     employmentStatus: "EMPLOYED",
     expectedMonthlyTransactionCount: "BETWEEN_5_AND_10",
     expectedMonthlyTransactionVolume: "MORE_THAN_500_LESS_THAN_2000",
-    sourceOfWealth: "SALARY",
+    sourceOfFundsCategory: "SALARY",
     yearlyGrossIncome: "FROM_50001_TO_60000",
   },
   biometrics: {
@@ -287,10 +287,8 @@ describe("deriveLevel", () => {
           city: "Anytown",
           postalCode: "12345",
           country: "US",
-          proof: {
-            category: "UTILITY_BILL",
-            file: Buffer.from("Utility Bill"),
-          },
+          proofCategory: "UTILITY_BILL",
+          proofFile: Buffer.from("Utility Bill"),
         },
       }),
     ).toBe("plus+liveness");
@@ -312,10 +310,8 @@ describe("deriveLevel", () => {
           city: "Anytown",
           postalCode: "12345",
           country: "US",
-          proof: {
-            category: "UTILITY_BILL",
-            file: Buffer.from("Utility Bill"),
-          },
+          proofCategory: "UTILITY_BILL",
+          proofFile: Buffer.from("Utility Bill"),
         },
       }),
     ).toBe("plus+liveness+email+phoneNumber");

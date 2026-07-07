@@ -3,7 +3,7 @@ import { z } from "zod";
 import { OccupationSchema } from "./enums";
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialSubjectEDDSchema: z.ZodObject<{
+export const EDDSchema: z.ZodObject<{
   occupation: z.ZodOptional<typeof OccupationSchema>;
   sourceOfFundsProof: z.ZodOptional<z.ZodType<Buffer>>;
 }> = z.object({
@@ -14,4 +14,4 @@ export const CredentialSubjectEDDSchema: z.ZodObject<{
   sourceOfFundsProof: z.instanceof(Buffer).optional(),
 });
 
-export type CredentialSubjectEDD = z.infer<typeof CredentialSubjectEDDSchema>;
+export type EDD = z.infer<typeof EDDSchema>;

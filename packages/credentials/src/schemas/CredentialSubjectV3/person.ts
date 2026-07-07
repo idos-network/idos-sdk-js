@@ -3,7 +3,7 @@ import { z } from "zod";
 import { GenderSchema } from "./enums";
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialSubjectPersonSchema: z.ZodObject<{
+export const PersonSchema: z.ZodObject<{
   /* Names */
   firstName: z.ZodOptional<z.ZodString>;
   // Indonesian and Indian did not always have last name
@@ -107,4 +107,4 @@ export const CredentialSubjectPersonSchema: z.ZodObject<{
     { message: "At least one of stateless, nationality, or secondNationality must be provided" },
   );
 
-export type CredentialSubjectPerson = z.infer<typeof CredentialSubjectPersonSchema>;
+export type Person = z.infer<typeof PersonSchema>;

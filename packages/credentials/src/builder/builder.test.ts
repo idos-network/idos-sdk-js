@@ -25,6 +25,7 @@ describe("verifiableCredentials", () => {
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
+            kycLevel: 1,
             issued: new Date("2022-01-01"),
             approvedAt: new Date("2022-01-01"),
             expirationDate: new Date("2030-01-01"),
@@ -69,6 +70,7 @@ describe("verifiableCredentials", () => {
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",
+          kycLevel: 1,
           issued: new Date("2022-01-01"),
           approvedAt: new Date("2022-01-01"),
           expirationDate: new Date("2030-01-01"),
@@ -114,6 +116,7 @@ describe("verifiableCredentials", () => {
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",
+          kycLevel: 1,
           issued: new Date("2022-01-01"),
           approvedAt: new Date("2022-01-01"),
           expirationDate: new Date("2030-01-01"),
@@ -138,7 +141,7 @@ describe("verifiableCredentials", () => {
 
   describe("credentials", () => {
     it("should raise an error if the fields are invalid", async () => {
-      expect.assertions(12); // catch
+      expect.assertions(8); // catch
 
       const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
       const issuer = "https://vc-issuers.cool.id/idos";
@@ -153,27 +156,35 @@ describe("verifiableCredentials", () => {
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
+            kycLevel: 1,
             issued: new Date("2022-01-01"),
             approvedAt: new Date("2022-01-01"),
             expirationDate: new Date("2030-01-01"),
           },
           {
             id: `uuid:${id}`,
-            firstName: "John",
-            familyName: "Lennon",
-            // @ts-expect-error - This is a test, so the error is expected, since data is invalid
-            gender: "MALE",
-            email: "john.lennon@example.com",
-            phoneNumber: "+1234567890",
-            ssn: "203-456",
-            dateOfBirth: new Date("2025-02-30"),
-            placeOfBirth: "New York, NY",
-            idDocumentCountry: "DEU",
-            idDocumentNumber: "123456789",
-            idDocumentType: "PASSPORT",
-            idDocumentDateOfIssue: new Date("2022-01-01"),
-            idDocumentDateOfExpiry: new Date("2025-01-01"),
-            idDocumentFrontFile: Buffer.from("Front of ID document"),
+            person: {
+              firstName: "John",
+              familyName: "Lennon",
+              // @ts-expect-error - This is a test, so the error is expected, since data is invalid
+              gender: "MALE",
+              nationality: "US",
+              ssn: "203-456",
+              dateOfBirth: new Date("2025-02-30"),
+              placeOfBirth: "New York, NY",
+            },
+            contact: {
+              email: "john.lennon@example.com",
+              phoneNumber: "+1234567890",
+            },
+            idDocument: {
+              country: "DEU",
+              number: "123456789",
+              type: "PASSPORT",
+              dateOfIssue: new Date("2022-01-01"),
+              dateOfExpiry: new Date("2025-01-01"),
+              frontFile: Buffer.from("Front of ID document"),
+            },
             residentialAddress: {
               street: "Main St",
               houseNumber: "123",
@@ -191,25 +202,20 @@ describe("verifiableCredentials", () => {
       } catch (error) {
         expect(error).toBeInstanceOf(ZodError);
         const zodError = error as ZodError;
-        expect(zodError.issues).toHaveLength(5);
+        expect(zodError.issues).toHaveLength(3);
 
         // idDocumentCountry
         const idDocumentCountryError = zodError.issues.find(
-          (error) => error.path[0] === "idDocumentCountry",
+          (error) => error.path[0] === "idDocument" && error.path[1] === "country",
         );
         expect(idDocumentCountryError).toBeDefined();
         expect(idDocumentCountryError?.message).toContain(
           "Too big: expected string to have <=2 characters",
         );
 
-        // selfieFile
-        const selfieFileError = zodError.issues.find((error) => error.path[0] === "selfieFile");
-        expect(selfieFileError).toBeDefined();
-        expect(selfieFileError?.message).toContain("expected Buffer, received undefined");
-
         // residentialAddress country
         const residentialAddressCountryError = zodError.issues.find(
-          (error) => error.path[0] === "residentialAddress",
+          (error) => error.path[0] === "residentialAddress" && error.path[1] === "country",
         );
         expect(residentialAddressCountryError).toBeDefined();
         expect(residentialAddressCountryError?.message).toContain(
@@ -217,14 +223,11 @@ describe("verifiableCredentials", () => {
         );
 
         // gender
-        const genderError = zodError.issues.find((error) => error.path[0] === "gender");
+        const genderError = zodError.issues.find(
+          (error) => error.path[0] === "person" && error.path[1] === "gender",
+        );
         expect(genderError).toBeDefined();
         expect(genderError?.message).toContain('Invalid option: expected one of "M"|"F"|"OTHER"');
-
-        // ssn
-        const ssnError = zodError.issues.find((error) => error.path[0] === "ssn");
-        expect(ssnError).toBeDefined();
-        expect(ssnError?.message).toContain("Too small: expected string to have >=9 characters");
       }
     });
 
@@ -244,29 +247,38 @@ describe("verifiableCredentials", () => {
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
+            kycLevel: 1,
             issued: new Date("2022-01-01"),
             approvedAt: new Date("2022-01-01"),
             expirationDate: new Date("2030-01-01"),
           },
           {
             id: `uuid:${id}`,
-            ssn: "123456789",
-            firstName: "",
-            familyName: undefined,
-            gender: "M",
-            nationality: "US",
-            email: "john.lennon@example.com",
-            phoneNumber: "+1234567890",
-            dateOfBirth: new Date("1980-01-01"),
-            placeOfBirth: "New York, NY",
-            idDocumentCountry: "US",
-            idDocumentNumber: "123456789",
-            idDocumentType: "PASSPORT",
-            idDocumentDateOfIssue: new Date("2022-01-01"),
-            idDocumentDateOfExpiry: new Date("2025-01-01"),
-            idDocumentFrontFile: Buffer.from("Front of ID document"),
-            idDocumentBackFile: Buffer.from("Back of ID document"),
-            selfieFile: Buffer.from("Selfie"),
+            person: {
+              ssn: "123456789",
+              firstName: "",
+              familyName: undefined,
+              gender: "M",
+              nationality: "US",
+              dateOfBirth: new Date("1980-01-01"),
+              placeOfBirth: "New York, NY",
+            },
+            contact: {
+              email: "john.lennon@example.com",
+              phoneNumber: "+1234567890",
+            },
+            idDocument: {
+              country: "US",
+              number: "123456789",
+              type: "PASSPORT",
+              dateOfIssue: new Date("2022-01-01"),
+              dateOfExpiry: new Date("2025-01-01"),
+              frontFile: Buffer.from("Front of ID document"),
+              backFile: Buffer.from("Back of ID document"),
+            },
+            biometrics: {
+              selfieFile: Buffer.from("Selfie"),
+            },
           },
           validKey,
         );
@@ -301,30 +313,39 @@ describe("verifiableCredentials", () => {
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",
+          kycLevel: 1,
           issued: new Date("2022-01-01"),
           approvedAt: new Date("2022-01-01"),
           expirationDate: new Date("2030-01-01"),
         },
         {
           id: `uuid:${id}`,
-          firstName: "John",
-          middleName: "Paul",
-          familyName: "Lennon",
-          ssn: "123456789",
-          gender: "M",
-          nationality: "US",
-          email: "john.lennon@example.com",
-          phoneNumber: "+1234567890",
-          dateOfBirth: new Date("1980-01-01"),
-          placeOfBirth: "New York, NY",
-          idDocumentCountry: "US",
-          idDocumentNumber: "123456789",
-          idDocumentType: "PASSPORT",
-          idDocumentDateOfIssue: new Date("2022-01-01"),
-          idDocumentDateOfExpiry: new Date("2025-01-01"),
-          idDocumentFrontFile: Buffer.from("Front of ID document"),
-          idDocumentBackFile: Buffer.from("Back of ID document"),
-          selfieFile: Buffer.from("Selfie"),
+          person: {
+            firstName: "John",
+            middleName: "Paul",
+            familyName: "Lennon",
+            ssn: "123456789",
+            gender: "M",
+            nationality: "US",
+            dateOfBirth: new Date("1980-01-01"),
+            placeOfBirth: "New York, NY",
+          },
+          contact: {
+            email: "john.lennon@example.com",
+            phoneNumber: "+1234567890",
+          },
+          idDocument: {
+            country: "US",
+            number: "123456789",
+            type: "PASSPORT",
+            dateOfIssue: new Date("2022-01-01"),
+            dateOfExpiry: new Date("2025-01-01"),
+            frontFile: Buffer.from("Front of ID document"),
+            backFile: Buffer.from("Back of ID document"),
+          },
+          biometrics: {
+            selfieFile: Buffer.from("Selfie"),
+          },
           residentialAddress: {
             street: "Main St",
             houseNumber: "123",
@@ -357,8 +378,8 @@ describe("verifiableCredentials", () => {
         fileToBase85(Buffer.from("Proof of address")),
       );
 
-      expect(data.credentialSubject.email).toBe("john.lennon@example.com");
-      expect(data.credentialSubject.phoneNumber).toBe("+1234567890");
+      expect(data.credentialSubject.contactEmail).toBe("john.lennon@example.com");
+      expect(data.credentialSubject.contactPhoneNumber).toBe("+1234567890");
 
       // Check if proof is properly constructed
       expect(data.proof.proofPurpose).toBe("assertionMethod");

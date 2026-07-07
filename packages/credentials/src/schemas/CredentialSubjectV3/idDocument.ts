@@ -3,7 +3,7 @@ import { z } from "zod";
 import { IDDocumentTypeSchema } from "./enums";
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialSubjectIdDocumentSchema: z.ZodObject<{
+export const IdDocumentSchema: z.ZodObject<{
   type: typeof IDDocumentTypeSchema;
   number: z.ZodString;
   country: z.ZodString;
@@ -62,4 +62,4 @@ export const CredentialSubjectIdDocumentSchema: z.ZodObject<{
   issuingSubdivision: z.string().min(1).max(255).optional(),
 });
 
-export type CredentialSubjectIdDocument = z.infer<typeof CredentialSubjectIdDocumentSchema>;
+export type IdDocument = z.infer<typeof IdDocumentSchema>;

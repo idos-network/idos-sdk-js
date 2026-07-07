@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialSubjectContactSchema: z.ZodObject<{
+export const ContactSchema: z.ZodObject<{
   email: z.ZodOptional<z.ZodEmail>;
   phoneNumber: z.ZodOptional<z.ZodString>;
 }> = z.object({
@@ -12,4 +12,4 @@ export const CredentialSubjectContactSchema: z.ZodObject<{
   phoneNumber: z.string().optional(),
 });
 
-export type CredentialSubjectContact = z.infer<typeof CredentialSubjectContactSchema>;
+export type Contact = z.infer<typeof ContactSchema>;

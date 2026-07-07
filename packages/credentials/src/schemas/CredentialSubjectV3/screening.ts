@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ScreeningResultSchema } from "./enums";
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialSubjectScreeningSchema: z.ZodObject<{
+export const ScreeningSchema: z.ZodObject<{
   sanctionsCheckResult: typeof ScreeningResultSchema;
   sanctionsConfidenceScore: z.ZodOptional<z.ZodNumber>;
   pepCheckResult: typeof ScreeningResultSchema;
@@ -22,4 +22,4 @@ export const CredentialSubjectScreeningSchema: z.ZodObject<{
   pepConfidenceScore: z.number().min(0).max(100).optional(),
 });
 
-export type CredentialSubjectScreening = z.infer<typeof CredentialSubjectScreeningSchema>;
+export type Screening = z.infer<typeof ScreeningSchema>;
