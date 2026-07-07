@@ -46,7 +46,7 @@ declare module "@digitalbazaar/vc" {
     documentLoader: JsonLDDocumentLoaderInstance;
   }
 
-  export interface VerifiedCredentialsProof {
+  export interface VerifiedCredentialProof {
     type: string;
     created: string;
     verificationMethod: string;
@@ -54,25 +54,30 @@ declare module "@digitalbazaar/vc" {
     proofPurpose: string;
   }
 
-  export interface VerifiedCredentials<K> {
+  export interface VerifiedCredential<K> {
     "@context": string[];
     type: string[];
     issuer: string;
     id: string;
     level: string;
+    kycLevel: number;
     issued: string;
     approvedAt: string;
     expirationDate: string;
     credentialSubject: K;
     issuanceDate: string;
-    proof: VerifiedCredentialsProof;
+    proof: VerifiableCredentialProof;
   }
 
+  export type VerifiableCredential<K> = VerifiedCredential<K>;
+
   // oxlint-disable-next-line typescript/no-explicit-any -- I don't know the right type
-  export declare function issue<K = any>(options: IssueOptions): Promise<VerifiedCredentials<K>>;
+  export declare function issue<CredentialSubject = any, TExtension = any>(
+    options: IssueOptions,
+  ): Promise<VerifiedCredential<CredentialSubject> & TExtension>;
 
   export interface VerifyCredentialOptions<K> {
-    credential: VerifiedCredentials<K>;
+    credential: VerifiableCredential<K>;
     suite: Ed25519Signature2020;
     controller: object;
     documentLoader: JsonLDDocumentLoaderInstance;
