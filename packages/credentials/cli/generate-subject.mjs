@@ -32,20 +32,26 @@ function formatFile(filePath) {
   }
 }
 
-function formatFile(filePath) {
-  const result = spawnSync(
-    process.platform === "win32" ? "pnpm.cmd" : "pnpm",
-    ["exec", "oxfmt", filePath],
-    { cwd: packageRoot, stdio: "inherit" },
-  );
+function unwrapOptional(schema) {
+  return schema?._def?.type === "optional" ? schema._def.innerType : schema;
+}
 
-  if (result.error) {
-    throw result.error;
+function getContextType(schema) {
+  const type = unwrapOptional(schema)?._def?.type;
+
+  if (type === "date") {
+    return "xsd:date";
   }
 
-  if (result.status !== 0) {
-    throw new Error(`Failed to format ${path.relative(packageRoot, filePath)}`);
+  if (type === "boolean") {
+    return "xsd:boolean";
   }
+
+  if (type === "number") {
+    return "xsd:double";
+  }
+
+  return "xsd:string";
 }
 
 // Configuration & directory paths
@@ -53,13 +59,11 @@ const configuration = [
   {
     dir: "credentialSubjectV3",
     jsonLd: "idos-credential-subject-v3.json",
-    ts: "credentialSubjectV3.generated.ts",
-    prefix: "CredentialSubject",
+    prefix: "CredentialSubjectV3",
   },
   {
     dir: "faceIdV1",
     jsonLd: "idos-credential-subject-face-id-v1.json",
-    ts: "faceIdV1.generated.ts",
     prefix: "FaceId",
   },
 ];
@@ -69,6 +73,7 @@ const jsonLdRoot = path.join(packageRoot, "assets/");
 const tsRoot = path.join(packageRoot, "src/types/");
 
 function compileEntities(entitiesRoot) {
+  const entitiesIndexPath = path.join(entitiesRoot, "index.ts");
   const tmpParent = path.join(packageRoot, ".tmp");
   fs.mkdirSync(tmpParent, { recursive: true });
   const tmpRoot = fs.mkdtempSync(path.join(tmpParent, "json-ld-"));
@@ -113,14 +118,18 @@ function renderJsonLd(credentialSubjectMapping) {
 
   for (const [prefix, schema] of Object.entries(credentialSubjectMapping)) {
     for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
-      context[`${prefix}${capitalize(fieldName)}`] = getContextType(fieldSchema);
+      if (prefix === "root") {
+        context[fieldName] = getContextType(fieldSchema);
+      } else {
+        context[`${prefix}${capitalize(fieldName)}`] = getContextType(fieldSchema);
+      }
     }
   }
 
   return `${JSON.stringify({ "@context": context }, null, 2)}\n`;
 }
 
-function findSchemaExport(schema, tmpRoot) {
+function findSchemaExport(schema, tmpRoot, generatedTypesImportRoot) {
   for (const fileName of fs.readdirSync(tmpRoot)) {
     if (!fileName.endsWith(".js") || fileName === "index.js") {
       continue;
@@ -140,16 +149,16 @@ function findSchemaExport(schema, tmpRoot) {
   throw new Error("Unable to find source export for credential subject schema");
 }
 
-function getSchemaMetadata(credentialSubjectMapping, tmpRoot) {
+function getSchemaMetadata(credentialSubjectMapping, tmpRoot, generatedTypesImportRoot) {
   return Object.entries(credentialSubjectMapping).map(([prefix, schema]) => ({
     prefix,
     schema,
-    ...findSchemaExport(schema, tmpRoot),
+    ...findSchemaExport(schema, tmpRoot, generatedTypesImportRoot),
   }));
 }
 
-function renderSubjectTypes(credentialSubjectMapping, tmpRoot) {
-  const schemas = getSchemaMetadata(credentialSubjectMapping, tmpRoot);
+function renderSubjectTypes(typePrefix, credentialSubjectMapping, tmpRoot, generatedTypesImportRoot) {
+  const schemas = getSchemaMetadata(credentialSubjectMapping, tmpRoot, generatedTypesImportRoot);
 
   const imports = schemas
     .map(({ exportName, importPath }) => `import { ${exportName} } from "${importPath}";`)
@@ -160,10 +169,11 @@ function renderSubjectTypes(credentialSubjectMapping, tmpRoot) {
 
   for (const { prefix, schema, exportName } of schemas) {
     for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
-      const verifiableFieldName = `${prefix}${capitalize(fieldName)}`;
+      const verifiableFieldName = prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
       const sourceExpression = `${exportName}.shape.${fieldName}`;
-      fields.push(`  ${verifiableFieldName}: ${sourceExpression},`);
-      typeDefinitions.push(`  ${verifiableFieldName}: typeof ${sourceExpression},`);
+
+      fields.push(`${verifiableFieldName}: ${sourceExpression},`);
+      typeDefinitions.push(`${verifiableFieldName}: typeof ${sourceExpression},`);
     }
   }
 
@@ -172,13 +182,13 @@ import { z } from "zod";
 
 ${imports}
 
-export const VerifiableCredentialV3Schema: z.ZodObject<{
+export const ${typePrefix}Schema: z.ZodObject<{
 ${typeDefinitions.join("\n")}
 }> = z.object({
 ${fields.join("\n")}
 });
 
-export type VerifiableCredentialV3 = z.infer<typeof VerifiableCredentialV3Schema>;
+export type ${typePrefix} = z.infer<typeof ${typePrefix}Schema>;
 `;
 }
 
@@ -186,20 +196,21 @@ function main() {
   for (const { dir, jsonLd, ts, prefix } of configuration) {
     const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
     const jsonLdPath = path.join(packageRoot, "assets/", jsonLd);
-    const subjectTypesPath = path.join(packageRoot, "src/types/", ts);
-    const generatedTypesImportRoot = `../schemas/${dir}`;
+    const subjectTypesPath = path.join(packageRoot, "src/generated/", `${dir}.ts`);
+    fs.mkdirSync(path.dirname(subjectTypesPath), { recursive: true });
 
+    const generatedTypesImportRoot = `../schemas/${dir}`;
     const tmpRoot = compileEntities(entitiesRoot);
 
     try {
       const { default: mapping } = require(path.join(tmpRoot, "index.js"));
-
+      
       fs.rmSync(jsonLdPath, { force: true });
       fs.rmSync(subjectTypesPath, { force: true });
 
       fs.writeFileSync(jsonLdPath, renderJsonLd(mapping));
       formatFile(jsonLdPath);
-      fs.writeFileSync(subjectTypesPath, renderSubjectTypes(mapping, tmpRoot));
+      fs.writeFileSync(subjectTypesPath, renderSubjectTypes(prefix, mapping, tmpRoot, generatedTypesImportRoot));
       formatFile(subjectTypesPath);
     } finally {
       fs.rmSync(tmpRoot, { recursive: true, force: true });

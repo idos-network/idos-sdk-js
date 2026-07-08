@@ -2,13 +2,25 @@ import * as z from "zod";
 
 // Current defaults
 import {
-  VerifiableCredentialV3Schema,
-  VerifiableCredentialV3,
-} from "./credentialSubjectV3.generated";
+  CredentialSubjectV3Schema,
+  CredentialSubjectV3,
+} from "../generated/credentialSubjectV3";
+
+import {
+  FaceIdSchema,
+  FaceId,
+} from "../generated/faceIdV1";
 
 // Reexported
-export type { VerifiableCredentialV3 };
-export { VerifiableCredentialV3 as VerifiableCredential };
+export type {
+  CredentialSubjectV3,
+  FaceId as FaceIdSubject,
+  CredentialSubjectV3 as CredentialSubject,
+};
+export {
+  CredentialSubjectV3 as CredentialSubject,
+  FaceId as FaceIdCredential,
+};
 
 export type idOSCredential = {
   id: string;
@@ -67,14 +79,6 @@ export interface VerifiedCredentialsProof {
   proofValue: string;
   proofPurpose: string;
 }
-
-export const CredentialSubjectFaceIdSchema: z.ZodObject<{
-  faceSignUserId: z.ZodString;
-}> = z.object({
-  faceSignUserId: z.string(),
-});
-
-export type CredentialSubjectFaceId = z.infer<typeof CredentialSubjectFaceIdSchema>;
 
 export interface VerifiedCredentials<K> {
   "@context": string[];
