@@ -156,7 +156,6 @@ export type {
   idOSGrant,
   Credential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
   VerifyCredentialResult,
   AvailableIssuerType,
 };

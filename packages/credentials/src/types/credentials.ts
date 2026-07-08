@@ -1,5 +1,3 @@
-import type { VerifiableCredential } from "@digitalbazaar/vc";
-
 import * as z from "zod";
 
 // Current defaults
@@ -19,13 +17,7 @@ import {
 } from "../schemas/FaceIdV1";
 
 // Reexport types and schemas
-export type {
-  CredentialSubjectV3,
-  CredentialSubjectV3BuilderType,
-  FaceIdV1,
-  FaceIdV1BuilderType,
-  VerifiableCredential,
-};
+export type { CredentialSubjectV3, CredentialSubjectV3BuilderType, FaceIdV1, FaceIdV1BuilderType };
 
 export {
   FaceIdV1Schema,
@@ -41,6 +33,8 @@ export type {
   FaceIdV1 as FaceIdLatest,
   FaceIdV1BuilderType as FaceIdBuilderLatest,
 };
+
+export { CredentialSubjectV3Schema as CredentialSubjectLatestSchema };
 
 export type idOSCredential = {
   id: string;
@@ -88,3 +82,31 @@ export const CredentialFieldsSchema: z.ZodObject<{
 });
 
 export type CredentialFields = z.infer<typeof CredentialFieldsSchema>;
+
+// TODO: This is a stub of the types for @digitalbazaar/vc
+// when they introduce TypeScript support we should remove this
+// The copy is here because `types.d.ts` file is not bundled.
+export interface VerifiedCredentialsProof {
+  type: string;
+  created: string;
+  verificationMethod: string;
+  proofValue: string;
+  proofPurpose: string;
+}
+
+export interface VerifiedCredentials<K> {
+  "@context": string[];
+  type: string[];
+  issuer: string;
+  id: string;
+  level: string;
+  kycLevel: number;
+  issued: string;
+  approvedAt: string;
+  expirationDate: string;
+  credentialSubject: K;
+  issuanceDate: string;
+  proof: VerifiedCredentialsProof;
+}
+
+export type VerifiableCredential<K> = VerifiedCredentials<K>;

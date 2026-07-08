@@ -29,7 +29,7 @@ export const getClientToken = async () => {
 };
 
 export const createUser = async (data: Credential) => {
-  if (!data.credentialSubject.email) {
+  if (!data.credentialSubject.contactEmail) {
     // Email is required, so you have to go to the auth page
     throw new Error("Email is required");
   }
@@ -44,7 +44,7 @@ export const createUser = async (data: Credential) => {
       Authorization: `Bearer ${clientToken}`,
     },
     body: JSON.stringify({
-      email: data.credentialSubject.email,
+      email: data.credentialSubject.contactEmail,
     }),
   });
 
@@ -131,10 +131,10 @@ export const createProfile = async (profileId: string, data: Credential) => {
     country: data.credentialSubject.residentialAddressCountry!,
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
     countryState: data.credentialSubject.residentialAddressCountry!,
-    nationality: data.credentialSubject.nationality ?? "DE", // TODO: Check this out
+    nationality: data.credentialSubject.personNationality ?? "DE", // TODO: Check this out
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
     // oxlint-disable-next-line typescript/no-non-null-asserted-optional-chain -- This is ok (demo)
-    birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
+    birthday: data.credentialSubject.personDateOfBirth?.split("T")[0]!,
     idDocument: {
       number: data.credentialSubject.idDocumentNumber,
       kind: data.credentialSubject.idDocumentType.toLowerCase(),
@@ -179,7 +179,12 @@ export const createProfile = async (profileId: string, data: Credential) => {
       "back",
     ),
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-    uploadFile(profileId, apiToken, data.credentialSubject.selfieFile!, "facialSimilarity"),
+    uploadFile(
+      profileId,
+      apiToken,
+      data.credentialSubject.biometricSelfieFile!,
+      "facialSimilarity",
+    ),
     uploadFile(
       profileId,
       apiToken,
@@ -332,7 +337,7 @@ export const auth = async (data: Credential, url: URL) => {
   params.set("code_challenge", codeChallenge);
   params.set("code_challenge_method", "S256");
   // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-  params.set("email", data.credentialSubject.email!);
+  params.set("email", data.credentialSubject.contactEmail!);
   params.set("redirect_uri", returnUrl.toString());
 
   const authUrl = new URL(`${SERVER_ENV.MONERIUM_API_URL}/auth?${params.toString()}`);

@@ -12,9 +12,9 @@ import {
   type VerifiableCredential,
 
   // Current KYC default is V3
-  type CredentialSubjectV3,
-  type CredentialSubjectV3BuilderType,
-  CredentialSubjectV3BuilderSchema,
+  type CredentialSubjectLatest,
+  type CredentialSubjectBuilderLatest,
+  CredentialSubjectLatestSchema,
 
   // Current Face ID default is V1
   type FaceIdV1,
@@ -32,7 +32,7 @@ import {
 } from "./loader";
 import { verifyCredential } from "./verifier";
 
-export type Credential = VerifiableCredential<CredentialSubjectV3>;
+export type Credential = VerifiableCredential<CredentialSubjectLatest>;
 export type FaceIdCredential = VerifiableCredential<FaceIdV1>;
 
 export type CredentialBuilder<TInput, TOutput = TInput> = (
@@ -87,12 +87,12 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
   return builder;
 }
 
-export const credentialSubjectConverter: CredentialConverter<CredentialSubjectV3BuilderType> = (
+export const credentialSubjectConverter: CredentialConverter<CredentialSubjectBuilderLatest> = (
   subject,
   validate,
 ) => {
   if (validate) {
-    CredentialSubjectV3BuilderSchema.parse(subject);
+    CredentialSubjectLatestSchema.parse(subject);
   }
 
   return {
@@ -116,9 +116,9 @@ export const credentialFaceIdSubjectConverter: CredentialConverter<FaceIdV1Build
 };
 
 export const buildCredential: CredentialBuilder<
-  CredentialSubjectV3BuilderType,
-  CredentialSubjectV3
-> = genericCredentialBuilder<CredentialSubjectV3BuilderType, CredentialSubjectV3>(
+  CredentialSubjectBuilderLatest,
+  CredentialSubjectLatest
+> = genericCredentialBuilder<CredentialSubjectBuilderLatest, CredentialSubjectLatest>(
   credentialSubjectConverter,
 );
 

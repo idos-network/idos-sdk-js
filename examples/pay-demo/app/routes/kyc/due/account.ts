@@ -31,9 +31,10 @@ export async function action({ request, context }: Route.ActionArgs) {
       accountResponse = await createAccount({
         type: "individual",
         category: "employed",
-        name: `${data.credentialSubject.firstName} ${data.credentialSubject.familyName}`,
-        email: data.credentialSubject.email as string,
-        country: data.credentialSubject.nationality ?? data.credentialSubject.idDocumentCountry,
+        name: `${data.credentialSubject.personFirstName} ${data.credentialSubject.personFamilyName}`,
+        email: data.credentialSubject.contactEmail as string,
+        country:
+          data.credentialSubject.personNationality ?? data.credentialSubject.idDocumentCountry,
       });
 
       if (!accountResponse) {
