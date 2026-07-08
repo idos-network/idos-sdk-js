@@ -31,8 +31,10 @@ describe("verifiableCredentials", () => {
             expirationDate: new Date("2030-01-01"),
           },
           {
-            // @ts-expect-error
-            id: `uuid:${id}`,
+            root: {
+              // @ts-expect-error
+              id: `uuid:${id}`,
+            },
           },
           validKey,
         );
@@ -41,7 +43,7 @@ describe("verifiableCredentials", () => {
         const zodError = error as ZodError;
         expect(zodError.issues).toHaveLength(1);
 
-        const faceSignUserId = zodError.issues.find((error) => error.path[0] === "faceSignUserId");
+        const faceSignUserId = zodError.issues.find((error) => error.path[1] === "faceSignUserId");
         expect(faceSignUserId).toBeDefined();
         expect(faceSignUserId?.message).toContain(
           "Invalid input: expected string, received undefined",
@@ -76,7 +78,9 @@ describe("verifiableCredentials", () => {
           expirationDate: new Date("2030-01-01"),
         },
         {
-          faceSignUserId,
+          root: {
+            faceSignUserId,
+          },
         },
         validKey,
       );
@@ -122,7 +126,9 @@ describe("verifiableCredentials", () => {
           expirationDate: new Date("2030-01-01"),
         },
         {
-          faceSignUserId,
+          root: {
+            faceSignUserId,
+          },
         },
         validKey,
       );
@@ -162,7 +168,9 @@ describe("verifiableCredentials", () => {
             expirationDate: new Date("2030-01-01"),
           },
           {
-            id: `uuid:${id}`,
+            root: {
+              id: `uuid:${id}`,
+            },
             person: {
               firstName: "John",
               familyName: "Lennon",
@@ -253,7 +261,9 @@ describe("verifiableCredentials", () => {
             expirationDate: new Date("2030-01-01"),
           },
           {
-            id: `uuid:${id}`,
+            root: {
+              id: `uuid:${id}`,
+            },
             person: {
               ssn: "123456789",
               firstName: "",
@@ -276,7 +286,7 @@ describe("verifiableCredentials", () => {
               frontFile: Buffer.from("Front of ID document"),
               backFile: Buffer.from("Back of ID document"),
             },
-            biometrics: {
+            biometric: {
               selfieFile: Buffer.from("Selfie"),
             },
           },
@@ -319,7 +329,9 @@ describe("verifiableCredentials", () => {
           expirationDate: new Date("2030-01-01"),
         },
         {
-          id: `uuid:${id}`,
+          root: {
+            id: `uuid:${id}`,
+          },
           person: {
             firstName: "John",
             middleName: "Paul",
@@ -343,7 +355,7 @@ describe("verifiableCredentials", () => {
             frontFile: Buffer.from("Front of ID document"),
             backFile: Buffer.from("Back of ID document"),
           },
-          biometrics: {
+          biometric: {
             selfieFile: Buffer.from("Selfie"),
           },
           residentialAddress: {

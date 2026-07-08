@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CredentialSubject } from "../types";
+import type { CredentialSubjectV3BuilderType } from "../types";
 
 import {
   deriveLevel,
@@ -10,28 +10,54 @@ import {
   recordFilter,
 } from "./";
 
-const defaultCredential: CredentialSubject = {
-  id: "uuid:1234",
+const defaultCredential: CredentialSubjectV3BuilderType = {
+  root: {
+    id: "uuid:1234567890",
+  },
   person: {
     firstName: "John",
     familyName: "Doe",
     dateOfBirth: new Date("1990-01-01"),
   },
+  contact: {
+    email: "john.doe@example.com",
+    phoneNumber: "+1234567890",
+  },
+  biometric: {
+    selfieFile: Buffer.from("Selfie"),
+  },
   idDocument: {
     type: "PASSPORT",
-    country: "US",
     number: "123456789",
+    country: "US",
+    dateOfExpiry: new Date("2026-01-01"),
+    dateOfIssue: new Date("2021-01-01"),
+    issuingAuthority: "US Department of State",
     frontFile: Buffer.from("ID Document Front"),
+    backFile: Buffer.from("ID Document Back"),
+    mrzLine1: "12345678901234567890123456789012",
   },
-  onboarding: {
-    employmentStatus: "EMPLOYED",
-    expectedMonthlyTransactionCount: "BETWEEN_5_AND_10",
-    expectedMonthlyTransactionVolume: "MORE_THAN_500_LESS_THAN_2000",
-    sourceOfFundsCategory: "SALARY",
-    yearlyGrossIncome: "FROM_50001_TO_60000",
+  residentialAddress: {
+    street: "123 Main St",
+    city: "Anytown",
+    postalCode: "12345",
+    country: "US",
+    proofCategory: "UTILITY_BILL",
+    proofFile: Buffer.from("Utility Bill"),
+    ipCountry: "US",
   },
-  biometrics: {
-    selfieFile: Buffer.alloc(0),
+  screening: {
+    sanctionsCheckResult: "CLEAR",
+    sanctionsConfidenceScore: 0.95,
+    pepCheckResult: "CLEAR",
+    pepConfidenceScore: 0.95,
+  },
+  edd: {
+    occupation: "REAL_ESTATE",
+    sourceOfFundsProof: Buffer.from("Source of Funds Proof"),
+  },
+  sourceOfWealth: {
+    type: "CRYPTO_TRADING",
   },
 };
 
@@ -264,8 +290,14 @@ describe("deriveLevel", () => {
   it("basic only", () => {
     expect(
       deriveLevel({
-        ...defaultCredential,
-        biometrics: undefined,
+        root: {
+          id: "uuid:1234567890",
+        },
+        person: {
+          firstName: "John",
+          familyName: "Doe",
+          dateOfBirth: new Date("1990-01-01"),
+        },
       }),
     ).toBe("basic");
   });
@@ -274,6 +306,8 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
+        residentialAddress: undefined,
+        contact: undefined,
       }),
     ).toBe("basic+liveness");
   });
@@ -282,14 +316,7 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
+        contact: undefined,
       }),
     ).toBe("plus+liveness");
   });
@@ -298,7 +325,7 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
-        biometrics: {
+        biometric: {
           selfieFile: Buffer.from("Selfie"),
         },
         contact: {

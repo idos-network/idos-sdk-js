@@ -6,16 +6,22 @@ import type { VerifyCredentialResult } from "./verifier";
 import {
   type AvailableIssuerType,
   type CredentialFields,
+
+  // Credentials container
   CredentialFieldsSchema,
-  type CredentialSubject,
-  type CredentialSubjectFaceId,
-  credentialSubjectEntityDescriptors,
-  CredentialSubjectFaceIdSchema,
-  CredentialSubjectSchema,
   type VerifiableCredential,
-  type VerifiableCredentialSubject,
+
+  // Current KYC default is V3
+  type CredentialSubjectV3,
+  type CredentialSubjectV3BuilderType,
+  CredentialSubjectV3BuilderSchema,
+
+  // Current Face ID default is V1
+  type FaceIdV1,
+  type FaceIdV1BuilderType,
+  FaceIdV1BuilderSchema,
 } from "../types";
-import { convertValues, issuerToKey } from "../utils";
+import { convertBuilderObject, issuerToKey } from "../utils";
 import {
   CONTEXT_IDOS_CREDENTIAL,
   CONTEXT_IDOS_CREDENTIAL_FACE_ID,
@@ -26,8 +32,8 @@ import {
 } from "./loader";
 import { verifyCredential } from "./verifier";
 
-export type Credential = VerifiableCredential<VerifiableCredentialSubject>;
-export type FaceIdCredential = VerifiableCredential<CredentialSubjectFaceId>;
+export type Credential = VerifiableCredential<CredentialSubjectV3>;
+export type FaceIdCredential = VerifiableCredential<FaceIdV1>;
 
 export type CredentialBuilder<TInput, TOutput = TInput> = (
   fields: CredentialFields,
@@ -65,7 +71,7 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
       "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIAL, CONTEXT_IDOS_SIGNATURE],
       type: ["VerifiableCredential"],
       issuer: key.controller,
-      ...convertValues(fields),
+      ...convertBuilderObject({ root: fields }),
       credentialSubject,
     };
 
@@ -81,43 +87,43 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
   return builder;
 }
 
-export const credentialSubjectConverter: CredentialConverter<CredentialSubject> = (
+export const credentialSubjectConverter: CredentialConverter<CredentialSubjectV3BuilderType> = (
   subject,
   validate,
 ) => {
   if (validate) {
-    CredentialSubjectSchema.parse(subject);
+    CredentialSubjectV3BuilderSchema.parse(subject);
   }
 
-  const { residentialAddress, ...subjectData } = subject;
   return {
     "@context": CONTEXT_IDOS_CREDENTIAL_SUBJECT,
-    ...convertValues(subjectData),
-    ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
+    ...convertBuilderObject(subject),
   };
 };
 
-export const credentialFaceIdSubjectConverter: CredentialConverter<CredentialSubjectFaceId> = (
+export const credentialFaceIdSubjectConverter: CredentialConverter<FaceIdV1BuilderType> = (
   subject,
   validate,
 ) => {
   if (validate) {
-    CredentialSubjectFaceIdSchema.parse(subject);
+    FaceIdV1BuilderSchema.parse(subject);
   }
 
   return {
     "@context": CONTEXT_IDOS_CREDENTIAL_FACE_ID,
-    ...convertValues(subject),
+    ...convertBuilderObject(subject),
   };
 };
 
-export const buildCredential: CredentialBuilder<CredentialSubject, VerifiableCredentialSubject> =
-  genericCredentialBuilder<CredentialSubject, VerifiableCredentialSubject>(
-    credentialSubjectConverter,
-  );
+export const buildCredential: CredentialBuilder<
+  CredentialSubjectV3BuilderType,
+  CredentialSubjectV3
+> = genericCredentialBuilder<CredentialSubjectV3BuilderType, CredentialSubjectV3>(
+  credentialSubjectConverter,
+);
 
-export const buildFaceIdCredential: CredentialBuilder<CredentialSubjectFaceId> =
-  genericCredentialBuilder<CredentialSubjectFaceId>(credentialFaceIdSubjectConverter);
+export const buildFaceIdCredential: CredentialBuilder<FaceIdV1BuilderType, FaceIdV1> =
+  genericCredentialBuilder<FaceIdV1BuilderType, FaceIdV1>(credentialFaceIdSubjectConverter);
 
 export type { VerifyCredentialResult };
 export { verifyCredential };

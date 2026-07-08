@@ -1,25 +1,37 @@
+import type { VerifiableCredential } from "@digitalbazaar/vc";
+
 import * as z from "zod";
 
 // Current defaults
 import {
   CredentialSubjectV3Schema,
-  CredentialSubjectV3,
-} from "../generated/credentialSubjectV3";
-
+  type CredentialSubjectV3,
+} from "../generated/CredentialSubjectV3";
+import { FaceIdV1Schema, type FaceIdV1 } from "../generated/FaceIdV1";
+// Builders
 import {
-  FaceIdSchema,
-  FaceId,
-} from "../generated/faceIdV1";
+  BuilderSchema as CredentialSubjectV3BuilderSchema,
+  type BuilderType as CredentialSubjectV3BuilderType,
+} from "../schemas/CredentialSubjectV3";
+import {
+  BuilderSchema as FaceIdV1BuilderSchema,
+  type BuilderType as FaceIdV1BuilderType,
+} from "../schemas/FaceIdV1";
 
-// Reexported
+// Reexport types and schemas
 export type {
   CredentialSubjectV3,
-  FaceId as FaceIdSubject,
-  CredentialSubjectV3 as CredentialSubject,
+  CredentialSubjectV3BuilderType,
+  FaceIdV1,
+  FaceIdV1BuilderType,
+  VerifiableCredential,
 };
+
 export {
-  CredentialSubjectV3 as CredentialSubject,
-  FaceId as FaceIdCredential,
+  FaceIdV1Schema,
+  FaceIdV1BuilderSchema,
+  CredentialSubjectV3Schema,
+  CredentialSubjectV3BuilderSchema,
 };
 
 export type idOSCredential = {
@@ -68,31 +80,3 @@ export const CredentialFieldsSchema: z.ZodObject<{
 });
 
 export type CredentialFields = z.infer<typeof CredentialFieldsSchema>;
-
-// TODO: This is a stub of the types for @digitalbazaar/vc
-// when they introduce TypeScript support we should remove this
-// The copy is here because `types.d.ts` file is not bundled.
-export interface VerifiedCredentialsProof {
-  type: string;
-  created: string;
-  verificationMethod: string;
-  proofValue: string;
-  proofPurpose: string;
-}
-
-export interface VerifiedCredentials<K> {
-  "@context": string[];
-  type: string[];
-  issuer: string;
-  id: string;
-  level: string;
-  kycLevel: number;
-  issued: string;
-  approvedAt: string;
-  expirationDate: string;
-  credentialSubject: K;
-  issuanceDate: string;
-  proof: VerifiedCredentialsProof;
-}
-
-export type VerifiableCredential<K> = VerifiedCredentials<K>;

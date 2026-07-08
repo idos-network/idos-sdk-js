@@ -57,20 +57,16 @@ function getContextType(schema) {
 // Configuration & directory paths
 const configuration = [
   {
-    dir: "credentialSubjectV3",
+    dir: "CredentialSubjectV3",
     jsonLd: "idos-credential-subject-v3.json",
     prefix: "CredentialSubjectV3",
   },
   {
-    dir: "faceIdV1",
+    dir: "FaceIdV1",
     jsonLd: "idos-credential-subject-face-id-v1.json",
-    prefix: "FaceId",
+    prefix: "FaceIdV1",
   },
 ];
-
-const entitiesRoot = path.join(packageRoot, "src/schemas/");
-const jsonLdRoot = path.join(packageRoot, "assets/");
-const tsRoot = path.join(packageRoot, "src/types/");
 
 function compileEntities(entitiesRoot) {
   const entitiesIndexPath = path.join(entitiesRoot, "index.ts");
@@ -157,7 +153,12 @@ function getSchemaMetadata(credentialSubjectMapping, tmpRoot, generatedTypesImpo
   }));
 }
 
-function renderSubjectTypes(typePrefix, credentialSubjectMapping, tmpRoot, generatedTypesImportRoot) {
+function renderSubjectTypes(
+  typePrefix,
+  credentialSubjectMapping,
+  tmpRoot,
+  generatedTypesImportRoot,
+) {
   const schemas = getSchemaMetadata(credentialSubjectMapping, tmpRoot, generatedTypesImportRoot);
 
   const imports = schemas
@@ -168,8 +169,9 @@ function renderSubjectTypes(typePrefix, credentialSubjectMapping, tmpRoot, gener
   const typeDefinitions = [];
 
   for (const { prefix, schema, exportName } of schemas) {
-    for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
-      const verifiableFieldName = prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
+    for (const fieldName of Object.keys(schema.shape)) {
+      const verifiableFieldName =
+        prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
       const sourceExpression = `${exportName}.shape.${fieldName}`;
 
       fields.push(`${verifiableFieldName}: ${sourceExpression},`);
@@ -193,7 +195,7 @@ export type ${typePrefix} = z.infer<typeof ${typePrefix}Schema>;
 }
 
 function main() {
-  for (const { dir, jsonLd, ts, prefix } of configuration) {
+  for (const { dir, jsonLd, prefix } of configuration) {
     const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
     const jsonLdPath = path.join(packageRoot, "assets/", jsonLd);
     const subjectTypesPath = path.join(packageRoot, "src/generated/", `${dir}.ts`);
@@ -204,13 +206,16 @@ function main() {
 
     try {
       const { default: mapping } = require(path.join(tmpRoot, "index.js"));
-      
+
       fs.rmSync(jsonLdPath, { force: true });
       fs.rmSync(subjectTypesPath, { force: true });
 
       fs.writeFileSync(jsonLdPath, renderJsonLd(mapping));
       formatFile(jsonLdPath);
-      fs.writeFileSync(subjectTypesPath, renderSubjectTypes(prefix, mapping, tmpRoot, generatedTypesImportRoot));
+      fs.writeFileSync(
+        subjectTypesPath,
+        renderSubjectTypes(prefix, mapping, tmpRoot, generatedTypesImportRoot),
+      );
       formatFile(subjectTypesPath);
     } finally {
       fs.rmSync(tmpRoot, { recursive: true, force: true });

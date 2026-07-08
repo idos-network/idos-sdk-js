@@ -7,7 +7,7 @@ import nacl from "tweetnacl";
 
 import type {
   AvailableIssuerType,
-  CredentialSubject,
+  CredentialSubjectV3BuilderType,
   CustomIssuerType,
   InsertableIDOSCredential,
 } from "../types";
@@ -87,10 +87,25 @@ export function convertValues<K extends Record<string, unknown>>(
   return acc;
 }
 
+export function convertBuilderObject(
+  object: Record<string, Record<string, unknown>>,
+): Record<string, unknown> {
+  const acc: Record<string, unknown> = {};
+
+  for (const key in object) {
+    if (Object.hasOwn(object, key)) {
+      const value = object[key];
+      Object.assign(acc, convertValues(value, key === "root" ? undefined : key));
+    }
+  }
+
+  return acc;
+}
+
 type BaseLevel = "basic" | "plus";
 type Addon = "liveness" | "email" | "phoneNumber";
 
-export function deriveLevel(credential: CredentialSubject): string {
+export function deriveLevel(credential: CredentialSubjectV3BuilderType): string {
   let level: BaseLevel = "basic";
 
   // Address is a sign for plus+
@@ -100,7 +115,7 @@ export function deriveLevel(credential: CredentialSubject): string {
   }
 
   const addons: Addon[] = [];
-  if (credential.biometrics?.selfieFile) {
+  if (credential.biometric?.selfieFile) {
     addons.push("liveness");
   }
 
