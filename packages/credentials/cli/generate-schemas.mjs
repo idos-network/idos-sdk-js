@@ -38,6 +38,8 @@ function unwrapOptional(schema) {
 
 function getContextType(schema) {
   const type = unwrapOptional(schema)?._def?.type;
+  const format = unwrapOptional(schema)?._def?.format;
+  const isInt = unwrapOptional(schema)?.isInt;
 
   if (type === "date") {
     return "xsd:date";
@@ -48,7 +50,15 @@ function getContextType(schema) {
   }
 
   if (type === "number") {
+    if (isInt) {
+      return "xsd:integer";
+    }
+
     return "xsd:double";
+  }
+
+  if (format === "datetime") {
+    return "xsd:dateTime";
   }
 
   return "xsd:string";
@@ -57,8 +67,9 @@ function getContextType(schema) {
 function getZodSchemaType(schema, sourceExpression) {
   const isOptional = schema?._def?.type === "optional";
   const type = unwrapOptional(schema)?._def?.type;
+  const format = unwrapOptional(schema)?._def?.format;
 
-  if (type === "custom" || type === "date") {
+  if (type === "custom" || type === "date" || format === "datetime") {
     return isOptional ? "z.ZodOptional<z.ZodString>" : "z.ZodString";
   }
 
@@ -68,16 +79,56 @@ function getZodSchemaType(schema, sourceExpression) {
 function getZodType(schema, sourceExpression) {
   const isOptional = schema?._def?.type === "optional";
   const type = unwrapOptional(schema)?._def?.type;
+  const format = unwrapOptional(schema)?._def?.format;
 
-  if (type === "custom" || type === "date") {
+  if (type === "custom" || type === "date" || format === "datetime") {
     return isOptional ? "z.string().optional()" : "z.string()";
   }
 
   return sourceExpression;
 }
 
+const legacyCountryCodesContext =
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/country-codes.xml";
+
+const legacyKycFieldContextOverrides = {
+  nationality: "aux:ISO_3166-1_alpha-2",
+  dateOfBirth: "aux:date",
+  idDocumentDateOfIssue: "aux:date",
+  idDocumentDateOfExpiry: "aux:date",
+  residentialAddressCountry: "aux:ISO_3166-1_alpha-2",
+};
+
 // Configuration & directory paths
 const configuration = [
+  {
+    dir: "CredentialsV1",
+    prefix: "CredentialsV1",
+    jsonLd: "idos-credentials-v1.json",
+  },
+  {
+    dir: "CredentialsV2",
+    prefix: "CredentialsV2",
+    jsonLd: "idos-credentials-v2.json",
+  },
+  {
+    dir: "KycV1",
+    prefix: "KycV1",
+    jsonLd: "idos-credential-subject-v1.json",
+    extraContext: {
+      aux: legacyCountryCodesContext,
+    },
+    fieldContextOverrides: legacyKycFieldContextOverrides,
+  },
+  {
+    dir: "KycV2",
+    prefix: "KycV2",
+    jsonLd: "idos-credential-subject-v2.json",
+    extraContext: {
+      aux: legacyCountryCodesContext,
+    },
+    fieldContextOverrides: legacyKycFieldContextOverrides,
+  },
   {
     dir: "KycV3",
     prefix: "KycV3",
@@ -127,22 +178,39 @@ function compileEntities(entitiesRoot) {
   return tmpRoot;
 }
 
-function renderJsonLd(credentialSubjectMapping) {
+function renderJsonLd(
+  credentialSubjectMapping,
+  { extraContext = {}, fieldContextOverrides = {} } = {},
+) {
   const context = {
     "@version": 1.1,
     "@protected": true,
     xsd: "http://www.w3.org/2001/XMLSchema#",
+    ...extraContext,
   };
+
+  // We need those fields to be part of ZOD validations
+  // but JSON-LD already defines them
+  const skipRootFields = ["id", "issued", "expirationDate"];
 
   for (const [prefix, schema] of Object.entries(credentialSubjectMapping)) {
     for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
+      const verifiableFieldName =
+        prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
+      const fieldContextOverride = fieldContextOverrides[verifiableFieldName];
+
+      if (fieldContextOverride === null) {
+        continue;
+      }
+
       if (prefix === "root") {
-        if (fieldName !== "id") {
+        
+        if (!skipRootFields.includes(fieldName)) {
           // root.id is required, but it's already part of the JSON-LD schema
-          context[fieldName] = getContextType(fieldSchema);
+          context[fieldName] = fieldContextOverride ?? getContextType(fieldSchema);
         }
       } else {
-        context[`${prefix}${capitalize(fieldName)}`] = getContextType(fieldSchema);
+        context[verifiableFieldName] = fieldContextOverride ?? getContextType(fieldSchema);
       }
     }
   }
@@ -222,7 +290,7 @@ export type ${typePrefix} = z.infer<typeof ${typePrefix}Schema>;
 }
 
 function main() {
-  for (const { dir, jsonLd, prefix, ts } of configuration) {
+  for (const { dir, jsonLd, prefix, extraContext, fieldContextOverrides } of configuration) {
     const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
     const jsonLdPath = path.join(packageRoot, "assets/", jsonLd);
 
@@ -238,7 +306,7 @@ function main() {
       fs.rmSync(jsonLdPath, { force: true });
       fs.rmSync(subjectTypesPath, { force: true });
 
-      fs.writeFileSync(jsonLdPath, renderJsonLd(mapping));
+      fs.writeFileSync(jsonLdPath, renderJsonLd(mapping, { extraContext, fieldContextOverrides }));
       formatFile(jsonLdPath);
       fs.writeFileSync(
         subjectTypesPath,

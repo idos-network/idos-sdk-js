@@ -26,9 +26,9 @@ describe("verifiableCredentials", () => {
             id: `${issuer}/credentials/${id}`,
             level: "human",
             kycLevel: 1,
-            issued: new Date("2022-01-01"),
-            approvedAt: new Date("2022-01-01"),
-            expirationDate: new Date("2030-01-01"),
+            issued: new Date("2022-01-01").toISOString(),
+            approvedAt: new Date("2022-01-01").toISOString(),
+            expirationDate: new Date("2030-01-01").toISOString(),
           },
           {
             root: {
@@ -73,9 +73,9 @@ describe("verifiableCredentials", () => {
           id: `${issuer}/credentials/${id}`,
           level: "human",
           kycLevel: 1,
-          issued: new Date("2022-01-01"),
-          approvedAt: new Date("2022-01-01"),
-          expirationDate: new Date("2030-01-01"),
+          issued: new Date("2022-01-01").toISOString(),
+          approvedAt: new Date("2022-01-01").toISOString(),
+          expirationDate: new Date("2030-01-01").toISOString(),
         },
         {
           root: {
@@ -121,9 +121,9 @@ describe("verifiableCredentials", () => {
           id: `${issuer}/credentials/${id}`,
           level: "human",
           kycLevel: 1,
-          issued: new Date("2022-01-01"),
-          approvedAt: new Date("2022-01-01"),
-          expirationDate: new Date("2030-01-01"),
+          issued: new Date("2022-01-01").toISOString(),
+          approvedAt: new Date("2022-01-01").toISOString(),
+          expirationDate: new Date("2030-01-01").toISOString(),
         },
         {
           root: {
@@ -163,9 +163,9 @@ describe("verifiableCredentials", () => {
             id: `${issuer}/credentials/${id}`,
             level: "human",
             kycLevel: 1,
-            issued: new Date("2022-01-01"),
-            approvedAt: new Date("2022-01-01"),
-            expirationDate: new Date("2030-01-01"),
+            issued: new Date("2022-01-01").toISOString(),
+            approvedAt: new Date("2022-01-01").toISOString(),
+            expirationDate: new Date("2030-01-01").toISOString(),
           },
           {
             root: {
@@ -256,9 +256,9 @@ describe("verifiableCredentials", () => {
             id: `${issuer}/credentials/${id}`,
             level: "human",
             kycLevel: 1,
-            issued: new Date("2022-01-01"),
-            approvedAt: new Date("2022-01-01"),
-            expirationDate: new Date("2030-01-01"),
+            issued: new Date("2022-01-01").toISOString(),
+            approvedAt: new Date("2022-01-01").toISOString(),
+            expirationDate: new Date("2030-01-01").toISOString(),
           },
           {
             root: {
@@ -324,9 +324,9 @@ describe("verifiableCredentials", () => {
           id: `${issuer}/credentials/${id}`,
           level: "human",
           kycLevel: 1,
-          issued: new Date("2022-01-01"),
-          approvedAt: new Date("2022-01-01"),
-          expirationDate: new Date("2030-01-01"),
+          issued: new Date("2022-01-01").toISOString(),
+          approvedAt: new Date("2022-01-01").toISOString(),
+          expirationDate: new Date("2030-01-01").toISOString(),
         },
         {
           root: {

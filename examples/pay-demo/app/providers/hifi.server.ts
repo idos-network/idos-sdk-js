@@ -1,4 +1,4 @@
-import type { Credential } from "@idos-network/consumer";
+import type { KycCredential } from "@idos-network/consumer";
 
 import countries2to3 from "countries-list/minimal/countries.2to3.min.json";
 
@@ -105,7 +105,7 @@ export interface UpdateKYCRequest extends Omit<CreateUserRequest, "signedAgreeme
 export const createUserAndKYC = async (
   signedAgreementId: string,
   credentialId: string,
-  data: Credential,
+  data: KycCredential,
   url: URL,
 ) => {
   // stateProvinceRegion is required but we don't have it in the data

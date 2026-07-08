@@ -6,8 +6,8 @@ import * as vc from "@digitalbazaar/vc";
 import type {
   AvailableIssuerType,
   VerifiableCredential,
-  CredentialSubjectV3,
-  FaceIdV1,
+  CredentialSubjectFaceIdLatest,
+  CredentialSubjectKYCLatest,
 } from "../types";
 
 import { issuerToKey } from "../utils";
@@ -15,7 +15,7 @@ import { defaultDocumentLoader } from "./loader";
 
 export type VerifyCredentialResult = [boolean, Map<AvailableIssuerType, vc.VerifyCredentialResult>];
 
-export async function verifyCredential<K = CredentialSubjectV3 | FaceIdV1>(
+export async function verifyCredential<K = CredentialSubjectFaceIdLatest | CredentialSubjectKYCLatest>(
   credential: VerifiableCredential<K>,
   issuers: AvailableIssuerType[],
   customDocumentLoader?: JsonLDDocumentLoaderInstance,

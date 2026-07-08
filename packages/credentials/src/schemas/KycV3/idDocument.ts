@@ -34,7 +34,7 @@ export const IdDocumentSchema: z.ZodObject<{
   /* The date the identity document was issued (YYYY-MM-DD). */
   dateOfIssue: z.date().optional(),
 
-  /* The name or code of the authority that issued the identity document (e.g. DVLA for UK driving licences, Bundesdruck­erei for German ID cards). */
+  /* The name or code of the authority that issued the identity document (e.g. DVLA for UK driving licenses, Bundesdruckerei for German ID cards). */
   issuingAuthority: z.string().min(1).max(255).optional(),
 
   /* The file containing the identity document (e.g. passport photo, ID card photo). */
@@ -43,7 +43,7 @@ export const IdDocumentSchema: z.ZodObject<{
   /* The file containing the identity document (e.g. passport photo, ID card photo). */
   backFile: z.instanceof(Buffer).optional(),
 
-  /* The Machine-Readable Zone (MRZ) line(s) from the bottom of the identity document — encodes key identity data in a standardised scannable format. Includes mrzLine2 and mrzLine3. */
+  /* The Machine-Readable Zone (MRZ) line(s) from the bottom of the identity document — encodes key identity data in a standardized scannable format. Includes mrzLine2 and mrzLine3. */
   mrzLine1: z.string().min(1).max(255).optional(),
 
   /* A title or honorific on the identity document (e.g. Dr, Mr, Ms, Prof). */
@@ -58,7 +58,7 @@ export const IdDocumentSchema: z.ZodObject<{
   /* The person's ethnicity as indicated on the identity document — only present on some national documents. */
   ethnicity: z.string().min(1).max(255).optional(),
 
-  /* The state or province that issued the identity document — relevant for jurisdictions where sub-national authorities issue IDs (e.g. US state driver's licences). */
+  /* The state or province that issued the identity document — relevant for jurisdictions where sub-national authorities issue IDs (e.g. US state driver's licenses). */
   issuingSubdivision: z.string().min(1).max(255).optional(),
 });
 

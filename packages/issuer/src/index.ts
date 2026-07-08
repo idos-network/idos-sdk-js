@@ -1,8 +1,8 @@
 import type {
   AvailableIssuerType,
-  CredentialFields,
-  CredentialSubjectBuilderLatest,
-  FaceIdBuilderLatest,
+  CredentialContainerLatest,
+  CredentialSubjectKYCLatestBuilderType,
+  CredentialSubjectFaceIdLatestBuilderType,
   idOSCredential,
 } from "@idos-network/credentials/types";
 import type {
@@ -18,10 +18,10 @@ import type { SignKeyPair } from "tweetnacl";
 import {
   buildCredential,
   buildFaceIdCredential,
-  type Credential,
+  type KycCredential,
   type FaceIdCredential,
 } from "@idos-network/credentials/builder";
-import { deriveLevel } from "@idos-network/credentials/utils";
+import { deriveLevel, deriveKYCLevel } from "@idos-network/credentials/utils";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 
 import {
@@ -153,12 +153,16 @@ export class idOSIssuer {
     subject: Parameters<typeof buildCredential>[1],
     issuer: Parameters<typeof buildCredential>[2],
     validate = true,
-  ): Promise<Credential> {
+  ): Promise<KycCredential> {
     return buildCredential(fields, subject, issuer, validate);
   }
 
   deriveCredentialLevel(subject: Parameters<typeof deriveLevel>[0]): string {
     return deriveLevel(subject);
+  }
+
+  deriveKYCLevel(subject: Parameters<typeof deriveKYCLevel>[0]): number {
+    return deriveKYCLevel(subject);
   }
 
   async buildFaceIdCredential(
@@ -178,14 +182,16 @@ export type {
   idOSUserAttribute,
   idOSDelegatedWriteGrant,
   idOSWallet,
-  CredentialFields,
   AvailableIssuerType,
 
-  // Verifiable credentials (whole objects)
-  Credential,
+  // Verifiable credential container (root fields level, kycLevel etc...)
+  CredentialContainerLatest as CredentialContainer,
+
+  // Verifiable credentials (whole fat flat objects)
+  KycCredential,
   FaceIdCredential,
 
   // Builder types
-  CredentialSubjectBuilderLatest as CredentialSubjectBuilderType,
-  FaceIdBuilderLatest as FaceIdBuilderType,
+  CredentialSubjectKYCLatestBuilderType as KycCredentialBuilderType,
+  CredentialSubjectFaceIdLatestBuilderType as FaceIdCredentialBuilderType,
 };

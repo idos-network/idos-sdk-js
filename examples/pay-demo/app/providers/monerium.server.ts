@@ -1,4 +1,4 @@
-import type { Credential } from "@idos-network/consumer";
+import type { KycCredential } from "@idos-network/consumer";
 
 // @ts-expect-error
 import ascii85 from "ascii85";
@@ -28,7 +28,7 @@ export const getClientToken = async () => {
   return await response.json().then((data) => data.access_token);
 };
 
-export const createUser = async (data: Credential) => {
+export const createUser = async (data: KycCredential) => {
   if (!data.credentialSubject.contactEmail) {
     // Email is required, so you have to go to the auth page
     throw new Error("Email is required");
@@ -113,7 +113,7 @@ export interface IdDocument {
   kind: string;
 }
 
-export const createProfile = async (profileId: string, data: Credential) => {
+export const createProfile = async (profileId: string, data: KycCredential) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
@@ -322,7 +322,7 @@ export const statusAndIban = async (profileId: string) => {
   };
 };
 
-export const auth = async (data: Credential, url: URL) => {
+export const auth = async (data: KycCredential, url: URL) => {
   // Generate PKCE code verifier and challenge
   const { codeChallenge, codeVerifier } = await generateCodeChallenge();
 

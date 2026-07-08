@@ -1,5 +1,5 @@
 import {
-  type Credential,
+  type KycCredential,
   idOSConsumer as idOSConsumerClass,
   type idOSCredential,
 } from "@idos-network/consumer";
@@ -38,7 +38,7 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   const credentialContents: string =
     await idOSConsumer.getCredentialSharedContentDecrypted(credentialId);
 
-  const data = JSON.parse(credentialContents) as Credential;
+  const data = JSON.parse(credentialContents) as KycCredential;
 
   const issuer = {
     issuer: SERVER_ENV.RELAY_ISSUER,

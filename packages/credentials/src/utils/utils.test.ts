@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CredentialSubjectV3BuilderType } from "../types";
+import type { CredentialSubjectKYCLatestBuilderType } from "../types";
 
 import {
   deriveLevel,
@@ -10,7 +10,7 @@ import {
   recordFilter,
 } from "./";
 
-const defaultCredential: CredentialSubjectV3BuilderType = {
+const defaultCredential: CredentialSubjectKYCLatestBuilderType = {
   root: {
     id: "uuid:1234567890",
   },

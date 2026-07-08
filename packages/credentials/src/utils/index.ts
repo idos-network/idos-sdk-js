@@ -7,10 +7,12 @@ import nacl from "tweetnacl";
 
 import type {
   AvailableIssuerType,
-  CredentialSubjectV3BuilderType,
   CustomIssuerType,
   InsertableIDOSCredential,
 } from "../types";
+
+// TODO: This is latest one (we should have also previous versions)
+export { deriveLevel, deriveKYCLevel } from "../schemas/KycV3/utils";
 
 export function fileToBase85(file: Buffer): string {
   return base85.encode(file, "ascii85");
@@ -102,33 +104,8 @@ export function convertBuilderObject(
   return acc;
 }
 
-type BaseLevel = "basic" | "plus";
-type Addon = "liveness" | "email" | "phoneNumber";
-
-export function deriveLevel(credential: CredentialSubjectV3BuilderType): string {
-  let level: BaseLevel = "basic";
-
-  // Address is a sign for plus+
-  const address = credential.residentialAddress;
-  if (address?.proofFile && address?.city && address?.proofCategory) {
-    level = "plus";
-  }
-
-  const addons: Addon[] = [];
-  if (credential.biometric?.selfieFile) {
-    addons.push("liveness");
-  }
-
-  if (credential.contact?.email) {
-    addons.push("email");
-  }
-
-  if (credential.contact?.phoneNumber) {
-    addons.push("phoneNumber");
-  }
-
-  return [level, ...addons].join("+");
-}
+export type BaseLevel = "basic" | "plus";
+export type Addon = "liveness" | "email" | "phoneNumber";
 
 export function parseLevel(level: string): {
   base: BaseLevel;

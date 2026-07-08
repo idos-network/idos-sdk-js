@@ -5,22 +5,23 @@ import type { VerifyCredentialResult } from "./verifier";
 
 import {
   type AvailableIssuerType,
-  type CredentialFields,
-
-  // Credentials container
-  CredentialFieldsSchema,
   type VerifiableCredential,
 
+  // Credentials container default is V2
+  CredentialContainerLatestBuilderSchema,
+  type CredentialContainerLatestBuilderType,
+
   // Current KYC default is V3
-  type CredentialSubjectLatest,
-  type CredentialSubjectBuilderLatest,
-  CredentialSubjectLatestSchema,
+  type CredentialSubjectKYCLatest,
+  type CredentialSubjectKYCLatestBuilderType,
+  CredentialSubjectKYCLatestBuilderSchema,
 
   // Current Face ID default is V1
-  type FaceIdV1,
-  type FaceIdV1BuilderType,
-  FaceIdV1BuilderSchema,
+  type CredentialSubjectFaceIdLatest,
+  type CredentialSubjectFaceIdLatestBuilderType,
+  CredentialSubjectFaceIdLatestBuilderSchema,
 } from "../types";
+
 import { convertBuilderObject, issuerToKey } from "../utils";
 import {
   CONTEXT_IDOS_CREDENTIAL,
@@ -32,11 +33,16 @@ import {
 } from "./loader";
 import { verifyCredential } from "./verifier";
 
-export type Credential = VerifiableCredential<CredentialSubjectLatest>;
-export type FaceIdCredential = VerifiableCredential<FaceIdV1>;
+/**
+ * Warning: This builder is for the latest versions of the credential types (only).
+ * Even we exports other types, it's for backward compatibility and should not be used.
+ * Backward compatibility for now should be implemented in your package.
+ */
+export type KycCredential = VerifiableCredential<CredentialSubjectKYCLatest>;
+export type FaceIdCredential = VerifiableCredential<CredentialSubjectFaceIdLatest>;
 
 export type CredentialBuilder<TInput, TOutput = TInput> = (
-  fields: CredentialFields,
+  fields: CredentialContainerLatestBuilderType["root"],
   subject: TInput,
   issuer: AvailableIssuerType,
   validate?: boolean,
@@ -52,14 +58,14 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
   credentialConverter: CredentialConverter<TInput>,
 ): CredentialBuilder<TInput, TOutput> {
   async function builder(
-    fields: CredentialFields,
+    fields: CredentialContainerLatestBuilderType["root"],
     subject: TInput,
     issuer: AvailableIssuerType,
     validate = true,
   ) {
     if (validate) {
       // This raises an z.ZodError exception if the fields are invalid
-      CredentialFieldsSchema.parse(fields);
+      CredentialContainerLatestBuilderSchema.parse({ root: fields });
     }
 
     const credentialSubject = credentialConverter(subject, validate);
@@ -87,12 +93,12 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
   return builder;
 }
 
-export const credentialSubjectConverter: CredentialConverter<CredentialSubjectBuilderLatest> = (
+export const credentialSubjectConverter: CredentialConverter<CredentialSubjectKYCLatestBuilderType> = (
   subject,
   validate,
 ) => {
   if (validate) {
-    CredentialSubjectLatestSchema.parse(subject);
+    CredentialSubjectKYCLatestBuilderSchema.parse(subject);
   }
 
   return {
@@ -101,12 +107,12 @@ export const credentialSubjectConverter: CredentialConverter<CredentialSubjectBu
   };
 };
 
-export const credentialFaceIdSubjectConverter: CredentialConverter<FaceIdV1BuilderType> = (
+export const credentialFaceIdSubjectConverter: CredentialConverter<CredentialSubjectFaceIdLatestBuilderType> = (
   subject,
   validate,
 ) => {
   if (validate) {
-    FaceIdV1BuilderSchema.parse(subject);
+    CredentialSubjectFaceIdLatestBuilderSchema.parse(subject);
   }
 
   return {
@@ -116,14 +122,14 @@ export const credentialFaceIdSubjectConverter: CredentialConverter<FaceIdV1Build
 };
 
 export const buildCredential: CredentialBuilder<
-  CredentialSubjectBuilderLatest,
-  CredentialSubjectLatest
-> = genericCredentialBuilder<CredentialSubjectBuilderLatest, CredentialSubjectLatest>(
+  CredentialSubjectKYCLatestBuilderType,
+  CredentialSubjectKYCLatest
+> = genericCredentialBuilder<CredentialSubjectKYCLatestBuilderType, CredentialSubjectKYCLatest>(
   credentialSubjectConverter,
 );
 
-export const buildFaceIdCredential: CredentialBuilder<FaceIdV1BuilderType, FaceIdV1> =
-  genericCredentialBuilder<FaceIdV1BuilderType, FaceIdV1>(credentialFaceIdSubjectConverter);
+export const buildFaceIdCredential: CredentialBuilder<CredentialSubjectFaceIdLatestBuilderType, CredentialSubjectFaceIdLatest> =
+  genericCredentialBuilder<CredentialSubjectFaceIdLatestBuilderType, CredentialSubjectFaceIdLatest>(credentialFaceIdSubjectConverter);
 
 export type { VerifyCredentialResult };
 export { verifyCredential };
