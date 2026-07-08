@@ -22,7 +22,7 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   personGender: typeof PersonSchema.shape.gender;
   personNationality: typeof PersonSchema.shape.nationality;
   personSecondNationality: typeof PersonSchema.shape.secondNationality;
-  personDateOfBirth: typeof PersonSchema.shape.dateOfBirth;
+  personDateOfBirth: z.ZodString;
   personPlaceOfBirth: typeof PersonSchema.shape.placeOfBirth;
   personRegionOfBirth: typeof PersonSchema.shape.regionOfBirth;
   personStateless: typeof PersonSchema.shape.stateless;
@@ -35,19 +35,19 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   personSsn: typeof PersonSchema.shape.ssn;
   contactEmail: typeof ContactSchema.shape.email;
   contactPhoneNumber: typeof ContactSchema.shape.phoneNumber;
-  biometricSelfieFile: typeof BiometricSchema.shape.selfieFile;
+  biometricSelfieFile: z.ZodString;
   biometricSelfieMatch: typeof BiometricSchema.shape.selfieMatch;
   idDocumentType: typeof IdDocumentSchema.shape.type;
   idDocumentNumber: typeof IdDocumentSchema.shape.number;
   idDocumentCountry: typeof IdDocumentSchema.shape.country;
-  idDocumentDateOfExpiry: typeof IdDocumentSchema.shape.dateOfExpiry;
-  idDocumentDateOfIssue: typeof IdDocumentSchema.shape.dateOfIssue;
+  idDocumentDateOfExpiry: z.ZodOptional<z.ZodString>;
+  idDocumentDateOfIssue: z.ZodOptional<z.ZodString>;
   idDocumentIssuingAuthority: typeof IdDocumentSchema.shape.issuingAuthority;
-  idDocumentFrontFile: typeof IdDocumentSchema.shape.frontFile;
-  idDocumentBackFile: typeof IdDocumentSchema.shape.backFile;
+  idDocumentFrontFile: z.ZodString;
+  idDocumentBackFile: z.ZodOptional<z.ZodString>;
   idDocumentMrzLine1: typeof IdDocumentSchema.shape.mrzLine1;
   idDocumentTitle: typeof IdDocumentSchema.shape.title;
-  idDocumentExtendedValidUntil: typeof IdDocumentSchema.shape.extendedValidUntil;
+  idDocumentExtendedValidUntil: z.ZodOptional<z.ZodString>;
   idDocumentAdditionalNumber: typeof IdDocumentSchema.shape.additionalNumber;
   idDocumentEthnicity: typeof IdDocumentSchema.shape.ethnicity;
   idDocumentIssuingSubdivision: typeof IdDocumentSchema.shape.issuingSubdivision;
@@ -59,15 +59,15 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   residentialAddressPostalCode: typeof ResidentialAddressSchema.shape.postalCode;
   residentialAddressCountry: typeof ResidentialAddressSchema.shape.country;
   residentialAddressProofCategory: typeof ResidentialAddressSchema.shape.proofCategory;
-  residentialAddressProofDateOfIssue: typeof ResidentialAddressSchema.shape.proofDateOfIssue;
-  residentialAddressProofFile: typeof ResidentialAddressSchema.shape.proofFile;
+  residentialAddressProofDateOfIssue: z.ZodOptional<z.ZodString>;
+  residentialAddressProofFile: z.ZodString;
   residentialAddressIpCountry: typeof ResidentialAddressSchema.shape.ipCountry;
   screeningSanctionsCheckResult: typeof ScreeningSchema.shape.sanctionsCheckResult;
   screeningSanctionsConfidenceScore: typeof ScreeningSchema.shape.sanctionsConfidenceScore;
   screeningPepCheckResult: typeof ScreeningSchema.shape.pepCheckResult;
   screeningPepConfidenceScore: typeof ScreeningSchema.shape.pepConfidenceScore;
   eddOccupation: typeof EDDSchema.shape.occupation;
-  eddSourceOfFundsProof: typeof EDDSchema.shape.sourceOfFundsProof;
+  eddSourceOfFundsProof: z.ZodOptional<z.ZodString>;
   sourceOfWealthType: typeof SourceOfWealthSchema.shape.type;
 }> = z.object({
   id: RootSchema.shape.id,
@@ -80,7 +80,7 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   personGender: PersonSchema.shape.gender,
   personNationality: PersonSchema.shape.nationality,
   personSecondNationality: PersonSchema.shape.secondNationality,
-  personDateOfBirth: PersonSchema.shape.dateOfBirth,
+  personDateOfBirth: z.string(),
   personPlaceOfBirth: PersonSchema.shape.placeOfBirth,
   personRegionOfBirth: PersonSchema.shape.regionOfBirth,
   personStateless: PersonSchema.shape.stateless,
@@ -93,19 +93,19 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   personSsn: PersonSchema.shape.ssn,
   contactEmail: ContactSchema.shape.email,
   contactPhoneNumber: ContactSchema.shape.phoneNumber,
-  biometricSelfieFile: BiometricSchema.shape.selfieFile,
+  biometricSelfieFile: z.string(),
   biometricSelfieMatch: BiometricSchema.shape.selfieMatch,
   idDocumentType: IdDocumentSchema.shape.type,
   idDocumentNumber: IdDocumentSchema.shape.number,
   idDocumentCountry: IdDocumentSchema.shape.country,
-  idDocumentDateOfExpiry: IdDocumentSchema.shape.dateOfExpiry,
-  idDocumentDateOfIssue: IdDocumentSchema.shape.dateOfIssue,
+  idDocumentDateOfExpiry: z.string().optional(),
+  idDocumentDateOfIssue: z.string().optional(),
   idDocumentIssuingAuthority: IdDocumentSchema.shape.issuingAuthority,
-  idDocumentFrontFile: IdDocumentSchema.shape.frontFile,
-  idDocumentBackFile: IdDocumentSchema.shape.backFile,
+  idDocumentFrontFile: z.string(),
+  idDocumentBackFile: z.string().optional(),
   idDocumentMrzLine1: IdDocumentSchema.shape.mrzLine1,
   idDocumentTitle: IdDocumentSchema.shape.title,
-  idDocumentExtendedValidUntil: IdDocumentSchema.shape.extendedValidUntil,
+  idDocumentExtendedValidUntil: z.string().optional(),
   idDocumentAdditionalNumber: IdDocumentSchema.shape.additionalNumber,
   idDocumentEthnicity: IdDocumentSchema.shape.ethnicity,
   idDocumentIssuingSubdivision: IdDocumentSchema.shape.issuingSubdivision,
@@ -117,15 +117,15 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   residentialAddressPostalCode: ResidentialAddressSchema.shape.postalCode,
   residentialAddressCountry: ResidentialAddressSchema.shape.country,
   residentialAddressProofCategory: ResidentialAddressSchema.shape.proofCategory,
-  residentialAddressProofDateOfIssue: ResidentialAddressSchema.shape.proofDateOfIssue,
-  residentialAddressProofFile: ResidentialAddressSchema.shape.proofFile,
+  residentialAddressProofDateOfIssue: z.string().optional(),
+  residentialAddressProofFile: z.string(),
   residentialAddressIpCountry: ResidentialAddressSchema.shape.ipCountry,
   screeningSanctionsCheckResult: ScreeningSchema.shape.sanctionsCheckResult,
   screeningSanctionsConfidenceScore: ScreeningSchema.shape.sanctionsConfidenceScore,
   screeningPepCheckResult: ScreeningSchema.shape.pepCheckResult,
   screeningPepConfidenceScore: ScreeningSchema.shape.pepConfidenceScore,
   eddOccupation: EDDSchema.shape.occupation,
-  eddSourceOfFundsProof: EDDSchema.shape.sourceOfFundsProof,
+  eddSourceOfFundsProof: z.string().optional(),
   sourceOfWealthType: SourceOfWealthSchema.shape.type,
 });
 

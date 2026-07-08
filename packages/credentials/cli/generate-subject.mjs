@@ -54,6 +54,28 @@ function getContextType(schema) {
   return "xsd:string";
 }
 
+function getZodSchemaType(schema, sourceExpression) {
+  const isOptional = schema?._def?.type === "optional";
+  const type = unwrapOptional(schema)?._def?.type;
+
+  if (type === "custom" || type === "date") {
+    return isOptional ? "z.ZodOptional<z.ZodString>" : "z.ZodString";
+  }
+
+  return `typeof ${sourceExpression}`;
+}
+
+function getZodType(schema, sourceExpression) {
+  const isOptional = schema?._def?.type === "optional";
+  const type = unwrapOptional(schema)?._def?.type;
+
+  if (type === "custom" || type === "date") {
+    return isOptional ? "z.string().optional()" : "z.string()";
+  }
+
+  return sourceExpression;
+}
+
 // Configuration & directory paths
 const configuration = [
   {
@@ -169,13 +191,15 @@ function renderSubjectTypes(
   const typeDefinitions = [];
 
   for (const { prefix, schema, exportName } of schemas) {
-    for (const fieldName of Object.keys(schema.shape)) {
+    for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
       const verifiableFieldName =
         prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
       const sourceExpression = `${exportName}.shape.${fieldName}`;
 
-      fields.push(`${verifiableFieldName}: ${sourceExpression},`);
-      typeDefinitions.push(`${verifiableFieldName}: typeof ${sourceExpression},`);
+      fields.push(`${verifiableFieldName}: ${getZodType(fieldSchema, sourceExpression)},`);
+      typeDefinitions.push(
+        `${verifiableFieldName}: ${getZodSchemaType(fieldSchema, sourceExpression)},`,
+      );
     }
   }
 
