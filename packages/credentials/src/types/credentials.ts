@@ -34,6 +34,14 @@ export {
   CredentialSubjectV3BuilderSchema,
 };
 
+// Export latest types for SDK
+export type {
+  CredentialSubjectV3 as CredentialSubjectLatest,
+  CredentialSubjectV3BuilderType as CredentialSubjectBuilderLatest,
+  FaceIdV1 as FaceIdLatest,
+  FaceIdV1BuilderType as FaceIdBuilderLatest,
+};
+
 export type idOSCredential = {
   id: string;
   user_id: string;

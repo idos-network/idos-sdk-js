@@ -1,8 +1,8 @@
 import type {
   AvailableIssuerType,
   CredentialFields,
-  CredentialSubject,
-  CredentialSubjectFaceId,
+  CredentialSubjectBuilderLatest,
+  FaceIdBuilderLatest,
   idOSCredential,
 } from "@idos-network/credentials/types";
 import type {
@@ -149,22 +149,22 @@ export class idOSIssuer {
   }
 
   async buildCredential(
-    fields: CredentialFields,
-    subject: CredentialSubject,
-    issuer: AvailableIssuerType,
+    fields: Parameters<typeof buildCredential>[0],
+    subject: Parameters<typeof buildCredential>[1],
+    issuer: Parameters<typeof buildCredential>[2],
     validate = true,
   ): Promise<Credential> {
     return buildCredential(fields, subject, issuer, validate);
   }
 
-  deriveCredentialLevel(subject: CredentialSubject): string {
+  deriveCredentialLevel(subject: Parameters<typeof deriveLevel>[0]): string {
     return deriveLevel(subject);
   }
 
   async buildFaceIdCredential(
-    fields: CredentialFields,
-    subject: CredentialSubjectFaceId,
-    issuer: AvailableIssuerType,
+    fields: Parameters<typeof buildFaceIdCredential>[0],
+    subject: Parameters<typeof buildFaceIdCredential>[1],
+    issuer: Parameters<typeof buildFaceIdCredential>[2],
     validate = true,
   ): Promise<FaceIdCredential> {
     return buildFaceIdCredential(fields, subject, issuer, validate);
@@ -179,9 +179,13 @@ export type {
   idOSDelegatedWriteGrant,
   idOSWallet,
   CredentialFields,
-  CredentialSubject,
   AvailableIssuerType,
+
+  // Verifiable credentials (whole objects)
   Credential,
-  CredentialSubjectFaceId,
   FaceIdCredential,
+
+  // Builder types
+  CredentialSubjectBuilderLatest as CredentialSubjectBuilderType,
+  FaceIdBuilderLatest as FaceIdBuilderType,
 };
