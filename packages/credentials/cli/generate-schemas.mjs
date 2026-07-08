@@ -79,9 +79,9 @@ function getZodType(schema, sourceExpression) {
 // Configuration & directory paths
 const configuration = [
   {
-    dir: "CredentialSubjectV3",
+    dir: "KycV3",
+    prefix: "KycV3",
     jsonLd: "idos-credential-subject-v3.json",
-    prefix: "CredentialSubjectV3",
   },
   {
     dir: "FaceIdV1",
@@ -137,7 +137,10 @@ function renderJsonLd(credentialSubjectMapping) {
   for (const [prefix, schema] of Object.entries(credentialSubjectMapping)) {
     for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
       if (prefix === "root") {
-        context[fieldName] = getContextType(fieldSchema);
+        if (fieldName !== "id") {
+          // root.id is required, but it's already part of the JSON-LD schema
+          context[fieldName] = getContextType(fieldSchema);
+        }
       } else {
         context[`${prefix}${capitalize(fieldName)}`] = getContextType(fieldSchema);
       }
@@ -219,9 +222,10 @@ export type ${typePrefix} = z.infer<typeof ${typePrefix}Schema>;
 }
 
 function main() {
-  for (const { dir, jsonLd, prefix } of configuration) {
+  for (const { dir, jsonLd, prefix, ts } of configuration) {
     const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
     const jsonLdPath = path.join(packageRoot, "assets/", jsonLd);
+
     const subjectTypesPath = path.join(packageRoot, "src/generated/", `${dir}.ts`);
     fs.mkdirSync(path.dirname(subjectTypesPath), { recursive: true });
 

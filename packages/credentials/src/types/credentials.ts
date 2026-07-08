@@ -1,23 +1,20 @@
 import * as z from "zod";
 
-// Current defaults
-import {
-  CredentialSubjectV3Schema,
-  type CredentialSubjectV3,
-} from "../generated/CredentialSubjectV3";
 import { FaceIdV1Schema, type FaceIdV1 } from "../generated/FaceIdV1";
-// Builders
-import {
-  BuilderSchema as CredentialSubjectV3BuilderSchema,
-  type BuilderType as CredentialSubjectV3BuilderType,
-} from "../schemas/CredentialSubjectV3";
+// Current defaults
+import { KycV3Schema, type KycV3 } from "../generated/KycV3";
 import {
   BuilderSchema as FaceIdV1BuilderSchema,
   type BuilderType as FaceIdV1BuilderType,
 } from "../schemas/FaceIdV1";
+// Builders
+import {
+  BuilderSchema as CredentialSubjectV3BuilderSchema,
+  type BuilderType as CredentialSubjectV3BuilderType,
+} from "../schemas/KycV3";
 
 // Reexport types and schemas
-export type { CredentialSubjectV3, CredentialSubjectV3BuilderType, FaceIdV1, FaceIdV1BuilderType };
+export type { KycV3, KycV3BuilderType, FaceIdV1, FaceIdV1BuilderType };
 
 export {
   FaceIdV1Schema,
