@@ -26,6 +26,6 @@ export function deriveLevel(credential: BuilderType): string {
   return [level, ...addons].join("+");
 }
 
-export function deriveKYCLevel(credential: BuilderType): number {
+export function deriveKYCLevel(_credential: BuilderType): number {
   return 1; // TODO: Implement this
 }

@@ -9,7 +9,7 @@ import { PersonSchema } from "../schemas/KycV3/person";
 import { ResidentialAddressSchema } from "../schemas/KycV3/residentialAddress";
 import { RootSchema } from "../schemas/KycV3/root";
 import { ScreeningSchema } from "../schemas/KycV3/screening";
-import { SourceOfWealthSchema } from "../schemas/KycV3/sow";
+import { SourceOfWealthSchema } from "../schemas/KycV3/sourceOfWealth";
 
 export const KycV3Schema: z.ZodObject<{
   id: typeof RootSchema.shape.id;

@@ -17,6 +17,7 @@ export const CONTEXT_IDOS_CREDENTIAL_V1 =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v1.json";
 export const CONTEXT_IDOS_CREDENTIAL_V2 =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v2.json";
+
 export const CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v1.json";
 export const CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT =

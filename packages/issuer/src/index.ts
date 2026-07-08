@@ -1,10 +1,4 @@
-import type {
-  AvailableIssuerType,
-  CredentialContainerLatest,
-  CredentialSubjectKYCLatestBuilderType,
-  CredentialSubjectFaceIdLatestBuilderType,
-  idOSCredential,
-} from "@idos-network/credentials/types";
+import type { AvailableIssuerType, idOSCredential } from "@idos-network/credentials/types";
 import type {
   EditPublicNotesAsIssuerInput,
   idOSDelegatedWriteGrant,
@@ -15,12 +9,7 @@ import type {
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
 
-import {
-  buildCredential,
-  buildFaceIdCredential,
-  type KycCredential,
-  type FaceIdCredential,
-} from "@idos-network/credentials/builder";
+import { buildKycCredential, buildFaceIdCredential } from "@idos-network/credentials/builder";
 import { deriveLevel, deriveKYCLevel } from "@idos-network/credentials/utils";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 
@@ -148,13 +137,13 @@ export class idOSIssuer {
     );
   }
 
-  async buildCredential(
-    fields: Parameters<typeof buildCredential>[0],
-    subject: Parameters<typeof buildCredential>[1],
-    issuer: Parameters<typeof buildCredential>[2],
+  async buildKycCredential(
+    fields: Parameters<typeof buildKycCredential>[0],
+    subject: Parameters<typeof buildKycCredential>[1],
+    issuer: Parameters<typeof buildKycCredential>[2],
     validate = true,
-  ): Promise<KycCredential> {
-    return buildCredential(fields, subject, issuer, validate);
+  ): ReturnType<typeof buildKycCredential> {
+    return buildKycCredential(fields, subject, issuer, validate);
   }
 
   deriveCredentialLevel(subject: Parameters<typeof deriveLevel>[0]): string {
@@ -170,7 +159,7 @@ export class idOSIssuer {
     subject: Parameters<typeof buildFaceIdCredential>[1],
     issuer: Parameters<typeof buildFaceIdCredential>[2],
     validate = true,
-  ): Promise<FaceIdCredential> {
+  ): ReturnType<typeof buildFaceIdCredential> {
     return buildFaceIdCredential(fields, subject, issuer, validate);
   }
 }
@@ -183,15 +172,4 @@ export type {
   idOSDelegatedWriteGrant,
   idOSWallet,
   AvailableIssuerType,
-
-  // Verifiable credential container (root fields level, kycLevel etc...)
-  CredentialContainerLatest as CredentialContainer,
-
-  // Verifiable credentials (whole fat flat objects)
-  KycCredential,
-  FaceIdCredential,
-
-  // Builder types
-  CredentialSubjectKYCLatestBuilderType as KycCredentialBuilderType,
-  CredentialSubjectFaceIdLatestBuilderType as FaceIdCredentialBuilderType,
 };

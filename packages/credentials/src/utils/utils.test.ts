@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CredentialSubjectKYCLatestBuilderType } from "../types";
+import type { KycSubjectLatestBuilderType } from "../types";
 
 import {
   deriveLevel,
@@ -10,7 +10,7 @@ import {
   recordFilter,
 } from "./";
 
-const defaultCredential: CredentialSubjectKYCLatestBuilderType = {
+const defaultCredential: KycSubjectLatestBuilderType = {
   root: {
     id: "uuid:1234567890",
   },

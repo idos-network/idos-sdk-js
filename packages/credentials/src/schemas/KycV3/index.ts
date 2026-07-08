@@ -8,7 +8,7 @@ import { PersonSchema } from "./person";
 import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
 import { ScreeningSchema } from "./screening";
-import { SourceOfWealthSchema } from "./sow";
+import { SourceOfWealthSchema } from "./sourceOfWealth";
 
 const mapping: Record<string, z.ZodObject<any>> = {
   root: RootSchema,

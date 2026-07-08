@@ -4,7 +4,7 @@ import { z } from "zod";
 export const RootSchema: z.ZodObject<{
   id: z.ZodString;
   level: z.ZodString;
-  approvedAt: z.ZodOptional<z.ZodISODateTime>;
+  approvedAt: z.ZodOptional<z.ZodDate>;
 }> = z.object({
   id: z.string(),
 
@@ -12,7 +12,7 @@ export const RootSchema: z.ZodObject<{
   level: z.string(),
 
   /* Date the credential was approved. */
-  approvedAt: z.iso.datetime().optional(),
+  approvedAt: z.date().optional(),
 });
 
 export type Root = z.infer<typeof RootSchema>;

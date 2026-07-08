@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
-import { buildCredential, buildFaceIdCredential } from ".";
+import { buildKycCredential, buildFaceIdCredential } from ".";
 import { fileToBase85 } from "../utils";
 import { verifyCredential } from "./verifier";
 
@@ -158,7 +158,7 @@ describe("verifiableCredentials", () => {
       });
 
       try {
-        await buildCredential(
+        await buildKycCredential(
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
@@ -251,7 +251,7 @@ describe("verifiableCredentials", () => {
       expect.assertions(3); // catch
 
       try {
-        await buildCredential(
+        await buildKycCredential(
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
@@ -319,7 +319,7 @@ describe("verifiableCredentials", () => {
         controller: `${issuer2}/issuers/1`,
       });
 
-      const data = await buildCredential(
+      const data = await buildKycCredential(
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",

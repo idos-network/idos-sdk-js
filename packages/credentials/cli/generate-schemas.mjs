@@ -16,10 +16,10 @@ function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function formatFile(filePath) {
+function formatFilesInDirectory(directory) {
   const result = spawnSync(
     process.platform === "win32" ? "pnpm.cmd" : "pnpm",
-    ["exec", "oxfmt", filePath],
+    ["exec", "oxfmt", directory],
     { cwd: packageRoot, stdio: "inherit" },
   );
 
@@ -28,7 +28,7 @@ function formatFile(filePath) {
   }
 
   if (result.status !== 0) {
-    throw new Error(`Failed to format ${path.relative(packageRoot, filePath)}`);
+    throw new Error(`Failed to format ${path.relative(packageRoot, directory)}`);
   }
 }
 
@@ -102,13 +102,13 @@ const legacyKycFieldContextOverrides = {
 // Configuration & directory paths
 const configuration = [
   {
-    dir: "CredentialsV1",
-    prefix: "CredentialsV1",
+    dir: "EnvelopeExtensionV1",
+    prefix: "EnvelopeExtensionV1",
     jsonLd: "idos-credentials-v1.json",
   },
   {
-    dir: "CredentialsV2",
-    prefix: "CredentialsV2",
+    dir: "EnvelopeExtensionV2",
+    prefix: "EnvelopeExtensionV2",
     jsonLd: "idos-credentials-v2.json",
   },
   {
@@ -306,16 +306,17 @@ function main() {
       fs.rmSync(subjectTypesPath, { force: true });
 
       fs.writeFileSync(jsonLdPath, renderJsonLd(mapping, { extraContext, fieldContextOverrides }));
-      formatFile(jsonLdPath);
       fs.writeFileSync(
         subjectTypesPath,
         renderSubjectTypes(prefix, mapping, tmpRoot, generatedTypesImportRoot),
       );
-      formatFile(subjectTypesPath);
     } finally {
       fs.rmSync(tmpRoot, { recursive: true, force: true });
     }
   }
+
+  formatFilesInDirectory("src/generated/*.ts");
+  formatFilesInDirectory("assets/*.json");
 }
 
 main();
