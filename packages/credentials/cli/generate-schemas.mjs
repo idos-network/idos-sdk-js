@@ -204,7 +204,6 @@ function renderJsonLd(
       }
 
       if (prefix === "root") {
-        
         if (!skipRootFields.includes(fieldName)) {
           // root.id is required, but it's already part of the JSON-LD schema
           context[fieldName] = fieldContextOverride ?? getContextType(fieldSchema);

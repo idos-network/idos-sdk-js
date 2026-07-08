@@ -2,7 +2,7 @@
 
 /**
  * KYC - Credential Subject all versions
- * 
+ *
  * V{n}Schema - Verifiable Credential Subject ZOD schema (flat type! not builder!)
  * V{n} - Verifiable Credential Subject TypeScript type (flat type! not builder! this is the type that would be stored)
  * V{n}BuilderSchema - Verifiable Credential Subject ZOD builder schema (sub-objects for builder, validations)
@@ -33,8 +33,8 @@ import {
   type BuilderType as CredentialSubjectKYCV3BuilderType,
 } from "../schemas/KycV3";
 
-export type { CredentialSubjectKYCV3, CredentialSubjectKYCV3BuilderType }
-export { CredentialSubjectKYCV3Schema, CredentialSubjectKYCV3BuilderSchema }
+export type { CredentialSubjectKYCV3, CredentialSubjectKYCV3BuilderType };
+export { CredentialSubjectKYCV3Schema, CredentialSubjectKYCV3BuilderSchema };
 
 /**
  * FaceId - Credential Subject for FaceId
@@ -48,8 +48,8 @@ import {
   type BuilderType as CredentialSubjectFaceIdV1BuilderType,
 } from "../schemas/FaceIdV1";
 
-export type { CredentialSubjectFaceIdV1, CredentialSubjectFaceIdV1BuilderType }
-export { CredentialSubjectFaceIdV1Schema, CredentialSubjectFaceIdV1BuilderSchema }
+export type { CredentialSubjectFaceIdV1, CredentialSubjectFaceIdV1BuilderType };
+export { CredentialSubjectFaceIdV1Schema, CredentialSubjectFaceIdV1BuilderSchema };
 
 /**
  * Credentials container (level, kycLevel, issued, approvedAt, expirationDate...)
@@ -71,8 +71,8 @@ import {
   type BuilderType as CredentialContainerV2BuilderType,
 } from "../schemas/CredentialsV2";
 
-export type { CredentialContainerV2, CredentialContainerV2BuilderType }
-export { CredentialContainerV2Schema, CredentialContainerV2BuilderSchema }
+export type { CredentialContainerV2, CredentialContainerV2BuilderType };
+export { CredentialContainerV2Schema, CredentialContainerV2BuilderSchema };
 
 /**
  * This would always pointed out to the latest versions of the above types
@@ -89,7 +89,7 @@ export type {
   // Credential container
   CredentialContainerV2 as CredentialContainerLatest,
   CredentialContainerV2BuilderType as CredentialContainerLatestBuilderType,
-}
+};
 export {
   // Credential subject for KYC
   CredentialSubjectKYCV3Schema as CredentialSubjectKYCLatestSchema,
@@ -102,7 +102,7 @@ export {
   // Credential container
   CredentialContainerV2Schema as CredentialContainerLatestSchema,
   CredentialContainerV2BuilderSchema as CredentialContainerLatestBuilderSchema,
-}
+};
 
 // Other utility types
 export type idOSCredential = {

@@ -4,11 +4,13 @@ import type {
   idOSCredential,
   VerifiableCredential,
 } from "@idos-network/credentials/types";
-
 import type { KwilSigner } from "@idos-network/kwil-js";
 
-import { type KycCredential, type FaceIdCredential, verifyCredential } from "@idos-network/credentials/builder";
-
+import {
+  type KycCredential,
+  type FaceIdCredential,
+  verifyCredential,
+} from "@idos-network/credentials/builder";
 import {
   createNodeKwilClient,
   createServerKwilSigner,

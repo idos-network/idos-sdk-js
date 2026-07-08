@@ -21,7 +21,6 @@ import {
   type CredentialSubjectFaceIdLatestBuilderType,
   CredentialSubjectFaceIdLatestBuilderSchema,
 } from "../types";
-
 import { convertBuilderObject, issuerToKey } from "../utils";
 import {
   CONTEXT_IDOS_CREDENTIAL,
@@ -93,10 +92,9 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
   return builder;
 }
 
-export const credentialSubjectConverter: CredentialConverter<CredentialSubjectKYCLatestBuilderType> = (
-  subject,
-  validate,
-) => {
+export const credentialSubjectConverter: CredentialConverter<
+  CredentialSubjectKYCLatestBuilderType
+> = (subject, validate) => {
   if (validate) {
     CredentialSubjectKYCLatestBuilderSchema.parse(subject);
   }
@@ -107,10 +105,9 @@ export const credentialSubjectConverter: CredentialConverter<CredentialSubjectKY
   };
 };
 
-export const credentialFaceIdSubjectConverter: CredentialConverter<CredentialSubjectFaceIdLatestBuilderType> = (
-  subject,
-  validate,
-) => {
+export const credentialFaceIdSubjectConverter: CredentialConverter<
+  CredentialSubjectFaceIdLatestBuilderType
+> = (subject, validate) => {
   if (validate) {
     CredentialSubjectFaceIdLatestBuilderSchema.parse(subject);
   }
@@ -128,8 +125,13 @@ export const buildCredential: CredentialBuilder<
   credentialSubjectConverter,
 );
 
-export const buildFaceIdCredential: CredentialBuilder<CredentialSubjectFaceIdLatestBuilderType, CredentialSubjectFaceIdLatest> =
-  genericCredentialBuilder<CredentialSubjectFaceIdLatestBuilderType, CredentialSubjectFaceIdLatest>(credentialFaceIdSubjectConverter);
+export const buildFaceIdCredential: CredentialBuilder<
+  CredentialSubjectFaceIdLatestBuilderType,
+  CredentialSubjectFaceIdLatest
+> = genericCredentialBuilder<
+  CredentialSubjectFaceIdLatestBuilderType,
+  CredentialSubjectFaceIdLatest
+>(credentialFaceIdSubjectConverter);
 
 export type { VerifyCredentialResult };
 export { verifyCredential };

@@ -15,7 +15,9 @@ import { defaultDocumentLoader } from "./loader";
 
 export type VerifyCredentialResult = [boolean, Map<AvailableIssuerType, vc.VerifyCredentialResult>];
 
-export async function verifyCredential<K = CredentialSubjectFaceIdLatest | CredentialSubjectKYCLatest>(
+export async function verifyCredential<
+  K = CredentialSubjectFaceIdLatest | CredentialSubjectKYCLatest,
+>(
   credential: VerifiableCredential<K>,
   issuers: AvailableIssuerType[],
   customDocumentLoader?: JsonLDDocumentLoaderInstance,

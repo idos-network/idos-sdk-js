@@ -5,11 +5,7 @@ import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-import type {
-  AvailableIssuerType,
-  CustomIssuerType,
-  InsertableIDOSCredential,
-} from "../types";
+import type { AvailableIssuerType, CustomIssuerType, InsertableIDOSCredential } from "../types";
 
 // TODO: This is latest one (we should have also previous versions)
 export { deriveLevel, deriveKYCLevel } from "../schemas/KycV3/utils";
