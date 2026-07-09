@@ -5,6 +5,7 @@ export default defineConfig({
     "./src/index.ts",
     "./src/utils/index.ts",
     "./src/builder/index.ts",
+    "./src/parser/index.ts",
     "./src/types/index.ts",
   ],
   dts: true,
