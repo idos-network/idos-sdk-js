@@ -2,6 +2,140 @@
 
 This library is helper for VerifiableCredentials in idOS.
 
+**Warning:*** The `schema/` folder is the real "source of truth", it has been used to generate all of the schemas and builders! Never change `assets/*.json` or `generated/**` files!
+
+## Types, names and other troubles.
+
+We're now dealing with a several different types and names (who has versions). This package is trying hard to unify that across the whole codebase and whomever includes that.
+
+### Naming
+
+* *Kyc{VERSION}* - Credential subject for KYC data
+* *FaceId{VERSION}* - Credentials subject for Face ID data
+* *EnvelopeExtension{VERSION}* - Envelope extension of the main VC object (see below)
+* All imports that ends up with *Latest* are pointed to the latest available version.
+
+Every section below, contains the export you should use, if you want to use one of those:
+
+### VerifiableCredential
+
+This is the main W3C container data model https://www.w3.org/TR/vc-data-model-2.0/.
+
+```typescript
+export interface VerifiableCredential<K> {
+  "@context": string[];
+  type: string[];
+  issuer: string;
+  id: string;
+  issued: string;
+  expirationDate: string;
+  credentialSubject: K;
+  issuanceDate: string;
+  proof: VerifiedCredentialsProof;
+}
+```
+
+This is the main structure of what is encrypted and stored in idOS, also this is something which should be verified if the signature is matching.
+
+```typescript
+// Exports you should use
+import type { VerifiableCredential } from "@idos-network/credentials/types";
+```
+### Schemas / Versioning
+
+Since over time there can be a lot of contractions in the schemas, we need to version that. Also we don't support "just" KYC credentials but also FaceID credentials. And as any other we want just one source of truth, which is now `src/schemas`. It contains all the informations required for json-ld, flat schema or builders.
+
+In this library is also a cli tool (`cli/generate-schemas.mjs`), to generate required `Json-LD XSD` schemas in the `assets/` folder and the matching full fat TypeScript definition for that.
+
+```json
+// JSON-LD: idos-credential-subject-v3.json
+{
+  "@context": {
+    "@version": 1.1,
+    "@protected": true,
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "personFirstName": "xsd:string",
+    "personFamilyName": "xsd:string",
+    ....
+  }
+}
+```
+
+Those schemas are passed and loaded via `loader` by URLs like:
+
+```
+https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v1.json
+```
+
+Also they are used in `@context` as described in w3c spec.
+
+### Builder types
+
+Since sub-objects in JSON-LD are quite problematic, we went to having a one big fat flat Json for Credential Subject. `Json-LD` itself did not provide validations (not even presence), it just saying field + type. But this structure is bad to work with in code, as any Developer we ❤️ structures, that's why we came up with `Zod` objects, which are the **source of truth**.
+
+Builder is for building the full-fat-credential Verifiable Credential object with all of those requirements.
+
+```typescript
+// Exports you should be using
+import {
+  buildLatestKycVC
+} from "@idos-network/credentials/builder";
+
+import type {
+  KycSubjectLatestBuilderType,
+  KycSubjectLatest,
+  EnvelopeExtensionLatestBuilderType,
+  AvailableIssuerType,
+} from "@idos-network/credentials/types";
+
+// Extension init
+const fields: EnvelopeExtensionLatestBuilderType = {
+  root: {
+    kycLevel: 2,
+    level: "basic+livenes",
+  }
+}
+
+// Full KYC data
+const subject: KycSubjectLatestBuilderType = {
+  root: {
+    id: crypto.randomUUID(),
+  },
+  person: {
+    firstName: "John",
+    familyName: "Doe",
+  },
+}
+
+if (/* condition for proof of residency */) {
+  subject.residentialAddress = {
+    street: "Broadway",
+    city: "New York",
+    state: "NY",
+  }
+}
+
+const issuer: AvailableIssuerType = {
+  // one of the issuer 
+}
+
+// The build method is also available in idOS issuer since it's commonly used together
+// issuer.buildLatestKycVC() with the same arguments
+const vc: VerifiableCredential<KycSubjectLatest> = await buildLatestKycVC(
+  fields,
+  subject,
+  issuer,
+);
+
+console.log(vc); // Verifiable credential with full flat KYC subject
+```
+
+### VerifiableCredential extensions
+
+We also need fields like `level` or `kycLevel` to be present so we are extending the basic root object with this. The definition is the same as for `credentialSubject`.
+
+### Parser types
+
 ## Generate a Ed25519VerificationKey2020
 
 ```javascript

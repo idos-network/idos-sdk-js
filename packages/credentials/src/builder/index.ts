@@ -121,12 +121,12 @@ export const credentialFaceIdSubjectConverter: CredentialConverter<
   };
 };
 
-export const buildKycCredential: CredentialBuilder<KycSubjectLatestBuilderType, KycSubjectLatest> =
+export const buildLatestKycVC: CredentialBuilder<KycSubjectLatestBuilderType, KycSubjectLatest> =
   genericCredentialBuilder<KycSubjectLatestBuilderType, KycSubjectLatest>(
     credentialSubjectConverter,
   );
 
-export const buildFaceIdCredential: CredentialBuilder<
+export const buildLatestFaceIdVC: CredentialBuilder<
   FaceIdSubjectLatestBuilderType,
   FaceIdSubjectLatest
 > = genericCredentialBuilder<FaceIdSubjectLatestBuilderType, FaceIdSubjectLatest>(
