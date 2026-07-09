@@ -166,9 +166,9 @@ export class idOSIssuer {
 
 // Export available types for building credentials (latest versions)
 // TODO: This is again a very weird in terms of backwards compatibility and should be removed.
-export type VCEnvelope = Parameters<typeof buildFaceIdCredential>[0];
-export type VCKycSubject = Parameters<typeof buildKycCredential>[1];
-export type VCFaceIdSubject = Parameters<typeof buildFaceIdCredential>[1];
+export type CredentialEnvelope = Parameters<typeof buildFaceIdCredential>[0];
+export type CredentialKycSubject = Parameters<typeof buildKycCredential>[1];
+export type CredentialFaceIdSubject = Parameters<typeof buildFaceIdCredential>[1];
 
 export type {
   idOSCredential,
