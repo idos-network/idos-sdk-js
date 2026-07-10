@@ -92,7 +92,7 @@ describe("VerifiableCredentialKycV3.serialize", () => {
 
     const serialized = credential.serialize() as Record<string, unknown>;
 
-    expect(serialized["@context"]).toEqual(["idos-credential-subject-v3"]);
+    expect(serialized["@context"]).toEqual(["https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json"]);
     expect(serialized.id).toBe("uuid:abc");
     expect(serialized.personFirstName).toBe("John");
     expect(serialized.personDateOfBirth).toBe(new Date("1990-01-01").toISOString());
