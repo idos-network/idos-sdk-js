@@ -3,11 +3,14 @@ import type { StructuredObject as CredentialSubjectType } from "./schema";
 
 import { VerifiableCredentialContainerBase } from "../..";
 import {
+  CONTEXT_IDOS_CREDENTIAL_V1,
+  CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID,
+} from "../../../utils/loader";
+import {
   StructuredSchema as EnvelopeSchema,
   type StructuredObject as EnvelopeType,
 } from "../../envelope/v1/schema";
 import { RootSchema } from "./root";
-import { CONTEXT_IDOS_CREDENTIAL_V1, CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID } from "../../../utils/loader";
 
 export class VerifiableCredentialFaceIdV1 extends VerifiableCredentialContainerBase<
   EnvelopeType,

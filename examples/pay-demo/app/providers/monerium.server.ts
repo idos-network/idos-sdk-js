@@ -113,7 +113,10 @@ export interface IdDocument {
   kind: string;
 }
 
-export const createProfile = async (profileId: string, data: VerifiableCredential<CredentialSubjectKycV2>) => {
+export const createProfile = async (
+  profileId: string,
+  data: VerifiableCredential<CredentialSubjectKycV2>,
+) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
@@ -179,12 +182,7 @@ export const createProfile = async (profileId: string, data: VerifiableCredentia
       "back",
     ),
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-    uploadFile(
-      profileId,
-      apiToken,
-      data.credentialSubject.selfieFile!,
-      "facialSimilarity",
-    ),
+    uploadFile(profileId, apiToken, data.credentialSubject.selfieFile!, "facialSimilarity"),
     uploadFile(
       profileId,
       apiToken,

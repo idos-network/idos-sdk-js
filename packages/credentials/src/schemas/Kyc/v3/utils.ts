@@ -1,5 +1,5 @@
-import type { StructuredObject } from "./schema";
 import type { BaseLevel, Addon } from "../../../utils";
+import type { StructuredObject } from "./schema";
 
 export function deriveLevel(credential: Partial<StructuredObject>): string {
   let level: BaseLevel = "basic";

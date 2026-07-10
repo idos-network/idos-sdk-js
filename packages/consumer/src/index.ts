@@ -1,9 +1,9 @@
-import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import type {
   AvailableIssuerType,
   idOSCredential,
   VerifiableCredential,
 } from "@idos-network/credentials/types";
+import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import { verifyCredential } from "@idos-network/credentials/verifier";

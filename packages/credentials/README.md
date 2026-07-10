@@ -267,11 +267,7 @@ const hasBasicLivenessAndEmail = matchLevelOrHigher(
 );
 // hasBasicLivenessAndEmail = false
 
-const hasBasicLivenessFromPlus = matchLevelOrHigher(
-  "basic",
-  ["liveness"],
-  "plus+liveness",
-);
+const hasBasicLivenessFromPlus = matchLevelOrHigher("basic", ["liveness"], "plus+liveness");
 // hasBasicLivenessFromPlus = true
 
 const pickedLevel = pickHighestMatchingLevel(

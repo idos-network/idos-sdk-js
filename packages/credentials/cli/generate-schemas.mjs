@@ -94,9 +94,7 @@ function makeOptional(schema, expression) {
 }
 
 function makeOptionalSchemaType(schema, typeExpression) {
-  return schema?._def?.type === "optional"
-    ? typeExpression
-    : `z.ZodOptional<${typeExpression}>`;
+  return schema?._def?.type === "optional" ? typeExpression : `z.ZodOptional<${typeExpression}>`;
 }
 
 const legacyCountryCodesContext =
@@ -284,9 +282,7 @@ function renderSubjectTypes(options) {
       const zodSchemaType = getZodSchemaType(fieldSchema, sourceExpression);
 
       fields.push(
-        `${verifiableFieldName}: ${
-          parentOptional ? makeOptional(fieldSchema, zodType) : zodType
-        },`,
+        `${verifiableFieldName}: ${parentOptional ? makeOptional(fieldSchema, zodType) : zodType},`,
       );
       typeDefinitions.push(
         `${verifiableFieldName}: ${
