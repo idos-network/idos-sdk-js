@@ -72,7 +72,9 @@ declare module "@digitalbazaar/vc" {
   export type VerifiableCredential<K> = VerifiedCredential<K>;
 
   // oxlint-disable-next-line typescript/no-explicit-any -- I don't know the right type
-  export declare function issue<K = any>(options: IssueOptions): Promise<VerifiedCredential<K>>;
+  export declare function issue<CredentialSubject = any, TExtension = any>(
+    options: IssueOptions,
+  ): Promise<VerifiedCredential<K> & TExtension>;
 
   export interface VerifyCredentialOptions<K> {
     credential: VerifiableCredential<K>;

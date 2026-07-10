@@ -8,7 +8,7 @@ import nacl from "tweetnacl";
 import type { AvailableIssuerType, CustomIssuerType, InsertableIDOSCredential } from "../types";
 
 // TODO: This is latest one (we should have also previous versions)
-export { deriveLevel, deriveKYCLevel } from "../schemas/KycV3/utils";
+export { deriveLevel, deriveKYCLevel } from "../schemas/Kyc/v3/utils";
 
 export function fileToBase85(file: Buffer): string {
   return base85.encode(file, "ascii85");

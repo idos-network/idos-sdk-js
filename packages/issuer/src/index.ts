@@ -10,9 +10,9 @@ import type {
 import type { SignKeyPair } from "tweetnacl";
 
 import { buildKycCredential, buildFaceIdCredential } from "@idos-network/credentials/builder";
-import { deriveLevel, deriveKYCLevel } from "@idos-network/credentials/utils";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 
+import { deriveLevel, deriveKYCLevel } from "../../credentials/dist/Kyc/KycV3/utils";
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,

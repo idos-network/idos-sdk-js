@@ -102,43 +102,40 @@ const legacyKycFieldContextOverrides = {
 // Configuration & directory paths
 const configuration = [
   {
-    dir: "EnvelopeExtensionV1",
-    prefix: "EnvelopeExtensionV1",
-    jsonLd: "idos-credentials-v1.json",
+    dir: "envelope/v1",
+    jsonLd: "idos-credentials-v1",
+    noRoot: true,
+    skipFlat: true,
   },
   {
-    dir: "EnvelopeExtensionV2",
-    prefix: "EnvelopeExtensionV2",
-    jsonLd: "idos-credentials-v2.json",
+    dir: "envelope/v2",
+    jsonLd: "idos-credentials-v2",
+    noRoot: true,
+    skipFlat: true,
   },
   {
-    dir: "KycV1",
-    prefix: "KycV1",
-    jsonLd: "idos-credential-subject-v1.json",
+    dir: "kyc/v3",
+  },
+  /*{
+    dir: "kyc/v1",
     extraContext: {
       aux: legacyCountryCodesContext,
     },
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
   {
-    dir: "KycV2",
-    prefix: "KycV2",
-    jsonLd: "idos-credential-subject-v2.json",
+    dir: "kyc/v2",
     extraContext: {
       aux: legacyCountryCodesContext,
     },
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
   {
-    dir: "KycV3",
-    prefix: "KycV3",
-    jsonLd: "idos-credential-subject-v3.json",
+    dir: "kyc/v3",
   },
   {
-    dir: "FaceIdV1",
-    jsonLd: "idos-credential-subject-face-id-v1.json",
-    prefix: "FaceIdV1",
-  },
+    dir: "face-id/v1",
+  },*/
 ];
 
 function compileEntities(entitiesRoot) {
@@ -179,8 +176,8 @@ function compileEntities(entitiesRoot) {
 }
 
 function renderJsonLd(
-  credentialSubjectMapping,
-  { extraContext = {}, fieldContextOverrides = {} } = {},
+  schemaShape,
+  { extraContext = {}, fieldContextOverrides = {}, noRoot = false },
 ) {
   const context = {
     "@version": 1.1,
@@ -189,12 +186,16 @@ function renderJsonLd(
     ...extraContext,
   };
 
+  if (noRoot) {
+    schemaShape = { root: schemaShape };
+  }
+
   // We need those fields to be part of ZOD validations
   // but JSON-LD already defines them
   const skipRootFields = ["id", "issued", "expirationDate"];
 
-  for (const [prefix, schema] of Object.entries(credentialSubjectMapping)) {
-    for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
+  for (const [prefix, schema] of Object.entries(schemaShape)) {
+    for (const [fieldName, fieldSchema] of Object.entries(schema)) {
       const verifiableFieldName =
         prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
       const fieldContextOverride = fieldContextOverrides[verifiableFieldName];
@@ -289,8 +290,50 @@ export type ${typePrefix} = z.infer<typeof ${typePrefix}Schema>;
 }
 
 function main() {
-  for (const { dir, jsonLd, prefix, extraContext, fieldContextOverrides } of configuration) {
-    const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
+  const schemaRoot = path.join(packageRoot, "src/schemas");
+  const generatedRoot = path.join(packageRoot, "src/generated");
+  const jsonLdRoot = path.join(packageRoot, "assets");
+
+  for (const {
+    dir,
+    jsonLd,
+    skipFlat,
+    noRoot,
+    extraContext,
+    fieldContextOverrides,
+  } of configuration) {
+    const entitiesRoot = path.join(schemaRoot, dir);
+    const entityIndexPath = path.join(entitiesRoot, "index.ts");
+
+    const tmpRoot = compileEntities(entitiesRoot);
+
+    try {
+      const { StructuredSchema } = require(path.join(tmpRoot, "index.js"));
+
+      // Generate JSON-LD schema
+      const jsonLdFile = path.join(jsonLdRoot, `${jsonLd}.json`);
+      fs.rmSync(jsonLdFile, { force: true });
+      fs.writeFileSync(
+        jsonLdFile,
+        renderJsonLd(StructuredSchema.shape, { noRoot, extraContext, fieldContextOverrides }),
+      );
+
+      if (!skipFlat) {
+        const flatFile = path.join(generatedRoot, `${dir}.ts`);
+        fs.writeFileSync(
+          flatFile,
+          renderSubjectTypes(StructuredSchema.shape, {
+            noRoot,
+            extraContext,
+            fieldContextOverrides,
+          }),
+        );
+      }
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
+    }
+  }
+  /*const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
     const jsonLdPath = path.join(packageRoot, "assets/", jsonLd);
 
     const subjectTypesPath = path.join(packageRoot, "src/generated/", `${dir}.ts`);
@@ -316,7 +359,7 @@ function main() {
   }
 
   formatFilesInDirectory("src/generated/*.ts");
-  formatFilesInDirectory("assets/*.json");
+  formatFilesInDirectory("assets/*.json");*/
 }
 
 main();

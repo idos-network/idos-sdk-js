@@ -10,24 +10,12 @@ import { RootSchema } from "./root";
 import { ScreeningSchema } from "./screening";
 import { SourceOfWealthSchema } from "./sourceOfWealth";
 
-const mapping: Record<string, z.ZodObject<any>> = {
-  root: RootSchema,
-  person: PersonSchema,
-  contact: ContactSchema,
-  biometric: BiometricSchema,
-  idDocument: IdDocumentSchema,
-  residentialAddress: ResidentialAddressSchema,
-  screening: ScreeningSchema,
-  edd: EDDSchema,
-  sourceOfWealth: SourceOfWealthSchema,
-};
-
-export const BuilderSchema: z.ZodObject<{
+export const StructuredSchema: z.ZodObject<{
   root: typeof RootSchema;
   person: typeof PersonSchema;
+  idDocument: typeof IdDocumentSchema;
   contact: z.ZodOptional<typeof ContactSchema>;
   biometric: z.ZodOptional<typeof BiometricSchema>;
-  idDocument: z.ZodOptional<typeof IdDocumentSchema>;
   residentialAddress: z.ZodOptional<typeof ResidentialAddressSchema>;
   screening: z.ZodOptional<typeof ScreeningSchema>;
   edd: z.ZodOptional<typeof EDDSchema>;
@@ -35,15 +23,13 @@ export const BuilderSchema: z.ZodObject<{
 }> = z.object({
   root: RootSchema,
   person: PersonSchema,
+  idDocument: IdDocumentSchema,
   contact: ContactSchema.optional(),
   biometric: BiometricSchema.optional(),
-  idDocument: IdDocumentSchema.optional(),
   residentialAddress: ResidentialAddressSchema.optional(),
   screening: ScreeningSchema.optional(),
   edd: EDDSchema.optional(),
   sourceOfWealth: SourceOfWealthSchema.optional(),
 });
 
-export type BuilderType = z.infer<typeof BuilderSchema>;
-
-export default mapping;
+export type StructuredObject = z.infer<typeof StructuredSchema>;

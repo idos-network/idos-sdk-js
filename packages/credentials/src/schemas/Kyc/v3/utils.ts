@@ -1,5 +1,5 @@
 import type { BuilderType } from ".";
-import type { BaseLevel, Addon } from "../../utils";
+import type { BaseLevel, Addon } from "../../../utils";
 
 export function deriveLevel(credential: BuilderType): string {
   let level: BaseLevel = "basic";

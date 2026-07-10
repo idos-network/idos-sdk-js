@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-// https://github.com/colinhacks/zod/issues/3751
-export const RootSchema: z.ZodObject<{
+export const StructuredSchema: z.ZodObject<{
   id: z.ZodString;
   level: z.ZodString;
   kycLevel: z.ZodNumber;
@@ -27,4 +26,4 @@ export const RootSchema: z.ZodObject<{
   expirationDate: z.iso.datetime().optional(),
 });
 
-export type Root = z.infer<typeof RootSchema>;
+export type StructuredObject = z.infer<typeof StructuredSchema>;
