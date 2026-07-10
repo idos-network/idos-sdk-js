@@ -2,12 +2,12 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import { describe, expect, it } from "vitest";
 
 import { parseCredential, parseCredentialSubject, parseEnvelope } from ".";
-import { buildFaceIdCredential, buildKycCredential } from "../builder";
+import { buildFaceIdCredential, buildKycCredential } from "../verifier";
 import {
   CONTEXT_IDOS_CREDENTIAL_V1,
   CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT,
   CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT,
-} from "../builder/loader";
+} from "../utils/loader";
 
 const ISSUER = "https://vc-issuers.cool.id/idos";
 const CRED_ID = `${ISSUER}/credentials/z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3`;

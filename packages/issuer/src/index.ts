@@ -9,7 +9,7 @@ import type {
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
 
-import { buildKycCredential, buildFaceIdCredential } from "@idos-network/credentials/builder";
+import { buildKycCredential, buildFaceIdCredential } from "../../credentials/dist/verifier/verifier";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 
 import { deriveLevel, deriveKYCLevel } from "../../credentials/dist/Kyc/KycV3/utils";

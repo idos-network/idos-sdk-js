@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { KycSubjectLatestBuilderType } from "../types";
+import type { StructuredObject as KycSubjectV3 } from "../schemas/Kyc/v3/schema";
 
 import {
   deriveLevel,
@@ -10,7 +10,7 @@ import {
   recordFilter,
 } from "./";
 
-const defaultCredential: KycSubjectLatestBuilderType = {
+const defaultCredential: KycSubjectV3 = {
   root: {
     id: "uuid:1234567890",
   },

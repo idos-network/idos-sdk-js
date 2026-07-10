@@ -1,11 +1,11 @@
-import type { KycV3 } from "../../../generated/KycV3";
+import type { CredentialSubjectV3 } from "../../../generated/CredentialSubjectV3";
 import type { StructuredObject as CredentialSubjectType } from "./schema";
 
 import { VerifiableCredentialContainerBase } from "../..";
 import {
   StructuredSchema as EnvelopeSchema,
   type StructuredObject as EnvelopeType,
-} from "../../envelope/v2";
+} from "../../envelope/v2/schema";
 import { BiometricSchema } from "./biometric";
 import { ContactSchema } from "./contact";
 import { EDDSchema } from "./edd";
@@ -19,10 +19,10 @@ import { SourceOfWealthSchema } from "./sourceOfWealth";
 export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase<
   EnvelopeType,
   CredentialSubjectType,
-  KycV3
+  CredentialSubjectV3
 > {
   constructor() {
-    super("idos-credential-v3", "idos-credential-v3-subject");
+    super("idos-credential-v2", "idos-credential-subject-v3");
   }
 
   checkValidity(): void {
@@ -98,18 +98,24 @@ export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase
     if (validate) {
       ResidentialAddressSchema.parse(residentialAddress);
     }
+
+    this.subject.residentialAddress = residentialAddress;
   }
 
   addScreening(screening: CredentialSubjectType["screening"], validate: boolean = true): void {
     if (validate) {
       ScreeningSchema.parse(screening);
     }
+
+    this.subject.screening = screening;
   }
 
   addEDD(edd: CredentialSubjectType["edd"], validate: boolean = true): void {
     if (validate) {
       EDDSchema.parse(edd);
     }
+
+    this.subject.edd = edd;
   }
 
   addSourceOfWealth(
@@ -119,5 +125,7 @@ export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase
     if (validate) {
       SourceOfWealthSchema.parse(sourceOfWealth);
     }
+
+    this.subject.sourceOfWealth = sourceOfWealth;
   }
 }

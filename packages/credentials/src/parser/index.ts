@@ -1,88 +1,42 @@
-import type {
-  EnvelopeExtensionV1,
-  EnvelopeExtensionV2,
-  FaceIdSubjectV1,
-  KycSubjectV1,
-  KycSubjectV2,
-  KycSubjectV3,
+import {
+  VerifiableCredentialFaceIdV1,
+  VerifiableCredentialKycV1,
+  VerifiableCredentialKycV2,
+  VerifiableCredentialKycV3,
+  type VerifiableCredential,
 } from "../types";
 
-import {
-  ENVELOPE_REGISTRY,
-  SUBJECT_REGISTRY,
-  type EnvelopeRegistryEntry,
-  type SubjectRegistryEntry,
-} from "../schemas/registry";
+export async function parseCredential(input: VerifiableCredential<{
+  "@context": string;
+}>): Promise<VerifiableCredentialFaceIdV1 | VerifiableCredentialKycV1 | VerifiableCredentialKycV2 | VerifiableCredentialKycV3> {
+  // Check one by one for context
+  const v1 = new VerifiableCredentialFaceIdV1();
 
-// ponytail: zod strips unknown keys, so parsing the raw VC objects (which still
-// carry @context / proof) against the flat schemas yields clean, typed results.
+  if (input.credentialSubject["@context"] === v1.subjectContext) {
+    v1.deserialize(input as any);
+    return v1;
+  }
 
-type Unknown = Record<string, unknown>;
+  const kycV1 = new VerifiableCredentialKycV1();
 
-export type ParsedSubject =
-  | { type: "kyc"; version: "v1"; subject: KycSubjectV1 }
-  | { type: "kyc"; version: "v2"; subject: KycSubjectV2 }
-  | { type: "kyc"; version: "v3"; subject: KycSubjectV3 }
-  | { type: "faceId"; version: "v1"; subject: FaceIdSubjectV1 }
-  | { type: "unknown"; version: "unknown"; subject: Unknown };
+  if (input.credentialSubject["@context"] === kycV1.subjectContext) {
+    kycV1.deserialize(input as any);
+    return kycV1;
+  }
 
-export type ParsedEnvelope =
-  | { version: "v1"; envelope: EnvelopeExtensionV1 }
-  | { version: "v2"; envelope: EnvelopeExtensionV2 }
-  | { version: "unknown"; envelope: Unknown };
+  const v2 = new VerifiableCredentialKycV2();
 
-export type ParsedCredential = {
-  envelope: ParsedEnvelope;
-  subject: ParsedSubject;
-};
+  if (input.credentialSubject["@context"] === v2.subjectContext) {
+    v2.deserialize(input as any);
+    return v2;
+  }
 
-function contexts(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === "string");
-  return [];
-}
+  const v3 = new VerifiableCredentialKycV3();
 
-function match<E extends { context: string }>(
-  entries: readonly E[],
-  value: unknown,
-): E | undefined {
-  const ctx = contexts(value);
-  return entries.find((entry) => ctx.includes(entry.context));
-}
+  if (input.credentialSubject["@context"] === v3.subjectContext) {
+    v3.deserialize(input as any);
+    return v3;
+  }
 
-/** Parse a `credentialSubject` into its versioned Zod type based on its `@context`. */
-export function parseCredentialSubject(input: object): ParsedSubject {
-  const subject = input as Unknown;
-  const entry: SubjectRegistryEntry | undefined = match(SUBJECT_REGISTRY, subject["@context"]);
-  if (!entry) return { type: "unknown", version: "unknown", subject };
-
-  // Cast: the registry pairs each context with the matching flat type; the
-  // discriminated union above documents the (type, version) → shape relation.
-  return {
-    type: entry.type,
-    version: entry.version,
-    subject: entry.schema.parse(subject),
-  } as ParsedSubject;
-}
-
-/** Parse the credential envelope (top-level level/kycLevel/...) by its `@context`. */
-export function parseEnvelope(input: object): ParsedEnvelope {
-  const credential = input as Unknown;
-  const entry: EnvelopeRegistryEntry | undefined = match(ENVELOPE_REGISTRY, credential["@context"]);
-  if (!entry) return { version: "unknown", envelope: credential };
-
-  return {
-    version: entry.version,
-    envelope: entry.schema.parse(credential),
-  } as ParsedEnvelope;
-}
-
-/** Parse a full verifiable credential into its versioned envelope + subject. */
-export function parseCredential(input: object): ParsedCredential {
-  const credential = input as Unknown;
-  const subject = (credential.credentialSubject ?? {}) as Unknown;
-  return {
-    envelope: parseEnvelope(credential),
-    subject: parseCredentialSubject(subject),
-  };
+  throw new Error("Unknown credential");
 }

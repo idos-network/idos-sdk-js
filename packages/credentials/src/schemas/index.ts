@@ -6,10 +6,9 @@ import type { IVerifiableCredentialContainer } from "./types";
 
 import {
   CONTEXT_V1,
-  BASE_PUBLIC_URL,
   CONTEXT_ED25519_SIGNATURE_2020_V1,
   defaultDocumentLoader,
-} from "../builder/loader";
+} from "../utils/loader";
 import { convertBuilderObject, issuerToKey } from "../utils";
 
 export class VerifiableCredentialContainerBase<
@@ -32,25 +31,34 @@ export class VerifiableCredentialContainerBase<
     this.subjectContext = subjectContext;
   }
 
+  public serialize(): TFlatSubject {
+    this.checkValidity();
+
+    return {
+      "@context": [
+        this.subjectContext
+      ],
+      ...convertBuilderObject(
+        this.subject as Record<string, Record<string, unknown>>,
+      ),
+    } as TFlatSubject;
+  }
+
   public async issue(
     issuer: AvailableIssuerType,
   ): Promise<VerifiableCredential<TFlatSubject> & TExternalEnvelopeFields> {
-    this.checkValidity();
-
     const key = await issuerToKey(issuer);
 
     const credential = {
       "@context": [
         CONTEXT_V1,
-        `${BASE_PUBLIC_URL}${this.envelopeContext}`,
+        this.envelopeContext,
         CONTEXT_ED25519_SIGNATURE_2020_V1,
       ],
       type: ["VerifiableCredential"],
       issuer: key.controller,
       ...convertBuilderObject({ root: this.envelope }),
-      credentialSubject: convertBuilderObject(
-        this.subject as Record<string, Record<string, unknown>>,
-      ),
+      credentialSubject: this.serialize(),
     };
 
     const suite = new Ed25519Signature2020({ key });
@@ -74,16 +82,8 @@ export class VerifiableCredentialContainerBase<
     throw new Error("Not implemented");
   }
 
-  get subjectData(): TFlatSubject {
-    throw new Error("Not implemented");
-  }
-
-  get envelopeData(): TExternalEnvelopeFields {
-    throw new Error("Not implemented");
-  }
-
   public async deserialize(
-    verifiableCredential: VerifiableCredential<TFlatSubject> & TExternalEnvelopeFields,
+    _verifiableCredential: VerifiableCredential<TFlatSubject> & TExternalEnvelopeFields,
   ): Promise<void> {
     throw new Error("Not implemented");
   }

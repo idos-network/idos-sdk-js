@@ -1,6 +1,8 @@
 import { type JsonLDDocumentLoaderInstance, JsonLdDocumentLoader } from "jsonld-document-loader";
 
 import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json";
+import v1 from "../../assets/v1.json";
+
 // TODO: Generate this
 import idosCredentialSubjectFaceIdV1 from "../../assets/idos-credential-subject-face-id-v1.json";
 import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
@@ -8,7 +10,6 @@ import idosCredentialSubjectV2 from "../../assets/idos-credential-subject-v2.jso
 import idosCredentialSubjectV3 from "../../assets/idos-credential-subject-v3.json";
 import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
 import idosCredentialsV2 from "../../assets/idos-credentials-v2.json";
-import v1 from "../../assets/v1.json";
 
 export const CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
 export const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suites/ed25519-2020/v1";
@@ -16,20 +17,12 @@ export const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suit
 export const BASE_PUBLIC_URL = "https://idos-network.github.io/idos-sdk-js/credentials/";
 
 // Check .github/workflow/pages.yml how those are deployed
-export const CONTEXT_IDOS_CREDENTIAL_V1 =
-  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v1.json";
-export const CONTEXT_IDOS_CREDENTIAL_V2 =
-  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v2.json";
-
-export const CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT =
-  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v1.json";
-export const CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT =
-  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v2.json";
-export const CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT =
-  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json";
-
-export const CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID =
-  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-face-id-v1.json";
+export const CONTEXT_IDOS_CREDENTIAL_V1: string = `${BASE_PUBLIC_URL}idos-credentials-v1.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V2: string = `${BASE_PUBLIC_URL}idos-credentials-v2.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v1.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v2.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v3.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID: string = `${BASE_PUBLIC_URL}idos-credential-subject-face-id-v1.json`;
 
 export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   const loader = new JsonLdDocumentLoader();

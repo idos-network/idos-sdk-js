@@ -6,7 +6,7 @@ import * as vc from "@digitalbazaar/vc";
 import type { AvailableIssuerType, VerifiableCredential } from "../types";
 
 import { issuerToKey } from "../utils";
-import { defaultDocumentLoader } from "./loader";
+import { defaultDocumentLoader } from "../utils/loader";
 
 export type VerifyCredentialResult = [boolean, Map<AvailableIssuerType, vc.VerifyCredentialResult>];
 

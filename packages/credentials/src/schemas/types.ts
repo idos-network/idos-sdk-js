@@ -17,9 +17,6 @@ export interface IVerifiableCredentialContainer<
   // Subject POJO to construct the verifiable credential subject
   subject: Partial<TStructuredSubject>;
 
-  // Subject data (full) - can throw error if invalid
-  readonly subjectData: TFlatSubject;
-
   // Return if the container is valid (has all required fields)
   checkValidity(): void;
 
@@ -33,6 +30,9 @@ export interface IVerifiableCredentialContainer<
   issue(
     issuer: AvailableIssuerType,
   ): Promise<VerifiableCredential<TFlatSubject> & TExternalEnvelopeFields>;
+
+  // Serialize verifiable credential
+  serialize(): TFlatSubject;
 
   // Deserialize verifiable credential
   deserialize(

@@ -1,7 +1,7 @@
-import type { BuilderType } from ".";
+import type { StructuredObject } from "./schema";
 import type { BaseLevel, Addon } from "../../../utils";
 
-export function deriveLevel(credential: BuilderType): string {
+export function deriveLevel(credential: Partial<StructuredObject>): string {
   let level: BaseLevel = "basic";
 
   // Address is a sign for plus+
@@ -26,6 +26,6 @@ export function deriveLevel(credential: BuilderType): string {
   return [level, ...addons].join("+");
 }
 
-export function deriveKYCLevel(_credential: BuilderType): number {
+export function deriveKYCLevel(_credential: Partial<StructuredObject>): number {
   return 1; // TODO: Implement this
 }

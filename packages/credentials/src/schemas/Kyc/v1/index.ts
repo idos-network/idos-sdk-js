@@ -1,25 +1,64 @@
-import { z } from "zod";
+import type { CredentialSubjectV1 } from "../../../generated/CredentialSubjectV1";
+import type { StructuredObject as CredentialSubjectType } from "./schema";
 
+import { VerifiableCredentialContainerBase } from "../..";
+import {
+  StructuredSchema as EnvelopeSchema,
+  type StructuredObject as EnvelopeType,
+} from "../../envelope/v1/schema";
 import { IdDocumentSchema } from "./idDocument";
 import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
+import { CONTEXT_IDOS_CREDENTIAL_V1, CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT } from "../../../utils/loader";
 
-const mapping: Record<string, z.ZodObject<any>> = {
-  root: RootSchema,
-  idDocument: IdDocumentSchema,
-  residentialAddress: ResidentialAddressSchema,
-};
+export class VerifiableCredentialKycV1 extends VerifiableCredentialContainerBase<
+  EnvelopeType,
+  CredentialSubjectType,
+  CredentialSubjectV1
+> {
+  constructor() {
+    super(CONTEXT_IDOS_CREDENTIAL_V1, CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT);
+  }
 
-export const BuilderSchema: z.ZodObject<{
-  root: typeof RootSchema;
-  idDocument: z.ZodOptional<typeof IdDocumentSchema>;
-  residentialAddress: z.ZodOptional<typeof ResidentialAddressSchema>;
-}> = z.object({
-  root: RootSchema,
-  idDocument: IdDocumentSchema.optional(),
-  residentialAddress: ResidentialAddressSchema.optional(),
-});
+  checkValidity(): void {
+    EnvelopeSchema.parse(this.envelope);
+    RootSchema.parse(this.subject.root);
 
-export type BuilderType = z.infer<typeof BuilderSchema>;
+    if (this.subject.idDocument) {
+      IdDocumentSchema.parse(this.subject.idDocument);
+    }
 
-export default mapping;
+    if (this.subject.residentialAddress) {
+      ResidentialAddressSchema.parse(this.subject.residentialAddress);
+    }
+  }
+
+  setMandatoryEnvelopeFields(fields: EnvelopeType): void {
+    EnvelopeSchema.parse(fields);
+    this.envelope = fields;
+  }
+
+  setMandatoryFields(root: CredentialSubjectType["root"]): void {
+    RootSchema.parse(root);
+    this.subject.root = root;
+  }
+
+  addIdDocument(idDocument: CredentialSubjectType["idDocument"], validate: boolean = true): void {
+    if (validate) {
+      IdDocumentSchema.parse(idDocument);
+    }
+
+    this.subject.idDocument = idDocument;
+  }
+
+  addResidentialAddress(
+    residentialAddress: CredentialSubjectType["residentialAddress"],
+    validate: boolean = true,
+  ): void {
+    if (validate) {
+      ResidentialAddressSchema.parse(residentialAddress);
+    }
+
+    this.subject.residentialAddress = residentialAddress;
+  }
+}
