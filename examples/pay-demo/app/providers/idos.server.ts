@@ -36,7 +36,7 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   const credentialContents: string =
     await idOSConsumer.getCredentialSharedContentDecrypted(credentialId);
 
-  const data = JSON.parse(credentialContents) as VerifiableCredential<any>;
+  const data = JSON.parse(credentialContents) as VerifiableCredential<CredentialSubjectKycV2>;
 
   const issuer = {
     issuer: SERVER_ENV.RELAY_ISSUER,
