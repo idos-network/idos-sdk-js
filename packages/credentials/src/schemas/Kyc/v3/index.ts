@@ -15,6 +15,7 @@ import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
 import { ScreeningSchema } from "./screening";
 import { SourceOfWealthSchema } from "./sourceOfWealth";
+import { CONTEXT_IDOS_CREDENTIAL_V2, CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT } from "../../../utils/loader";
 
 export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase<
   EnvelopeType,
@@ -22,7 +23,7 @@ export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase
   CredentialSubjectV3
 > {
   constructor() {
-    super("idos-credential-v2", "idos-credential-subject-v3");
+    super(CONTEXT_IDOS_CREDENTIAL_V2, CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT);
   }
 
   checkValidity(): void {

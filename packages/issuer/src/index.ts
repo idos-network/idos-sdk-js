@@ -9,10 +9,8 @@ import type {
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
 
-import { buildKycCredential, buildFaceIdCredential } from "../../credentials/dist/verifier/verifier";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 
-import { deriveLevel, deriveKYCLevel } from "../../credentials/dist/Kyc/KycV3/utils";
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,
@@ -135,32 +133,6 @@ export class idOSIssuer {
       (contentHash: string) => this.getCredentialIdByContentHash(contentHash),
       (id: string) => this.getCredentialShared(id),
     );
-  }
-
-  async buildKycCredential(
-    fields: Parameters<typeof buildKycCredential>[0],
-    subject: Parameters<typeof buildKycCredential>[1],
-    issuer: Parameters<typeof buildKycCredential>[2],
-    validate = true,
-  ): ReturnType<typeof buildKycCredential> {
-    return buildKycCredential(fields, subject, issuer, validate);
-  }
-
-  deriveCredentialLevel(subject: Parameters<typeof deriveLevel>[0]): string {
-    return deriveLevel(subject);
-  }
-
-  deriveKYCLevel(subject: Parameters<typeof deriveKYCLevel>[0]): number {
-    return deriveKYCLevel(subject);
-  }
-
-  async buildFaceIdCredential(
-    fields: Parameters<typeof buildFaceIdCredential>[0],
-    subject: Parameters<typeof buildFaceIdCredential>[1],
-    issuer: Parameters<typeof buildFaceIdCredential>[2],
-    validate = true,
-  ): ReturnType<typeof buildFaceIdCredential> {
-    return buildFaceIdCredential(fields, subject, issuer, validate);
   }
 }
 

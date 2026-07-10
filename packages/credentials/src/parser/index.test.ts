@@ -1,17 +1,16 @@
-import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import { describe, expect, it } from "vitest";
 
-import { parseCredential, parseCredentialSubject, parseEnvelope } from ".";
-import { buildFaceIdCredential, buildKycCredential } from "../verifier";
+import { parseCredential } from ".";
 import {
-  CONTEXT_IDOS_CREDENTIAL_V1,
-  CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT,
-  CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT,
-} from "../utils/loader";
+  VerifiableCredentialFaceIdV1,
+  VerifiableCredentialKycV1,
+  VerifiableCredentialKycV2,
+  VerifiableCredentialKycV3,
+  type VerifiableCredential,
+} from "../types";
 
 const ISSUER = "https://vc-issuers.cool.id/idos";
 const CRED_ID = `${ISSUER}/credentials/z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3`;
-
 const envelopeFields = {
   id: CRED_ID,
   level: "human",
@@ -21,125 +20,137 @@ const envelopeFields = {
   expirationDate: new Date("2030-01-01").toISOString(),
 };
 
-function key() {
-  return Ed25519VerificationKey2020.generate({
-    id: `${ISSUER}/keys/1`,
-    controller: `${ISSUER}/issuers/1`,
-  });
+const proof = {
+  type: "Ed25519Signature2020",
+  created: new Date("2022-01-01").toISOString(),
+  verificationMethod: `${ISSUER}/keys/1`,
+  proofValue: "proof",
+  proofPurpose: "assertionMethod",
+};
+
+function credential<TSubject>(
+  envelopeContext: string,
+  credentialSubject: TSubject,
+): VerifiableCredential<TSubject> & typeof envelopeFields {
+  return {
+    "@context": ["https://www.w3.org/2018/credentials/v1", envelopeContext],
+    type: ["VerifiableCredential"],
+    issuer: ISSUER,
+    ...envelopeFields,
+    credentialSubject,
+    issuanceDate: envelopeFields.issued,
+    proof,
+  };
 }
 
 describe("parseCredential", () => {
-  it("parses a latest (V3 subject / V2 envelope) KYC credential built by the builder", async () => {
-    const credential = await buildKycCredential(
-      envelopeFields,
+  it("returns a deserialized KYC v3 container", async () => {
+    const original = new VerifiableCredentialKycV3();
+    original.setMandatoryEnvelopeFields(envelopeFields);
+    original.setMandatoryFields(
+      { id: "uuid:abc" },
       {
-        root: { id: "uuid:abc" },
-        person: {
-          firstName: "John",
-          familyName: "Lennon",
-          gender: "M",
-          nationality: "US",
-          dateOfBirth: new Date("1980-01-01"),
-          placeOfBirth: "New York, NY",
-        },
-        contact: { email: "john@example.com", phoneNumber: "+1234567890" },
-        idDocument: {
-          country: "US",
-          number: "123456789",
-          type: "PASSPORT",
-          dateOfIssue: new Date("2022-01-01"),
-          dateOfExpiry: new Date("2025-01-01"),
-          frontFile: Buffer.from("Front"),
-        },
-        biometric: { selfieFile: Buffer.from("Selfie") },
-        residentialAddress: {
-          street: "Main St",
-          city: "New York",
-          country: "US",
-          proofCategory: "Utility Bill",
-          proofFile: Buffer.from("Proof"),
-        },
-        screening: { sanctionsCheckResult: "CLEAR", pepCheckResult: "CLEAR" },
-        sourceOfWealth: { type: "SALARY" },
+        firstName: "John",
+        familyName: "Lennon",
+        gender: "M",
+        nationality: "US",
+        dateOfBirth: new Date("1980-01-01"),
+        placeOfBirth: "New York, NY",
       },
-      await key(),
+      {
+        country: "US",
+        number: "123456789",
+        type: "PASSPORT",
+        dateOfIssue: new Date("2022-01-01"),
+        dateOfExpiry: new Date("2025-01-01"),
+        frontFile: Buffer.from("Front"),
+      },
+    );
+    original.addContact({ email: "john@example.com", phoneNumber: "+1234567890" });
+    original.addBiometric({ selfieFile: Buffer.from("Selfie") });
+    original.addResidentialAddress({
+      street: "Main St",
+      city: "New York",
+      country: "US",
+      proofCategory: "Utility Bill",
+      proofFile: Buffer.from("Proof"),
+    });
+    original.addScreening({ sanctionsCheckResult: "CLEAR", pepCheckResult: "CLEAR" });
+    original.addSourceOfWealth({ type: "SALARY" });
+
+    const parsed = await parseCredential(
+      credential(original.envelopeContext, original.serialize()),
     );
 
-    const { envelope, subject } = parseCredential(credential);
-
-    expect(envelope.version).toBe("v2");
-    expect(subject.type).toBe("kyc");
-    expect(subject.version).toBe("v3");
-
-    if (subject.type !== "kyc" || subject.version !== "v3") throw new Error("expected kyc v3");
-    expect(subject.subject.personFirstName).toBe("John");
-    // @context / proof are stripped by the flat schema
-    expect(subject.subject).not.toHaveProperty("@context");
-    expect(subject.subject).not.toHaveProperty("proof");
-
-    if (envelope.version !== "v2") throw new Error("expected v2 envelope");
-    expect(envelope.envelope.level).toBe("human");
-    expect(envelope.envelope.kycLevel).toBe(1);
+    expect(parsed).toBeInstanceOf(VerifiableCredentialKycV3);
+    if (!(parsed instanceof VerifiableCredentialKycV3)) throw new Error("expected kyc v3");
+    expect(() => parsed.checkValidity()).not.toThrow();
+    expect(parsed.envelope.level).toBe("human");
+    expect(parsed.envelope.kycLevel).toBe(1);
+    expect(parsed.subject.person?.firstName).toBe("John");
+    expect(parsed.subject.person?.dateOfBirth).toEqual(new Date("1980-01-01"));
+    expect(parsed.subject.idDocument?.frontFile?.toString()).toBe("Front");
   });
 
-  it("parses a FaceId credential", async () => {
-    const credential = await buildFaceIdCredential(
-      envelopeFields,
-      { root: { faceSignUserId: "11111111-1111-1111-1111-111111111111" } },
-      await key(),
-    );
-
-    const { subject } = parseCredential(credential);
-    expect(subject.type).toBe("faceId");
-    expect(subject.version).toBe("v1");
-    if (subject.type !== "faceId") throw new Error("expected faceId");
-    expect(subject.subject.faceSignUserId).toBe("11111111-1111-1111-1111-111111111111");
-  });
-});
-
-describe("parseCredentialSubject", () => {
-  it("routes by subject @context (V1 vs V2)", () => {
-    const v1 = parseCredentialSubject({
-      "@context": CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT,
-      id: "uuid:abc",
-    });
-    expect(v1).toMatchObject({ type: "kyc", version: "v1" });
-
-    const v2 = parseCredentialSubject({
-      "@context": CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT,
-      id: "uuid:abc",
-    });
-    expect(v2).toMatchObject({ type: "kyc", version: "v2" });
-  });
-
-  it("returns the plain object for an unknown/missing context", () => {
-    const raw = { id: "uuid:abc", firstName: "Nobody" };
-
-    expect(parseCredentialSubject(raw)).toEqual({
-      type: "unknown",
-      version: "unknown",
-      subject: raw,
-    });
-
-    expect(parseCredentialSubject({ "@context": "https://example.com/whatever" })).toMatchObject({
-      type: "unknown",
-      version: "unknown",
-    });
-  });
-});
-
-describe("parseEnvelope", () => {
-  it("routes by top-level @context array", () => {
-    const parsed = parseEnvelope({
-      "@context": ["https://www.w3.org/2018/credentials/v1", CONTEXT_IDOS_CREDENTIAL_V1],
+  it("returns a deserialized FaceId v1 container", async () => {
+    const original = new VerifiableCredentialFaceIdV1();
+    original.setMandatoryEnvelopeFields({
       id: CRED_ID,
       level: "human",
+      approvedAt: new Date("2022-01-01"),
     });
-    expect(parsed.version).toBe("v1");
+    original.setMandatoryFields({ faceSignUserId: "11111111-1111-1111-1111-111111111111" });
+
+    const parsed = await parseCredential(
+      credential(original.envelopeContext, original.serialize()),
+    );
+
+    expect(parsed).toBeInstanceOf(VerifiableCredentialFaceIdV1);
+    if (!(parsed instanceof VerifiableCredentialFaceIdV1)) throw new Error("expected faceId");
+    expect(() => parsed.checkValidity()).not.toThrow();
+    expect(parsed.subject.root?.faceSignUserId).toBe("11111111-1111-1111-1111-111111111111");
   });
 
-  it("returns the plain object for an unknown context", () => {
-    const raw = { "@context": ["https://www.w3.org/2018/credentials/v1"], level: "human" };
-    expect(parseEnvelope(raw)).toEqual({ version: "unknown", envelope: raw });
+  it("returns a deserialized KYC v1 container", async () => {
+    const original = new VerifiableCredentialKycV1();
+    original.setMandatoryEnvelopeFields({ id: CRED_ID, level: "human" });
+    original.setMandatoryFields({ id: "uuid:v1", firstName: "Ada" });
+    original.addIdDocument({
+      country: "US",
+      number: "123456789",
+      type: "PASSPORT",
+      frontFile: Buffer.from("Front"),
+    });
+
+    const parsed = await parseCredential(
+      credential(original.envelopeContext, original.serialize()),
+    );
+
+    expect(parsed).toBeInstanceOf(VerifiableCredentialKycV1);
+    if (!(parsed instanceof VerifiableCredentialKycV1)) throw new Error("expected kyc v1");
+    expect(() => parsed.checkValidity()).not.toThrow();
+    expect(parsed.subject.root?.firstName).toBe("Ada");
+    expect(parsed.subject.idDocument?.frontFile?.toString()).toBe("Front");
+  });
+
+  it("returns a deserialized KYC v2 container", async () => {
+    const original = new VerifiableCredentialKycV2();
+    original.setMandatoryEnvelopeFields(envelopeFields);
+    original.setMandatoryFields({ id: "uuid:v2", firstName: "Grace" });
+
+    const parsed = await parseCredential(
+      credential(original.envelopeContext, original.serialize()),
+    );
+
+    expect(parsed).toBeInstanceOf(VerifiableCredentialKycV2);
+    if (!(parsed instanceof VerifiableCredentialKycV2)) throw new Error("expected kyc v2");
+    expect(() => parsed.checkValidity()).not.toThrow();
+    expect(parsed.subject.root?.firstName).toBe("Grace");
+  });
+
+  it("throws for an unknown subject context", async () => {
+    await expect(
+      parseCredential(credential("unknown-envelope", { "@context": "unknown-subject" })),
+    ).rejects.toThrow("Unknown credential");
   });
 });

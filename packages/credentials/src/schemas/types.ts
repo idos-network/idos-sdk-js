@@ -35,7 +35,5 @@ export interface IVerifiableCredentialContainer<
   serialize(): TFlatSubject;
 
   // Deserialize verifiable credential
-  deserialize(
-    verifiableCredential: VerifiableCredential<TFlatSubject> & TExternalEnvelopeFields,
-  ): Promise<void>;
+  deserialize(verifiableCredential: VerifiableCredential<unknown>): Promise<void>;
 }
