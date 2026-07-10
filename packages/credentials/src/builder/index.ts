@@ -39,8 +39,8 @@ import { verifyCredential } from "./verifier";
  * This is essentially the wrong way forward, consumer should be able to fetch
  * the right credential object from idOS.
  */
-export type VCKyc = Awaited<ReturnType<typeof buildKycCredential>>;
-export type VCFaceId = Awaited<ReturnType<typeof buildFaceIdCredential>>;
+export type VCKyc = Awaited<ReturnType<typeof buildLatestKycVC>>;
+export type VCFaceId = Awaited<ReturnType<typeof buildLatestFaceIdVC>>;
 
 export type CredentialBuilder<TInput, TOutput = TInput> = (
   fields: EnvelopeExtensionLatestBuilderType["root"],
