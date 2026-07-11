@@ -1,104 +1,14 @@
-import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
-import * as base85 from "base85";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-import type { AvailableIssuerType, CustomIssuerType, InsertableIDOSCredential } from "../types";
+import type { InsertableIDOSCredential } from "../types";
 
-// TODO: This is latest one (we should have also previous versions)
-export { deriveLevel, deriveKYCLevel } from "../schemas/KycV3/utils";
-
-export function fileToBase85(file: Buffer): string {
-  return base85.encode(file, "ascii85");
-}
-
-export function base85ToFile(data: string): Buffer | false {
-  return base85.decode(data);
-}
-
-export function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function isIssuerKey(issuer: AvailableIssuerType): issuer is Ed25519VerificationKey2020 {
-  return (
-    typeof issuer === "object" &&
-    issuer !== null &&
-    "type" in issuer &&
-    "id" in issuer &&
-    "controller" in issuer
-  );
-}
-
-function isCustomIssuerType(issuer: AvailableIssuerType): issuer is CustomIssuerType {
-  return (
-    typeof issuer === "object" &&
-    issuer !== null &&
-    "issuer" in issuer &&
-    "publicKeyMultibase" in issuer
-  );
-}
-
-export async function issuerToKey(
-  issuer: AvailableIssuerType,
-): Promise<Ed25519VerificationKey2020> {
-  if (isIssuerKey(issuer)) {
-    return issuer;
-  }
-
-  if (isCustomIssuerType(issuer)) {
-    return await Ed25519VerificationKey2020.from({
-      id: `${issuer.issuer}/keys/1`,
-      controller: `${issuer.issuer}/issuers/1`,
-      publicKeyMultibase: issuer.publicKeyMultibase,
-      privateKeyMultibase: issuer.privateKeyMultibase,
-      type: "Ed25519VerificationKey2020",
-    });
-  }
-
-  return await Ed25519VerificationKey2020.from({ ...issuer, type: "Ed25519VerificationKey2020" });
-}
-
-export function convertValues<K extends Record<string, unknown>>(
-  fields: K,
-  prefix?: string,
-): Record<string, unknown> {
-  const acc: Record<string, unknown> = {};
-
-  for (const key in fields) {
-    if (Object.hasOwn(fields, key)) {
-      const value = fields[key];
-      const name = prefix ? `${prefix}${capitalizeFirstLetter(key)}` : key;
-      if (value instanceof Date) {
-        acc[name] = value.toISOString();
-      } else if (value instanceof Buffer) {
-        // Convert file to base85
-        acc[name] = fileToBase85(value);
-      } else {
-        acc[name] = value;
-      }
-    }
-  }
-
-  return acc;
-}
-
-export function convertBuilderObject(
-  object: Record<string, Record<string, unknown>>,
-): Record<string, unknown> {
-  const acc: Record<string, unknown> = {};
-
-  for (const key in object) {
-    if (Object.hasOwn(object, key)) {
-      const value = object[key];
-      Object.assign(acc, convertValues(value, key === "root" ? undefined : key));
-    }
-  }
-
-  return acc;
-}
+// Proxying functions
+export * from "./deserialization";
+export * from "./issuer";
+export * from "./serialization";
 
 export type BaseLevel = "basic" | "plus";
 export type Addon = "liveness" | "email" | "phoneNumber";

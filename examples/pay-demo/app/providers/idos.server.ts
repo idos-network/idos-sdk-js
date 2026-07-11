@@ -1,4 +1,4 @@
-import type { VCKyc } from "@idos-network/credentials/builder";
+import type { CredentialSubjectKycV2, VerifiableCredential } from "@idos-network/credentials/types";
 
 import { idOSConsumer as idOSConsumerClass, type idOSCredential } from "@idos-network/consumer";
 import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
@@ -36,7 +36,7 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   const credentialContents: string =
     await idOSConsumer.getCredentialSharedContentDecrypted(credentialId);
 
-  const data = JSON.parse(credentialContents) as VCKyc;
+  const data = JSON.parse(credentialContents) as VerifiableCredential<CredentialSubjectKycV2>;
 
   const issuer = {
     issuer: SERVER_ENV.RELAY_ISSUER,

@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { z } from "zod";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.resolve(dirname, "..");
@@ -88,6 +89,14 @@ function getZodType(schema, sourceExpression) {
   return sourceExpression;
 }
 
+function makeOptional(schema, expression) {
+  return schema?._def?.type === "optional" ? expression : `${expression}.optional()`;
+}
+
+function makeOptionalSchemaType(schema, typeExpression) {
+  return schema?._def?.type === "optional" ? typeExpression : `z.ZodOptional<${typeExpression}>`;
+}
+
 const legacyCountryCodesContext =
   "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/country-codes.xml";
 
@@ -102,47 +111,48 @@ const legacyKycFieldContextOverrides = {
 // Configuration & directory paths
 const configuration = [
   {
-    dir: "EnvelopeExtensionV1",
-    prefix: "EnvelopeExtensionV1",
-    jsonLd: "idos-credentials-v1.json",
+    dir: "envelope/v1",
+    jsonLd: "idos-credentials-v1",
+    noRoot: true,
+    flatName: false,
   },
   {
-    dir: "EnvelopeExtensionV2",
-    prefix: "EnvelopeExtensionV2",
-    jsonLd: "idos-credentials-v2.json",
+    dir: "envelope/v2",
+    jsonLd: "idos-credentials-v2",
+    noRoot: true,
+    flatName: false,
   },
   {
-    dir: "KycV1",
-    prefix: "KycV1",
-    jsonLd: "idos-credential-subject-v1.json",
+    dir: "Kyc/v3",
+    jsonLd: "idos-credential-subject-v3",
+    flatName: "CredentialSubjectV3",
+  },
+  {
+    dir: "Kyc/v1",
+    jsonLd: "idos-credential-subject-v1",
+    flatName: "CredentialSubjectV1",
     extraContext: {
       aux: legacyCountryCodesContext,
     },
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
   {
-    dir: "KycV2",
-    prefix: "KycV2",
-    jsonLd: "idos-credential-subject-v2.json",
+    dir: "Kyc/v2",
+    jsonLd: "idos-credential-subject-v2",
+    flatName: "CredentialSubjectV2",
     extraContext: {
       aux: legacyCountryCodesContext,
     },
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
   {
-    dir: "KycV3",
-    prefix: "KycV3",
-    jsonLd: "idos-credential-subject-v3.json",
-  },
-  {
-    dir: "FaceIdV1",
-    jsonLd: "idos-credential-subject-face-id-v1.json",
-    prefix: "FaceIdV1",
+    dir: "FaceId/v1",
+    jsonLd: "idos-credential-subject-face-id-v1",
+    flatName: "FaceIdV1",
   },
 ];
 
-function compileEntities(entitiesRoot) {
-  const entitiesIndexPath = path.join(entitiesRoot, "index.ts");
+function compileEntities(entitiesRoot, indexPath) {
   const tmpParent = path.join(packageRoot, ".tmp");
   fs.mkdirSync(tmpParent, { recursive: true });
   const tmpRoot = fs.mkdtempSync(path.join(tmpParent, "json-ld-"));
@@ -152,7 +162,7 @@ function compileEntities(entitiesRoot) {
     process.execPath,
     [
       tscPath,
-      entitiesIndexPath,
+      indexPath,
       "--outDir",
       tmpRoot,
       "--rootDir",
@@ -178,10 +188,7 @@ function compileEntities(entitiesRoot) {
   return tmpRoot;
 }
 
-function renderJsonLd(
-  credentialSubjectMapping,
-  { extraContext = {}, fieldContextOverrides = {} } = {},
-) {
+function renderJsonLd(schemaShape, { extraContext = {}, fieldContextOverrides = {} }) {
   const context = {
     "@version": 1.1,
     "@protected": true,
@@ -193,8 +200,13 @@ function renderJsonLd(
   // but JSON-LD already defines them
   const skipRootFields = ["id", "issued", "expirationDate"];
 
-  for (const [prefix, schema] of Object.entries(credentialSubjectMapping)) {
-    for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
+  for (const [prefix, schema] of Object.entries(schemaShape)) {
+    let currentSchema = schema;
+    if (currentSchema._def?.type === "optional") {
+      currentSchema = currentSchema.unwrap();
+    }
+
+    for (const [fieldName, fieldSchema] of Object.entries(currentSchema.shape)) {
       const verifiableFieldName =
         prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
       const fieldContextOverride = fieldContextOverrides[verifiableFieldName];
@@ -238,42 +250,49 @@ function findSchemaExport(schema, tmpRoot, generatedTypesImportRoot) {
 }
 
 function getSchemaMetadata(credentialSubjectMapping, tmpRoot, generatedTypesImportRoot) {
-  return Object.entries(credentialSubjectMapping).map(([prefix, schema]) => ({
-    prefix,
-    schema,
-    ...findSchemaExport(schema, tmpRoot, generatedTypesImportRoot),
-  }));
+  return Object.entries(credentialSubjectMapping).map(([prefix, schema]) => {
+    const unwrappedSchema = unwrapOptional(schema);
+
+    return {
+      prefix,
+      schema: unwrappedSchema,
+      parentOptional: schema?._def?.type === "optional",
+      ...findSchemaExport(unwrappedSchema, tmpRoot, generatedTypesImportRoot),
+    };
+  });
 }
 
-function renderSubjectTypes(
-  typePrefix,
-  credentialSubjectMapping,
-  tmpRoot,
-  generatedTypesImportRoot,
-) {
-  const schemas = getSchemaMetadata(credentialSubjectMapping, tmpRoot, generatedTypesImportRoot);
+function renderSubjectTypes(options) {
+  const { shape, typePrefix, tmpRoot, generatedTypesImportRoot } = options;
+  const schemas = getSchemaMetadata(shape, tmpRoot, generatedTypesImportRoot);
 
   const imports = schemas
-    .map(({ exportName, importPath }) => `import { ${exportName} } from "${importPath}";`)
+    .map(({ importPath, exportName }) => `import { ${exportName} } from "${importPath}";`)
     .join("\n");
 
   const fields = [];
   const typeDefinitions = [];
 
-  for (const { prefix, schema, exportName } of schemas) {
+  for (const { prefix, schema, exportName, parentOptional } of schemas) {
     for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
       const verifiableFieldName =
         prefix === "root" ? fieldName : `${prefix}${capitalize(fieldName)}`;
       const sourceExpression = `${exportName}.shape.${fieldName}`;
+      const zodType = getZodType(fieldSchema, sourceExpression);
+      const zodSchemaType = getZodSchemaType(fieldSchema, sourceExpression);
 
-      fields.push(`${verifiableFieldName}: ${getZodType(fieldSchema, sourceExpression)},`);
+      fields.push(
+        `${verifiableFieldName}: ${parentOptional ? makeOptional(fieldSchema, zodType) : zodType},`,
+      );
       typeDefinitions.push(
-        `${verifiableFieldName}: ${getZodSchemaType(fieldSchema, sourceExpression)},`,
+        `${verifiableFieldName}: ${
+          parentOptional ? makeOptionalSchemaType(fieldSchema, zodSchemaType) : zodSchemaType
+        },`,
       );
     }
   }
 
-  return `/* This file is generated by packages/credentials/cli/generate-subject.mjs. */
+  return `/* This file is generated by packages/credentials/cli/generate-schemas.mjs. */
 import { z } from "zod";
 
 ${imports}
@@ -289,27 +308,62 @@ export type ${typePrefix} = z.infer<typeof ${typePrefix}Schema>;
 }
 
 function main() {
-  for (const { dir, jsonLd, prefix, extraContext, fieldContextOverrides } of configuration) {
-    const entitiesRoot = path.join(packageRoot, "src/schemas/", dir);
-    const jsonLdPath = path.join(packageRoot, "assets/", jsonLd);
+  const schemaRoot = path.join(packageRoot, "src/schemas");
+  const generatedRoot = path.join(packageRoot, "src/generated");
+  const jsonLdRoot = path.join(packageRoot, "assets");
 
-    const subjectTypesPath = path.join(packageRoot, "src/generated/", `${dir}.ts`);
-    fs.mkdirSync(path.dirname(subjectTypesPath), { recursive: true });
+  fs.rmSync(generatedRoot, { recursive: true, force: true });
+  fs.mkdirSync(generatedRoot, { recursive: true });
 
-    const generatedTypesImportRoot = `../schemas/${dir}`;
-    const tmpRoot = compileEntities(entitiesRoot);
+  for (const {
+    dir,
+    jsonLd,
+    flatName,
+    noRoot,
+    extraContext,
+    fieldContextOverrides,
+  } of configuration) {
+    const entitiesRoot = path.join(schemaRoot, dir);
+    const entityIndexPath = path.join(entitiesRoot, "schema.ts");
+
+    const tmpRoot = compileEntities(entitiesRoot, entityIndexPath);
 
     try {
-      const { default: mapping } = require(path.join(tmpRoot, "index.js"));
+      const { StructuredSchema } = require(path.join(tmpRoot, "schema.js"));
 
-      fs.rmSync(jsonLdPath, { force: true });
-      fs.rmSync(subjectTypesPath, { force: true });
+      // Generate JSON-LD schema
+      const jsonLdFile = path.join(jsonLdRoot, `${jsonLd}.json`);
+      fs.rmSync(jsonLdFile, { force: true });
 
-      fs.writeFileSync(jsonLdPath, renderJsonLd(mapping, { extraContext, fieldContextOverrides }));
+      // Convert noRoot schema to root schema
+      let schema = StructuredSchema;
+      if (noRoot) {
+        schema = z.object({
+          root: StructuredSchema,
+        });
+      }
+
       fs.writeFileSync(
-        subjectTypesPath,
-        renderSubjectTypes(prefix, mapping, tmpRoot, generatedTypesImportRoot),
+        jsonLdFile,
+        renderJsonLd(schema.shape, { extraContext, fieldContextOverrides }),
       );
+
+      if (flatName) {
+        const flatFile = path.join(generatedRoot, `${flatName}.ts`);
+        const generatedTypesImportRoot = `../schemas/${dir}`;
+
+        fs.writeFileSync(
+          flatFile,
+          renderSubjectTypes({
+            shape: schema.shape,
+            typePrefix: flatName,
+            tmpRoot,
+            generatedTypesImportRoot,
+            extraContext,
+            fieldContextOverrides,
+          }),
+        );
+      }
     } finally {
       fs.rmSync(tmpRoot, { recursive: true, force: true });
     }

@@ -1,4 +1,4 @@
-import type { VCKyc } from "@idos-network/credentials/builder";
+import type { CredentialSubjectKycV2, VerifiableCredential } from "@idos-network/credentials/types";
 
 // @ts-expect-error
 import ascii85 from "ascii85";
@@ -28,8 +28,8 @@ export const getClientToken = async () => {
   return await response.json().then((data) => data.access_token);
 };
 
-export const createUser = async (data: VCKyc) => {
-  if (!data.credentialSubject.contactEmail) {
+export const createUser = async (data: VerifiableCredential<CredentialSubjectKycV2>) => {
+  if (!data.credentialSubject.email) {
     // Email is required, so you have to go to the auth page
     throw new Error("Email is required");
   }
@@ -44,7 +44,7 @@ export const createUser = async (data: VCKyc) => {
       Authorization: `Bearer ${clientToken}`,
     },
     body: JSON.stringify({
-      email: data.credentialSubject.contactEmail,
+      email: data.credentialSubject.email,
     }),
   });
 
@@ -113,7 +113,10 @@ export interface IdDocument {
   kind: string;
 }
 
-export const createProfile = async (profileId: string, data: VCKyc) => {
+export const createProfile = async (
+  profileId: string,
+  data: VerifiableCredential<CredentialSubjectKycV2>,
+) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
@@ -131,13 +134,13 @@ export const createProfile = async (profileId: string, data: VCKyc) => {
     country: data.credentialSubject.residentialAddressCountry!,
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
     countryState: data.credentialSubject.residentialAddressCountry!,
-    nationality: data.credentialSubject.personNationality ?? "DE", // TODO: Check this out
+    nationality: data.credentialSubject.nationality ?? "DE", // TODO: Check this out
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
     // oxlint-disable-next-line typescript/no-non-null-asserted-optional-chain -- This is ok (demo)
-    birthday: data.credentialSubject.personDateOfBirth?.split("T")[0]!,
+    birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
     idDocument: {
-      number: data.credentialSubject.idDocumentNumber,
-      kind: data.credentialSubject.idDocumentType.toLowerCase(),
+      number: data.credentialSubject.idDocumentNumber ?? "",
+      kind: data.credentialSubject.idDocumentType?.toLowerCase() ?? "",
     },
   };
 
@@ -179,12 +182,7 @@ export const createProfile = async (profileId: string, data: VCKyc) => {
       "back",
     ),
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-    uploadFile(
-      profileId,
-      apiToken,
-      data.credentialSubject.biometricSelfieFile!,
-      "facialSimilarity",
-    ),
+    uploadFile(profileId, apiToken, data.credentialSubject.selfieFile!, "facialSimilarity"),
     uploadFile(
       profileId,
       apiToken,
@@ -322,7 +320,7 @@ export const statusAndIban = async (profileId: string) => {
   };
 };
 
-export const auth = async (data: VCKyc, url: URL) => {
+export const auth = async (data: VerifiableCredential<CredentialSubjectKycV2>, url: URL) => {
   // Generate PKCE code verifier and challenge
   const { codeChallenge, codeVerifier } = await generateCodeChallenge();
 
@@ -337,7 +335,7 @@ export const auth = async (data: VCKyc, url: URL) => {
   params.set("code_challenge", codeChallenge);
   params.set("code_challenge_method", "S256");
   // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-  params.set("email", data.credentialSubject.contactEmail!);
+  params.set("email", data.credentialSubject.email!);
   params.set("redirect_uri", returnUrl.toString());
 
   const authUrl = new URL(`${SERVER_ENV.MONERIUM_API_URL}/auth?${params.toString()}`);
