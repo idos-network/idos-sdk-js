@@ -26,24 +26,23 @@ https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v1.json
 ## Naming and versioning
 
 Credential data is versioned because the idOS credential format evolves over
-time. The package exports both explicit versions and `Latest` aliases.
+time. The package exports explicit versioned container classes and flat
+credential subject types.
 
-- `KycSubjectV{n}`: flat credential subject type for KYC data.
-- `KycSubjectV{n}BuilderType`: structured input type used by the KYC builder.
-- `FaceIdSubjectV{n}`: flat credential subject type for Face ID data.
-- `FaceIdSubjectV{n}BuilderType`: structured input type used by the Face ID builder.
-- `EnvelopeExtensionV{n}`: top-level idOS fields added to the verifiable credential, such as `level` and `kycLevel`.
-- `*Latest`: alias for the current version used by the builders.
+- `VerifiableCredentialKycV{n}`: versioned KYC credential container.
+- `VerifiableCredentialFaceIdV{n}`: versioned Face ID credential container.
+- `CredentialSubjectKycV{n}`: flat credential subject type for KYC data.
+- `CredentialSubjectFaceIdV{n}`: flat credential subject type for Face ID data.
 
 Use explicit versioned types when reading stored credentials with long-lived
-compatibility requirements. Use `Latest` types when creating new credentials.
+compatibility requirements. Use the latest versioned class when creating new
+credentials.
 
 ```typescript
-import type {
-  EnvelopeExtensionLatestBuilderType,
-  KycSubjectLatest,
-  KycSubjectLatestBuilderType,
-  VerifiableCredential,
+import {
+  VerifiableCredentialKycV3,
+  type CredentialSubjectKycV3,
+  type VerifiableCredential,
 } from "@idos-network/credentials/types";
 ```
 
@@ -74,7 +73,7 @@ credential proof before trusting or using its contents.
 
 ## Create an issuer key
 
-The builders sign credentials with Ed25519 keys. You can pass either an
+Credential containers sign credentials with Ed25519 keys. You can pass either an
 `Ed25519VerificationKey2020` instance or issuer key material that can be converted
 to one.
 
@@ -100,76 +99,81 @@ const trustedIssuer = {
 
 ## Build a KYC credential
 
-Builders accept structured input and produce the flat credential subject required
-by JSON-LD. Zod validation is enabled by default.
+Credential containers accept structured fields, validate each section with Zod,
+and produce the flat credential subject required by JSON-LD. Calling `issue()`
+builds and signs the full verifiable credential.
 
 ```typescript
-import { buildLatestKycVC } from "@idos-network/credentials/builder";
-import type {
-  AvailableIssuerType,
-  EnvelopeExtensionLatestBuilderType,
-  KycSubjectLatest,
-  KycSubjectLatestBuilderType,
-  VerifiableCredential,
+import {
+  type AvailableIssuerType,
+  type CredentialSubjectKycV3,
+  type VerifiableCredential,
+  VerifiableCredentialKycV3,
 } from "@idos-network/credentials/types";
 
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 
-const fields: EnvelopeExtensionLatestBuilderType["root"] = {
+const kycCredential = new VerifiableCredentialKycV3();
+
+kycCredential.setMandatoryEnvelopeFields({
   id: `${issuer}/credentials/${id}`,
   level: "basic+liveness+email",
   kycLevel: 1,
   issued: new Date("2022-01-01").toISOString(),
   approvedAt: new Date("2022-01-01").toISOString(),
   expirationDate: new Date("2030-01-01").toISOString(),
-};
+});
 
-const subject: KycSubjectLatestBuilderType = {
-  root: {
+kycCredential.setMandatoryFields(
+  {
     id: `uuid:${id}`,
   },
-  person: {
+  {
     firstName: "John",
     familyName: "Doe",
     dateOfBirth: new Date("1990-01-01"),
     nationality: "US",
   },
-  contact: {
-    email: "john@example.com",
-  },
-  biometric: {
-    selfieFile: Buffer.from("Selfie"),
-  },
-  idDocument: {
+  {
     type: "PASSPORT",
     country: "US",
     number: "123456789",
     frontFile: Buffer.from("ID document front"),
   },
-};
+);
+
+kycCredential.addContact({
+  email: "john@example.com",
+});
+
+kycCredential.addBiometric({
+  selfieFile: Buffer.from("Selfie"),
+});
 
 const issuerKey: AvailableIssuerType = key;
 
-const credential: VerifiableCredential<KycSubjectLatest> = await buildLatestKycVC(
-  fields,
-  subject,
-  issuerKey,
-);
+const credential: VerifiableCredential<CredentialSubjectKycV3> =
+  await kycCredential.issue(issuerKey);
 ```
 
 ## Build a Face ID credential
 
 ```typescript
-import { buildLatestFaceIdVC } from "@idos-network/credentials/builder";
-import type { FaceIdSubjectLatestBuilderType } from "@idos-network/credentials/types";
+import { VerifiableCredentialFaceIdV1 } from "@idos-network/credentials/types";
 
-const faceIdSubject: FaceIdSubjectLatestBuilderType = {
-  root: {
-    faceSignUserId: "11111111-1111-1111-1111-111111111111",
-  },
-};
+const faceIdCredential = new VerifiableCredentialFaceIdV1();
 
-const faceIdCredential = await buildLatestFaceIdVC(fields, faceIdSubject, key);
+faceIdCredential.setMandatoryEnvelopeFields({
+  id: `${issuer}/credentials/${id}`,
+  level: "human",
+  approvedAt: new Date("2022-01-01"),
+});
+
+faceIdCredential.setMandatoryFields({
+  faceSignUserId: "11111111-1111-1111-1111-111111111111",
+});
+
+const issuedFaceIdCredential = await faceIdCredential.issue(key);
 ```
 
 ## Verify a credential
@@ -178,7 +182,7 @@ const faceIdCredential = await buildLatestFaceIdVC(fields, faceIdSubject, key);
 returns as soon as one issuer verifies the credential successfully.
 
 ```javascript
-import { verifyCredential } from "@idos-network/credentials/builder";
+import { verifyCredential } from "@idos-network/credentials/verifier";
 
 const allowedIssuers = [
   {
@@ -196,29 +200,26 @@ console.log("Results by issuer:", resultsByIssuer);
 
 ## Parse a credential
 
-The parser reads the JSON-LD context and returns the matching versioned envelope
-and subject types. Unknown contexts are returned as plain objects so callers can
-handle unsupported versions explicitly.
+The parser reads the JSON-LD context and returns the matching versioned
+credential container with structured `envelope` and `subject` fields. Unknown
+contexts throw an error so callers can handle unsupported versions explicitly.
 
 ```typescript
-import {
-  parseCredential,
-  parseCredentialSubject,
-  parseEnvelope,
-} from "@idos-network/credentials/parser";
+import { parseCredential } from "@idos-network/credentials/parser";
+import { VerifiableCredentialKycV3 } from "@idos-network/credentials/types";
 
-const parsed = parseCredential(credential);
+const parsed = await parseCredential(credential);
 
-if (parsed.subject.type === "kyc" && parsed.subject.version === "v3") {
-  console.log(parsed.subject.subject.personFirstName);
+if (parsed instanceof VerifiableCredentialKycV3) {
+  console.log(parsed.subject.person?.firstName);
 }
 ```
 
 ## Derive a level
 
-`deriveLevel` derives the string level from a KYC builder input. The current
-implementation treats address proof as `plus` and adds optional addons for
-liveness, email, and phone number.
+`deriveLevel` derives the string level from KYC v3 structured subject data. The
+current implementation treats address proof as `plus` and adds optional addons
+for liveness, email, and phone number.
 
 ```javascript
 import { deriveLevel } from "@idos-network/credentials/utils";

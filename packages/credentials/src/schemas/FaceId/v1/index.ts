@@ -1,5 +1,4 @@
 import type { FaceIdV1 } from "../../../generated/FaceIdV1";
-import type { StructuredObject as CredentialSubjectType } from "./schema";
 
 import { VerifiableCredentialContainerBase } from "../..";
 import {
@@ -11,6 +10,7 @@ import {
   type StructuredObject as EnvelopeType,
 } from "../../envelope/v1/schema";
 import { RootSchema } from "./root";
+import { StructuredSchema, type StructuredObject as CredentialSubjectType } from "./schema";
 
 export class VerifiableCredentialFaceIdV1 extends VerifiableCredentialContainerBase<
   EnvelopeType,
@@ -18,7 +18,12 @@ export class VerifiableCredentialFaceIdV1 extends VerifiableCredentialContainerB
   FaceIdV1
 > {
   constructor() {
-    super(CONTEXT_IDOS_CREDENTIAL_V1, CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID);
+    super(
+      CONTEXT_IDOS_CREDENTIAL_V1,
+      CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID,
+      EnvelopeSchema,
+      StructuredSchema,
+    );
   }
 
   checkValidity(): void {

@@ -1,65 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { StructuredObject as KycSubjectV3 } from "../schemas/Kyc/v3/schema";
-
 import {
-  deriveLevel,
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
-} from "./";
-
-const defaultCredential: KycSubjectV3 = {
-  root: {
-    id: "uuid:1234567890",
-  },
-  person: {
-    firstName: "John",
-    familyName: "Doe",
-    dateOfBirth: new Date("1990-01-01"),
-  },
-  contact: {
-    email: "john.doe@example.com",
-    phoneNumber: "+1234567890",
-  },
-  biometric: {
-    selfieFile: Buffer.from("Selfie"),
-  },
-  idDocument: {
-    type: "PASSPORT",
-    number: "123456789",
-    country: "US",
-    dateOfExpiry: new Date("2026-01-01"),
-    dateOfIssue: new Date("2021-01-01"),
-    issuingAuthority: "US Department of State",
-    frontFile: Buffer.from("ID Document Front"),
-    backFile: Buffer.from("ID Document Back"),
-    mrzLine1: "12345678901234567890123456789012",
-  },
-  residentialAddress: {
-    street: "123 Main St",
-    city: "Anytown",
-    postalCode: "12345",
-    country: "US",
-    proofCategory: "UTILITY_BILL",
-    proofFile: Buffer.from("Utility Bill"),
-    ipCountry: "US",
-  },
-  screening: {
-    sanctionsCheckResult: "CLEAR",
-    sanctionsConfidenceScore: 0.95,
-    pepCheckResult: "CLEAR",
-    pepConfidenceScore: 0.95,
-  },
-  edd: {
-    occupation: "REAL_ESTATE",
-    sourceOfFundsProof: Buffer.from("Source of Funds Proof"),
-  },
-  sourceOfWealth: {
-    type: "CRYPTO_TRADING",
-  },
-};
+} from ".";
 
 describe("recordFilter", () => {
   [
@@ -283,64 +229,5 @@ describe("highestMatchingCredential", () => {
     });
 
     expect(matchedCredentials).toBeUndefined();
-  });
-});
-
-describe("deriveLevel", () => {
-  it("basic only", () => {
-    expect(
-      deriveLevel({
-        root: {
-          id: "uuid:1234567890",
-        },
-        person: {
-          firstName: "John",
-          familyName: "Doe",
-          dateOfBirth: new Date("1990-01-01"),
-        },
-      }),
-    ).toBe("basic");
-  });
-
-  it("basic+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        residentialAddress: undefined,
-        contact: undefined,
-      }),
-    ).toBe("basic+liveness");
-  });
-
-  it("plus+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        contact: undefined,
-      }),
-    ).toBe("plus+liveness");
-  });
-
-  it("plus+liveness+phoneNumber", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        biometric: {
-          selfieFile: Buffer.from("Selfie"),
-        },
-        contact: {
-          phoneNumber: "+1234567890",
-          email: "john.doe@example.com",
-        },
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness+email+phoneNumber");
   });
 });

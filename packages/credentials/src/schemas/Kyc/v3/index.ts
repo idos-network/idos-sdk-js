@@ -1,5 +1,4 @@
 import type { CredentialSubjectV3 } from "../../../generated/CredentialSubjectV3";
-import type { StructuredObject as CredentialSubjectType } from "./schema";
 
 import { VerifiableCredentialContainerBase } from "../..";
 import {
@@ -17,6 +16,7 @@ import { IdDocumentSchema } from "./idDocument";
 import { PersonSchema } from "./person";
 import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
+import { StructuredSchema, type StructuredObject as CredentialSubjectType } from "./schema";
 import { ScreeningSchema } from "./screening";
 import { SourceOfWealthSchema } from "./sourceOfWealth";
 
@@ -26,7 +26,12 @@ export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase
   CredentialSubjectV3
 > {
   constructor() {
-    super(CONTEXT_IDOS_CREDENTIAL_V2, CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT);
+    super(
+      CONTEXT_IDOS_CREDENTIAL_V2,
+      CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT,
+      EnvelopeSchema,
+      StructuredSchema,
+    );
   }
 
   checkValidity(): void {
@@ -124,7 +129,7 @@ export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase
 
   addSourceOfWealth(
     sourceOfWealth: CredentialSubjectType["sourceOfWealth"],
-    validate: boolean = true,
+    validate = true,
   ): void {
     if (validate) {
       SourceOfWealthSchema.parse(sourceOfWealth);

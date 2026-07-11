@@ -1,5 +1,4 @@
 import type { CredentialSubjectV1 } from "../../../generated/CredentialSubjectV1";
-import type { StructuredObject as CredentialSubjectType } from "./schema";
 
 import { VerifiableCredentialContainerBase } from "../..";
 import {
@@ -13,6 +12,7 @@ import {
 import { IdDocumentSchema } from "./idDocument";
 import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
+import { StructuredSchema, type StructuredObject as CredentialSubjectType } from "./schema";
 
 export class VerifiableCredentialKycV1 extends VerifiableCredentialContainerBase<
   EnvelopeType,
@@ -20,7 +20,12 @@ export class VerifiableCredentialKycV1 extends VerifiableCredentialContainerBase
   CredentialSubjectV1
 > {
   constructor() {
-    super(CONTEXT_IDOS_CREDENTIAL_V1, CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT);
+    super(
+      CONTEXT_IDOS_CREDENTIAL_V1,
+      CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT,
+      EnvelopeSchema,
+      StructuredSchema,
+    );
   }
 
   checkValidity(): void {

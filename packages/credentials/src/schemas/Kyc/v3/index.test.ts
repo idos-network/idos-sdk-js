@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { base85ToFile } from "../../../utils";
+import { base85ToFile, fileToBase85 } from "../../../utils/serialization";
 import { VerifiableCredentialKycV3 } from "./index";
 
 describe("VerifiableCredentialKycV3.serialize", () => {
@@ -15,6 +15,7 @@ describe("VerifiableCredentialKycV3.serialize", () => {
       approvedAt: new Date("2022-01-02").toISOString(),
       expirationDate: new Date("2030-01-01").toISOString(),
     });
+
     credential.setMandatoryFields(
       { id: "uuid:abc" },
       {
@@ -45,6 +46,7 @@ describe("VerifiableCredentialKycV3.serialize", () => {
       approvedAt: new Date("2022-01-02").toISOString(),
       expirationDate: new Date("2030-01-01").toISOString(),
     });
+
     credential.setMandatoryFields(
       { id: "uuid:abc" },
       {
@@ -92,7 +94,9 @@ describe("VerifiableCredentialKycV3.serialize", () => {
 
     const serialized = credential.serialize() as Record<string, unknown>;
 
-    expect(serialized["@context"]).toEqual(["https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json"]);
+    expect(serialized["@context"]).toEqual([
+      "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json",
+    ]);
     expect(serialized.id).toBe("uuid:abc");
     expect(serialized.personFirstName).toBe("John");
     expect(serialized.personDateOfBirth).toBe(new Date("1990-01-01").toISOString());
@@ -114,5 +118,56 @@ describe("VerifiableCredentialKycV3.serialize", () => {
     expect(serialized.eddOccupation).toBe("REAL_ESTATE");
     expect(base85ToFile(serialized.eddSourceOfFundsProof as string)?.toString()).toBe("Funds");
     expect(serialized.sourceOfWealthType).toBe("SALARY");
+  });
+
+  it("deserializes flat envelope and subject fields", async () => {
+    const credential = new VerifiableCredentialKycV3();
+
+    await credential.deserialize({
+      "@context": [],
+      type: ["VerifiableCredential"],
+      issuer: "did:example:issuer",
+      id: "https://issuer.example/credentials/123",
+      level: "human",
+      kycLevel: 1,
+      issued: new Date("2022-01-01").toISOString(),
+      approvedAt: new Date("2022-01-02").toISOString(),
+      expirationDate: new Date("2030-01-01").toISOString(),
+      issuanceDate: new Date("2022-01-01").toISOString(),
+      credentialSubject: {
+        "@context": [
+          "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json",
+        ],
+        id: "uuid:abc",
+        personFirstName: "John",
+        personFamilyName: "Doe",
+        personNationality: "US",
+        personDateOfBirth: new Date("1990-01-01").toISOString(),
+        idDocumentType: "PASSPORT",
+        idDocumentNumber: "123456789",
+        idDocumentCountry: "US",
+        idDocumentFrontFile: fileToBase85(Buffer.from("Front")),
+        eddSourceOfFundsProof: fileToBase85(Buffer.from("Funds")),
+      },
+      proof: {
+        type: "Ed25519Signature2020",
+        created: new Date("2022-01-01").toISOString(),
+        verificationMethod: "did:example:issuer#key-1",
+        proofValue: "proof",
+        proofPurpose: "assertionMethod",
+      },
+    });
+
+    expect(credential.envelope).toEqual({
+      id: "https://issuer.example/credentials/123",
+      level: "human",
+      kycLevel: 1,
+      issued: new Date("2022-01-01").toISOString(),
+      approvedAt: new Date("2022-01-02").toISOString(),
+      expirationDate: new Date("2030-01-01").toISOString(),
+    });
+    expect(credential.subject.person?.dateOfBirth).toEqual(new Date("1990-01-01"));
+    expect(credential.subject.idDocument?.frontFile.toString()).toBe("Front");
+    expect(credential.subject.edd?.sourceOfFundsProof?.toString()).toBe("Funds");
   });
 });
