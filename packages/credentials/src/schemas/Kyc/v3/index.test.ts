@@ -90,7 +90,12 @@ describe("VerifiableCredentialKycV3.serialize", () => {
       occupation: "REAL_ESTATE",
       sourceOfFundsProof: Buffer.from("Funds"),
     });
-    credential.addSourceOfWealth({ type: "SALARY" });
+    credential.addSourceOfWealth({
+      type: "SALARY",
+      yearlyGrossIncome: "LESS_THAN_20000",
+      approximateNetWorth: "UP_TO_25000",
+      sourceOfWealthProofFile: Buffer.from("Proof"),
+    });
 
     const serialized = credential.serialize() as Record<string, unknown>;
 
@@ -118,6 +123,11 @@ describe("VerifiableCredentialKycV3.serialize", () => {
     expect(serialized.eddOccupation).toBe("REAL_ESTATE");
     expect(base85ToFile(serialized.eddSourceOfFundsProof as string)?.toString()).toBe("Funds");
     expect(serialized.sourceOfWealthType).toBe("SALARY");
+    expect(serialized.sourceOfWealthYearlyGrossIncome).toBe("LESS_THAN_20000");
+    expect(serialized.sourceOfWealthApproximateNetWorth).toBe("UP_TO_25000");
+    expect(
+      base85ToFile(serialized.sourceOfWealthSourceOfWealthProofFile as string)?.toString(),
+    ).toBe("Proof");
   });
 
   it("deserializes flat envelope and subject fields", async () => {

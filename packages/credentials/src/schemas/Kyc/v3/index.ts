@@ -13,6 +13,7 @@ import { BiometricSchema } from "./biometric";
 import { ContactSchema } from "./contact";
 import { EDDSchema } from "./edd";
 import { IdDocumentSchema } from "./idDocument";
+import { OnboardingSchema } from "./onboarding";
 import { PersonSchema } from "./person";
 import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
@@ -117,6 +118,14 @@ export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase
     }
 
     this.subject.screening = screening;
+  }
+
+  addOnboarding(onboarding: CredentialSubjectType["onboarding"], validate: boolean = true): void {
+    if (validate) {
+      OnboardingSchema.parse(onboarding);
+    }
+
+    this.subject.onboarding = onboarding;
   }
 
   addEDD(edd: CredentialSubjectType["edd"], validate: boolean = true): void {

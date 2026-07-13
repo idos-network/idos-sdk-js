@@ -5,6 +5,7 @@ import { BiometricSchema } from "../schemas/Kyc/v3/biometric";
 import { ContactSchema } from "../schemas/Kyc/v3/contact";
 import { EDDSchema } from "../schemas/Kyc/v3/edd";
 import { IdDocumentSchema } from "../schemas/Kyc/v3/idDocument";
+import { OnboardingSchema } from "../schemas/Kyc/v3/onboarding";
 import { PersonSchema } from "../schemas/Kyc/v3/person";
 import { ResidentialAddressSchema } from "../schemas/Kyc/v3/residentialAddress";
 import { RootSchema } from "../schemas/Kyc/v3/root";
@@ -71,6 +72,20 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   eddOccupation: typeof EDDSchema.shape.occupation;
   eddSourceOfFundsProof: z.ZodOptional<z.ZodString>;
   sourceOfWealthType: z.ZodOptional<typeof SourceOfWealthSchema.shape.type>;
+  sourceOfWealthYearlyGrossIncome: z.ZodOptional<
+    typeof SourceOfWealthSchema.shape.yearlyGrossIncome
+  >;
+  sourceOfWealthApproximateNetWorth: z.ZodOptional<
+    typeof SourceOfWealthSchema.shape.approximateNetWorth
+  >;
+  sourceOfWealthSourceOfWealthProofFile: z.ZodOptional<z.ZodString>;
+  onboardingEmploymentStatus: z.ZodOptional<typeof OnboardingSchema.shape.employmentStatus>;
+  onboardingExpectedMonthlyTransactionCount: z.ZodOptional<
+    typeof OnboardingSchema.shape.expectedMonthlyTransactionCount
+  >;
+  onboardingExpectedMonthlyTransactionVolume: z.ZodOptional<
+    typeof OnboardingSchema.shape.expectedMonthlyTransactionVolume
+  >;
 }> = z.object({
   id: RootSchema.shape.id,
   personFirstName: PersonSchema.shape.firstName,
@@ -129,6 +144,14 @@ export const CredentialSubjectV3Schema: z.ZodObject<{
   eddOccupation: EDDSchema.shape.occupation,
   eddSourceOfFundsProof: z.string().optional(),
   sourceOfWealthType: SourceOfWealthSchema.shape.type.optional(),
+  sourceOfWealthYearlyGrossIncome: SourceOfWealthSchema.shape.yearlyGrossIncome.optional(),
+  sourceOfWealthApproximateNetWorth: SourceOfWealthSchema.shape.approximateNetWorth.optional(),
+  sourceOfWealthSourceOfWealthProofFile: z.string().optional(),
+  onboardingEmploymentStatus: OnboardingSchema.shape.employmentStatus.optional(),
+  onboardingExpectedMonthlyTransactionCount:
+    OnboardingSchema.shape.expectedMonthlyTransactionCount.optional(),
+  onboardingExpectedMonthlyTransactionVolume:
+    OnboardingSchema.shape.expectedMonthlyTransactionVolume.optional(),
 });
 
 export type CredentialSubjectV3 = z.infer<typeof CredentialSubjectV3Schema>;

@@ -32,31 +32,29 @@ export const GenderSchema: z.ZodEnum<{
 }> = z.enum(["M", "F", "OTHER"]);
 export type Gender = z.infer<typeof GenderSchema>;
 
-export const CredentialKycEmploymentStatusSchema: z.ZodEnum<{
+export const EmploymentStatusSchema: z.ZodEnum<{
   EMPLOYED: "EMPLOYED";
   SELF_EMPLOYED: "SELF_EMPLOYED";
   UNEMPLOYED: "UNEMPLOYED";
   RETIRED: "RETIRED";
   STUDENT: "STUDENT";
 }> = z.enum(["EMPLOYED", "SELF_EMPLOYED", "UNEMPLOYED", "RETIRED", "STUDENT"]);
-export type CredentialKycEmploymentStatus = z.infer<typeof CredentialKycEmploymentStatusSchema>;
+export type EmploymentStatus = z.infer<typeof EmploymentStatusSchema>;
 
-export const CredentialExpectedMonthlyTransactionCountSchema: z.ZodEnum<{
+export const ExpectedMonthlyTransactionCountSchema: z.ZodEnum<{
   LESS_THAN_5: "LESS_THAN_5";
   BETWEEN_5_AND_10: "BETWEEN_5_AND_10";
   MORE_THAN_10: "MORE_THAN_10";
 }> = z.enum(["LESS_THAN_5", "BETWEEN_5_AND_10", "MORE_THAN_10"]);
-export type CredentialExpectedMonthlyTransactionCount = z.infer<
-  typeof CredentialExpectedMonthlyTransactionCountSchema
->;
+export type ExpectedMonthlyTransactionCount = z.infer<typeof ExpectedMonthlyTransactionCountSchema>;
 
-export const CredentialExpectedMonthlyTransactionVolumeSchema: z.ZodEnum<{
+export const ExpectedMonthlyTransactionVolumeSchema: z.ZodEnum<{
   LESS_THAN_500: "LESS_THAN_500";
   MORE_THAN_500_LESS_THAN_2000: "MORE_THAN_500_LESS_THAN_2000";
   MORE_THAN_2000: "MORE_THAN_2000";
 }> = z.enum(["LESS_THAN_500", "MORE_THAN_500_LESS_THAN_2000", "MORE_THAN_2000"]);
-export type CredentialExpectedMonthlyTransactionVolume = z.infer<
-  typeof CredentialExpectedMonthlyTransactionVolumeSchema
+export type ExpectedMonthlyTransactionVolume = z.infer<
+  typeof ExpectedMonthlyTransactionVolumeSchema
 >;
 
 export const SourceOfWealthTypeSchema: z.ZodEnum<{
@@ -68,7 +66,7 @@ export const SourceOfWealthTypeSchema: z.ZodEnum<{
 }> = z.enum(["SALARY", "SAVINGS", "INVESTMENTS", "CRYPTO_TRADING", "OTHER"]);
 export type SourceOfWealthType = z.infer<typeof SourceOfWealthTypeSchema>;
 
-export const CredentialYearlyGrossIncomeSchema: z.ZodEnum<{
+export const YearlyGrossIncomeSchema: z.ZodEnum<{
   LESS_THAN_20000: "LESS_THAN_20000";
   FROM_20001_TO_30000: "FROM_20001_TO_30000";
   FROM_30001_TO_40000: "FROM_30001_TO_40000";
@@ -107,9 +105,9 @@ export const CredentialYearlyGrossIncomeSchema: z.ZodEnum<{
   "FROM_200001_TO_500000",
   "MORE_THAN_500000",
 ]);
-export type CredentialYearlyGrossIncome = z.infer<typeof CredentialYearlyGrossIncomeSchema>;
+export type YearlyGrossIncome = z.infer<typeof YearlyGrossIncomeSchema>;
 
-export const CredentialApproximateNetWorthSchema: z.ZodEnum<{
+export const ApproximateNetWorthSchema: z.ZodEnum<{
   UP_TO_25000: "UP_TO_25000";
   BETWEEN_25001_AND_50000: "BETWEEN_25001_AND_50000";
   BETWEEN_50001_AND_100000: "BETWEEN_50001_AND_100000";
@@ -126,7 +124,7 @@ export const CredentialApproximateNetWorthSchema: z.ZodEnum<{
   "BETWEEN_500001_AND_1000000",
   "OVER_1000001",
 ]);
-export type CredentialApproximateNetWorth = z.infer<typeof CredentialApproximateNetWorthSchema>;
+export type ApproximateNetWorth = z.infer<typeof ApproximateNetWorthSchema>;
 
 export const OccupationSchema: z.ZodEnum<{
   AGRICULTURE: "AGRICULTURE";

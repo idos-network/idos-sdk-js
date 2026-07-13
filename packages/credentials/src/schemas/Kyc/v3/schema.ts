@@ -4,6 +4,7 @@ import { BiometricSchema } from "./biometric";
 import { ContactSchema } from "./contact";
 import { EDDSchema } from "./edd";
 import { IdDocumentSchema } from "./idDocument";
+import { OnboardingSchema } from "./onboarding";
 import { PersonSchema } from "./person";
 import { ResidentialAddressSchema } from "./residentialAddress";
 import { RootSchema } from "./root";
@@ -20,6 +21,7 @@ export const StructuredSchema: z.ZodObject<{
   screening: z.ZodOptional<typeof ScreeningSchema>;
   edd: z.ZodOptional<typeof EDDSchema>;
   sourceOfWealth: z.ZodOptional<typeof SourceOfWealthSchema>;
+  onboarding: z.ZodOptional<typeof OnboardingSchema>;
 }> = z.object({
   root: RootSchema,
   person: PersonSchema,
@@ -30,6 +32,7 @@ export const StructuredSchema: z.ZodObject<{
   screening: ScreeningSchema.optional(),
   edd: EDDSchema.optional(),
   sourceOfWealth: SourceOfWealthSchema.optional(),
+  onboarding: OnboardingSchema.optional(),
 });
 
 export type StructuredObject = z.infer<typeof StructuredSchema>;
