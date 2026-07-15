@@ -339,7 +339,7 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Int,
     },
   ],
-  create_prelim_credentials_by_dwg: [
+  create_preliminary_credentials_by_dwg: [
     {
       name: "request_id",
       type: DataType.Uuid,
@@ -1374,7 +1374,7 @@ export async function createCredentialsByDwg(
 ): Promise<void> {
   const inputs = CreateCredentialsByDwgInputSchema.parse(params);
   await kwilClient.execute({
-    name: "create_prelim_credentials_by_dwg",
+    name: "create_preliminary_credentials_by_dwg",
     inputs,
     description:
       "Create preliminary original and copy credentials with AG on behalf of a user (using delegated write grant given by the user)",
