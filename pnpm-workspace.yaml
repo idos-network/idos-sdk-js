@@ -120,7 +120,7 @@ minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
   # KGW cookie helpers for blob gateway (feat/blob_gateway)
-  - "@idos-network/kwil-js@0.1.4"
+  - "@idos-network/kwil-js@0.1.5"
 
 onlyBuiltDependencies:
   - "@swc/core"
@@ -165,7 +165,7 @@ overrides:
   # but the import is the same
   bs58: "6.0.0"
 
-  basic-ftp: ">=5.3.1"
-  fast-uri: ">=3.1.2"
+  basic-ftp: "6.0.1"
+  fast-uri: "4.0.0"
 
 strictDepBuilds: true
