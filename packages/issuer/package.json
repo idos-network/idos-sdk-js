@@ -40,7 +40,7 @@
   "devDependencies": {
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build",
-    "vitest": "^4.1.5"
+    "vitest": "catalog:testing"
   },
   "peerDependencies": {
     "typescript": "catalog:build"
