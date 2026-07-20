@@ -64,7 +64,6 @@ import {
   hexEncode,
   hexEncodeSha256Hash,
   utf8Decode,
-  utf8Encode,
 } from "@idos-network/utils/codecs";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import invariant from "tiny-invariant";
@@ -616,7 +615,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     },
   ): Promise<ShareCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
-    const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
     invariant(this.blobGateway, "Blob gateway is required to request an access grant");
@@ -629,12 +627,14 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         credential.issuer_auth_public_key.toLowerCase(),
       "`issuerSigningKeyPair` does not match the credential issuer_auth_public_key",
     );
-    const plaintextContent = utf8Decode(await this.#decryptCredentialContent(credential));
+
+    const plaintextContent = await this.#decryptCredentialContent(credential);
+    const contentHash = hexEncodeSha256Hash(plaintextContent);
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
 
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
-      utf8Encode(plaintextContent),
+      plaintextContent,
       base64Decode(consumerEncryptionPublicKey),
     );
 
