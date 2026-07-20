@@ -4,7 +4,7 @@ import { encryptContent } from "@idos-network/utils/cryptography";
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { idOSConsumer } from "./index";
+import { idOSConsumer } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn() },

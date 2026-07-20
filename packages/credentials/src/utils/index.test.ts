@@ -3,7 +3,6 @@ import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
 import {
-  buildInsertableIDOSCredential,
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
