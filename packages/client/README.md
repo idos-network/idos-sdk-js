@@ -60,7 +60,7 @@ const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
   consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
   consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
   issuerSigningKeyPair, // Must match the credential issuer_auth_public_key
-  lockedUntil: lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
+  lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 
 // Also when the user is logged in, we can ask him to add another wallet
