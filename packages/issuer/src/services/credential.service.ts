@@ -96,7 +96,7 @@ export class CredentialService {
     const signedReference = buildSignedCredentialContentReference(
       publicNotes,
       contentReference.uri,
-      this.#signingKeyPair,
+      this.#signingKeyPair.secretKey,
     );
 
     return {

@@ -26,11 +26,6 @@ export type SignedCredentialContentReference = {
   issuer_auth_public_key: string;
 };
 
-export type CredentialSigningKeyPair = {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
-};
-
 // https://github.com/colinhacks/zod/issues/3751
 export const CredentialFieldsSchema: z.ZodObject<{
   id: z.ZodString;

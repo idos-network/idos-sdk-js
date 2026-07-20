@@ -8,7 +8,6 @@ import type {
   AvailableIssuerType,
   CredentialFields,
   CredentialResidentialAddress,
-  CredentialSigningKeyPair,
   CredentialSubject,
   CredentialSubjectFaceId,
   CustomIssuerType,
@@ -245,12 +244,11 @@ export function recordFilter(
 export function buildSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
-  issuerSigningKeyPair: CredentialSigningKeyPair,
+  issuerSigningSecretKey: Uint8Array,
 ): SignedCredentialContentReference {
-  const publicNotesSignature = nacl.sign.detached(
-    utf8Encode(publicNotes),
-    issuerSigningKeyPair.secretKey,
-  );
+  const { publicKey, secretKey } = nacl.sign.keyPair.fromSecretKey(issuerSigningSecretKey);
+
+  const publicNotesSignature = nacl.sign.detached(utf8Encode(publicNotes), secretKey);
 
   return {
     public_notes: publicNotes,
@@ -259,10 +257,10 @@ export function buildSignedCredentialContentReference(
     broader_signature: base64Encode(
       nacl.sign.detached(
         Uint8Array.from([...publicNotesSignature, ...utf8Encode(contentUri)]),
-        issuerSigningKeyPair.secretKey,
+        secretKey,
       ),
     ),
 
-    issuer_auth_public_key: hexEncode(issuerSigningKeyPair.publicKey, true),
+    issuer_auth_public_key: hexEncode(publicKey, true),
   };
 }

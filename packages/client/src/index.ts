@@ -1,4 +1,3 @@
-import type { CredentialSigningKeyPair } from "@idos-network/credentials/types";
 import type {
   BaseProvider,
   EncryptionPasswordStore,
@@ -61,7 +60,6 @@ import {
 import {
   base64Decode,
   base64Encode,
-  hexEncode,
   hexEncodeSha256Hash,
   utf8Decode,
 } from "@idos-network/utils/codecs";
@@ -605,12 +603,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     {
       consumerEncryptionPublicKey,
       consumerAuthPublicKey,
-      issuerSigningKeyPair,
+      issuerSigningSecretKey,
       lockedUntil = 0,
     }: {
       consumerEncryptionPublicKey: string;
       consumerAuthPublicKey: string;
-      issuerSigningKeyPair?: CredentialSigningKeyPair;
+      issuerSigningSecretKey?: Uint8Array;
       lockedUntil?: number;
     },
   ): Promise<ShareCredentialInput> {
@@ -619,13 +617,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
     invariant(this.blobGateway, "Blob gateway is required to request an access grant");
     invariant(
-      issuerSigningKeyPair,
-      "`issuerSigningKeyPair` is required to sign the shared credential copy",
-    );
-    invariant(
-      hexEncode(issuerSigningKeyPair.publicKey, true).toLowerCase() ===
-        credential.issuer_auth_public_key.toLowerCase(),
-      "`issuerSigningKeyPair` does not match the credential issuer_auth_public_key",
+      issuerSigningSecretKey,
+      "`issuerSigningSecretKey` is required to sign the shared credential copy",
     );
 
     const plaintextContent = await this.#decryptCredentialContent(credential);
@@ -639,9 +632,19 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
 
     const copyReference = await createBlobContentReference(content);
+    const signedReference = buildSignedCredentialContentReference(
+      "",
+      copyReference.uri,
+      issuerSigningSecretKey,
+    );
+    invariant(
+      signedReference.issuer_auth_public_key.toLowerCase() ===
+        credential.issuer_auth_public_key.toLowerCase(),
+      "`issuerSigningSecretKey` does not match the credential issuer_auth_public_key",
+    );
 
     const preliminaryCredential: ShareCredentialInput = {
-      ...buildSignedCredentialContentReference("", copyReference.uri, issuerSigningKeyPair),
+      ...signedReference,
       request_id: crypto.randomUUID(),
       copy_id: crypto.randomUUID(),
       original_id: credential.id,
