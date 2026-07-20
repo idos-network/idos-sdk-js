@@ -130,6 +130,8 @@ const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
 });
 ```
 
+> **Security warning:** `issuerSigningKeyPair` is a `CredentialSigningKeyPair` and includes a `secretKey` used for cryptographic signing (via `buildSignedCredentialContentReference`). Never expose that key material in a browser bundle. Call `requestAccessGrant` with `issuerSigningKeyPair` only from a trusted backend service — signing stays a backend-only responsibility, as in the [issuer guide](guide-issuer.md) architecture section.
+
 `issuerSigningKeyPair` must match the credential's `issuer_auth_public_key`; Kwil verifies the copy's `content_uri` signature before accepting the preliminary share.
 
 ## 6) Manage wallets
