@@ -103,6 +103,10 @@ describe("idOSConsumer", () => {
     await expect(
       consumer.getCredentialSharedContentDecrypted("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
     ).resolves.toBe("hello from blob");
+    expect(mocks.blobGateway.fetchBlob).toHaveBeenCalledWith({
+      contentUri: "ipfs://bafkreiayiizdgzqnwn43lqmfurzsg5epvknle5egvpfrwplwj6jtnifsjm",
+      expectedSize: encryptedContent.byteLength,
+    });
   });
 
   it("reads legacy inline-content credentials without fetching blobs", async () => {
