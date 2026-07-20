@@ -3,8 +3,8 @@ import crypto from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
-import { buildCredential, buildFaceIdCredential } from ".";
 import { fileToBase85 } from "../utils";
+import { buildCredential, buildFaceIdCredential } from "./index.js";
 import { verifyCredential } from "./verifier";
 
 describe("verifiableCredentials", () => {

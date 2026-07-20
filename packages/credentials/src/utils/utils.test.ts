@@ -8,7 +8,7 @@ import {
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
-} from "./";
+} from "./index.js";
 
 const defaultCredential: CredentialSubject = {
   id: "uuid:1234",

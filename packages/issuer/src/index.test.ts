@@ -1,7 +1,7 @@
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { idOSIssuer } from "./index";
+import { idOSIssuer } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn(), uploadCredentialBlobs: vi.fn() },
