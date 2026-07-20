@@ -123,7 +123,7 @@ minimumReleaseAgeExclude:
   - vite@8.2.0
   - "@noble/hashes@2.3.0"
   # KGW cookie helpers for blob gateway (feat/blob_gateway)
-  - "@idos-network/kwil-js@0.1.4"
+  - "@idos-network/kwil-js@0.1.5"
 
 onlyBuiltDependencies:
   - "@swc/core"
@@ -168,7 +168,7 @@ overrides:
   "brace-expansion": ">= 5.0.9"
   "nanoid": ">= 5.1.11"
   "toml": ">= 4.1.2"
-  basic-ftp: ">=5.3.1"
+  basic-ftp: ">=6.0.1"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
@@ -179,6 +179,5 @@ overrides:
   # Bs58 is broken < 6.0.0 together with vite 8.x
   # but the import is the same
   bs58: "6.0.0"
-
 
 strictDepBuilds: true
