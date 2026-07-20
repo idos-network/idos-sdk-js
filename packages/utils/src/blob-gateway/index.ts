@@ -167,13 +167,9 @@ export class BlobGateway {
     const explicitMaxBytes = normalizeByteCount(maxBytes, "maxBytes");
     const maxFetchBytes = explicitMaxBytes ?? this.#maxFetchBytes;
 
-    if (
-      expectedByteLength !== undefined &&
-      explicitMaxBytes !== undefined &&
-      expectedByteLength > explicitMaxBytes
-    ) {
+    if (expectedByteLength !== undefined && expectedByteLength > maxFetchBytes) {
       throw new Error(
-        `blob gateway expected size ${expectedByteLength} exceeds maximum fetch size ${explicitMaxBytes}`,
+        `blob gateway expected size ${expectedByteLength} exceeds maximum fetch size ${maxFetchBytes}`,
       );
     }
 

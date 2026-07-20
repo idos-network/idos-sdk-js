@@ -179,4 +179,18 @@ describe("BlobGateway", () => {
       "blob gateway response content-length 7 exceeds maximum fetch size 6",
     );
   });
+
+  it("rejects expectedSize that exceeds the configured gateway fetch maximum", async () => {
+    const content = utf8Encode("content");
+    const { uri } = await createBlobContentReference(content);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      maxFetchBytes: 4,
+      fetchFn: async () => new Response(content),
+    });
+
+    await expect(
+      gateway.fetchBlob({ contentUri: uri, expectedSize: content.byteLength }),
+    ).rejects.toThrow("blob gateway expected size 7 exceeds maximum fetch size 4");
+  });
 });
