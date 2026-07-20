@@ -3,6 +3,7 @@ import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
 import {
+  buildSignedCredentialContentReference,
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
@@ -283,5 +284,17 @@ describe("buildInsertableIDOSCredential", () => {
     expect(() => buildInsertableIDOSCredential("user-1", "{}", "content", "")).toThrow(
       "Missing `encryptorPublicKey`",
     );
+  });
+});
+
+describe("buildSignedCredentialContentReference", () => {
+  it("derives issuer_auth_public_key from the signing secret key", () => {
+    const keyPair = nacl.sign.keyPair();
+    const result = buildSignedCredentialContentReference("", "ipfs://cid", keyPair.secretKey);
+
+    expect(result.public_notes).toBe("");
+    expect(result.public_notes_signature).toBeTruthy();
+    expect(result.broader_signature).toBeTruthy();
+    expect(result.issuer_auth_public_key).toBe(hexEncode(keyPair.publicKey, true));
   });
 });

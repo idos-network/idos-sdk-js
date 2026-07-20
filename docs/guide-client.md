@@ -125,14 +125,14 @@ To share a credential with a consumer app/service, create a blob-backed access g
 const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
   consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
   consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
-  issuerSigningKeyPair,
+  issuerSigningSecretKey,
   lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // optional
 });
 ```
 
-> **Security warning:** `issuerSigningKeyPair` is a `CredentialSigningKeyPair` and includes a `secretKey` used for cryptographic signing (via `buildSignedCredentialContentReference`). Never expose that key material in a browser bundle. Call `requestAccessGrant` with `issuerSigningKeyPair` only from a trusted backend service — signing stays a backend-only responsibility, as in the [issuer guide](guide-issuer.md) architecture section.
+> **Security warning:** `issuerSigningSecretKey` is used for cryptographic signing (via `buildSignedCredentialContentReference`). Never expose that key material in a browser bundle. Call `requestAccessGrant` with `issuerSigningSecretKey` only from a trusted backend service — signing stays a backend-only responsibility, as in the [issuer guide](guide-issuer.md) architecture section.
 
-`issuerSigningKeyPair` must match the credential's `issuer_auth_public_key`; Kwil verifies the copy's `content_uri` signature before accepting the preliminary share.
+The public key derived from `issuerSigningSecretKey` must match the credential's `issuer_auth_public_key`; Kwil verifies the copy's `content_uri` signature before accepting the preliminary share.
 
 ## 6) Manage wallets
 

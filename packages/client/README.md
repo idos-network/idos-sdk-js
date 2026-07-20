@@ -59,7 +59,7 @@ const credentials = await loggedInClient.filterCredentials({
 const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
   consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
   consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
-  issuerSigningKeyPair, // Must match the credential issuer_auth_public_key
+  issuerSigningSecretKey, // Must derive to the credential issuer_auth_public_key
   lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 

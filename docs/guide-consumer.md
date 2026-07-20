@@ -342,9 +342,10 @@ The simplest way to do this is to ask the user to create and insert a blob-backe
 const accessGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID", {
   consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
   consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
-  issuerSigningKeyPair,
+  issuerSigningSecretKey,
 });
 ```
+
 
 Alternatively, you can ask for a delegated access grant, which the user creates:
 
