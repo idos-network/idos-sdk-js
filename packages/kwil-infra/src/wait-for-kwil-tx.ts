@@ -31,8 +31,20 @@ export class KwilTxPollTimeoutError extends Error {
   constructor(
     readonly txHash: string,
     readonly deadlineMs: number,
+    options?: { cause?: unknown },
   ) {
-    super(`Timed out after ${deadlineMs}ms waiting for Kwil transaction ${txHash}`);
+    const lastError =
+      options?.cause instanceof Error
+        ? options.cause.message
+        : options?.cause != null
+          ? String(options.cause)
+          : undefined;
+    super(
+      lastError
+        ? `Timed out after ${deadlineMs}ms waiting for Kwil transaction ${txHash}: last error: ${lastError}`
+        : `Timed out after ${deadlineMs}ms waiting for Kwil transaction ${txHash}`,
+      options?.cause !== undefined ? { cause: options.cause } : undefined,
+    );
   }
 }
 
@@ -59,6 +71,7 @@ export async function waitForKwilTx(
 ): Promise<void> {
   const deadlineAt = Date.now() + deadlineMs;
   let intervalMs = INITIAL_POLL_INTERVAL_MS;
+  let lastPollError: unknown;
 
   while (Date.now() < deadlineAt) {
     try {
@@ -76,6 +89,7 @@ export async function waitForKwilTx(
       if (error instanceof KwilTxFailedError) {
         throw error;
       }
+      lastPollError = error;
     }
 
     const waitMs = pollIntervalWithJitter(intervalMs);
@@ -88,5 +102,9 @@ export async function waitForKwilTx(
     intervalMs = nextPollIntervalMs(intervalMs);
   }
 
-  throw new KwilTxPollTimeoutError(txHash, deadlineMs);
+  throw new KwilTxPollTimeoutError(
+    txHash,
+    deadlineMs,
+    lastPollError !== undefined ? { cause: lastPollError } : undefined,
+  );
 }

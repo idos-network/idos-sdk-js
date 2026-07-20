@@ -72,4 +72,21 @@ describe("waitForKwilTx", () => {
     await assertion;
     expect(txInfo.mock.calls.length).toBeGreaterThan(1);
   });
+
+  it("includes the last poll error when timing out after persistent failures", async () => {
+    const pollError = new Error("network down");
+    const txInfo = vi.fn().mockRejectedValue(pollError);
+
+    vi.useFakeTimers();
+    const waitPromise = waitForKwilTx(txInfo, "0xbad", 1_000);
+    const assertion = expect(waitPromise).rejects.toMatchObject({
+      name: "KwilTxPollTimeoutError",
+      txHash: "0xbad",
+      message: expect.stringContaining("last error: network down"),
+      cause: pollError,
+    });
+    await vi.runAllTimersAsync();
+
+    await assertion;
+  });
 });
