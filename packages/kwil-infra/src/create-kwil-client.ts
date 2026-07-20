@@ -98,7 +98,7 @@ export class KwilActionClient {
     params: KwilExecuteActionRequestParams,
     signer: KwilSigner | undefined = this.signer,
     synchronous = true,
-  ): Promise<string | undefined> {
+  ): Promise<string> {
     invariant(signer, "Signer is not set, you must set it before executing an action");
     const action: ActionBody = {
       name: params.name,
@@ -111,7 +111,7 @@ export class KwilActionClient {
     const txHash = response.data?.tx_hash;
 
     if (!txHash) {
-      return undefined;
+      throw new Error(`Kwil execute "${params.name}" did not return a transaction hash`);
     }
 
     if (synchronous) {
