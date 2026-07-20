@@ -104,4 +104,40 @@ describe("idOSConsumer", () => {
       consumer.getCredentialSharedContentDecrypted("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
     ).resolves.toBe("hello from blob");
   });
+
+  it("reads legacy inline-content credentials without fetching blobs", async () => {
+    const recipientKeyPair = nacl.box.keyPair();
+    const encryptorKeyPair = nacl.box.keyPair();
+    const encryptedContent = encryptContent(
+      utf8Encode("hello from inline"),
+      recipientKeyPair.publicKey,
+      encryptorKeyPair.secretKey,
+    );
+    mocks.getCredentialShared.mockResolvedValueOnce([
+      {
+        id: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
+        user_id: "00000000-0000-0000-0000-000000000000",
+        public_notes: "",
+        content: base64Encode(encryptedContent),
+        content_uri: null,
+        content_size: null,
+        encryptor_public_key: base64Encode(encryptorKeyPair.publicKey),
+        issuer_auth_public_key: "issuer",
+        inserter_type: null,
+        inserter_id: null,
+      },
+    ]);
+
+    const consumer = await idOSConsumer.init({
+      nodeUrl: "https://nodes.example",
+      blobGatewayUrl: "https://blob.example",
+      consumerSigner: nacl.sign.keyPair(),
+      recipientEncryptionPrivateKey: base64Encode(recipientKeyPair.secretKey),
+    });
+
+    await expect(
+      consumer.getCredentialSharedContentDecrypted("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
+    ).resolves.toBe("hello from inline");
+    expect(mocks.blobGateway.fetchBlob).not.toHaveBeenCalled();
+  });
 });
