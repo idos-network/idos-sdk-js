@@ -2,8 +2,12 @@
 
 import { describe, expect, it } from "vitest";
 
-import { BlobGateway, createBlobContentReference, resolveCredentialEncryptedContent } from ".";
 import { base64Encode, utf8Encode } from "../codecs";
+import {
+  BlobGateway,
+  createBlobContentReference,
+  resolveCredentialEncryptedContent,
+} from "./index.js";
 
 describe("createBlobContentReference", () => {
   it("creates a blob-gateway compatible content reference", async () => {
