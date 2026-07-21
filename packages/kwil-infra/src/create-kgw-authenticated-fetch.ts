@@ -103,12 +103,13 @@ async function bufferRequestBody(
   }
 
   if (input instanceof Request && input.body != null) {
+    const requestClone = input.clone();
     return {
       requestInit: {
         ...init,
         method: init?.method ?? input.method,
       },
-      bufferedBody: await bufferBody(input.body),
+      bufferedBody: await bufferBody(requestClone.body!),
     };
   }
 
