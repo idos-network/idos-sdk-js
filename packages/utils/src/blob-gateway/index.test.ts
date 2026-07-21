@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { base64Encode, utf8Encode } from "../codecs";
 import {
@@ -167,17 +167,19 @@ describe("BlobGateway", () => {
   it("rejects content-length values larger than the configured fetch maximum", async () => {
     const content = utf8Encode("content");
     const { uri } = await createBlobContentReference(content);
+    const response = new Response(content, {
+      headers: { "content-length": String(content.byteLength) },
+    });
+    const cancel = vi.spyOn(response.body!, "cancel");
     const gateway = new BlobGateway({
       url: "https://blob.example",
-      fetchFn: async () =>
-        new Response(content, {
-          headers: { "content-length": String(content.byteLength) },
-        }),
+      fetchFn: async () => response,
     });
 
     await expect(gateway.fetchBlob({ contentUri: uri, maxBytes: 6 })).rejects.toThrow(
       "blob gateway response content-length 7 exceeds maximum fetch size 6",
     );
+    expect(cancel).toHaveBeenCalled();
   });
 
   it("rejects expectedSize that exceeds the configured gateway fetch maximum", async () => {

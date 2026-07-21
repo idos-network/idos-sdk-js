@@ -187,6 +187,9 @@ export class BlobGateway {
     }
 
     if (declaredContentLength !== undefined && declaredContentLength > maxResponseBytes) {
+      if (response.body) {
+        await response.body.cancel().catch(() => undefined);
+      }
       throw new Error(
         `blob gateway response content-length ${declaredContentLength} exceeds maximum fetch size ${maxResponseBytes}`,
       );
