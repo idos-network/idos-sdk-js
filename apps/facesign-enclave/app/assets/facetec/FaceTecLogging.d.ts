@@ -11,7 +11,7 @@ export declare enum FaceTecLoggingMode {
    */
   LocalhostOnly = 1,
 }
-export declare var FaceTecLogging: {
+export declare const FaceTecLogging: {
   setFaceTecLoggingMode: (enumValue: FaceTecLoggingMode) => void;
 };
 //# sourceMappingURL=FaceTecLogging.d.ts.map

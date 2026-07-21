@@ -110,9 +110,7 @@ export declare enum FaceTecSessionStatus {
   IFrameNotAllowedWithoutPermission = 8,
 }
 /**
- * Represents results of a session. To get the results in the onActivityResult method
- * you will call getParcelableExtra(FaceTecSDK.EXTRA_SESSION_RESULTS). These results will consist of a number
- * of variables that give more detail about the enrollment attempt.
+ * Represents results of a session.
  */
 export interface FaceTecSessionResult {
   /** The result of the session */
