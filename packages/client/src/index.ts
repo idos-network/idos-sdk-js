@@ -610,7 +610,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     }: {
       consumerEncryptionPublicKey: string;
       consumerAuthPublicKey: string;
-      issuerSigningSecretKey?: Uint8Array;
+      issuerSigningSecretKey: Uint8Array;
       lockedUntil?: number;
     },
   ): Promise<ShareCredentialInput> {
