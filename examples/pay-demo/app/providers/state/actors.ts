@@ -45,6 +45,7 @@ export const actors = {
         throw new Error("No credential found");
       }
 
+      // @ts-expect-error pay-demo browser has no issuerSigningSecretKey; mute until AG moves server-side
       return input.client.requestAccessGrant(input.credentialId, {
         consumerEncryptionPublicKey: COMMON_ENV.RELAY_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.RELAY_PUBLIC_KEY,
