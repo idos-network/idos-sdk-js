@@ -130,6 +130,36 @@ describe("createKgwAuthenticatedFetch", () => {
     ).resolves.toEqual(["first", "second"]);
   });
 
+  it("retries Request-input bodies after an auth failure without locking the original", async () => {
+    const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
+    const receivedBodies: string[] = [];
+
+    fetchFn.mockImplementation(async (_input, init) => {
+      const body = init?.body;
+      receivedBodies.push(
+        body instanceof ArrayBuffer ? new TextDecoder().decode(body) : String(body),
+      );
+
+      if (fetchFn.mock.calls.length === 1) {
+        return new Response("unauthorized", { status: 401 });
+      }
+
+      return new Response("ok");
+    });
+
+    const request = new Request("https://blob.example/upload", {
+      method: "POST",
+      body: "request-body",
+    });
+    const response = await authFetch(request);
+
+    expect(response.ok).toBe(true);
+    expect(request.bodyUsed).toBe(false);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(receivedBodies).toEqual(["request-body", "request-body"]);
+  });
+
   it("refreshes and retries once after an auth failure", async () => {
     const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
     fetchFn
