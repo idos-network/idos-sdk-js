@@ -66,15 +66,14 @@ await loggedInClient.addWallet({
 });
 ```
 
-### Server-side: request an access grant
+### Request an access grant
 
-`issuerSigningSecretKey` is used to sign the shared credential copy. Never put it in a browser bundle — call `requestAccessGrant` only from a trusted backend.
+The logged-in user issues the shared copy (ephemeral user-side signing key). No original-issuer secret is required.
 
 ```typescript
 const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
   consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
   consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
-  issuerSigningSecretKey, // Must derive to the credential issuer_auth_public_key
   lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 ```

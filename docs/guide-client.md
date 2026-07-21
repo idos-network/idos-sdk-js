@@ -119,20 +119,17 @@ The SDK decrypts through the enclave provider, so plaintext handling stays in th
 
 ## 5) Share a credential (request access grant)
 
-To share a credential with a consumer app/service, create a blob-backed access grant:
+To share a credential with a consumer app/service, create a blob-backed access grant from the logged-in user session:
 
 ```ts
 const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
   consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
   consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
-  issuerSigningSecretKey,
   lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // optional
 });
 ```
 
-> **Security warning:** `issuerSigningSecretKey` is used for cryptographic signing (via `buildSignedCredentialContentReference`). Never expose that key material in a browser bundle. Call `requestAccessGrant` with `issuerSigningSecretKey` only from a trusted backend service — signing stays a backend-only responsibility, as in the [issuer guide](guide-issuer.md) architecture section.
-
-The public key derived from `issuerSigningSecretKey` must match the credential's `issuer_auth_public_key`; Kwil verifies the copy's `content_uri` signature before accepting the preliminary share.
+`issuer_auth_public_key` on a credential row is whoever **issued that row**. For a shared copy, the **user** is the issuer: the client signs the copy `content_uri` with an ephemeral user-side key. That key need not match the original credential's issuer (often a server app). Kwil verifies the copy signatures under the submitted key and that the original belongs to the caller.
 
 ## 6) Manage wallets
 

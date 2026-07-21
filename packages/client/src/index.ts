@@ -6,7 +6,7 @@ import type {
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import {
-  buildSignedCredentialContentReference,
+  buildEphemeralSignedCredentialContentReference,
   matchLevelOrHigher,
   recordFilter,
 } from "@idos-network/credentials/utils";
@@ -603,12 +603,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     {
       consumerEncryptionPublicKey,
       consumerAuthPublicKey,
-      issuerSigningSecretKey,
       lockedUntil = 0,
     }: {
       consumerEncryptionPublicKey: string;
       consumerAuthPublicKey: string;
-      issuerSigningSecretKey: Uint8Array;
       lockedUntil?: number;
     },
   ): Promise<ShareCredentialInput> {
@@ -616,10 +614,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
     invariant(this.blobGateway, "Blob gateway is required to request an access grant");
-    invariant(
-      issuerSigningSecretKey,
-      "`issuerSigningSecretKey` is required to sign the shared credential copy",
-    );
 
     const plaintextContent = await this.#decryptCredentialContent(credential);
     const contentHash = hexEncodeSha256Hash(plaintextContent);
@@ -631,17 +625,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(consumerEncryptionPublicKey),
     );
 
+    // User issues the shared copy: sign content_uri with an ephemeral user-side key.
+    // Copy issuer_auth_public_key need not match the original credential's issuer.
     const copyReference = await createBlobContentReference(content);
-    const signedReference = buildSignedCredentialContentReference(
-      "",
-      copyReference.uri,
-      issuerSigningSecretKey,
-    );
-    invariant(
-      signedReference.issuer_auth_public_key.toLowerCase() ===
-        credential.issuer_auth_public_key.toLowerCase(),
-      "`issuerSigningSecretKey` does not match the credential issuer_auth_public_key",
-    );
+    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
 
     const preliminaryCredential: ShareCredentialInput = {
       ...signedReference,

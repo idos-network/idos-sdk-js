@@ -264,3 +264,15 @@ export function buildSignedCredentialContentReference(
     issuer_auth_public_key: hexEncode(publicKey, true),
   };
 }
+
+/** User-issued share copy: sign with a fresh ephemeral key (need not match original issuer). */
+export function buildEphemeralSignedCredentialContentReference(
+  publicNotes: string,
+  contentUri: string,
+): SignedCredentialContentReference {
+  return buildSignedCredentialContentReference(
+    publicNotes,
+    contentUri,
+    nacl.sign.keyPair().secretKey,
+  );
+}
