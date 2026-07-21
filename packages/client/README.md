@@ -54,15 +54,6 @@ const credentials = await loggedInClient.filterCredentials({
   },
 });
 
-// If we found a credential which we can use, ask the user to share a
-// blob-backed copy that the consumer can later read.
-const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
-  consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
-  consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
-  issuerSigningSecretKey, // Must derive to the credential issuer_auth_public_key
-  lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
-});
-
 // Also when the user is logged in, we can ask him to add another wallet
 // wallet type is required.
 await loggedInClient.addWallet({
@@ -72,6 +63,19 @@ await loggedInClient.addWallet({
   message: "Sign this message to prove you own this wallet",
   signature: "0x...", // Signature of the message
   wallet_type: "EVM", // Required: "EVM", "NEAR", "XRPL"...
+});
+```
+
+### Server-side: request an access grant
+
+`issuerSigningSecretKey` is used to sign the shared credential copy. Never put it in a browser bundle — call `requestAccessGrant` only from a trusted backend.
+
+```typescript
+const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
+  consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
+  consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
+  issuerSigningSecretKey, // Must derive to the credential issuer_auth_public_key
+  lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 ```
 

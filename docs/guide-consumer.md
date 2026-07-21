@@ -336,18 +336,7 @@ This will return a list of `idOSCredentials` that match the filtering criteria.
 
 ### [ frontend ] Requesting access grant
 
-The simplest way to do this is to ask the user to create and insert a blob-backed access grant for you.
-
-```typescript
-const accessGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID", {
-  consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
-  consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
-  issuerSigningSecretKey,
-});
-```
-
-
-Alternatively, you can ask for a delegated access grant, which the user creates:
+Ask the user to create a delegated access grant, then insert it from your backend:
 
 ```js
 await idOSClient.requestDAGMessage({
@@ -367,6 +356,18 @@ await idOSConsumer.createAccessGrantByDag({
   dag_grantee_wallet_identifier,
   dag_signature,
   dag_locked_until,
+});
+```
+
+### [ backend ] Blob-backed access grant (issuer signing)
+
+`requestAccessGrant` signs a shared credential copy with `issuerSigningSecretKey`. Never put that key in a browser bundle — call it only from a trusted backend service.
+
+```typescript
+const accessGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID", {
+  consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
+  consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
+  issuerSigningSecretKey,
 });
 ```
 
