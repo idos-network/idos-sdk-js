@@ -359,15 +359,14 @@ await idOSConsumer.createAccessGrantByDag({
 });
 ```
 
-### [ backend ] Blob-backed access grant (issuer signing)
+### [ frontend ] Blob-backed access grant
 
-`requestAccessGrant` signs a shared credential copy with `issuerSigningSecretKey`. Never put that key in a browser bundle — call it only from a trusted backend service.
+Ask the logged-in user to share a credential with your consumer keys. The user issues the shared copy (`issuer_auth_public_key` on the copy is the user-side share signer, not the original KYC issuer):
 
 ```typescript
 const accessGrant = await idOSClient.requestAccessGrant("CREDENTIAL_ID", {
   consumerAuthPublicKey: "CONSUMER_AUTH_PUBLIC_KEY_HEX",
   consumerEncryptionPublicKey: "CONSUMER_ENCRYPTION_PUBLIC_KEY_BASE64",
-  issuerSigningSecretKey,
 });
 ```
 
