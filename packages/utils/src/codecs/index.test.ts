@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   base64Codec,
+  base64UrlDecode,
+  base64UrlEncode,
   bs58Decode,
   bs58Encode,
   fromBytesToJson,
@@ -33,6 +35,19 @@ describe("codecs", () => {
     const bytes = new Uint8Array([9, 8, 7, 6, 5]);
     const encoded = base64Codec.encode(bytes);
     expect(base64Codec.decode(encoded)).toEqual(bytes);
+  });
+
+  it("base64UrlEncode returns unpadded URL-safe base64", () => {
+    const bytes = new Uint8Array([251, 255, 255]);
+    expect(base64UrlEncode(bytes)).toBe("-___");
+  });
+
+  it("base64UrlDecode handles unpadded base64url strings", () => {
+    const bytes = new Uint8Array(Array.from({ length: 32 }, (_, index) => index));
+    const encoded = base64UrlEncode(bytes);
+
+    expect(encoded).not.toContain("=");
+    expect(base64UrlDecode(encoded)).toEqual(bytes);
   });
 
   it("fromBytesToJson throws on invalid JSON", () => {
