@@ -53,7 +53,7 @@
     "match-sorter": "^8.3.0",
     "near-api-js": "catalog:near",
     "pg": "^8.21.0",
-    "prisma-field-encryption": "https://pkg.pr.new/prisma-field-encryption@cbdb758",
+    "prisma-field-encryption": "https://pkg.pr.new/prisma-field-encryption@151",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-router": "catalog:react-router",
