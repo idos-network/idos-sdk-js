@@ -32,7 +32,7 @@ jobs:
       - run: pnpm install
 
       - name: Run tests with coverage
-        run: pnpm --filter @idos-network/${{ matrix.package }} coverage
+        run: pnpm turbo run coverage --filter @idos-network/${{ matrix.package }}
 
       - name: Report coverage
         if: always()
