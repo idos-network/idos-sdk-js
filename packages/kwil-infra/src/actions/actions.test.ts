@@ -52,38 +52,30 @@ describe("CreateCredentialsByDwgInputSchema", () => {
     ).not.toThrow();
   });
 
-  it("rejects non-IPFS content URIs", () => {
+  it.each([
+    ["https URI", { original_content_uri: "https://example.com/blob" }],
+    [
+      "bare CID",
+      { copy_content_uri: "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku" },
+    ],
+  ])("rejects non-IPFS content URI (%s)", (_label, override) => {
     expect(() =>
       CreateCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
-        original_content_uri: "https://example.com/blob",
-      }),
-    ).toThrow();
-    expect(() =>
-      CreateCredentialsByDwgInputSchema.parse({
-        ...validPreliminaryCredentialsByDwgInput,
-        copy_content_uri: "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+        ...override,
       }),
     ).toThrow();
   });
 
-  it("rejects zero, negative, and non-integer content sizes", () => {
+  it.each([
+    ["zero", { original_content_size: 0 }],
+    ["negative", { original_content_size: -1 }],
+    ["non-integer", { copy_content_size: 1.5 }],
+  ])("rejects %s content size", (_label, override) => {
     expect(() =>
       CreateCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
-        original_content_size: 0,
-      }),
-    ).toThrow();
-    expect(() =>
-      CreateCredentialsByDwgInputSchema.parse({
-        ...validPreliminaryCredentialsByDwgInput,
-        original_content_size: -1,
-      }),
-    ).toThrow();
-    expect(() =>
-      CreateCredentialsByDwgInputSchema.parse({
-        ...validPreliminaryCredentialsByDwgInput,
-        copy_content_size: 1.5,
+        ...override,
       }),
     ).toThrow();
   });
@@ -103,23 +95,15 @@ describe("ShareCredentialInputSchema", () => {
     ).toThrow();
   });
 
-  it("rejects zero, negative, and non-integer content sizes", () => {
+  it.each([
+    ["zero", 0],
+    ["negative", -1],
+    ["non-integer", 1.5],
+  ])("rejects %s content size", (_label, content_size) => {
     expect(() =>
       ShareCredentialInputSchema.parse({
         ...validShareCredentialInput,
-        content_size: 0,
-      }),
-    ).toThrow();
-    expect(() =>
-      ShareCredentialInputSchema.parse({
-        ...validShareCredentialInput,
-        content_size: -1,
-      }),
-    ).toThrow();
-    expect(() =>
-      ShareCredentialInputSchema.parse({
-        ...validShareCredentialInput,
-        content_size: 1.5,
+        content_size,
       }),
     ).toThrow();
   });
