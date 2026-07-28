@@ -17,8 +17,6 @@ import {
   type KwilSignerType,
 } from "@idos-network/kwil-infra";
 import {
-  type CreateAgByDagForCopyInput,
-  createAgByDagForCopy,
   type GetAccessGrantsGrantedInput,
   getAccessGrantsForCredential,
   getAccessGrantsGrantedCount,
@@ -147,13 +145,6 @@ export class idOSConsumer {
       grants: await getGrants(this.#kwilClient, params),
       totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
-  }
-
-  async createAccessGrantByDag(
-    params: CreateAgByDagForCopyInput,
-  ): Promise<CreateAgByDagForCopyInput> {
-    await createAgByDagForCopy(this.#kwilClient, params);
-    return params;
   }
 
   async verifyCredential<K = VerifiableCredentialSubject>(

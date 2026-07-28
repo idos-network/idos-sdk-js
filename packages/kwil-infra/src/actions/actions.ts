@@ -595,54 +595,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
-  dag_message: [
-    {
-      name: "dag_owner_wallet_identifier",
-      type: DataType.Text,
-    },
-    {
-      name: "dag_grantee_wallet_identifier",
-      type: DataType.Text,
-    },
-    {
-      name: "dag_data_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "dag_locked_until",
-      type: DataType.Int,
-    },
-    {
-      name: "dag_content_hash",
-      type: DataType.Text,
-    },
-  ],
-  create_ag_by_dag_for_copy: [
-    {
-      name: "dag_owner_wallet_identifier",
-      type: DataType.Text,
-    },
-    {
-      name: "dag_grantee_wallet_identifier",
-      type: DataType.Text,
-    },
-    {
-      name: "dag_data_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "dag_locked_until",
-      type: DataType.Int,
-    },
-    {
-      name: "dag_content_hash",
-      type: DataType.Text,
-    },
-    {
-      name: "dag_signature",
-      type: DataType.Text,
-    },
-  ],
   get_access_grants_for_credential: [
     {
       name: "credential_id",
@@ -1885,77 +1837,6 @@ export async function hasLockedAccessGrants(
       inputs,
     })
     .then((result) => result[0]);
-}
-
-export const DagMessageInputSchema: z.ZodObject<{
-  dag_owner_wallet_identifier: z.ZodString;
-  dag_grantee_wallet_identifier: z.ZodString;
-  dag_data_id: z.ZodUUID;
-  dag_locked_until: z.ZodNumber;
-  dag_content_hash: z.ZodString;
-}> = z.object({
-  dag_owner_wallet_identifier: z.string(),
-  dag_grantee_wallet_identifier: z.string(),
-  dag_data_id: z.uuid(),
-  dag_locked_until: z.number(),
-  dag_content_hash: z.string(),
-});
-
-export type DagMessageInput = z.infer<typeof DagMessageInputSchema>;
-
-export const DagMessageOutputSchema: z.ZodObject<{
-  message: z.ZodString;
-}> = z.object({
-  message: z.string(),
-});
-
-export type DagMessageOutput = z.infer<typeof DagMessageOutputSchema>;
-
-export async function dagMessage(
-  kwilClient: KwilActionClient,
-  params: DagMessageInput,
-): Promise<DagMessageOutput> {
-  const inputs = DagMessageInputSchema.parse(params);
-  return await kwilClient
-    .call<DagMessageOutput[]>({
-      name: "dag_message",
-      inputs,
-    })
-    .then((result) => result[0]);
-}
-
-export const CreateAgByDagForCopyInputSchema: z.ZodObject<{
-  dag_owner_wallet_identifier: z.ZodString;
-  dag_grantee_wallet_identifier: z.ZodString;
-  dag_data_id: z.ZodUUID;
-  dag_locked_until: z.ZodNumber;
-  dag_content_hash: z.ZodString;
-  dag_signature: z.ZodString;
-}> = z.object({
-  dag_owner_wallet_identifier: z.string(),
-  dag_grantee_wallet_identifier: z.string(),
-  dag_data_id: z.uuid(),
-  dag_locked_until: z.number(),
-  dag_content_hash: z.string(),
-  dag_signature: z.string(),
-});
-
-export type CreateAgByDagForCopyInput = z.infer<typeof CreateAgByDagForCopyInputSchema>;
-
-/**
- *  Get the wallet type and public key for XRPL/NEAR wallets from database
- *  This works for EVM-compatible signatures only
- */
-export async function createAgByDagForCopy(
-  kwilClient: KwilActionClient,
-  params: CreateAgByDagForCopyInput,
-): Promise<void> {
-  const inputs = CreateAgByDagForCopyInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "create_ag_by_dag_for_copy",
-    inputs,
-    description: "Create an Access Grant in idOS",
-  });
 }
 
 export const GetAccessGrantsForCredentialInputSchema: z.ZodObject<{

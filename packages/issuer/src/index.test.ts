@@ -36,7 +36,6 @@ describe("idOSIssuer", () => {
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
       signingKeyPair,
-      encryptionSecretKey: nacl.box.keyPair().secretKey,
     });
 
     expect(createKgwAuthenticatedBlobGateway).toHaveBeenCalledWith({
@@ -52,7 +51,6 @@ describe("idOSIssuer", () => {
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
       signingKeyPair: nacl.sign.keyPair(),
-      encryptionSecretKey: nacl.box.keyPair().secretKey,
     });
     const userEncryptionKeyPair = nacl.box.keyPair();
     const copyEncryptionKeyPair = nacl.box.keyPair();
