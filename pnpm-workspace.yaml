@@ -93,6 +93,7 @@ catalogs:
 
   testing:
     "vitest": "4.1.9"
+    "@vitest/coverage-v8": "4.1.9"
 
   utils:
     "@stablelib/base64": "^2.0.1"
