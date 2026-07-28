@@ -24,7 +24,7 @@ import {
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
 import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
-import { base64Encode } from "@idos-network/utils/codecs";
+import { base64Decode, base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 
@@ -105,7 +105,7 @@ export class idOSConsumer {
 
     return await this.#noncedBox.decrypt(
       await resolveCredentialEncryptedContent(credentialCopy, this.#blobGateway),
-      credentialCopy.encryptor_public_key,
+      base64Decode(credentialCopy.encryptor_public_key),
     );
   }
 

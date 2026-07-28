@@ -96,17 +96,10 @@ export class NoncedBox {
     return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
   }
 
-  async decrypt(b64FullMessage: string, b64SenderPublicKey: string): Promise<string> {
-    const decodedMessage = base64Decode(b64FullMessage);
-    const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
-    const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
-    const nonce = decodedMessage.slice(0, nacl.box.nonceLength);
-    const content = decryptContent(
-      message,
-      nonce,
-      senderEncryptionPublicKey,
-      this.keyPair.secretKey,
-    );
+  async decrypt(fullMessage: Uint8Array, senderPublicKey: Uint8Array): Promise<string> {
+    const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
+    const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+    const content = decryptContent(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
     return utf8Decode(content);
   }
