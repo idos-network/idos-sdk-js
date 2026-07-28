@@ -1,18 +1,11 @@
 import type {
   AvailableIssuerType,
-<<<<<<< HEAD
   idOSCredential,
-=======
-  IDDocumentType,
-  idOSCredentialRecord as idOSCredential,
->>>>>>> 649a140e (Migrate share_credential to new blob content model. Refactor  names and cleanup.)
   VerifiableCredential,
 } from "@idos-network/credentials/types";
 import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
-import { verifyCredential } from "@idos-network/credentials/verifier";
-import { normalizeCredentialContentSize } from "@idos-network/credentials/utils";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
@@ -21,8 +14,6 @@ import {
   type KwilSignerType,
 } from "@idos-network/kwil-infra";
 import {
-  type CreateAgByDagForCopyInput,
-  createAgByDagForCopy,
   type GetAccessGrantsGrantedInput,
   getAccessGrantsForCredential,
   getAccessGrantsGrantedCount,
@@ -113,7 +104,7 @@ export class idOSConsumer {
     invariant(credentialCopy, `Credential with id ${dataId} not found`);
 
     return await this.#noncedBox.decrypt(
-      await this.#getCredentialEncryptedContent(credentialCopy),
+      await resolveCredentialEncryptedContent(credentialCopy, this.#blobGateway),
       credentialCopy.encryptor_public_key,
     );
   }
@@ -151,24 +142,6 @@ export class idOSConsumer {
       grants: await getGrants(this.#kwilClient, params),
       totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
-  }
-
-  async createAccessGrantByDag(
-    params: CreateAgByDagForCopyInput,
-  ): Promise<CreateAgByDagForCopyInput> {
-    await createAgByDagForCopy(this.#kwilClient, params);
-    return params;
-  }
-
-  async verifyCredential<K>(
-    credentials: VerifiableCredential<K>,
-    issuers: AvailableIssuerType[],
-  ): Promise<VerifyCredentialResult> {
-    return verifyCredential<K>(credentials, issuers);
-  }
-
-  async #getCredentialEncryptedContent(credential: idOSCredential): Promise<string> {
-    return base64Encode(await resolveCredentialEncryptedContent(credential, this.#blobGateway));
   }
 }
 

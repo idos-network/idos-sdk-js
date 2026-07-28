@@ -100,7 +100,7 @@ For complete documentation, examples, and implementation guides:
 - **Profile & Session Lifecycle** - Check profile existence, attach a wallet signer, and log users in/out
 - **Enclave-Backed Encryption** - Generate user encryption profiles and decrypt credential content safely via the enclave
 - **Credential Access & Filtering** - Fetch credentials, read decrypted content, and filter by issuer, level, and field rules
-- **Credential Sharing Flows** - Request DAG/DWG messages, create access grants, and share credentials with controlled lock times
+- **Credential Sharing Flows** - Request DWG messages, create access grants, and share credentials with controlled lock times
 - **Wallet Management** - Add, list, and remove wallets (single or batch), including MPC-aware wallet synchronization
 - **Multi-Chain Wallet Support** - Works with EVM, NEAR, XRPL, and Stellar wallet types
 

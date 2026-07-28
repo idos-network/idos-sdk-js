@@ -25,12 +25,10 @@ See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulat
 
 > 🛑 DANGER 🛑
 >
-> Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
+> Make sure you don't lose access to your signing secret key. Otherwise, you won't be able to authenticate to idOS nodes. The idOS team won't be able to help you.
 
 You'll need:
 
-- `encryptionSecretKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to encrypt the credentials you issue to your users
-  - see [Encryption](encryption.md) for more information
 - `signingKeyPair`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
   - see [Signatures](signatures.md) for more information
 
@@ -96,7 +94,6 @@ import { idOSIssuer as idOSIssuerClass } from "@idos-network/issuer";
 const idOSIssuer = await idOSIssuerClass.init({
   nodeUrl: KWIL_NODE_URL,
   signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
-  encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
 });
 ```
 

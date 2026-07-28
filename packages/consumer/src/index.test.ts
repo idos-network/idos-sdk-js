@@ -22,7 +22,6 @@ vi.mock("@idos-network/kwil-infra", () => ({
 }));
 
 vi.mock("@idos-network/kwil-infra/actions", () => ({
-  createAgByDagForCopy: vi.fn(),
   getAccessGrantsForCredential: vi.fn(),
   getAccessGrantsGrantedCount: vi.fn(),
   getCredentialShared: mocks.getCredentialShared,

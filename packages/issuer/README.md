@@ -22,11 +22,10 @@ pnpm add @idos-network/issuer
 ```typescript
 import { idOSIssuer as idOSIssuerClass } from "@idos-network/issuer";
 
-// Initialize with your signing and encryption keys
+// Initialize with your signing keypair
 const idOSIssuer = await idOSIssuerClass.init({
   nodeUrl: "https://nodes.idos.network",
   signingKeyPair, // Your signing keypair
-  encryptionSecretKey, // Your encryption secret key
 });
 
 // Create a user profile

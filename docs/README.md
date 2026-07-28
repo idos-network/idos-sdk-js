@@ -132,28 +132,6 @@ While Issuers and Consumers are key actors in the system, they are primarily rep
 
   dWGs can only be used once.
 
-- **Delegated Access Grants**:
-
-  Delegated Access Grants (dAGs) are a mechanism that allows entities other than the user to create Access Grants on their behalf.
-
-  A dAG is implemented as a signed message containing the following fields:
-  - **Data ID**: The identifier of the credential or data being shared.
-  - **Owner Wallet Identifier**: The wallet address of the user who owns the data.
-  - **Grantee Wallet Identifier**: The wallet address of the entity receiving access.
-  - **Signature**: A cryptographic signature verifying the authenticity of the dAG.
-  - **Locked Until**: A timestamp indicating when the Access Grant can be revoked.
-  - **Content Hash**: A hash of shared data used to verify integrity across credential copy and access grant flows.
-
-  Whoever transmits the dAG to idOS also needs to provide the copy credential's fields (including the encrypted content). Check the schema for more details.
-
-  dAGs can be used multiple times.
-
-  > 🚧 Will change soon 🚧
-  >
-  > dAG being multi-use is a remnant of the previous Access Grant architecture. Given how the usefulness of dAGs has been evolving, we're going to make them single-use.
-  >
-  > If you want to rely on multi-use, please get in touch with us first, so we can properly guide you and evolve the system accordingly.
-
 ## Other stakeholders
 
 These are other parties that bear influence in the system, even though they're not directly represented.

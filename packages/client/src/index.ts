@@ -25,8 +25,6 @@ import {
   addWallet,
   addWallets,
   addAttribute as createAttribute,
-  type DagMessageInput,
-  dagMessage,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
   type GetWalletsOutput,
@@ -379,10 +377,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
-  }
-
-  async requestDAGMessage(params: DagMessageInput): Promise<string> {
-    return dagMessage(this.kwilClient, params).then((res) => res.message);
   }
 
   async getGrants(
