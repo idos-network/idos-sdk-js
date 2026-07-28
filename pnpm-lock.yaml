@@ -622,6 +622,9 @@ importers:
       '@types/react-dom':
         specifier: catalog:react
         version: 19.2.3(@types/react@19.2.17)
+      '@vitest/coverage-v8':
+        specifier: catalog:testing
+        version: 4.1.9(vitest@4.1.9)
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -4415,6 +4418,7 @@ packages:
   '@stellar/stellar-base@13.1.0':
     resolution: {integrity: sha512-90EArG+eCCEzDGj3OJNoCtwpWDwxjv+rs/RNPhvg4bulpjN/CSRj+Ys/SalRcfM4/WRC5/qAfjzmJBAuquWhkA==}
     engines: {node: '>=18.0.0'}
+    deprecated: This package is now rolled into @stellar/stellar-sdk. Please use @stellar/stellar-sdk to continue receiving updates and support.
 
   '@stellar/stellar-sdk@13.3.0':
     resolution: {integrity: sha512-8+GHcZLp+mdin8gSjcgfb/Lb6sSMYRX6Nf/0LcSJxvjLQR0XHpjGzOiRbYb2jSXo51EnA6kAV5j+4Pzh5OUKUg==}

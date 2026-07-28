@@ -14,6 +14,7 @@
     "db:migrate:dev": "npx dotenv-cli -e .env.development.local -- npx prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "test": "pnpm run db:generate && vitest run",
+    "coverage": "pnpm run db:generate && vitest run --coverage",
     "test:watch": "pnpm run db:generate && vitest"
   },
   "dependencies": {
@@ -82,6 +83,7 @@
     "@types/pg": "^8.20.0",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
+    "@vitest/coverage-v8": "catalog:testing",
     "dotenv": "^17.4.2",
     "jsdom": "^22.1.0",
     "prisma": "^7.8.0",
