@@ -92,6 +92,11 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
   constructor(params: {
     chainId?: string;
     nodeUrl: string;
+    /**
+     * Optional blob gateway base URL. Defaults to `nodeUrl`.
+     * In the browser this must share KGW's session-cookie Domain
+     * (typically the same host), because reads use `credentials: "include"`.
+     */
     blobGatewayUrl?: string;
     enclaveOptions: Omit<Provider["options"], "mode">;
     enclaveProvider?: new (options: Omit<Provider["options"], "mode">) => Provider;
@@ -152,7 +157,8 @@ export class idOSClientIdle {
 
     const blobGateway = new BlobGateway({
       url: params.blobGatewayUrl ?? params.nodeUrl,
-      // Kwil RPC uses withCredentials; blob reads need the same KGW session cookie cross-origin.
+      // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
+      // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
       fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
     });
 
@@ -693,6 +699,11 @@ export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;
+  /**
+   * Optional blob gateway base URL. Defaults to `nodeUrl`.
+   * In the browser this must share KGW's session-cookie Domain
+   * (typically the same host), because reads use `credentials: "include"`.
+   */
   blobGatewayUrl?: string;
   enclaveOptions: Omit<IframeEnclave["options"], "mode">;
 }): idOSClientConfiguration<IframeEnclave> {
