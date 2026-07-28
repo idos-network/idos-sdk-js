@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { CreateCredentialsByDwgInputSchema, ShareCredentialInputSchema } from "./actions";
+import {
+  CreatePreliminaryCredentialsByDwgInputSchema,
+  SharePreliminaryCredentialInputSchema,
+} from "./actions";
 
 const validPreliminaryCredentialsByDwgInput = {
   request_id: "00000000-0000-4000-8000-000000000001",
@@ -45,10 +48,10 @@ const validShareCredentialInput = {
   locked_until: 0,
 };
 
-describe("CreateCredentialsByDwgInputSchema", () => {
+describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
   it("accepts IPFS content URIs and positive integer sizes", () => {
     expect(() =>
-      CreateCredentialsByDwgInputSchema.parse(validPreliminaryCredentialsByDwgInput),
+      CreatePreliminaryCredentialsByDwgInputSchema.parse(validPreliminaryCredentialsByDwgInput),
     ).not.toThrow();
   });
 
@@ -60,7 +63,7 @@ describe("CreateCredentialsByDwgInputSchema", () => {
     ],
   ])("rejects non-IPFS content URI (%s)", (_label, override) => {
     expect(() =>
-      CreateCredentialsByDwgInputSchema.parse({
+      CreatePreliminaryCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
         ...override,
       }),
@@ -73,7 +76,7 @@ describe("CreateCredentialsByDwgInputSchema", () => {
     ["non-integer", { copy_content_size: 1.5 }],
   ])("rejects %s content size", (_label, override) => {
     expect(() =>
-      CreateCredentialsByDwgInputSchema.parse({
+      CreatePreliminaryCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
         ...override,
       }),
@@ -81,14 +84,16 @@ describe("CreateCredentialsByDwgInputSchema", () => {
   });
 });
 
-describe("ShareCredentialInputSchema", () => {
+describe("SharePreliminaryCredentialInputSchema", () => {
   it("accepts IPFS content URIs and positive integer sizes", () => {
-    expect(() => ShareCredentialInputSchema.parse(validShareCredentialInput)).not.toThrow();
+    expect(() =>
+      SharePreliminaryCredentialInputSchema.parse(validShareCredentialInput),
+    ).not.toThrow();
   });
 
   it("rejects non-IPFS content URIs", () => {
     expect(() =>
-      ShareCredentialInputSchema.parse({
+      SharePreliminaryCredentialInputSchema.parse({
         ...validShareCredentialInput,
         content_uri: "https://example.com/blob",
       }),
@@ -101,7 +106,7 @@ describe("ShareCredentialInputSchema", () => {
     ["non-integer", 1.5],
   ])("rejects %s content size", (_label, content_size) => {
     expect(() =>
-      ShareCredentialInputSchema.parse({
+      SharePreliminaryCredentialInputSchema.parse({
         ...validShareCredentialInput,
         content_size,
       }),

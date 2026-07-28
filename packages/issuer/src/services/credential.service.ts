@@ -3,8 +3,8 @@ import type { KwilActionClient } from "@idos-network/kwil-infra";
 
 import { buildSignedCredentialContentReference } from "@idos-network/credentials/utils";
 import {
-  type CreateCredentialsByDwgInput,
-  createCredentialsByDwg,
+  type CreatePreliminaryCredentialsByDwgInput,
+  createPreliminaryCredentialsByDwg,
   dwgMessage,
   type EditPublicNotesAsIssuerInput,
   editPublicNotesAsIssuer,
@@ -140,7 +140,7 @@ export class CredentialService {
     };
 
     const requestId = crypto.randomUUID();
-    const payload: CreateCredentialsByDwgInput = {
+    const payload: CreatePreliminaryCredentialsByDwgInput = {
       request_id: requestId,
       issuer_auth_public_key: originalCredential.issuerAuthPublicKey,
       original_encryptor_public_key: originalCredential.encryptorPublicKey,
@@ -169,7 +169,7 @@ export class CredentialService {
 
     console.log("create_preliminary_credentials_by_dwg payload");
 
-    await createCredentialsByDwg(this.#kwilClient, payload);
+    await createPreliminaryCredentialsByDwg(this.#kwilClient, payload);
     await this.#blobGateway.uploadCredentialBlobs({
       requestId,
       original: originalCredential.encryptedContent,

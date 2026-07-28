@@ -5,7 +5,7 @@ import { idOSIssuer } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn(), uploadCredentialBlobs: vi.fn() },
-  createCredentialsByDwg: vi.fn(),
+  createPreliminaryCredentialsByDwg: vi.fn(),
   kwilClient: {
     setSigner: vi.fn(),
   },
@@ -20,7 +20,7 @@ vi.mock("@idos-network/kwil-infra", () => ({
 
 vi.mock("@idos-network/kwil-infra/actions", async (importOriginal) => ({
   ...((await importOriginal()) as object),
-  createCredentialsByDwg: mocks.createCredentialsByDwg,
+  createPreliminaryCredentialsByDwg: mocks.createPreliminaryCredentialsByDwg,
 }));
 
 describe("idOSIssuer", () => {
@@ -46,7 +46,7 @@ describe("idOSIssuer", () => {
   });
 
   it("creates delegated write grant credentials through the blob-backed flow", async () => {
-    const { createCredentialsByDwg } = await import("@idos-network/kwil-infra/actions");
+    const { createPreliminaryCredentialsByDwg } = await import("@idos-network/kwil-infra/actions");
     const issuer = await idOSIssuer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
@@ -74,10 +74,10 @@ describe("idOSIssuer", () => {
       copyEncryptionKeyPair.publicKey,
     );
 
-    expect(createCredentialsByDwg).toHaveBeenCalledOnce();
+    expect(createPreliminaryCredentialsByDwg).toHaveBeenCalledOnce();
     expect(mocks.blobGateway.uploadCredentialBlobs).toHaveBeenCalledOnce();
 
-    const payload = mocks.createCredentialsByDwg.mock.calls[0]?.[1];
+    const payload = mocks.createPreliminaryCredentialsByDwg.mock.calls[0]?.[1];
     expect(payload.original_content_uri).toMatch(/^ipfs:\/\//);
     expect(payload.copy_content_uri).toMatch(/^ipfs:\/\//);
     expect(payload.original_content_size).toBeGreaterThan(0);
@@ -97,7 +97,7 @@ describe("idOSIssuer", () => {
       content_uri: payload.copy_content_uri,
       content_size: payload.copy_content_size,
     });
-    expect(mocks.createCredentialsByDwg.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(mocks.createPreliminaryCredentialsByDwg.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.blobGateway.uploadCredentialBlobs.mock.invocationCallOrder[0],
     );
   });
