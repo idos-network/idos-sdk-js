@@ -46,8 +46,8 @@ import {
   removeCredential,
   removeWallet,
   revokeAccessGrant,
-  type ShareCredentialInput,
-  shareCredential,
+  type SharePreliminaryCredentialInput,
+  sharePreliminaryCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
 import {
@@ -328,8 +328,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return getCredentialOwned(this.kwilClient, { id }).then((res) => res[0]);
   }
 
-  async shareCredential(credential: ShareCredentialInput): Promise<ShareCredentialInput> {
-    await shareCredential(this.kwilClient, credential);
+  async shareCredential(
+    credential: SharePreliminaryCredentialInput,
+  ): Promise<SharePreliminaryCredentialInput> {
+    await sharePreliminaryCredential(this.kwilClient, credential);
     return credential;
   }
 
@@ -609,7 +611,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       consumerAuthPublicKey: string;
       lockedUntil?: number;
     },
-  ): Promise<ShareCredentialInput> {
+  ): Promise<SharePreliminaryCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
@@ -629,7 +631,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const copyReference = await createBlobContentReference(content);
     const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
 
-    const preliminaryCredential: ShareCredentialInput = {
+    const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,
       request_id: crypto.randomUUID(),
       copy_id: crypto.randomUUID(),

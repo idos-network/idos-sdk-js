@@ -17,7 +17,6 @@ export type EncryptionPasswordStore = (typeof ENCRYPTION_PASSWORD_STORES)[number
 export const encryptionPasswordStoreSchema: z.ZodType<EncryptionPasswordStore> = z.enum(
   ENCRYPTION_PASSWORD_STORES,
 );
-
 const IPFS_URI_PREFIX = "ipfs://";
 const ipfsContentUriSchema = z.string().startsWith(IPFS_URI_PREFIX);
 const contentSizeSchema = z.number().int().positive();
@@ -28,38 +27,6 @@ export type ActionSchemaElement = {
 };
 
 export const actionSchema: Record<string, ActionSchemaElement[]> = {
-  add_inserter_as_owner: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "name",
-      type: DataType.Text,
-    },
-  ],
-  delete_inserter_as_owner: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-  ],
-  add_delegate_as_owner: [
-    {
-      name: "address",
-      type: DataType.Text,
-    },
-    {
-      name: "inserter_id",
-      type: DataType.Uuid,
-    },
-  ],
-  delete_delegate_as_owner: [
-    {
-      name: "address",
-      type: DataType.Text,
-    },
-  ],
   add_user_as_inserter: [
     {
       name: "id",
@@ -158,43 +125,13 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
-  upsert_credential_as_inserter: [
+  create_preliminary_credential: [
     {
-      name: "id",
+      name: "request_id",
       type: DataType.Uuid,
     },
     {
-      name: "user_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "issuer_auth_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "encryptor_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "content",
-      type: DataType.Text,
-    },
-    {
-      name: "public_notes",
-      type: DataType.Text,
-    },
-    {
-      name: "public_notes_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "broader_signature",
-      type: DataType.Text,
-    },
-  ],
-  add_credential: [
-    {
-      name: "id",
+      name: "credential_id",
       type: DataType.Uuid,
     },
     {
@@ -206,7 +143,15 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
     {
-      name: "content",
+      name: "content_uri",
+      type: DataType.Text,
+    },
+    {
+      name: "content_size",
+      type: DataType.Int,
+    },
+    {
+      name: "content_hash",
       type: DataType.Text,
     },
     {
@@ -230,36 +175,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     },
     {
       name: "original_issuer_auth_public_key",
-      type: DataType.Text,
-    },
-  ],
-  edit_credential: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "public_notes",
-      type: DataType.Text,
-    },
-    {
-      name: "public_notes_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "broader_signature",
-      type: DataType.Text,
-    },
-    {
-      name: "content",
-      type: DataType.Text,
-    },
-    {
-      name: "encryptor_public_key",
-      type: DataType.Text,
-    },
-    {
-      name: "issuer_auth_public_key",
       type: DataType.Text,
     },
   ],
@@ -435,6 +350,12 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     {
       name: "dwg_signature",
       type: DataType.Text,
+    },
+  ],
+  delete_stale_preliminary_as_gateway: [
+    {
+      name: "age_seconds",
+      type: DataType.Int,
     },
   ],
   credential_exist_as_inserter: [
@@ -660,91 +581,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     },
   ],
 };
-export const AddInserterAsOwnerInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-  name: z.ZodString;
-}> = z.object({
-  id: z.uuid(),
-  name: z.string(),
-});
-
-export type AddInserterAsOwnerInput = z.infer<typeof AddInserterAsOwnerInputSchema>;
-
-/**  INSERTER AND DELEGATE ACTIONS */
-export async function addInserterAsOwner(
-  kwilClient: KwilActionClient,
-  params: AddInserterAsOwnerInput,
-): Promise<void> {
-  const inputs = AddInserterAsOwnerInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "add_inserter_as_owner",
-    inputs,
-    description: "Add inserter as owner",
-  });
-}
-
-export const DeleteInserterAsOwnerInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-}> = z.object({
-  id: z.uuid(),
-});
-
-export type DeleteInserterAsOwnerInput = z.infer<typeof DeleteInserterAsOwnerInputSchema>;
-
-export async function deleteInserterAsOwner(
-  kwilClient: KwilActionClient,
-  params: DeleteInserterAsOwnerInput,
-): Promise<void> {
-  const inputs = DeleteInserterAsOwnerInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "delete_inserter_as_owner",
-    inputs,
-    description: "Delete inserter as owner",
-  });
-}
-
-export const AddDelegateAsOwnerInputSchema: z.ZodObject<{
-  address: z.ZodString;
-  inserter_id: z.ZodUUID;
-}> = z.object({
-  address: z.string(),
-  inserter_id: z.uuid(),
-});
-
-export type AddDelegateAsOwnerInput = z.infer<typeof AddDelegateAsOwnerInputSchema>;
-
-export async function addDelegateAsOwner(
-  kwilClient: KwilActionClient,
-  params: AddDelegateAsOwnerInput,
-): Promise<void> {
-  const inputs = AddDelegateAsOwnerInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "add_delegate_as_owner",
-    inputs,
-    description: "Add a delegate as owner",
-  });
-}
-
-export const DeleteDelegateAsOwnerInputSchema: z.ZodObject<{
-  address: z.ZodString;
-}> = z.object({
-  address: z.string(),
-});
-
-export type DeleteDelegateAsOwnerInput = z.infer<typeof DeleteDelegateAsOwnerInputSchema>;
-
-export async function deleteDelegateAsOwner(
-  kwilClient: KwilActionClient,
-  params: DeleteDelegateAsOwnerInput,
-): Promise<void> {
-  const inputs = DeleteDelegateAsOwnerInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "delete_delegate_as_owner",
-    inputs,
-    description: "Delete a delegate from idOS",
-  });
-}
-
 export const AddUserAsInserterInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   recipient_encryption_public_key: z.ZodString;
@@ -963,74 +799,44 @@ export async function removeWallet(
   });
 }
 
-export const UpsertCredentialAsInserterInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-  user_id: z.ZodUUID;
+export const CreatePreliminaryCredentialInputSchema: z.ZodObject<{
+  request_id: z.ZodUUID;
+  credential_id: z.ZodUUID;
   issuer_auth_public_key: z.ZodString;
   encryptor_public_key: z.ZodString;
-  content: z.ZodString;
+  content_uri: z.ZodString;
+  content_size: z.ZodNumber;
+  content_hash: z.ZodString;
   public_notes: z.ZodString;
   public_notes_signature: z.ZodString;
   broader_signature: z.ZodString;
 }> = z.object({
-  id: z.uuid(),
-  user_id: z.uuid(),
+  request_id: z.uuid(),
+  credential_id: z.uuid(),
   issuer_auth_public_key: z.string(),
   encryptor_public_key: z.string(),
-  content: z.string(),
+  content_uri: ipfsContentUriSchema,
+  content_size: contentSizeSchema,
+  content_hash: z.string(),
   public_notes: z.string(),
   public_notes_signature: z.string(),
   broader_signature: z.string(),
 });
 
-export type UpsertCredentialAsInserterInput = z.infer<typeof UpsertCredentialAsInserterInputSchema>;
+export type CreatePreliminaryCredentialInput = z.infer<
+  typeof CreatePreliminaryCredentialInputSchema
+>;
 
-/**
- *  CREDENTIAL ACTIONS
- *  throw an error if not authorized
- */
-export async function upsertCredentialAsInserter(
+/**  CREDENTIAL ACTIONS */
+export async function createPreliminaryCredential(
   kwilClient: KwilActionClient,
-  params: UpsertCredentialAsInserterInput,
+  params: CreatePreliminaryCredentialInput,
 ): Promise<void> {
-  const inputs = UpsertCredentialAsInserterInputSchema.parse(params);
+  const inputs = CreatePreliminaryCredentialInputSchema.parse(params);
   await kwilClient.execute({
-    name: "upsert_credential_as_inserter",
+    name: "create_preliminary_credential",
     inputs,
-    description:
-      "Add or update a credential in idOS on behalf of a user by permissioned profile creator (inserter) ",
-  });
-}
-
-export const AddCredentialInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-  issuer_auth_public_key: z.ZodString;
-  encryptor_public_key: z.ZodString;
-  content: z.ZodString;
-  public_notes: z.ZodString;
-  public_notes_signature: z.ZodString;
-  broader_signature: z.ZodString;
-}> = z.object({
-  id: z.uuid(),
-  issuer_auth_public_key: z.string(),
-  encryptor_public_key: z.string(),
-  content: z.string(),
-  public_notes: z.string(),
-  public_notes_signature: z.string(),
-  broader_signature: z.string(),
-});
-
-export type AddCredentialInput = z.infer<typeof AddCredentialInputSchema>;
-
-export async function addCredential(
-  kwilClient: KwilActionClient,
-  params: AddCredentialInput,
-): Promise<void> {
-  const inputs = AddCredentialInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "add_credential",
-    inputs,
-    description: "Add a new credential",
+    description: "Create a new preliminary credential",
   });
 }
 
@@ -1038,15 +844,21 @@ export const GetCredentialsOutputSchema: z.ZodObject<{
   id: z.ZodUUID;
   user_id: z.ZodUUID;
   public_notes: z.ZodString;
+  content_uri: z.ZodNullable<z.ZodString>;
+  content_size: z.ZodNullable<z.ZodNumber>;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodNullable<z.ZodString>;
+  inserter_type: z.ZodNullable<z.ZodString>;
+  inserter_id: z.ZodNullable<z.ZodString>;
   original_id: z.ZodNullable<z.ZodUUID>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   public_notes: z.string(),
+  content_uri: z.string().nullable(),
+  content_size: z.number().nullable(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string().nullable(),
+  inserter_type: z.string().nullable(),
+  inserter_id: z.string().nullable(),
   original_id: z.uuid().nullable(),
 });
 
@@ -1077,7 +889,8 @@ export const GetCredentialsSharedByUserOutputSchema: z.ZodObject<{
   public_notes: z.ZodString;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodNullable<z.ZodString>;
+  inserter_type: z.ZodNullable<z.ZodString>;
+  inserter_id: z.ZodNullable<z.ZodString>;
   original_id: z.ZodNullable<z.ZodUUID>;
 }> = z.object({
   id: z.uuid(),
@@ -1085,7 +898,8 @@ export const GetCredentialsSharedByUserOutputSchema: z.ZodObject<{
   public_notes: z.string(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string().nullable(),
+  inserter_type: z.string().nullable(),
+  inserter_id: z.string().nullable(),
   original_id: z.uuid().nullable(),
 });
 
@@ -1101,43 +915,6 @@ export async function getCredentialsSharedByUser(
   return await kwilClient.call<GetCredentialsSharedByUserOutput[]>({
     name: "get_credentials_shared_by_user",
     inputs,
-  });
-}
-
-export const EditCredentialInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-  public_notes: z.ZodString;
-  public_notes_signature: z.ZodString;
-  broader_signature: z.ZodString;
-  content: z.ZodString;
-  encryptor_public_key: z.ZodString;
-  issuer_auth_public_key: z.ZodString;
-}> = z.object({
-  id: z.uuid(),
-  public_notes: z.string(),
-  public_notes_signature: z.string(),
-  broader_signature: z.string(),
-  content: z.string(),
-  encryptor_public_key: z.string(),
-  issuer_auth_public_key: z.string(),
-});
-
-export type EditCredentialInput = z.infer<typeof EditCredentialInputSchema>;
-
-/**
- *  we forbid to edit a copy
- *  only copies can have AGs, so data_id in AGs is id of a copy
- *  if $id is shared_credentials.copy_id - it is a copy
- */
-export async function editCredential(
-  kwilClient: KwilActionClient,
-  params: EditCredentialInput,
-): Promise<void> {
-  const inputs = EditCredentialInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "edit_credential",
-    inputs,
-    description: "Edit a credential",
   });
 }
 
@@ -1208,7 +985,7 @@ export async function rescindSharedCredential(
   });
 }
 
-export const ShareCredentialInputSchema: z.ZodObject<{
+export const SharePreliminaryCredentialInputSchema: z.ZodObject<{
   request_id: z.ZodUUID;
   copy_id: z.ZodUUID;
   original_id: z.ZodUUID;
@@ -1235,16 +1012,16 @@ export const ShareCredentialInputSchema: z.ZodObject<{
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
   grantee_wallet_identifier: z.string(),
-  locked_until: z.number().int().nonnegative(),
+  locked_until: z.number(),
 });
 
-export type ShareCredentialInput = z.infer<typeof ShareCredentialInputSchema>;
+export type SharePreliminaryCredentialInput = z.infer<typeof SharePreliminaryCredentialInputSchema>;
 
-export async function shareCredential(
+export async function sharePreliminaryCredential(
   kwilClient: KwilActionClient,
-  params: ShareCredentialInput,
+  params: SharePreliminaryCredentialInput,
 ): Promise<void> {
-  const inputs = ShareCredentialInputSchema.parse(params);
+  const inputs = SharePreliminaryCredentialInputSchema.parse(params);
   await kwilClient.execute({
     name: "share_preliminary_credential",
     inputs,
@@ -1252,21 +1029,7 @@ export async function shareCredential(
   });
 }
 
-/**
- *  Delegated write credential actions
- *  For access grant
- *  Check the content creator (encryptor) of credentials is the issuer that user delegated to issue the credentials
- *  Get the wallet type and public key for XRPL/NEAR wallets from database
- *  Will fail if not in the RFC3339 format
- *  Check the format and precedence
- *  Check if current block timestamp in time range allowed by write grant.
- *  @block_timestamp is a timestamp of previous block, which is can be a few seconds earlier
- *  (max is 6 seconds in current network consensus settings) then a time on a requester's machine.
- *  Also, if requester's machine has wrong time, it can be an issue.
- *  Insert original credential
- *  Insert copy credential
- */
-export const CreateCredentialsByDwgInputSchema: z.ZodObject<{
+export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   request_id: z.ZodUUID;
   issuer_auth_public_key: z.ZodString;
   original_encryptor_public_key: z.ZodString;
@@ -1318,18 +1081,63 @@ export const CreateCredentialsByDwgInputSchema: z.ZodObject<{
   dwg_signature: z.string(),
 });
 
-export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgInputSchema>;
+export type CreatePreliminaryCredentialsByDwgInput = z.infer<
+  typeof CreatePreliminaryCredentialsByDwgInputSchema
+>;
 
-export async function createCredentialsByDwg(
+/**
+ *  Delegated write credential actions
+ *  For access grant
+ *  We will use the same ids for preliminary credentials as for credentials, so we need to check if they already exist
+ *  We capture gas upfront to prevent the real credential from being created if the gas is not enough
+ *  The gas can be refunded fully or partially
+ *  Temporary: an issuer is not an inserter/caller. A user grants a DWG to an issuer_key;
+ *  the issuer must issue the credential and sign the proof with that same issuer_key.
+ *  Today we approximate "same issuer" via delegates sharing an inserter_id.
+ *  TODO: once the SDK distinguishes issuer_key from delegate_key, replace with:
+ *    if $issuer_auth_public_key != $dwg_issuer_public_key {
+ *        error('credentials issuer must be an issuer of delegated write grant');
+ *    }
+ *  Get the wallet type and public key for XRPL/NEAR wallets from database
+ *  Will fail if not in the RFC3339 format
+ *  Check the format and precedence
+ *  Check if current block timestamp in time range allowed by write grant.
+ *  @block_timestamp is a timestamp of previous block, which is can be a few seconds earlier
+ *  (max is 6 seconds in current network consensus settings) then a time on a requester's machine.
+ *  Also, if requester's machine has wrong time, it can be an issue.
+ */
+export async function createPreliminaryCredentialsByDwg(
   kwilClient: KwilActionClient,
-  params: CreateCredentialsByDwgInput,
+  params: CreatePreliminaryCredentialsByDwgInput,
 ): Promise<void> {
-  const inputs = CreateCredentialsByDwgInputSchema.parse(params);
+  const inputs = CreatePreliminaryCredentialsByDwgInputSchema.parse(params);
   await kwilClient.execute({
     name: "create_preliminary_credentials_by_dwg",
     inputs,
     description:
-      "Create preliminary original and copy credentials with AG on behalf of a user (using delegated write grant given by the user)",
+      "Add original credential and copy credential with AG on behalf of a user (using delegated write grant given by the user)",
+  });
+}
+
+export const DeleteStalePreliminaryAsGatewayInputSchema: z.ZodObject<{
+  age_seconds: z.ZodNumber;
+}> = z.object({
+  age_seconds: z.number(),
+});
+
+export type DeleteStalePreliminaryAsGatewayInput = z.infer<
+  typeof DeleteStalePreliminaryAsGatewayInputSchema
+>;
+
+/**  `@generator.ignore` */
+export async function deleteStalePreliminaryAsGateway(
+  kwilClient: KwilActionClient,
+  params: DeleteStalePreliminaryAsGatewayInput,
+): Promise<void> {
+  const inputs = DeleteStalePreliminaryAsGatewayInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "delete_stale_preliminary_as_gateway",
+    inputs,
   });
 }
 
