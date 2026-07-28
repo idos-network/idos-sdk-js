@@ -74,24 +74,25 @@ export async function waitForKwilTx(
   let lastPollError: unknown;
 
   while (Date.now() < deadlineAt) {
+    let data: KwilTxInfo | undefined;
+
+    // Transient poll failures (e.g. "not found" before the node indexes the tx) are
+    // recorded and retried. Terminal tx failures are decided below, outside this catch.
     try {
-      const response = await txInfo(txHash);
-      const data = response.data;
-
-      if (data && isTxFinalized(data)) {
-        if (data.tx_result.code === 0) {
-          return;
-        }
-
-        throw new KwilTxFailedError(txHash, data.tx_result.code, data.tx_result.log, data.height);
-      }
+      data = (await txInfo(txHash)).data;
     } catch (error) {
-      if (error instanceof KwilTxFailedError) {
-        throw error;
-      }
       lastPollError = error;
     }
 
+    // height > 0 means the tx was included. Then code 0 is success; anything else is final failure.
+    if (data && isTxFinalized(data)) {
+      if (data.tx_result.code !== 0) {
+        throw new KwilTxFailedError(txHash, data.tx_result.code, data.tx_result.log, data.height);
+      }
+      return;
+    }
+
+    // Not finalized yet (or last poll errored) — back off and try again until the deadline.
     const waitMs = pollIntervalWithJitter(intervalMs);
     const remainingMs = deadlineAt - Date.now();
     if (remainingMs <= 0) {
