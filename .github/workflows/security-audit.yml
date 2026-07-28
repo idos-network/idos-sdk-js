@@ -1,4 +1,4 @@
-name: Typecheck
+name: Security Dependency Audit
 
 on:
   pull_request:
