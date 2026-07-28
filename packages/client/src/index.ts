@@ -132,13 +132,13 @@ export class idOSClientIdle {
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
-  readonly blobGateway?: BlobGateway;
+  readonly blobGateway: BlobGateway;
 
   constructor(
     store: Store,
     kwilClient: KwilActionClient,
     enclaveProvider: BaseProvider,
-    blobGateway?: BlobGateway,
+    blobGateway: BlobGateway,
   ) {
     this.state = "idle";
     this.store = store;
@@ -214,7 +214,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
-  readonly blobGateway?: BlobGateway;
+  readonly blobGateway: BlobGateway;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -296,7 +296,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
   readonly user: idOSUser;
-  readonly blobGateway?: BlobGateway;
+  readonly blobGateway: BlobGateway;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
     this.state = "logged-in";
@@ -619,7 +619,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const credential = await this.getCredentialById(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
-    invariant(this.blobGateway, "Blob gateway is required to request an access grant");
 
     const plaintextContent = await this.#decryptCredentialContent(credential);
     const contentHash = hexEncodeSha256Hash(plaintextContent);
