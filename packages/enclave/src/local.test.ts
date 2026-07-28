@@ -8,6 +8,17 @@ import { describe, expect, it, vi } from "vitest";
 
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 
+vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@idos-network/utils/encryption")>();
+
+  return {
+    ...actual,
+    keyDerivation: vi.fn(
+      async () => new Uint8Array(Array.from({ length: 32 }, (_, index) => index)),
+    ),
+  };
+});
+
 class TestEnclave extends LocalEnclave {
   async getPasswordContext() {
     return {
