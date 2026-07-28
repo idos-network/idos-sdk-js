@@ -28,6 +28,7 @@ import {
 
 const idOSClientWithoutSigner = await createIDOSClient({
   nodeUrl: "https://nodes.idos.network",
+  // Must share KGW's session-cookie Domain (typically same host as nodeUrl).
   blobGatewayUrl: "https://blob-gateway.idos.network",
   enclaveOptions: {
     container: "#idosContainer",

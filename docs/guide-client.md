@@ -45,6 +45,7 @@ import { createIDOSClient } from "@idos-network/client";
 
 const idOSClientIdle = await createIDOSClient({
   nodeUrl: "https://nodes.idos.network",
+  // Must share KGW's session-cookie Domain (typically same host as nodeUrl).
   blobGatewayUrl: "https://blob-gateway.idos.network",
   enclaveOptions: {
     container: "#idos-enclave",
