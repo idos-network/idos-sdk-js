@@ -1,5 +1,14 @@
 # @idos-network/issuer
 
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [565e87c]
+  - @idos-network/credentials@1.3.1
+  - @idos-network/kwil-infra@1.3.1
+  - @idos-network/utils@1.3.1
+
 ## 1.3.0
 
 ### Minor Changes

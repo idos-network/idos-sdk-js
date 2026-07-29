@@ -1,5 +1,11 @@
 # @idos-network/utils
 
+## 1.3.1
+
+### Patch Changes
+
+- 565e87c: Report test coverage
+
 ## 1.3.0
 
 ### Minor Changes
