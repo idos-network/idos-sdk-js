@@ -1,4 +1,4 @@
-import { base85ToFile } from "@idos-network/credentials/utils";
+import { base85ToFile } from "@idos-network/utils/codecs";
 import { fileTypeFromBuffer } from "file-type";
 
 import { verifyFileUrl } from "~/providers/files.server";

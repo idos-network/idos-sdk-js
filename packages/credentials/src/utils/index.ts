@@ -1,6 +1,11 @@
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
-import * as base85 from "base85";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  utf8Encode,
+  fileToBase85,
+} from "@idos-network/utils/codecs";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
@@ -14,14 +19,6 @@ import type {
   CustomIssuerType,
   InsertableIDOSCredential,
 } from "../types";
-
-export function fileToBase85(file: Buffer): string {
-  return base85.encode(file, "ascii85");
-}
-
-export function base85ToFile(data: string): Buffer | false {
-  return base85.decode(data);
-}
 
 export function capitalizeFirstLetter(str: string): string {
   return str[0].toUpperCase() + str.slice(1);

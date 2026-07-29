@@ -1,10 +1,10 @@
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
+import { fileToBase85 } from "@idos-network/utils/codecs";
 import crypto from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
 import { buildCredential, buildFaceIdCredential } from ".";
-import { fileToBase85 } from "../utils";
 import { verifyCredential } from "./verifier";
 
 describe("verifiableCredentials", () => {
