@@ -1,9 +1,4 @@
-import {
-  base64Decode,
-  base64Encode,
-  hexEncode,
-  utf8Encode,
-} from "@idos-network/utils/codecs";
+import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
