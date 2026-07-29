@@ -10,6 +10,7 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
@@ -53,9 +54,168 @@ jobs:
       - name: Run tests with coverage
         run: pnpm turbo run coverage --filter ${{ matrix.filter }}
 
-      - name: Report coverage
+      - name: Upload coverage summary
         if: always()
-        uses: davelosert/vitest-coverage-report-action@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
-          working-directory: ${{ matrix.directory }}
+          name: coverage-${{ matrix.name }}
+          path: ${{ matrix.directory }}/coverage/coverage-summary.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  report-coverage:
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: always()
+    steps:
+      - name: Download coverage summaries
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: coverage-*
+          path: coverage-artifacts
+
+      - name: Report coverage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("node:fs");
+            const path = require("node:path");
+
+            const marker = "<!-- idos-coverage-report -->";
+            const artifactsDir = "coverage-artifacts";
+            const metrics = ["statements", "branches", "functions", "lines"];
+
+            function findCoverageSummaries(dir) {
+              if (!fs.existsSync(dir)) return [];
+
+              return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+                const entryPath = path.join(dir, entry.name);
+
+                if (entry.isDirectory()) {
+                  return findCoverageSummaries(entryPath);
+                }
+
+                return entry.name === "coverage-summary.json" ? [entryPath] : [];
+              });
+            }
+
+            function formatMetric(metric) {
+              return `${metric.pct}% (${metric.covered}/${metric.total})`;
+            }
+
+            function escapeCell(value) {
+              return String(value).replace(/\|/g, "\\|");
+            }
+
+            function relativeFilePath(filePath) {
+              const workspace = process.env.GITHUB_WORKSPACE;
+              if (workspace && filePath.startsWith(workspace)) {
+                return path.relative(workspace, filePath);
+              }
+
+              const workspaceMarker = "/idos-sdk-js/idos-sdk-js/";
+              const markerIndex = filePath.indexOf(workspaceMarker);
+              return markerIndex === -1
+                ? filePath
+                : filePath.slice(markerIndex + workspaceMarker.length);
+            }
+
+            const reports = findCoverageSummaries(artifactsDir)
+              .map((summaryPath) => {
+                const artifactName = summaryPath.split(path.sep).at(-2) ?? "";
+                const packageName = artifactName.replace(/^coverage-/, "");
+                const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
+                const files = Object.entries(summary)
+                  .filter(([filePath]) => filePath !== "total")
+                  .map(([filePath, fileSummary]) => ({
+                    path: relativeFilePath(filePath),
+                    summary: fileSummary,
+                  }))
+                  .sort((a, b) => a.summary.lines.pct - b.summary.lines.pct || a.path.localeCompare(b.path));
+
+                return {
+                  name: packageName,
+                  total: summary.total,
+                  files,
+                };
+              })
+              .sort((a, b) => a.name.localeCompare(b.name));
+
+            const summaryTable = reports.length
+              ? [
+                  "| Package | Statements | Branches | Functions | Lines |",
+                  "| --- | ---: | ---: | ---: | ---: |",
+                  ...reports.map(
+                    ({ name, total }) =>
+                      `| ${escapeCell(name)} | ${formatMetric(total.statements)} | ${formatMetric(total.branches)} | ${formatMetric(total.functions)} | ${formatMetric(total.lines)} |`,
+                  ),
+                ].join("\n")
+              : "_No coverage summaries were uploaded._";
+
+            const packageDetails = reports
+              .map(({ name, total, files }) => {
+                const filesBelowFullCoverage = files.filter(({ summary }) =>
+                  metrics.some((metric) => summary[metric].pct < 100),
+                );
+                const visibleFiles = filesBelowFullCoverage.slice(0, 75);
+                const hiddenCount = filesBelowFullCoverage.length - visibleFiles.length;
+                const fileTable = visibleFiles.length
+                  ? [
+                      "| File | Statements | Branches | Functions | Lines |",
+                      "| --- | ---: | ---: | ---: | ---: |",
+                      ...visibleFiles.map(
+                        ({ path: filePath, summary }) =>
+                          `| ${escapeCell(filePath)} | ${formatMetric(summary.statements)} | ${formatMetric(summary.branches)} | ${formatMetric(summary.functions)} | ${formatMetric(summary.lines)} |`,
+                      ),
+                      hiddenCount > 0 ? `\n_${hiddenCount} more files below 100% omitted._` : "",
+                    ].join("\n")
+                  : "_All reported files are fully covered._";
+
+                return [
+                  `<details>`,
+                  `<summary><strong>${escapeCell(name)}</strong>: ${formatMetric(total.lines)} lines, ${filesBelowFullCoverage.length}/${files.length} files below 100%</summary>`,
+                  "",
+                  fileTable,
+                  "",
+                  `</details>`,
+                ].join("\n");
+              })
+              .join("\n\n");
+
+            const body = [
+              marker,
+              "## Coverage",
+              "",
+              summaryTable,
+              "",
+              "## Package Details",
+              "",
+              packageDetails || "_No package details available._",
+            ].join("\n");
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const previousComment = comments.find((comment) => comment.body?.includes(marker));
+
+            if (previousComment) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previousComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
