@@ -1,6 +1,6 @@
 import type { Credential } from "@idos-network/consumer";
 
-import { base85ToFile } from "@idos-network/utils";
+import { base85ToFile } from "@idos-network/utils/codecs";
 
 import { SERVER_ENV } from "./envFlags.server";
 import { generateCodeChallenge } from "./utils";
