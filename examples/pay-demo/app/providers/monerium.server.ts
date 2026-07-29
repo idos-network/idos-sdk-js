@@ -1,6 +1,4 @@
-import type { CredentialSubjectKycV2, VerifiableCredential } from "@idos-network/credentials/types";
-
-import { base85ToFile } from "@idos-network/utils/codecs";
+import type { VerifiableCredentialKycV2 } from "@idos-network/credentials/types";
 
 import { SERVER_ENV } from "./envFlags.server";
 import { generateCodeChallenge } from "./utils";
@@ -27,8 +25,8 @@ export const getClientToken = async () => {
   return await response.json().then((data) => data.access_token);
 };
 
-export const createUser = async (data: VerifiableCredential<CredentialSubjectKycV2>) => {
-  if (!data.credentialSubject.email) {
+export const createUser = async (data: VerifiableCredentialKycV2) => {
+  if (!data.subject.root?.email) {
     // Email is required, so you have to go to the auth page
     throw new Error("Email is required");
   }
@@ -43,7 +41,7 @@ export const createUser = async (data: VerifiableCredential<CredentialSubjectKyc
       Authorization: `Bearer ${clientToken}`,
     },
     body: JSON.stringify({
-      email: data.credentialSubject.email,
+      email: data.subject.root?.email,
     }),
   });
 
@@ -112,34 +110,29 @@ export interface IdDocument {
   kind: string;
 }
 
-export const createProfile = async (
-  profileId: string,
-  data: VerifiableCredential<CredentialSubjectKycV2>,
-) => {
+export const createProfile = async (profileId: string, data: VerifiableCredentialKycV2) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
-    // @ts-expect-error Demo
-    firstName: data.credentialSubject.firstName,
-    // @ts-expect-error Demo
-    lastName: data.credentialSubject.familyName,
+    firstName: data.subject.root?.firstName ?? "",
+    lastName: data.subject.root?.familyName ?? "",
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
-    address: data.credentialSubject.residentialAddressStreet!,
+    address: data.subject.residentialAddress?.street ?? "",
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
-    postalCode: data.credentialSubject.residentialAddressPostalCode!,
+    postalCode: data.subject.residentialAddress?.postalCode ?? "",
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
-    city: data.credentialSubject.residentialAddressCity!,
+    city: data.subject.residentialAddress?.city ?? "",
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
-    country: data.credentialSubject.residentialAddressCountry!,
+    country: data.subject.residentialAddress?.country ?? "",
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok, we are choosing plus+liveness
-    countryState: data.credentialSubject.residentialAddressCountry!,
-    nationality: data.credentialSubject.nationality ?? "DE", // TODO: Check this out
+    countryState: data.subject.residentialAddress?.region ?? "",
+    nationality: data.subject.root?.nationality ?? "DE", // TODO: Check this out
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
     // oxlint-disable-next-line typescript/no-non-null-asserted-optional-chain -- This is ok (demo)
-    birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
+    birthday: data.subject.root?.dateOfBirth?.toISOString().split("T")[0] ?? "",
     idDocument: {
-      number: data.credentialSubject.idDocumentNumber ?? "",
-      kind: data.credentialSubject.idDocumentType?.toLowerCase() ?? "",
+      number: data.subject.idDocument?.number ?? "",
+      kind: data.subject.idDocument?.type?.toLowerCase() ?? "",
     },
   };
 
@@ -168,7 +161,7 @@ export const createProfile = async (
       profileId,
       apiToken,
       // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-      data.credentialSubject.idDocumentFrontFile!,
+      data.subject.idDocument?.frontFile,
       "idDocument",
       "front",
     ),
@@ -176,17 +169,17 @@ export const createProfile = async (
       profileId,
       apiToken,
       // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-      data.credentialSubject.idDocumentBackFile!,
+      data.subject.idDocument?.backFile,
       "idDocument",
       "back",
     ),
     // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-    uploadFile(profileId, apiToken, data.credentialSubject.selfieFile!, "facialSimilarity"),
+    uploadFile(profileId, apiToken, data.subject.root?.selfieFile, "facialSimilarity"),
     uploadFile(
       profileId,
       apiToken,
       // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-      data.credentialSubject.residentialAddressProofFile!,
+      data.subject.residentialAddress?.proofFile,
       "proofOfResidency",
     ),
   ]);
@@ -197,21 +190,15 @@ export const createProfile = async (
 export const uploadFile = async (
   profileId: string,
   apiToken: string,
-  base85file: string,
+  inputFile: Buffer | undefined,
   kind: "idDocument" | "facialSimilarity" | "proofOfResidency",
   side: "front" | "back" = "front",
 ) => {
-  if (!base85file) return;
-
-  // Decode base85 file and get the type
-  const decodedFile = base85ToFile(base85file);
-  if (!decodedFile) {
-    throw new Error("Failed to decode file");
-  }
+  if (!inputFile) return;
 
   const formData = new FormData();
-  // @ts-expect-error - decodedFile might be ArrayBuffer, Buffer, or Uint8Array, we should check this
-  formData.append("file", new Blob([decodedFile]));
+  // @ts-expect-error - inputFile might be ArrayBuffer, Buffer, or Uint8Array, we should check this
+  formData.append("file", new Blob([inputFile]));
 
   const response = await fetch(`${SERVER_ENV.MONERIUM_API_URL}/files`, {
     method: "POST",
@@ -320,7 +307,7 @@ export const statusAndIban = async (profileId: string) => {
   };
 };
 
-export const auth = async (data: VerifiableCredential<CredentialSubjectKycV2>, url: URL) => {
+export const auth = async (data: VerifiableCredentialKycV2, url: URL) => {
   // Generate PKCE code verifier and challenge
   const { codeChallenge, codeVerifier } = await generateCodeChallenge();
 
@@ -335,7 +322,7 @@ export const auth = async (data: VerifiableCredential<CredentialSubjectKycV2>, u
   params.set("code_challenge", codeChallenge);
   params.set("code_challenge_method", "S256");
   // oxlint-disable-next-line typescript/no-non-null-assertion -- This is ok (demo)
-  params.set("email", data.credentialSubject.email!);
+  params.set("email", data.subject.root?.email ?? "");
   params.set("redirect_uri", returnUrl.toString());
 
   const authUrl = new URL(`${SERVER_ENV.MONERIUM_API_URL}/auth?${params.toString()}`);

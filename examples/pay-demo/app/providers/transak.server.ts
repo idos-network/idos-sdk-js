@@ -1,3 +1,5 @@
+import type { VerifiableCredentialKycV2 } from "@idos-network/credentials/types";
+
 import { SERVER_ENV } from "./envFlags.server";
 import { getCredentialShared } from "./idos.server";
 import { getISORegionCodeFromNominatim } from "./maps.server";
@@ -29,26 +31,6 @@ type TransakUserData = {
   address: TransakAddress;
 };
 
-type CredentialSubject = {
-  id: string;
-  residentialAddressStreet: string;
-  residentialAddressCity: string;
-  residentialAddressState: string;
-  residentialAddressPostalCode: string;
-  residentialAddressCountry: string;
-  firstName: string;
-  middleName: string;
-  ssn: string;
-  gender: string;
-  nationality: string;
-  familyName: string;
-  maidenName: string;
-  email: string;
-  phoneNumber: string;
-  dateOfBirth: string;
-  placeOfBirth: string;
-};
-
 type CreateTransakWidgetUrlResponse = {
   data: {
     widgetUrl: string;
@@ -60,21 +42,21 @@ const formatDateForTransak = (date: string) => {
 };
 
 const mapCredentialSubjectToTransakUserData = (
-  credentialSubject: CredentialSubject,
+  vc: VerifiableCredentialKycV2,
   stateCode: string,
 ): TransakUserData => ({
-  firstName: credentialSubject.firstName,
-  lastName: credentialSubject.familyName,
-  email: credentialSubject.email,
-  mobileNumber: credentialSubject.phoneNumber,
-  dob: formatDateForTransak(credentialSubject.dateOfBirth),
-  ssn: credentialSubject.ssn,
+  firstName: vc.subject.root!.firstName!,
+  lastName: vc.subject.root!.familyName!,
+  email: vc.subject.root!.email!,
+  mobileNumber: vc.subject.root!.phoneNumber!,
+  dob: formatDateForTransak(vc.subject.root!.dateOfBirth?.toISOString() ?? ""),
+  ssn: vc.subject.root!.ssn!,
   address: {
-    addressLine1: credentialSubject.residentialAddressStreet,
-    addressLine2: credentialSubject.residentialAddressCity,
-    city: credentialSubject.residentialAddressCity,
-    postCode: credentialSubject.residentialAddressPostalCode,
-    countryCode: credentialSubject.residentialAddressCountry,
+    addressLine1: vc.subject.residentialAddress?.street ?? "",
+    addressLine2: vc.subject.residentialAddress?.city ?? "",
+    city: vc.subject.residentialAddress?.city ?? "",
+    postCode: vc.subject.residentialAddress?.postalCode ?? "",
+    countryCode: vc.subject.residentialAddress?.country ?? "",
     state: stateCode,
   },
 });
@@ -127,15 +109,13 @@ export async function createTransakWidgetUrl({
 
   // Decrypt the credential to extract user data for prefilling
   const credentialData = await getCredentialShared(credentialId);
-  // oxlint-disable-next-line typescript/no-explicit-any -- credential structure varies
-  const credentialSubject = (credentialData as any).credentialSubject as CredentialSubject;
 
   // Resolve state/region code from postal code + country
   let stateCode = "N/A";
   try {
     const address = [
-      credentialSubject.residentialAddressPostalCode,
-      credentialSubject.residentialAddressCountry,
+      credentialData.subject.residentialAddress?.postalCode,
+      credentialData.subject.residentialAddress?.country,
     ]
       .filter(Boolean)
       .join(", ");
@@ -146,7 +126,7 @@ export async function createTransakWidgetUrl({
     console.warn("[createTransakWidgetUrl] Could not resolve state code:", e);
   }
 
-  const userData = mapCredentialSubjectToTransakUserData(credentialSubject, stateCode);
+  const userData = mapCredentialSubjectToTransakUserData(credentialData, stateCode);
 
   const payload = {
     walletAddress,

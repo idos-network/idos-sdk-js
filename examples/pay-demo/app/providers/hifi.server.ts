@@ -1,4 +1,4 @@
-import type { CredentialSubjectKycV2, VerifiableCredential } from "@idos-network/credentials/types";
+import type { VerifiableCredentialKycV2 } from "@idos-network/credentials/types";
 
 import countries2to3 from "countries-list/minimal/countries.2to3.min.json";
 
@@ -105,23 +105,20 @@ export interface UpdateKYCRequest extends Omit<CreateUserRequest, "signedAgreeme
 export const createUserAndKYC = async (
   signedAgreementId: string,
   credentialId: string,
-  data: VerifiableCredential<CredentialSubjectKycV2>,
+  data: VerifiableCredentialKycV2,
   url: URL,
 ) => {
   // stateProvinceRegion is required but we don't have it in the data
   // so we need to get it from the address
   const stateProvinceRegion = await getISORegionCodeFromNominatim(
     [
-      [
-        data.credentialSubject.residentialAddressStreet,
-        data.credentialSubject.residentialAddressHouseNumber,
-      ]
+      [data.subject.residentialAddress?.street, data.subject.residentialAddress?.houseNumber]
         .filter((x) => x)
         .join(" "),
-      data.credentialSubject.residentialAddressCity,
-      data.credentialSubject.residentialAddressPostalCode,
-      data.credentialSubject.residentialAddressCountry,
-      data.credentialSubject.residentialAddressAdditionalAddressInfo,
+      data.subject.residentialAddress?.city,
+      data.subject.residentialAddress?.postalCode,
+      data.subject.residentialAddress?.country,
+      data.subject.residentialAddress?.additionalAddressInfo,
     ]
       .filter((x) => x)
       .join(", "),
@@ -129,28 +126,19 @@ export const createUserAndKYC = async (
 
   const user: CreateUserRequest = {
     type: "individual",
-    // @ts-expect-error Demo
-    firstName: data.credentialSubject.firstName,
-    // @ts-expect-error Demo
-    lastName: data.credentialSubject.familyName,
-    // @ts-expect-error Demo
-    email: data.credentialSubject.email,
-    // @ts-expect-error Demo
-    dateOfBirth: data.credentialSubject.dateOfBirth?.split("T")[0],
+    firstName: data.subject.root?.firstName ?? "",
+    lastName: data.subject.root?.familyName ?? "",
+    email: data.subject.root?.email ?? "",
+    dateOfBirth: data.subject.root?.dateOfBirth?.toISOString().split("T")[0] ?? "",
     address: {
-      // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
-      addressLine1: data.credentialSubject.residentialAddressStreet!,
-      addressLine2: data.credentialSubject.residentialAddressHouseNumber ?? "",
-      // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
-      city: data.credentialSubject.residentialAddressCity!,
-      // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
-      postalCode: data.credentialSubject.residentialAddressPostalCode!,
+      addressLine1: data.subject.residentialAddress?.street ?? "",
+      addressLine2: data.subject.residentialAddress?.houseNumber ?? "",
+      city: data.subject.residentialAddress?.city ?? "",
+      postalCode: data.subject.residentialAddress?.postalCode ?? "",
       stateProvinceRegion: stateProvinceRegion.slice(0, 2),
-      country:
-        countries2to3[
-          // oxlint-disable-next-line typescript/no-non-null-assertion -- false positive
-          data.credentialSubject.residentialAddressCountry! as keyof typeof countries2to3
-        ],
+      country: data.subject.residentialAddress?.country
+        ? countries2to3[data.subject.residentialAddress?.country as keyof typeof countries2to3]
+        : "",
     },
     signedAgreementId,
   };
@@ -176,21 +164,18 @@ export const createUserAndKYC = async (
 
   const updateKYCRequest: UpdateKYCRequest = {
     ...user,
-    signedAgreementId: undefined,
-    phone: data.credentialSubject.phoneNumber ?? "+420606707808",
+    phone: data.subject.root?.phoneNumber ?? "+420606707808",
     // TODO: Get this from the data
     taxIdentificationNumber: "123456789",
-    govIdType: data.credentialSubject.idDocumentType?.toUpperCase() ?? "",
-    govIdNumber: data.credentialSubject.idDocumentNumber ?? "",
-    // @ts-expect-error Demo
-    govIdIssuanceDate: data.credentialSubject.idDocumentDateOfIssue?.toString()?.split("T")[0],
+    govIdType: data.subject.idDocument?.type?.toUpperCase() ?? "",
+    govIdNumber: data.subject.idDocument?.number ?? "",
+    govIdIssuanceDate: data.subject.idDocument?.dateOfIssue?.toISOString().split("T")[0] ?? "",
     govIdFrontUrl: generateFileUrl(url, credentialId, "idDocumentFrontFile"),
-    govIdBackUrl: data.credentialSubject.idDocumentBackFile
+    govIdBackUrl: data.subject.idDocument?.backFile
       ? generateFileUrl(url, credentialId, "idDocumentBackFile")
       : generateFileUrl(url, credentialId, "idDocumentFrontFile"), // Send front file if back is not provided
-    govIdCountry:
-      countries2to3[data.credentialSubject.idDocumentCountry as keyof typeof countries2to3],
-    proofOfAddressType: data.credentialSubject.residentialAddressProofCategory?.toUpperCase() ?? "",
+    govIdCountry: countries2to3[data.subject.idDocument?.country as keyof typeof countries2to3],
+    proofOfAddressType: data.subject.residentialAddress?.proofCategory?.toUpperCase() ?? "",
     proofOfAddressUrl: generateFileUrl(url, credentialId, "residentialAddressProofFile"),
   };
 

@@ -2,8 +2,6 @@ import { decode as base64Decode, encode as base64Encode } from "@stablelib/base6
 import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
 import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
-// @ts-expect-error
-import ascii85 from "ascii85";
 import * as base85 from "base85";
 import bs58 from "bs58";
 
