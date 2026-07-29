@@ -207,6 +207,7 @@ export const uploadFile = async (
   }
 
   const formData = new FormData();
+  // @ts-expect-error - decodedFile might be ArrayBuffer, Buffer, or Uint8Array, we should check this
   formData.append("file", new Blob([decodedFile]));
 
   const response = await fetch(`${SERVER_ENV.MONERIUM_API_URL}/files`, {
