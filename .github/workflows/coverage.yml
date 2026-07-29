@@ -53,9 +53,111 @@ jobs:
       - name: Run tests with coverage
         run: pnpm turbo run coverage --filter ${{ matrix.filter }}
 
-      - name: Report coverage
+      - name: Upload coverage reports
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.name }}
+          path: |
+            ${{ matrix.directory }}/coverage/coverage-summary.json
+            ${{ matrix.directory }}/coverage/coverage-final.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  report-coverage:
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: always()
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: coverage-*
+          path: coverage-artifacts
+
+      - name: Merge coverage reports
+        run: |
+          node <<'EOF'
+          const fs = require("node:fs");
+          const path = require("node:path");
+
+          const artifactsDir = "coverage-artifacts";
+          const outputDir = "coverage";
+          const metrics = ["lines", "statements", "functions", "branches"];
+
+          function findFiles(dir, fileName) {
+            if (!fs.existsSync(dir)) return [];
+
+            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+              const entryPath = path.join(dir, entry.name);
+
+              if (entry.isDirectory()) {
+                return findFiles(entryPath, fileName);
+              }
+
+              return entry.name === fileName ? [entryPath] : [];
+            });
+          }
+
+          const summaryPaths = findFiles(artifactsDir, "coverage-summary.json");
+          if (summaryPaths.length === 0) {
+            console.log("No coverage summaries found.");
+            process.exit(0);
+          }
+
+          const mergedSummary = {
+            total: Object.fromEntries(
+              metrics.map((metric) => [metric, { total: 0, covered: 0, skipped: 0, pct: 100 }]),
+            ),
+          };
+          const mergedFinal = {};
+
+          for (const summaryPath of summaryPaths) {
+            const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
+
+            for (const metric of metrics) {
+              mergedSummary.total[metric].total += summary.total[metric].total;
+              mergedSummary.total[metric].covered += summary.total[metric].covered;
+              mergedSummary.total[metric].skipped += summary.total[metric].skipped;
+            }
+
+            for (const [filePath, fileSummary] of Object.entries(summary)) {
+              if (filePath !== "total") {
+                mergedSummary[filePath] = fileSummary;
+              }
+            }
+          }
+
+          for (const metric of metrics) {
+            const total = mergedSummary.total[metric].total;
+            const covered = mergedSummary.total[metric].covered;
+            mergedSummary.total[metric].pct =
+              total === 0 ? 100 : Math.floor((covered / total) * 10000) / 100;
+          }
+
+          for (const finalPath of findFiles(artifactsDir, "coverage-final.json")) {
+            Object.assign(mergedFinal, JSON.parse(fs.readFileSync(finalPath, "utf8")));
+          }
+
+          fs.mkdirSync(outputDir, { recursive: true });
+          fs.writeFileSync(
+            path.join(outputDir, "coverage-summary.json"),
+            `${JSON.stringify(mergedSummary, null, 2)}\n`,
+          );
+          fs.writeFileSync(
+            path.join(outputDir, "coverage-final.json"),
+            `${JSON.stringify(mergedFinal, null, 2)}\n`,
+          );
+          EOF
+
+      - name: Report coverage
+        if: ${{ hashFiles('coverage/coverage-summary.json') != '' }}
         uses: davelosert/vitest-coverage-report-action@v2
         with:
-          name: ${{ matrix.name }}
-          working-directory: ${{ matrix.directory }}
+          json-summary-path: coverage/coverage-summary.json
+          json-final-path: coverage/coverage-final.json
