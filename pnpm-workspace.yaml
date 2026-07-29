@@ -103,7 +103,6 @@ catalogs:
     "@stablelib/sha256": "^2.0.1"
     "@stablelib/utf8": "^2.1.0"
     "base85": "^3.2.0"
-    "ascii85": "1.0.2"
     "borsh": "^2.0.0"
     "bs58": "^6.0.0"
     "es-toolkit": "^1.46.1"
