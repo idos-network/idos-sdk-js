@@ -10,6 +10,7 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
@@ -53,14 +54,12 @@ jobs:
       - name: Run tests with coverage
         run: pnpm turbo run coverage --filter ${{ matrix.filter }}
 
-      - name: Upload coverage reports
+      - name: Upload coverage summary
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.name }}
-          path: |
-            ${{ matrix.directory }}/coverage/coverage-summary.json
-            ${{ matrix.directory }}/coverage/coverage-final.json
+          path: ${{ matrix.directory }}/coverage/coverage-summary.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -69,95 +68,154 @@ jobs:
     needs: coverage
     if: always()
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Download coverage reports
+      - name: Download coverage summaries
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           pattern: coverage-*
           path: coverage-artifacts
 
-      - name: Merge coverage reports
-        run: |
-          node <<'EOF'
-          const fs = require("node:fs");
-          const path = require("node:path");
-
-          const artifactsDir = "coverage-artifacts";
-          const outputDir = "coverage";
-          const metrics = ["lines", "statements", "functions", "branches"];
-
-          function findFiles(dir, fileName) {
-            if (!fs.existsSync(dir)) return [];
-
-            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-              const entryPath = path.join(dir, entry.name);
-
-              if (entry.isDirectory()) {
-                return findFiles(entryPath, fileName);
-              }
-
-              return entry.name === fileName ? [entryPath] : [];
-            });
-          }
-
-          const summaryPaths = findFiles(artifactsDir, "coverage-summary.json");
-          if (summaryPaths.length === 0) {
-            console.log("No coverage summaries found.");
-            process.exit(0);
-          }
-
-          const mergedSummary = {
-            total: Object.fromEntries(
-              metrics.map((metric) => [metric, { total: 0, covered: 0, skipped: 0, pct: 100 }]),
-            ),
-          };
-          const mergedFinal = {};
-
-          for (const summaryPath of summaryPaths) {
-            const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
-
-            for (const metric of metrics) {
-              mergedSummary.total[metric].total += summary.total[metric].total;
-              mergedSummary.total[metric].covered += summary.total[metric].covered;
-              mergedSummary.total[metric].skipped += summary.total[metric].skipped;
-            }
-
-            for (const [filePath, fileSummary] of Object.entries(summary)) {
-              if (filePath !== "total") {
-                mergedSummary[filePath] = fileSummary;
-              }
-            }
-          }
-
-          for (const metric of metrics) {
-            const total = mergedSummary.total[metric].total;
-            const covered = mergedSummary.total[metric].covered;
-            mergedSummary.total[metric].pct =
-              total === 0 ? 100 : Math.floor((covered / total) * 10000) / 100;
-          }
-
-          for (const finalPath of findFiles(artifactsDir, "coverage-final.json")) {
-            Object.assign(mergedFinal, JSON.parse(fs.readFileSync(finalPath, "utf8")));
-          }
-
-          fs.mkdirSync(outputDir, { recursive: true });
-          fs.writeFileSync(
-            path.join(outputDir, "coverage-summary.json"),
-            `${JSON.stringify(mergedSummary, null, 2)}\n`,
-          );
-          fs.writeFileSync(
-            path.join(outputDir, "coverage-final.json"),
-            `${JSON.stringify(mergedFinal, null, 2)}\n`,
-          );
-          EOF
-
       - name: Report coverage
-        if: ${{ hashFiles('coverage/coverage-summary.json') != '' }}
-        uses: davelosert/vitest-coverage-report-action@v2
+        uses: actions/github-script@v7
         with:
-          json-summary-path: coverage/coverage-summary.json
-          json-final-path: coverage/coverage-final.json
+          script: |
+            const fs = require("node:fs");
+            const path = require("node:path");
+
+            const marker = "<!-- idos-coverage-report -->";
+            const artifactsDir = "coverage-artifacts";
+            const metrics = ["statements", "branches", "functions", "lines"];
+
+            function findCoverageSummaries(dir) {
+              if (!fs.existsSync(dir)) return [];
+
+              return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+                const entryPath = path.join(dir, entry.name);
+
+                if (entry.isDirectory()) {
+                  return findCoverageSummaries(entryPath);
+                }
+
+                return entry.name === "coverage-summary.json" ? [entryPath] : [];
+              });
+            }
+
+            function formatMetric(metric) {
+              return `${metric.pct}% (${metric.covered}/${metric.total})`;
+            }
+
+            function escapeCell(value) {
+              return String(value).replace(/\|/g, "\\|");
+            }
+
+            function relativeFilePath(filePath) {
+              const workspace = process.env.GITHUB_WORKSPACE;
+              if (workspace && filePath.startsWith(workspace)) {
+                return path.relative(workspace, filePath);
+              }
+
+              const workspaceMarker = "/idos-sdk-js/idos-sdk-js/";
+              const markerIndex = filePath.indexOf(workspaceMarker);
+              return markerIndex === -1
+                ? filePath
+                : filePath.slice(markerIndex + workspaceMarker.length);
+            }
+
+            const reports = findCoverageSummaries(artifactsDir)
+              .map((summaryPath) => {
+                const artifactName = summaryPath.split(path.sep).at(-2) ?? "";
+                const packageName = artifactName.replace(/^coverage-/, "");
+                const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
+                const files = Object.entries(summary)
+                  .filter(([filePath]) => filePath !== "total")
+                  .map(([filePath, fileSummary]) => ({
+                    path: relativeFilePath(filePath),
+                    summary: fileSummary,
+                  }))
+                  .sort((a, b) => a.summary.lines.pct - b.summary.lines.pct || a.path.localeCompare(b.path));
+
+                return {
+                  name: packageName,
+                  total: summary.total,
+                  files,
+                };
+              })
+              .sort((a, b) => a.name.localeCompare(b.name));
+
+            const summaryTable = reports.length
+              ? [
+                  "| Package | Statements | Branches | Functions | Lines |",
+                  "| --- | ---: | ---: | ---: | ---: |",
+                  ...reports.map(
+                    ({ name, total }) =>
+                      `| ${escapeCell(name)} | ${formatMetric(total.statements)} | ${formatMetric(total.branches)} | ${formatMetric(total.functions)} | ${formatMetric(total.lines)} |`,
+                  ),
+                ].join("\n")
+              : "_No coverage summaries were uploaded._";
+
+            const packageDetails = reports
+              .map(({ name, total, files }) => {
+                const filesBelowFullCoverage = files.filter(({ summary }) =>
+                  metrics.some((metric) => summary[metric].pct < 100),
+                );
+                const visibleFiles = filesBelowFullCoverage.slice(0, 75);
+                const hiddenCount = filesBelowFullCoverage.length - visibleFiles.length;
+                const fileTable = visibleFiles.length
+                  ? [
+                      "| File | Statements | Branches | Functions | Lines |",
+                      "| --- | ---: | ---: | ---: | ---: |",
+                      ...visibleFiles.map(
+                        ({ path: filePath, summary }) =>
+                          `| ${escapeCell(filePath)} | ${formatMetric(summary.statements)} | ${formatMetric(summary.branches)} | ${formatMetric(summary.functions)} | ${formatMetric(summary.lines)} |`,
+                      ),
+                      hiddenCount > 0 ? `\n_${hiddenCount} more files below 100% omitted._` : "",
+                    ].join("\n")
+                  : "_All reported files are fully covered._";
+
+                return [
+                  `<details>`,
+                  `<summary><strong>${escapeCell(name)}</strong>: ${formatMetric(total.lines)} lines, ${filesBelowFullCoverage.length}/${files.length} files below 100%</summary>`,
+                  "",
+                  fileTable,
+                  "",
+                  `</details>`,
+                ].join("\n");
+              })
+              .join("\n\n");
+
+            const body = [
+              marker,
+              "## Coverage",
+              "",
+              summaryTable,
+              "",
+              "## Package Details",
+              "",
+              packageDetails || "_No package details available._",
+            ].join("\n");
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const previousComment = comments.find((comment) => comment.body?.includes(marker));
+
+            if (previousComment) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previousComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
