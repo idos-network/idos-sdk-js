@@ -1,5 +1,11 @@
 # @idos-network/utils
 
+## 1.4.0
+
+### Minor Changes
+
+- 5e8c407: Unify base85 library
+
 ## 1.3.1
 
 ### Patch Changes
