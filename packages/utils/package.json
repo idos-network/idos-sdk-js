@@ -60,6 +60,7 @@
     "@stablelib/hex": "catalog:utils",
     "@stablelib/sha256": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
+    "base85": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
     "tiny-invariant": "catalog:core",

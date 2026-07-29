@@ -775,12 +775,6 @@ importers:
       '@xstate/react':
         specifier: ^6.0.0
         version: 6.1.0(@types/react@19.2.17)(react@19.2.8)(xstate@5.32.5)
-      ascii85:
-        specifier: ^1.0.2
-        version: 1.0.2
-      base85:
-        specifier: catalog:utils
-        version: 3.2.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -946,9 +940,6 @@ importers:
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
-      base85:
-        specifier: catalog:utils
-        version: 3.2.0
       es-toolkit:
         specifier: catalog:utils
         version: 1.50.0
@@ -1157,6 +1148,9 @@ importers:
       '@stablelib/utf8':
         specifier: catalog:utils
         version: 2.1.0
+      base85:
+        specifier: catalog:utils
+        version: 3.2.0
       borsh:
         specifier: catalog:utils
         version: 2.0.0
@@ -5314,10 +5308,6 @@ packages:
   array-union@2.1.0:
     resolution: {integrity: sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==}
     engines: {node: '>=8'}
-
-  ascii85@1.0.2:
-    resolution: {integrity: sha512-kliwItQL8aueLy2XwGDRc6U4FLrZuSKvc3NYhaTnUEsl8JjjkvMNYJ2WmBoZnUYMEz6nvZ9yGhruoufaVcNAnw==}
-    engines: {node: '>=0.12'}
 
   asn1.js@4.10.1:
     resolution: {integrity: sha512-p32cOF5q0Zqs9uBiONKYLm6BClCoBCM5O9JfeUSlnQLBTxYdTK+pW+nXflm8UkKd2UYlEbYz5qEi0JuZR9ckSw==}
@@ -15681,8 +15671,6 @@ snapshots:
       is-array-buffer: 3.0.5
 
   array-union@2.1.0: {}
-
-  ascii85@1.0.2: {}
 
   asn1.js@4.10.1:
     dependencies:
