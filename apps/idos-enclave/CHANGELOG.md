@@ -1,5 +1,14 @@
 # idos-enclave
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [5e8c407]
+  - @idos-network/credentials@1.4.0
+  - @idos-network/utils@1.4.0
+  - @idos-network/enclave@1.4.0
+
 ## 0.2.1
 
 ### Patch Changes
