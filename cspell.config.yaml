@@ -31,3 +31,4 @@ ignorePaths:
   - "apps/facesign-enclave/public/facetec/**"
   - "apps/idos-data-dashboard/src/generated/**"
   - "apps/idos-data-dashboard/prisma/**"
+  - "**/coverage/*.json"

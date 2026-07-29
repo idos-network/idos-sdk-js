@@ -25,6 +25,7 @@ ctznd
 curations
 DAG
 Datil
+davelosert
 dawidd
 devnet
 digitalbazaar

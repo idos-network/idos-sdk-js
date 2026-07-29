@@ -1,0 +1,61 @@
+name: Tests & Coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: credentials
+            filter: "@idos-network/credentials"
+            directory: packages/credentials
+          - name: enclave
+            filter: "@idos-network/enclave"
+            directory: packages/enclave
+          - name: kwil-infra
+            filter: "@idos-network/kwil-infra"
+            directory: packages/kwil-infra
+          - name: utils
+            filter: "@idos-network/utils"
+            directory: packages/utils
+          - name: data-dashboard
+            filter: "data-dashboard"
+            directory: apps/idos-data-dashboard
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: "pnpm"
+
+      - run: pnpm install
+
+      - name: Run tests with coverage
+        run: pnpm turbo run coverage --filter ${{ matrix.filter }}
+
+      - name: Report coverage
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: ${{ matrix.name }}
+          working-directory: ${{ matrix.directory }}
