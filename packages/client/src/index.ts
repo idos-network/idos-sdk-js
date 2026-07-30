@@ -23,8 +23,6 @@ import {
   addWallet,
   addWallets,
   addAttribute as createAttribute,
-  type DagMessageInput,
-  dagMessage,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
   type GetWalletsOutput,
@@ -48,8 +46,8 @@ import {
   removeCredential,
   removeWallet,
   revokeAccessGrant,
-  type ShareCredentialInput,
-  shareCredential,
+  type SharePreliminaryCredentialInput,
+  sharePreliminaryCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
 import {
@@ -132,13 +130,13 @@ export class idOSClientIdle {
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
-  readonly blobGateway?: BlobGateway;
+  readonly blobGateway: BlobGateway;
 
   constructor(
     store: Store,
     kwilClient: KwilActionClient,
     enclaveProvider: BaseProvider,
-    blobGateway?: BlobGateway,
+    blobGateway: BlobGateway,
   ) {
     this.state = "idle";
     this.store = store;
@@ -214,7 +212,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
-  readonly blobGateway?: BlobGateway;
+  readonly blobGateway: BlobGateway;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -296,7 +294,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
   readonly user: idOSUser;
-  readonly blobGateway?: BlobGateway;
+  readonly blobGateway: BlobGateway;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
     this.state = "logged-in";
@@ -330,8 +328,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return getCredentialOwned(this.kwilClient, { id }).then((res) => res[0]);
   }
 
-  async shareCredential(credential: ShareCredentialInput): Promise<ShareCredentialInput> {
-    await shareCredential(this.kwilClient, credential);
+  async shareCredential(
+    credential: SharePreliminaryCredentialInput,
+  ): Promise<SharePreliminaryCredentialInput> {
+    await sharePreliminaryCredential(this.kwilClient, credential);
     return credential;
   }
 
@@ -377,10 +377,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
-  }
-
-  async requestDAGMessage(params: DagMessageInput): Promise<string> {
-    return dagMessage(this.kwilClient, params).then((res) => res.message);
   }
 
   async getGrants(
@@ -615,11 +611,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       consumerAuthPublicKey: string;
       lockedUntil?: number;
     },
-  ): Promise<ShareCredentialInput> {
+  ): Promise<SharePreliminaryCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
-    invariant(this.blobGateway, "Blob gateway is required to request an access grant");
 
     const plaintextContent = await this.#decryptCredentialContent(credential);
     const contentHash = hexEncodeSha256Hash(plaintextContent);
@@ -636,7 +631,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const copyReference = await createBlobContentReference(content);
     const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
 
-    const preliminaryCredential: ShareCredentialInput = {
+    const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,
       request_id: crypto.randomUUID(),
       copy_id: crypto.randomUUID(),

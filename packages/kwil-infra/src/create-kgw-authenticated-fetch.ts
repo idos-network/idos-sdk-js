@@ -43,6 +43,10 @@ export function createKgwAuthenticatedFetch({
   isAuthFailure = defaultKgwAuthFailurePredicate,
 }: CreateKgwAuthenticatedFetchParams): typeof fetch {
   const nodeKwil = getNodeKwilClient(kwilClient);
+  // Coalesce in-flight re-auths. Node isn't multi-threaded, but concurrent awaits still
+  // interleave: two fetches can both see an auth failure and both call refreshCookie before
+  // either finishes. Without this, that would kick off two authenticateKGWAndSetCookie calls.
+  // See "shares one refresh across parallel auth failures".
   let refreshPromise: Promise<string> | undefined;
 
   const refreshCookie = async (): Promise<string> => {

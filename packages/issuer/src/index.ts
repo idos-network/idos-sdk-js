@@ -34,7 +34,6 @@ import {
   type CredentialByDelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
-import { type CreateAccessGrantFromDAGParams, GrantService } from "./services/grant.service";
 import {
   type CreateProfileReqParams,
   type CreateWalletReqParams,
@@ -47,12 +46,10 @@ type CreateIssuerParams = {
   nodeUrl: string;
   blobGatewayUrl?: string;
   signingKeyPair: SignKeyPair;
-  encryptionSecretKey: Uint8Array;
 };
 
 export class idOSIssuer {
   readonly #credentialService: CredentialService;
-  readonly #grantService: GrantService;
   readonly #userService: UserService;
 
   static async init(params: CreateIssuerParams): Promise<idOSIssuer> {
@@ -71,20 +68,13 @@ export class idOSIssuer {
     });
 
     const credentialService = new CredentialService(kwilClient, params.signingKeyPair, blobGateway);
-
-    const grantService = new GrantService(kwilClient, params.encryptionSecretKey, blobGateway);
     const userService = new UserService(kwilClient);
 
-    return new idOSIssuer(credentialService, grantService, userService);
+    return new idOSIssuer(credentialService, userService);
   }
 
-  private constructor(
-    credentialService: CredentialService,
-    grantService: GrantService,
-    userService: UserService,
-  ) {
+  private constructor(credentialService: CredentialService, userService: UserService) {
     this.#credentialService = credentialService;
-    this.#grantService = grantService;
     this.#userService = userService;
   }
 
@@ -144,16 +134,6 @@ export class idOSIssuer {
 
   async getCredentialShared(id: string): Promise<idOSCredentialRecord | null> {
     return this.#credentialService.getCredentialShared(id);
-  }
-
-  async createAccessGrantFromDAG(
-    params: CreateAccessGrantFromDAGParams,
-  ): Promise<CreateAccessGrantFromDAGParams | null> {
-    return this.#grantService.createAccessGrantFromDAG(
-      params,
-      (contentHash: string) => this.getCredentialIdByContentHash(contentHash),
-      (id: string) => this.getCredentialShared(id),
-    );
   }
 
   async buildCredential(

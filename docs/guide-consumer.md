@@ -334,31 +334,6 @@ const filteredCredentials: idOSCredential[] = await idOSClient.filterCredentials
 
 This will return a list of `idOSCredentials` that match the filtering criteria.
 
-### [ frontend ] Requesting access grant
-
-Ask the user to create a delegated access grant, then insert it from your backend:
-
-```js
-await idOSClient.requestDAGMessage({
-  dag_owner_wallet_identifier, // This is the user
-  dag_grantee_wallet_identifier, // This is you, the consumer
-  dag_data_id,
-  dag_locked_until, // Unix timestamp. According to your compliance officer's instructions.
-});
-```
-
-and you then insert after sending it to your backend:
-
-```js
-await idOSConsumer.createAccessGrantByDag({
-  dag_data_id,
-  dag_owner_wallet_identifier,
-  dag_grantee_wallet_identifier,
-  dag_signature,
-  dag_locked_until,
-});
-```
-
 ### [ frontend ] Blob-backed access grant
 
 Ask the logged-in user to share a credential with your consumer keys. The user issues the shared copy (`issuer_auth_public_key` on the copy is the user-side share signer, not the original KYC issuer):
