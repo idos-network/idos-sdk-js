@@ -352,12 +352,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
-  delete_stale_preliminary_as_gateway: [
-    {
-      name: "age_seconds",
-      type: DataType.Int,
-    },
-  ],
   credential_exist_as_inserter: [
     {
       name: "id",
@@ -1116,28 +1110,6 @@ export async function createPreliminaryCredentialsByDwg(
     inputs,
     description:
       "Add original credential and copy credential with AG on behalf of a user (using delegated write grant given by the user)",
-  });
-}
-
-export const DeleteStalePreliminaryAsGatewayInputSchema: z.ZodObject<{
-  age_seconds: z.ZodNumber;
-}> = z.object({
-  age_seconds: z.number(),
-});
-
-export type DeleteStalePreliminaryAsGatewayInput = z.infer<
-  typeof DeleteStalePreliminaryAsGatewayInputSchema
->;
-
-/**  `@generator.ignore` */
-export async function deleteStalePreliminaryAsGateway(
-  kwilClient: KwilActionClient,
-  params: DeleteStalePreliminaryAsGatewayInput,
-): Promise<void> {
-  const inputs = DeleteStalePreliminaryAsGatewayInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "delete_stale_preliminary_as_gateway",
-    inputs,
   });
 }
 
