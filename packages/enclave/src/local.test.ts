@@ -19,6 +19,14 @@ vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
   };
 });
 
+// Obfuscated store uses syncScrypt(N=16384); keep tests under vitest's default 5s timeout on CI.
+vi.mock("scrypt-js", () => ({
+  syncScrypt: vi.fn(
+    (_password: Uint8Array, _salt: Uint8Array, _N: number, _r: number, _p: number, dkLen: number) =>
+      new Uint8Array(dkLen).fill(7),
+  ),
+}));
+
 class TestEnclave extends LocalEnclave {
   async getPasswordContext() {
     return {
