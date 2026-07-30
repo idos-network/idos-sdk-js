@@ -1,5 +1,24 @@
 # @idos-network/credentials
 
+## 1.4.0
+
+### Minor Changes
+
+- 5e8c407: Unify base85 library
+
+### Patch Changes
+
+- Updated dependencies [5e8c407]
+  - @idos-network/utils@1.4.0
+
+## 1.3.1
+
+### Patch Changes
+
+- 565e87c: Report test coverage
+- Updated dependencies [565e87c]
+  - @idos-network/utils@1.3.1
+
 ## 1.3.0
 
 ### Minor Changes

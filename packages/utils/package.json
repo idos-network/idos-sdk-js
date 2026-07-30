@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/utils",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "idOS Utils for JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
@@ -52,6 +52,7 @@
     "dev": "tsdown --watch",
     "publint": "pnpx publint --strict",
     "test": "vitest",
+    "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -63,6 +64,7 @@
     "@stablelib/hex": "catalog:utils",
     "@stablelib/sha256": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
+    "base85": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
     "ipfs-only-hash": "^4.0.0",
@@ -72,6 +74,7 @@
   "devDependencies": {
     "@types/chrome": "^0.1.42",
     "@types/node": "catalog:build",
+    "@vitest/coverage-v8": "catalog:testing",
     "jsdom": "^22.1.0",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",

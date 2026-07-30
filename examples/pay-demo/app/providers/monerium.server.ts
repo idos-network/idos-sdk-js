@@ -1,7 +1,6 @@
 import type { Credential } from "@idos-network/consumer";
 
-// @ts-expect-error
-import ascii85 from "ascii85";
+import { base85ToFile } from "@idos-network/utils/codecs";
 
 import { SERVER_ENV } from "./envFlags.server";
 import { generateCodeChallenge } from "./utils";
@@ -202,12 +201,13 @@ export const uploadFile = async (
   if (!base85file) return;
 
   // Decode base85 file and get the type
-  const decodedFile = ascii85.decode(base85file);
+  const decodedFile = base85ToFile(base85file);
   if (!decodedFile) {
     throw new Error("Failed to decode file");
   }
 
   const formData = new FormData();
+  // @ts-expect-error - decodedFile might be ArrayBuffer, Buffer, or Uint8Array, we should check this
   formData.append("file", new Blob([decodedFile]));
 
   const response = await fetch(`${SERVER_ENV.MONERIUM_API_URL}/files`, {

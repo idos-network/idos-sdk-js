@@ -1,5 +1,29 @@
 # pay-demo
 
+## 0.6.0
+
+### Minor Changes
+
+- 5e8c407: Unify base85 library
+
+### Patch Changes
+
+- Updated dependencies [5e8c407]
+  - @idos-network/credentials@1.4.0
+  - @idos-network/utils@1.4.0
+  - @idos-network/client@1.4.0
+  - @idos-network/consumer@1.4.0
+
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [565e87c]
+  - @idos-network/credentials@1.3.1
+  - @idos-network/utils@1.3.1
+  - @idos-network/client@1.3.1
+  - @idos-network/consumer@1.3.1
+
 ## 0.5.0
 
 ### Minor Changes

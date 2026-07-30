@@ -10,10 +10,6 @@ export default {
 
   appDirectory: "./src",
 
-  future: {
-    v8_middleware: true,
-  },
-
   presets: [vercelPreset()],
 
   buildEnd: async ({ viteConfig, reactRouterConfig, buildManifest }) => {
