@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { Base85File, IsoDate } from "../../codecs";
+
 // https://github.com/colinhacks/zod/issues/3751
 export const ResidentialAddressSchema: z.ZodObject<{
   verified: z.ZodBoolean;
@@ -11,8 +13,8 @@ export const ResidentialAddressSchema: z.ZodObject<{
   postalCode: z.ZodOptional<z.ZodString>;
   country: z.ZodString;
   proofCategory: z.ZodOptional<z.ZodString>;
-  proofDateOfIssue: z.ZodOptional<z.ZodDate>;
-  proofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  proofDateOfIssue: z.ZodOptional<typeof IsoDate>;
+  proofFile: z.ZodOptional<typeof Base85File>;
   ipCountry: z.ZodOptional<z.ZodString>;
 }> = z
   .object({
@@ -46,10 +48,10 @@ export const ResidentialAddressSchema: z.ZodObject<{
     proofCategory: z.string().optional(),
 
     /* Residential Address Proof Date Of Issue	Date the address proof document was issued. */
-    proofDateOfIssue: z.date().optional(),
+    proofDateOfIssue: IsoDate.optional(),
 
     /* Residential Address Proof File or URL of the document provided as address proof. */
-    proofFile: z.instanceof(Buffer).optional(),
+    proofFile: Base85File.optional(),
 
     /* Country code derived from the IP address used when the applicant registered in Sumsub — indicates where they were located. */
     ipCountry: z.string().min(2).max(2).optional(),

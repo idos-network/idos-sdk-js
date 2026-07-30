@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { Base85File } from "../../codecs";
 import {
   SourceOfWealthTypeSchema,
   YearlyGrossIncomeSchema,
@@ -14,7 +15,7 @@ export const SourceOfWealthSchema: z.ZodObject<{
   yearlyGrossIncomeCurrency: z.ZodOptional<typeof CurrencySchema>;
   approximateNetWorth: z.ZodOptional<typeof ApproximateNetWorthSchema>;
   approximateNetWorthCurrency: z.ZodOptional<typeof CurrencySchema>;
-  sourceOfWealthProofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  sourceOfWealthProofFile: z.ZodOptional<typeof Base85File>;
 }> = z
   .object({
     /* Categories/types of wealth sources declared by the person (e.g. employment, inheritance, investments). */
@@ -33,7 +34,7 @@ export const SourceOfWealthSchema: z.ZodObject<{
     approximateNetWorthCurrency: CurrencySchema.optional(),
 
     /* A file containing proof of the person's source of wealth (e.g. bank statement, salary slip, investment statement). */
-    sourceOfWealthProofFile: z.instanceof(Buffer).optional(),
+    sourceOfWealthProofFile: Base85File.optional(),
   })
   .superRefine((data, ctx) => {
     if (data.yearlyGrossIncome && !data.yearlyGrossIncomeCurrency) {

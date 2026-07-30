@@ -1,4 +1,3 @@
-import { base85ToFile } from "@idos-network/utils/codecs";
 import { z } from "zod";
 
 import { capitalizeFirstLetter } from "./serialization";
@@ -27,43 +26,25 @@ function getObjectShape(schema: AnyZodSchema): Record<string, AnyZodSchema> {
   throw new Error("Expected a Zod object schema");
 }
 
-function isBufferSchema(schema: AnyZodSchema): boolean {
-  // Revisit (parse a probe value) if a non-Buffer custom schema is ever added.
-  return schema instanceof z.ZodCustom;
-}
-
-function deserializeValue(value: unknown, schema: AnyZodSchema): unknown {
-  if (value === undefined) {
-    return value;
-  }
-
-  const unwrapped = unwrapSchema(schema);
-
-  if (unwrapped instanceof z.ZodDate && typeof value === "string") {
-    return new Date(value);
-  }
-
-  if (typeof value === "string" && isBufferSchema(unwrapped)) {
-    const file = base85ToFile(value);
-    return file === false ? value : file;
-  }
-
-  return value;
-}
-
+/*
+ * Both directions are a pure reshape followed by `z.decode`: the schemas declare which
+ * fields cross the wire as ISO strings or base85 (see `schemas/codecs.ts`), so decoding
+ * produces the `Date`/`Buffer` values without anything here inspecting field types.
+ * Unknown flat keys are dropped, so envelope extras like `proof` do not reach the schema.
+ */
 export function flatObjectToStructured<T>(
   flatObject: Record<string, unknown>,
   schema: z.ZodSchema<T>,
 ): T {
   const structured: Record<string, unknown> = {};
 
-  for (const [key, fieldSchema] of Object.entries(getObjectShape(schema))) {
+  for (const key of Object.keys(getObjectShape(schema))) {
     if (Object.hasOwn(flatObject, key)) {
-      structured[key] = deserializeValue(flatObject[key], fieldSchema);
+      structured[key] = flatObject[key];
     }
   }
 
-  return schema.parse(structured);
+  return z.decode(schema, structured);
 }
 
 export function flatSubjectToStructured<T>(
@@ -75,12 +56,12 @@ export function flatSubjectToStructured<T>(
   for (const [sectionKey, sectionSchema] of Object.entries(getObjectShape(schema))) {
     const section: Record<string, unknown> = {};
 
-    for (const [fieldKey, fieldSchema] of Object.entries(getObjectShape(sectionSchema))) {
+    for (const fieldKey of Object.keys(getObjectShape(sectionSchema))) {
       const flatKey =
         sectionKey === "root" ? fieldKey : `${sectionKey}${capitalizeFirstLetter(fieldKey)}`;
 
       if (Object.hasOwn(flatSubject, flatKey)) {
-        section[fieldKey] = deserializeValue(flatSubject[flatKey], fieldSchema);
+        section[fieldKey] = flatSubject[flatKey];
       }
     }
 
@@ -89,5 +70,5 @@ export function flatSubjectToStructured<T>(
     }
   }
 
-  return schema.parse(structured);
+  return z.decode(schema, structured);
 }

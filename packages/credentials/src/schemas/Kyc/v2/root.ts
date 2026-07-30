@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { Base85File, IsoDate } from "../../codecs";
+
 // https://github.com/colinhacks/zod/issues/3751
 export const RootSchema: z.ZodObject<{
   id: z.ZodString;
@@ -12,9 +14,9 @@ export const RootSchema: z.ZodObject<{
   email: z.ZodOptional<z.ZodEmail>;
   phoneNumber: z.ZodOptional<z.ZodString>;
   ssn: z.ZodOptional<z.ZodString>;
-  dateOfBirth: z.ZodOptional<z.ZodDate>;
+  dateOfBirth: z.ZodOptional<typeof IsoDate>;
   placeOfBirth: z.ZodOptional<z.ZodString>;
-  selfieFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  selfieFile: z.ZodOptional<typeof Base85File>;
 }> = z.object({
   id: z.string(),
   firstName: z.string().optional(),
@@ -26,9 +28,9 @@ export const RootSchema: z.ZodObject<{
   email: z.email().optional(),
   phoneNumber: z.string().optional(),
   ssn: z.string().optional(),
-  dateOfBirth: z.date().optional(),
+  dateOfBirth: IsoDate.optional(),
   placeOfBirth: z.string().optional(),
-  selfieFile: z.instanceof(Buffer).optional(),
+  selfieFile: Base85File.optional(),
 });
 
 export type Root = z.infer<typeof RootSchema>;

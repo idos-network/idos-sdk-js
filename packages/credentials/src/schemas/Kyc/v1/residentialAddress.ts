@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { Base85File, IsoDate } from "../../codecs";
+
 // https://github.com/colinhacks/zod/issues/3751
 export const ResidentialAddressSchema: z.ZodObject<{
   street: z.ZodOptional<z.ZodString>;
@@ -10,8 +12,8 @@ export const ResidentialAddressSchema: z.ZodObject<{
   postalCode: z.ZodOptional<z.ZodString>;
   country: z.ZodOptional<z.ZodString>;
   proofCategory: z.ZodOptional<z.ZodString>;
-  proofDateOfIssue: z.ZodOptional<z.ZodDate>;
-  proofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  proofDateOfIssue: z.ZodOptional<typeof IsoDate>;
+  proofFile: z.ZodOptional<typeof Base85File>;
 }> = z.object({
   street: z.string().optional(),
   houseNumber: z.string().optional(),
@@ -21,8 +23,8 @@ export const ResidentialAddressSchema: z.ZodObject<{
   postalCode: z.string().optional(),
   country: z.string().min(2).max(2).optional(),
   proofCategory: z.string().optional(),
-  proofDateOfIssue: z.date().optional(),
-  proofFile: z.instanceof(Buffer).optional(),
+  proofDateOfIssue: IsoDate.optional(),
+  proofFile: Base85File.optional(),
 });
 
 export type ResidentialAddress = z.infer<typeof ResidentialAddressSchema>;

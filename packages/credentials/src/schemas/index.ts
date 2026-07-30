@@ -14,12 +14,12 @@ import {
   defaultDocumentLoader,
 } from "../utils/loader";
 import { convertBuilderObject } from "../utils/serialization";
-import { deriveSectionMaps } from "./utils";
+import { deriveSectionMaps, type FlatSubject } from "./utils";
 
 export class VerifiableCredentialContainerBase<
   TExternalEnvelopeFields extends { level: string },
   TStructuredSubject extends Record<string, unknown> & { root: unknown },
-  TFlatSubject,
+  TFlatSubject = FlatSubject<TStructuredSubject>,
 > implements IVerifiableCredentialContainer<
   TExternalEnvelopeFields,
   TStructuredSubject,
@@ -43,7 +43,8 @@ export class VerifiableCredentialContainerBase<
   }
 
   public setMandatoryEnvelopeFields(fields: Omit<TExternalEnvelopeFields, "level">): void {
-    this.envelopeSchema.omit({ level: true }).parse(fields);
+    // Encode rather than parse: `fields` holds decoded values (a `Date` for `approvedAt`).
+    z.encode(this.envelopeSchema.omit({ level: true }), fields as Record<string, unknown>);
     this.envelope = fields as Partial<TExternalEnvelopeFields>;
   }
 
@@ -52,20 +53,14 @@ export class VerifiableCredentialContainerBase<
   }
 
   public serializeSubject(): TFlatSubject {
-    this.checkValidity();
-
     return {
       "@context": [this.subjectContext],
-      ...convertBuilderObject(this.subject as Record<string, Record<string, unknown>>),
+      ...convertBuilderObject(this.checkValidity().subject),
     } as TFlatSubject;
   }
 
   public serializeEnvelope(): TExternalEnvelopeFields {
-    this.checkValidity();
-
-    return {
-      ...this.envelope,
-    } as TExternalEnvelopeFields;
+    return this.checkValidity().envelope;
   }
 
   public async issue(
@@ -98,10 +93,26 @@ export class VerifiableCredentialContainerBase<
     throw new Error("Not implemented");
   }
 
-  checkValidity(): void {
+  /*
+   * `z.encode` validates the decoded (Date/Buffer) side that builders work with and
+   * returns the wire form; `.parse()` would validate the wire side and reject those
+   * values outright. Both halves are partial until validated — proving them complete is
+   * the point of this call — so the encoded result is handed back for the serializers to
+   * reuse rather than encoding a second time.
+   */
+  checkValidity(): {
+    envelope: TExternalEnvelopeFields;
+    subject: Record<string, Record<string, unknown>>;
+  } {
     this.setMissingFields();
-    this.envelopeSchema.parse(this.envelope);
-    this.subjectSchema.parse(this.subject);
+
+    return {
+      envelope: z.encode(this.envelopeSchema, this.envelope) as TExternalEnvelopeFields,
+      subject: z.encode(this.subjectSchema, this.subject as TStructuredSubject) as Record<
+        string,
+        Record<string, unknown>
+      >,
+    };
   }
 
   protected setMissingFields(): void {
@@ -118,7 +129,8 @@ export class VerifiableCredentialContainerBase<
     assertNoExtraFields(String(section), this.sectionFields[section], fields as object);
 
     if (validate) {
-      this.sectionSchemas[section].parse(fields);
+      // Encode rather than parse: `fields` holds decoded values (Date, Buffer).
+      z.encode(this.sectionSchemas[section], fields as Record<string, unknown>);
     }
 
     this.subject[section] = fields;

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { IsoDate } from "../../codecs";
 import { GenderSchema } from "./enums";
 
 // https://github.com/colinhacks/zod/issues/3751
@@ -25,7 +26,7 @@ export const PersonSchema: z.ZodObject<{
   subsidiaryProtectionStatus: z.ZodOptional<z.ZodBoolean>;
 
   /* Birth details */
-  dateOfBirth: z.ZodDate;
+  dateOfBirth: typeof IsoDate;
   placeOfBirth: z.ZodOptional<z.ZodString>;
   regionOfBirth: z.ZodOptional<z.ZodString>;
 
@@ -64,7 +65,7 @@ export const PersonSchema: z.ZodObject<{
     secondNationality: z.string().min(2).max(2).optional(),
 
     /* The person's date of birth (YYYY-MM-DD) */
-    dateOfBirth: z.date(),
+    dateOfBirth: IsoDate,
 
     /* The city/country where the person was born. */
     placeOfBirth: z.string().optional(),

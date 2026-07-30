@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+import { IsoDate } from "../../codecs";
+
 // https://github.com/colinhacks/zod/issues/3751
 export const StructuredSchema: z.ZodObject<{
   id: z.ZodString;
   level: z.ZodString;
-  approvedAt: z.ZodOptional<z.ZodDate>;
+  approvedAt: z.ZodOptional<typeof IsoDate>;
 }> = z.object({
   id: z.string(),
 
@@ -12,7 +14,7 @@ export const StructuredSchema: z.ZodObject<{
   level: z.string(),
 
   /* Date the credential was approved. */
-  approvedAt: z.date().optional(),
+  approvedAt: IsoDate.optional(),
 });
 
 export type StructuredObject = z.infer<typeof StructuredSchema>;

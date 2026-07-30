@@ -1,4 +1,3 @@
-import type { EddV1 } from "../../../generated/EddV1";
 import type { PublicNotes } from "../../types";
 
 import { VerifiableCredentialContainerBase } from "../..";
@@ -11,8 +10,7 @@ import { StructuredSchema, type StructuredObject as CredentialSubjectType } from
 
 export class VerifiableCredentialEddV1 extends VerifiableCredentialContainerBase<
   EnvelopeType,
-  CredentialSubjectType,
-  EddV1
+  CredentialSubjectType
 > {
   constructor() {
     super(

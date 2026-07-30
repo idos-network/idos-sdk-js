@@ -2,14 +2,15 @@ import { fileToBase85 } from "@idos-network/utils/codecs";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
+import { Base85File, IsoDate } from "../schemas/codecs";
 import { flatObjectToStructured, flatSubjectToStructured } from "./deserialization";
 
 describe("flatObjectToStructured", () => {
   it("deserializes flat values according to the provided schema", () => {
     const schema = z.object({
       id: z.string(),
-      issued: z.date(),
-      approvalFile: z.instanceof(Buffer).optional(),
+      issued: IsoDate,
+      approvalFile: Base85File.optional(),
       reviewStatus: z.enum(["pending", "approved", "rejected"]),
       status: z.string().default("approved"),
     });
@@ -61,9 +62,9 @@ describe("flatSubjectToStructured", () => {
       person: z
         .object({
           firstName: z.string(),
-          dateOfBirth: z.date(),
+          dateOfBirth: IsoDate,
           documentType: z.enum(["PASSPORT", "ID_CARD"]),
-          portraitFile: z.instanceof(Buffer).optional(),
+          portraitFile: Base85File.optional(),
         })
         .optional(),
       contact: z

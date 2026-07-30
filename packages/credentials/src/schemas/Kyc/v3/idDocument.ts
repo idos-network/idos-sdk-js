@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { Base85File, IsoDate } from "../../codecs";
 import { IDDocumentTypeSchema } from "./enums";
 
 // https://github.com/colinhacks/zod/issues/3751
@@ -7,14 +8,14 @@ export const IdDocumentSchema: z.ZodObject<{
   type: typeof IDDocumentTypeSchema;
   number: z.ZodString;
   country: z.ZodString;
-  dateOfIssue: z.ZodOptional<z.ZodDate>;
-  dateOfExpiry: z.ZodOptional<z.ZodDate>;
+  dateOfIssue: z.ZodOptional<typeof IsoDate>;
+  dateOfExpiry: z.ZodOptional<typeof IsoDate>;
   issuingAuthority: z.ZodOptional<z.ZodString>;
-  frontFile: z.ZodType<Buffer<ArrayBufferLike>>;
-  backFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  frontFile: typeof Base85File;
+  backFile: z.ZodOptional<typeof Base85File>;
   title: z.ZodOptional<z.ZodString>;
   mrzLine1: z.ZodOptional<z.ZodString>;
-  extendedValidUntil: z.ZodOptional<z.ZodDate>;
+  extendedValidUntil: z.ZodOptional<typeof IsoDate>;
   additionalNumber: z.ZodOptional<z.ZodString>;
   ethnicity: z.ZodOptional<z.ZodString>;
   issuingSubdivision: z.ZodOptional<z.ZodString>;
@@ -29,19 +30,19 @@ export const IdDocumentSchema: z.ZodObject<{
   country: z.string().min(2).max(2),
 
   /* The date the identity document expires or ceases to be valid (YYYY-MM-DD). */
-  dateOfExpiry: z.date().optional(),
+  dateOfExpiry: IsoDate.optional(),
 
   /* The date the identity document was issued (YYYY-MM-DD). */
-  dateOfIssue: z.date().optional(),
+  dateOfIssue: IsoDate.optional(),
 
   /* The name or code of the authority that issued the identity document (e.g. DVLA for UK driving licenses, Bundesdruckerei for German ID cards). */
   issuingAuthority: z.string().min(1).max(255).optional(),
 
   /* The file containing the identity document (e.g. passport photo, ID card photo). */
-  frontFile: z.instanceof(Buffer),
+  frontFile: Base85File,
 
   /* The file containing the identity document (e.g. passport photo, ID card photo). */
-  backFile: z.instanceof(Buffer).optional(),
+  backFile: Base85File.optional(),
 
   /* The Machine-Readable Zone (MRZ) line(s) from the bottom of the identity document — encodes key identity data in a standardized scannable format. Includes mrzLine2 and mrzLine3. */
   mrzLine1: z.string().min(1).max(255).optional(),
@@ -50,7 +51,7 @@ export const IdDocumentSchema: z.ZodObject<{
   title: z.string().min(1).max(255).optional(),
 
   /* An extended or renewed expiry date when a document's validity has been officially extended beyond its original expiry. */
-  extendedValidUntil: z.date().optional(),
+  extendedValidUntil: IsoDate.optional(),
 
   /* A secondary personal identification number on the document (e.g. DNI in Spain, CRP in Brazil) — different from the document number itself. */
   additionalNumber: z.string().min(1).max(255).optional(),

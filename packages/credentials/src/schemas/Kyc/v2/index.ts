@@ -1,5 +1,3 @@
-import type { CredentialSubjectV2 } from "../../../generated/CredentialSubjectV2";
-
 import { VerifiableCredentialContainerBase } from "../..";
 import {
   CONTEXT_IDOS_CREDENTIAL_V1,
@@ -14,8 +12,7 @@ import { deriveLevel } from "./utils";
 
 export class VerifiableCredentialKycV2 extends VerifiableCredentialContainerBase<
   EnvelopeType,
-  CredentialSubjectType,
-  CredentialSubjectV2
+  CredentialSubjectType
 > {
   constructor() {
     super(

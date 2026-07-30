@@ -1,4 +1,3 @@
-import type { CredentialSubjectV3 } from "../../../generated/CredentialSubjectV3";
 import type { PublicNotes } from "../../types";
 
 import { VerifiableCredentialContainerBase } from "../..";
@@ -15,8 +14,7 @@ import { deriveLevel, deriveKYCLevel, derivePublicNotes, deriveExpirationDate } 
 
 export class VerifiableCredentialKycV3 extends VerifiableCredentialContainerBase<
   EnvelopeType,
-  CredentialSubjectType,
-  CredentialSubjectV3
+  CredentialSubjectType
 > {
   constructor() {
     super(

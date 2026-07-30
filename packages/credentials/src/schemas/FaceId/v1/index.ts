@@ -1,5 +1,3 @@
-import type { FaceIdV1 } from "../../../generated/FaceIdV1";
-
 import { VerifiableCredentialContainerBase } from "../..";
 import {
   CONTEXT_IDOS_CREDENTIAL_V1,
@@ -13,8 +11,7 @@ import { StructuredSchema, type StructuredObject as CredentialSubjectType } from
 
 export class VerifiableCredentialFaceIdV1 extends VerifiableCredentialContainerBase<
   EnvelopeType,
-  CredentialSubjectType,
-  FaceIdV1
+  CredentialSubjectType
 > {
   constructor() {
     super(

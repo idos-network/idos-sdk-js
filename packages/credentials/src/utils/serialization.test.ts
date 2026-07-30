@@ -1,15 +1,19 @@
-import { fileToBase85 } from "@idos-network/utils/codecs";
 import { describe, expect, it } from "vitest";
 
 import { convertBuilderObject, convertValues } from "./serialization";
 
+/*
+ * Values reach these helpers already encoded — the schemas declare their wire form with a
+ * codec and the container runs `z.encode` first — so flattening must be a pure rename and
+ * must leave the values it carries untouched.
+ */
 describe("convertValues", () => {
-  it("serializes flat values with an optional prefix", () => {
+  it("prefixes keys without touching values", () => {
     const result = convertValues(
       {
         firstName: "Ada",
-        issued: new Date("2024-01-01T00:00:00.000Z"),
-        documentFile: Buffer.from("document"),
+        issued: "2024-01-01T00:00:00.000Z",
+        documentFile: "<~;KZGo~>",
       },
       "person",
     );
@@ -17,21 +21,25 @@ describe("convertValues", () => {
     expect(result).toEqual({
       personFirstName: "Ada",
       personIssued: "2024-01-01T00:00:00.000Z",
-      personDocumentFile: fileToBase85(Buffer.from("document")),
+      personDocumentFile: "<~;KZGo~>",
     });
+  });
+
+  it("leaves keys unprefixed when no prefix is given", () => {
+    expect(convertValues({ id: "subject-123" })).toEqual({ id: "subject-123" });
   });
 });
 
 describe("convertBuilderObject", () => {
-  it("flattens root and prefixed sections", () => {
+  it("flattens root unprefixed and every other section prefixed", () => {
     const result = convertBuilderObject({
       root: {
         id: "subject-123",
       },
       person: {
         firstName: "Ada",
-        dateOfBirth: new Date("1815-12-10T00:00:00.000Z"),
-        portraitFile: Buffer.from("portrait"),
+        dateOfBirth: "1815-12-10T00:00:00.000Z",
+        portraitFile: "<~;KZGo~>",
       },
     });
 
@@ -39,7 +47,7 @@ describe("convertBuilderObject", () => {
       id: "subject-123",
       personFirstName: "Ada",
       personDateOfBirth: "1815-12-10T00:00:00.000Z",
-      personPortraitFile: fileToBase85(Buffer.from("portrait")),
+      personPortraitFile: "<~;KZGo~>",
     });
   });
 });
