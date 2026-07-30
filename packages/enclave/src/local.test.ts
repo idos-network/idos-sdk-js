@@ -8,6 +8,25 @@ import { describe, expect, it, vi } from "vitest";
 
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 
+vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@idos-network/utils/encryption")>();
+
+  return {
+    ...actual,
+    keyDerivation: vi.fn(
+      async () => new Uint8Array(Array.from({ length: 32 }, (_, index) => index)),
+    ),
+  };
+});
+
+// Obfuscated store uses syncScrypt(N=16384); keep tests under vitest's default 5s timeout on CI.
+vi.mock("scrypt-js", () => ({
+  syncScrypt: vi.fn(
+    (_password: Uint8Array, _salt: Uint8Array, _N: number, _r: number, _p: number, dkLen: number) =>
+      new Uint8Array(dkLen).fill(7),
+  ),
+}));
+
 class TestEnclave extends LocalEnclave {
   async getPasswordContext() {
     return {

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,6 +11,8 @@ import {
   fromBytesToJson,
   hexEncodeSha256Hash,
   toBytes,
+  fileToBase85,
+  base85ToFile,
 } from "./index.js";
 
 describe("codecs", () => {
@@ -53,5 +57,35 @@ describe("codecs", () => {
   it("fromBytesToJson throws on invalid JSON", () => {
     const bytes = new Uint8Array([0xff, 0xfe, 0xfd]);
     expect(() => fromBytesToJson(bytes)).toThrow();
+  });
+
+  it("round-trips files (image) through base85", () => {
+    const image = readFileSync(path.join(__dirname, "test", "image.png"));
+
+    const serialized = fileToBase85(image);
+    const deserialized = base85ToFile(serialized);
+
+    expect(deserialized).not.toBeFalsy();
+    expect(deserialized).toStrictEqual(image);
+  });
+
+  it("round-trips files (pdf) through base85", () => {
+    const document = readFileSync(path.join(__dirname, "test", "document.pdf"));
+
+    const serialized = fileToBase85(document);
+    const deserialized = base85ToFile(serialized);
+
+    expect(deserialized).not.toBeFalsy();
+    expect(deserialized).toStrictEqual(document);
+  });
+
+  it("round-trips files (webp) through base85", () => {
+    const image = readFileSync(path.join(__dirname, "test", "image.webp"));
+
+    const serialized = fileToBase85(image);
+    const deserialized = base85ToFile(serialized);
+
+    expect(deserialized).not.toBeFalsy();
+    expect(deserialized).toStrictEqual(image);
   });
 });
