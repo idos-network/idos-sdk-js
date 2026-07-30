@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   CreatePreliminaryCredentialsByDwgInputSchema,
   SharePreliminaryCredentialInputSchema,
+  UpsertWalletAsInserterInputSchema,
+  walletTypeSchema,
 } from "./actions";
 
 const validPreliminaryCredentialsByDwgInput = {
