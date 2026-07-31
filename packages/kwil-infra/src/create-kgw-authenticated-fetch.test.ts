@@ -234,4 +234,21 @@ describe("createKgwAuthenticatedFetch", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(fetchFn).toHaveBeenCalledTimes(2);
   });
+
+  it("leaves a non-JSON success body readable after the auth probe", async () => {
+    const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=valid; Path=/");
+    const payload = new Uint8Array(1024 * 64).map((_, i) => i % 256);
+    fetchFn.mockResolvedValueOnce(
+      new Response(payload, {
+        status: 200,
+        headers: { "content-type": "application/octet-stream" },
+      }),
+    );
+
+    const response = await authFetch("https://blob.example/download");
+    const body = new Uint8Array(await response.arrayBuffer());
+
+    expect(refresh).not.toHaveBeenCalled();
+    expect(body).toEqual(payload);
+  });
 });
