@@ -5,6 +5,8 @@ import type { KwilActionClient } from "./create-kwil-client";
 
 const KGW_AUTH_ERROR_CODE = -901;
 
+/** Return true when the response means KGW auth is missing/expired.
+ *  May read the body only for `application/json` responses (those are probed via a clone). */
 export type KgwAuthFailurePredicate = (response: Response) => Promise<boolean> | boolean;
 
 export type CreateKgwAuthenticatedFetchParams = {
@@ -73,13 +75,42 @@ export function createKgwAuthenticatedFetch({
       ...withCookie(input, withMaterializedBody(bufferedRequest), cookie),
     );
 
-    if (!(await isAuthFailure(response.clone()))) {
+    if (!(await isAuthFailure(authFailureProbe(response)))) {
       return response;
     }
 
+    // Discard the failed response so an unread body doesn't keep streaming.
+    await discardUnreadBody(response);
     const refreshedCookie = await refreshCookie();
     return fetchFn(...withCookie(input, withMaterializedBody(bufferedRequest), refreshedCookie));
   };
+}
+
+/**
+ * Body is one-shot. Only clone when the default predicate might call `.json()`
+ * (JSON content-type). Cloning a large blob response would tee the stream and
+ * risk buffering the download on an abandoned branch — and in Node, canceling
+ * that unread tee branch hangs.
+ */
+function authFailureProbe(response: Response): Response {
+  const contentType = response.headers.get("content-type");
+  if (contentType?.includes("application/json")) {
+    return response.clone();
+  }
+
+  return response;
+}
+
+async function discardUnreadBody(response: Response): Promise<void> {
+  if (response.bodyUsed || !response.body) {
+    return;
+  }
+
+  try {
+    await response.body.cancel();
+  } catch {
+    // Already locked/closed by a concurrent reader.
+  }
 }
 
 type BufferedFormDataEntry =
