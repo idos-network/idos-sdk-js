@@ -123,6 +123,15 @@ export class BlobGateway {
       body.append("copy", new Blob([toArrayBuffer(copy)]), "copy.blob");
     }
 
+    // Hash while the upload is in flight so we can fail fast if the gateway
+    // reports a different CID than the bytes we sent.
+    const expectedOriginalCid = original
+      ? createBlobContentReference(original).then((reference) => reference.cid)
+      : undefined;
+    const expectedCopyCid = copy
+      ? createBlobContentReference(copy).then((reference) => reference.cid)
+      : undefined;
+
     let response: Response;
     try {
       response = await this.#fetch(uploadUrl, {
@@ -158,7 +167,13 @@ export class BlobGateway {
       throw new Error(`blob gateway upload failed with ${response.status}: ${responseText}`);
     }
 
-    return JSON.parse(responseText) as BlobGatewayUploadResponse;
+    const parsed = JSON.parse(responseText) as BlobGatewayUploadResponse;
+    const [originalCid, copyCid] = await Promise.all([expectedOriginalCid, expectedCopyCid]);
+
+    assertReturnedUploadCid(parsed.original_cid, originalCid, "original");
+    assertReturnedUploadCid(parsed.copy_cid, copyCid, "copy");
+
+    return parsed;
   }
 
   async fetchBlob({ contentUri, expectedSize, maxBytes }: FetchBlobParams): Promise<Uint8Array> {
@@ -221,6 +236,23 @@ function rootCidFromContentUri(contentUri: string): string {
   }
 
   return contentUri.slice(IPFS_URI_PREFIX.length);
+}
+
+function assertReturnedUploadCid(
+  returnedCid: string | undefined,
+  expectedCid: string | undefined,
+  label: "original" | "copy",
+): void {
+  // Gateway may omit CIDs; when it reports one for a part we uploaded, it must match.
+  if (expectedCid === undefined || returnedCid === undefined) {
+    return;
+  }
+
+  if (returnedCid !== expectedCid) {
+    throw new Error(
+      `blob gateway upload returned ${label} CID ${returnedCid}, expected ${expectedCid}`,
+    );
+  }
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
