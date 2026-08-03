@@ -101,22 +101,42 @@ describe("BlobGateway", () => {
   });
 
   it("uploads a copy blob without requiring an original blob", async () => {
+    const copy = utf8Encode("copy");
+    const { cid } = await createBlobContentReference(copy);
     const calls: Parameters<typeof fetch>[] = [];
     const gateway = new BlobGateway({
       url: "https://blob.example",
       fetchFn: async (...args) => {
         calls.push(args);
-        return Response.json({ request_id: "request-1", copy_cid: "copy-cid" });
+        return Response.json({ request_id: "request-1", copy_cid: cid });
       },
     });
 
     const result = await gateway.uploadCredentialBlobs({
       requestId: "request-1",
-      copy: utf8Encode("copy"),
+      copy,
     });
 
-    expect(result).toEqual({ request_id: "request-1", copy_cid: "copy-cid" });
+    expect(result).toEqual({ request_id: "request-1", copy_cid: cid });
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
+  });
+
+  it("rejects upload responses whose CID does not match the uploaded bytes", async () => {
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () =>
+        Response.json({
+          request_id: "request-1",
+          original_cid: "bafkreiwrongcidfromgateway000000000000000000000000000000",
+        }),
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toThrow(/blob gateway upload returned original CID .+, expected .+/);
   });
 
   it("fetches blobs through the initialized gateway URL", async () => {
