@@ -119,7 +119,7 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Renovate security update: axios@1.15.2
   - axios@1.15.2
-  - '@noble/hashes@2.3.0'
+  - "@noble/hashes@2.3.0"
 
 onlyBuiltDependencies:
   - "@swc/core"
