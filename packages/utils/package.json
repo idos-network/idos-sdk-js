@@ -52,7 +52,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@noble/hashes": "^2.2.0",
+    "@noble/hashes": "^2.3.0",
     "@scure/bip39": "2.2.0",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/binary": "catalog:utils",
@@ -67,7 +67,7 @@
     "tweetnacl": "catalog:core"
   },
   "devDependencies": {
-    "@types/chrome": "^0.1.42",
+    "@types/chrome": "^0.2.5",
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
     "jsdom": "^22.1.0",
