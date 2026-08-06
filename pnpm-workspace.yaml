@@ -72,8 +72,8 @@ catalogs:
     # This version needs to be 1.7.20 untill this
     # https://github.com/reown-com/appkit/issues/5481
     # is solved.
-    "@reown/appkit": "1.8.23"
-    "@reown/appkit-adapter-wagmi": "1.8.23"
+    "@reown/appkit": "1.7.20"
+    "@reown/appkit-adapter-wagmi": "1.7.20"
 
   stellar:
     "@creit.tech/stellar-wallets-kit": "^1.9.5"
