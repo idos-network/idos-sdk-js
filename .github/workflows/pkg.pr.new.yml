@@ -5,6 +5,8 @@ on:
     branches:
       - playground
       - main
+      - alpha
+      - beta
     tags:
       - "!**"
   pull_request:
