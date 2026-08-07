@@ -1,5 +1,11 @@
 # @idos-network/utils
 
+## 1.5.0
+
+### Minor Changes
+
+- 76fd426: Upgrade dependencies
+
 ## 1.4.0
 
 ### Minor Changes
