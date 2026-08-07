@@ -20,7 +20,7 @@ infrastructure. It includes:
 
 - Typed action helpers generated from the Kwil schema.
 - Client helpers to `call` and `execute` actions.
-- Signer helpers for EVM, NEAR, Stellar, XRPL, and custom signers.
+- Signer helpers for EVM, NEAR, Stellar, XRPL, MM token (`mm_token`), and custom signers.
 - Signature verification utilities across supported wallet types.
 - XRPL wallet helpers (Xumm, GemWallet).
 
@@ -46,6 +46,44 @@ const kwil = await createNodeKwilClient({
   nodeUrl: "https://kwil.your-node.example",
 });
 ```
+
+## Authenticate with an MM (MetaMask UKYC) token
+
+KGW `mm_token` auth expects a **base64url-encoded** envelope string — not raw JSON.
+Decoded shape:
+
+```json
+{
+  "payload": { "version": 1, "aud": "...", "signing_public_key": "...", "...": "..." },
+  "signature": "base64url(ed25519-signature-over-canonical-payload)"
+}
+```
+
+```ts
+import { createMmTokenKwilSigner, createNodeKwilClient } from "@idos-network/kwil-infra";
+import { getCredentials } from "@idos-network/kwil-infra/actions";
+
+const kwil = await createNodeKwilClient({
+  nodeUrl: "https://kwil.your-node.example",
+});
+
+// MetaMask / UKYC issues this as a single base64url string.
+const encodedMmToken =
+  "eyJwYXlsb2FkIjp7InZlcnNpb24iOjEsImF1ZCI6Im1ldGFtYXNrOnVzZXItc3RvcmFnZTp1a3ljIiwiLi4uIjpudWxsfSwic2lnbmF0dXJlIjoiLi4uIn0";
+
+const mmSigner = createMmTokenKwilSigner(encodedMmToken);
+kwil.setSigner(mmSigner);
+
+await getCredentials(kwil);
+```
+
+`createMmTokenKwilSigner` also accepts a decoded `{ payload, signature }` object and
+re-encodes it. Prefer the encoded string from MetaMask so `signMessage` preserves the
+exact bytes KGW will verify.
+
+Note: `mm_token` callers cannot `add_wallet` / `remove_wallet` — MM wallets are inserted
+by a trusted issuer (`wallet_type: "MM"`, with `address` and `public_key` both set to
+`payload.signing_public_key`).
 
 ## Run actions
 
