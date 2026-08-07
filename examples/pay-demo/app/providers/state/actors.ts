@@ -59,7 +59,7 @@ export const actors = {
       }
 
       const response = await fetch(
-        `/app/kyc/token?credentialId=${input.dag?.id}&provider=${input.provider}`,
+        `/app/kyc/token?credentialId=${input.dag?.copy_id}&provider=${input.provider}`,
       );
 
       if (response.status !== 200) {
