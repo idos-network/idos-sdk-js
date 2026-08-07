@@ -1,24 +1,33 @@
 import { KwilSigner } from "@idos-network/kwil-js";
-import { base64UrlDecode, utf8Decode, utf8Encode } from "@idos-network/utils/codecs";
+import {
+  base64UrlDecode,
+  base64UrlEncode,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/utils/codecs";
 
 const ED25519_PUBLIC_KEY_BYTES = 32;
 const ED25519_SIGNATURE_BYTES = 64;
 
+/** Decoded UKYC capability envelope. KGW signature data is base64url(JSON of this). */
 export interface MmTokenEnvelope {
-  token: string;
+  payload: MmTokenPayload | Record<string, unknown>;
   signature: string;
 }
 
-interface MmTokenPayload {
+export interface MmTokenPayload {
   signing_public_key: string;
+  [key: string]: unknown;
 }
 
 function isMmTokenEnvelope(value: unknown): value is MmTokenEnvelope {
   return (
     value !== null &&
     typeof value === "object" &&
-    "token" in value &&
-    typeof value.token === "string" &&
+    "payload" in value &&
+    value.payload !== null &&
+    typeof value.payload === "object" &&
+    !Array.isArray(value.payload) &&
     "signature" in value &&
     typeof value.signature === "string"
   );
@@ -40,20 +49,43 @@ function decodeBase64Url(value: string, errorMessage: string): Uint8Array {
   }
 }
 
-export function createMmTokenKwilSigner(envelope: string | MmTokenEnvelope): KwilSigner {
-  const envelopeBytes =
-    typeof envelope === "string" ? utf8Encode(envelope) : utf8Encode(JSON.stringify(envelope));
-  const parsedEnvelope =
-    typeof envelope === "string"
-      ? parseJson<unknown>(envelopeBytes, "Invalid mm_token envelope JSON")
-      : envelope;
+/**
+ * Build a KwilSigner for KGW `mm_token` auth.
+ *
+ * Pass the MetaMask-issued capability token as a **base64url-encoded** envelope string
+ * (what KGW verifies). A decoded `{ payload, signature }` object is also accepted and
+ * will be re-encoded.
+ *
+ * `signMessage` always returns the UTF-8 bytes of that encoded string — KGW ignores the
+ * request message and only verifies the envelope.
+ */
+export function createMmTokenKwilSigner(encodedEnvelope: string | MmTokenEnvelope): KwilSigner {
+  let signatureData: Uint8Array;
+  let envelope: MmTokenEnvelope;
 
-  if (!isMmTokenEnvelope(parsedEnvelope)) {
-    throw new Error("Invalid mm_token envelope: expected token and signature strings");
+  if (typeof encodedEnvelope === "string") {
+    const trimmed = encodedEnvelope.trim();
+    if (!trimmed) {
+      throw new Error("Invalid mm_token envelope: empty");
+    }
+    // KGW Verify receives UTF-8 of the base64url string, not the decoded JSON bytes.
+    signatureData = utf8Encode(trimmed);
+    const envelopeBytes = decodeBase64Url(trimmed, "Invalid mm_token envelope encoding");
+    const parsed = parseJson<unknown>(envelopeBytes, "Invalid mm_token envelope JSON");
+    if (!isMmTokenEnvelope(parsed)) {
+      throw new Error("Invalid mm_token envelope: expected payload object and signature string");
+    }
+    envelope = parsed;
+  } else {
+    if (!isMmTokenEnvelope(encodedEnvelope)) {
+      throw new Error("Invalid mm_token envelope: expected payload object and signature string");
+    }
+    envelope = encodedEnvelope;
+    signatureData = utf8Encode(base64UrlEncode(utf8Encode(JSON.stringify(envelope))));
   }
 
   const tokenSignatureBytes = decodeBase64Url(
-    parsedEnvelope.signature,
+    envelope.signature,
     "Invalid mm_token envelope signature encoding",
   );
   if (tokenSignatureBytes.length !== ED25519_SIGNATURE_BYTES) {
@@ -62,18 +94,13 @@ export function createMmTokenKwilSigner(envelope: string | MmTokenEnvelope): Kwi
     );
   }
 
-  const tokenBytes = decodeBase64Url(
-    parsedEnvelope.token,
-    "Invalid mm_token envelope token encoding",
-  );
-  const token = parseJson<Partial<MmTokenPayload>>(tokenBytes, "Invalid mm_token token JSON");
-
-  if (typeof token.signing_public_key !== "string") {
-    throw new Error("Invalid mm_token token: missing signing_public_key");
+  const signingPublicKey = envelope.payload.signing_public_key;
+  if (typeof signingPublicKey !== "string") {
+    throw new Error("Invalid mm_token payload: missing signing_public_key");
   }
 
   const signingPublicKeyBytes = decodeBase64Url(
-    token.signing_public_key,
+    signingPublicKey,
     "Invalid mm_token signing_public_key encoding",
   );
 
@@ -83,5 +110,5 @@ export function createMmTokenKwilSigner(envelope: string | MmTokenEnvelope): Kwi
     );
   }
 
-  return new KwilSigner(async () => envelopeBytes.slice(), signingPublicKeyBytes, "mm_token");
+  return new KwilSigner(async () => signatureData.slice(), signingPublicKeyBytes, "mm_token");
 }
