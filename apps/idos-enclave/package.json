@@ -16,13 +16,13 @@
     "@idos-network/credentials": "workspace:*",
     "@idos-network/enclave": "workspace:*",
     "@idos-network/utils": "workspace:*",
-    "@partisiablockchain/abi-client": "^5.207.0",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^5.310.0",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.214.0",
     "@preact/signals": "catalog:preact",
     "@rollup/plugin-inject": "^5.0.5",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
-    "dompurify": "^3.4.12",
+    "dompurify": "^3.4.13",
     "lucide-preact": "^0.577.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
@@ -31,15 +31,15 @@
     "web-bip39": "^0.0.3"
   },
   "devDependencies": {
-    "@preact/preset-vite": "^2.10.1",
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/vite": "^4.3.0",
+    "@preact/preset-vite": "^2.10.6",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/vite": "^4.3.3",
     "ethers": "catalog:ethereum",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-mkcert": "^1.17.8",
+    "vite-plugin-mkcert": "^1.17.12",
     "vite-plugin-node-polyfills": "catalog:build"
   }
 }
