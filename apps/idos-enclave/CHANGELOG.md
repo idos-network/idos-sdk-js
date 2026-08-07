@@ -1,5 +1,18 @@
 # idos-enclave
 
+## 0.3.0
+
+### Minor Changes
+
+- 76fd426: Upgrade dependencies
+
+### Patch Changes
+
+- Updated dependencies [76fd426]
+  - @idos-network/enclave@1.5.0
+  - @idos-network/utils@1.5.0
+  - @idos-network/credentials@1.5.0
+
 ## 0.2.2
 
 ### Patch Changes
