@@ -6,7 +6,7 @@ import type {
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import {
-  buildInsertableIDOSCredential,
+  buildEphemeralSignedCredentialContentReference,
   matchLevelOrHigher,
   recordFilter,
   type BaseLevel,
@@ -25,8 +25,6 @@ import {
   addWallet,
   addWallets,
   addAttribute as createAttribute,
-  type DagMessageInput,
-  dagMessage,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
   type GetWalletsOutput,
@@ -50,16 +48,20 @@ import {
   removeCredential,
   removeWallet,
   revokeAccessGrant,
-  type ShareCredentialInput,
-  shareCredential,
+  type SharePreliminaryCredentialInput,
+  sharePreliminaryCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
+import {
+  BlobGateway,
+  createBlobContentReference,
+  resolveCredentialEncryptedContent,
+} from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
   base64Encode,
   hexEncodeSha256Hash,
   utf8Decode,
-  utf8Encode,
 } from "@idos-network/utils/codecs";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import invariant from "tiny-invariant";
@@ -82,6 +84,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
   readonly state: "configuration";
   readonly chainId?: string;
   readonly nodeUrl: string;
+  readonly blobGatewayUrl?: string;
   readonly enclaveOptions: Omit<Provider["options"], "mode">;
   readonly store: Store;
   readonly enclaveProvider: BaseProvider;
@@ -89,6 +92,12 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
   constructor(params: {
     chainId?: string;
     nodeUrl: string;
+    /**
+     * Optional blob gateway base URL. Defaults to `nodeUrl`.
+     * In the browser this must share KGW's session-cookie Domain
+     * (typically the same host), because reads use `credentials: "include"`.
+     */
+    blobGatewayUrl?: string;
     enclaveOptions: Omit<Provider["options"], "mode">;
     enclaveProvider?: new (options: Omit<Provider["options"], "mode">) => Provider;
     store?: Store;
@@ -96,6 +105,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
     this.state = "configuration";
     this.chainId = params.chainId;
     this.nodeUrl = params.nodeUrl;
+    this.blobGatewayUrl = params.blobGatewayUrl;
     this.enclaveOptions = params.enclaveOptions;
     this.store = params.store ?? new LocalStorageStore();
 
@@ -122,12 +132,19 @@ export class idOSClientIdle {
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
+  readonly blobGateway: BlobGateway;
 
-  constructor(store: Store, kwilClient: KwilActionClient, enclaveProvider: BaseProvider) {
+  constructor(
+    store: Store,
+    kwilClient: KwilActionClient,
+    enclaveProvider: BaseProvider,
+    blobGateway: BlobGateway,
+  ) {
     this.state = "idle";
     this.store = store;
     this.kwilClient = kwilClient;
     this.enclaveProvider = enclaveProvider;
+    this.blobGateway = blobGateway;
   }
 
   static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
@@ -138,7 +155,14 @@ export class idOSClientIdle {
 
     await params.enclaveProvider.load();
 
-    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
+    const blobGateway = new BlobGateway({
+      url: params.blobGatewayUrl ?? params.nodeUrl,
+      // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
+      // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
+      fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
+    });
+
+    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
@@ -190,6 +214,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
+  readonly blobGateway: BlobGateway;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -208,13 +233,14 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
+    this.blobGateway = idOSClientIdle.blobGateway;
     // @ts-expect-error - TODO: Fix this
     this.enclaveProvider.setSigner(this.signer);
   }
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
+    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
   }
 
   async hasProfile(): Promise<boolean> {
@@ -270,6 +296,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly walletPublicKey: string | undefined;
   readonly walletType: WalletType;
   readonly user: idOSUser;
+  readonly blobGateway: BlobGateway;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
     this.state = "logged-in";
@@ -282,11 +309,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.walletPublicKey = idOSClientWithUserSigner.walletPublicKey;
     this.walletType = idOSClientWithUserSigner.walletType;
     this.user = user;
+    this.blobGateway = idOSClientWithUserSigner.blobGateway;
   }
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
+    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
   }
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
@@ -302,8 +330,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return getCredentialOwned(this.kwilClient, { id }).then((res) => res[0]);
   }
 
-  async shareCredential(credential: ShareCredentialInput): Promise<ShareCredentialInput> {
-    await shareCredential(this.kwilClient, credential);
+  async shareCredential(
+    credential: SharePreliminaryCredentialInput,
+  ): Promise<SharePreliminaryCredentialInput> {
+    await sharePreliminaryCredential(this.kwilClient, credential);
     return credential;
   }
 
@@ -328,13 +358,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const credential = await this.getCredentialById(id);
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
-
-    await this.enclaveProvider.ensureUserEncryptionProfile();
-
-    const plaintext = await this.enclaveProvider.decrypt(
-      base64Decode(credential.content),
-      base64Decode(credential.encryptor_public_key),
-    );
+    const plaintext = await this.#decryptCredentialContent(credential);
 
     return hexEncodeSha256Hash(plaintext);
   }
@@ -343,19 +367,18 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const credential = await this.getCredentialById(id);
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
-
-    await this.enclaveProvider.ensureUserEncryptionProfile();
-
-    const plaintext = await this.enclaveProvider.decrypt(
-      base64Decode(credential.content),
-      base64Decode(credential.encryptor_public_key),
-    );
+    const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
   }
 
-  async requestDAGMessage(params: DagMessageInput): Promise<string> {
-    return dagMessage(this.kwilClient, params).then((res) => res.message);
+  async getCredentialSharedContent(id: string): Promise<string> {
+    const credential = await this.getCredentialShared(id);
+
+    invariant(credential, `Shared credential with id ${id} not found`);
+    const plaintext = await this.#decryptCredentialContent(credential);
+
+    return utf8Decode(plaintext);
   }
 
   async getGrants(
@@ -565,7 +588,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       );
 
       const matches = await this.enclaveProvider.filterCredentials(
-        fullCredentials,
+        await Promise.all(
+          fullCredentials.map((credential) => this.#credentialWithInlineContent(credential)),
+        ),
         privateFieldFilters,
       );
 
@@ -588,44 +613,72 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       consumerAuthPublicKey: string;
       lockedUntil?: number;
     },
-  ): Promise<ShareCredentialInput> {
+  ): Promise<SharePreliminaryCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
-    const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
 
-    const plaintextContent = utf8Decode(
-      await this.enclaveProvider.decrypt(
-        base64Decode(credential.content),
-        base64Decode(credential.encryptor_public_key),
-      ),
-    );
+    const plaintextContent = await this.#decryptCredentialContent(credential);
+    const contentHash = hexEncodeSha256Hash(plaintextContent);
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
 
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
-      utf8Encode(plaintextContent),
+      plaintextContent,
       base64Decode(consumerEncryptionPublicKey),
     );
 
-    const insertableCredential: ShareCredentialInput = {
-      ...credential,
-      ...buildInsertableIDOSCredential(
-        credential.user_id,
-        "",
-        base64Encode(content),
-        base64Encode(encryptorPublicKey),
-      ),
-      original_credential_id: credential.id,
-      id: crypto.randomUUID(),
+    // User issues the shared copy: sign content_uri with an ephemeral user-side key.
+    // Copy issuer_auth_public_key need not match the original credential's issuer.
+    const copyReference = await createBlobContentReference(content);
+    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
+
+    const preliminaryCredential: SharePreliminaryCredentialInput = {
+      ...signedReference,
+      request_id: crypto.randomUUID(),
+      copy_id: crypto.randomUUID(),
+      original_id: credential.id,
+      content_uri: copyReference.uri,
+      content_size: copyReference.size,
+      encryptor_public_key: base64Encode(encryptorPublicKey),
       grantee_wallet_identifier: consumerAuthPublicKey,
       locked_until: lockedUntil,
       content_hash: contentHash,
     };
 
-    await this.shareCredential(insertableCredential);
+    await this.shareCredential(preliminaryCredential);
+    await this.blobGateway.uploadCredentialBlobs({
+      requestId: preliminaryCredential.request_id,
+      copy: content,
+    });
 
-    return insertableCredential;
+    return preliminaryCredential;
+  }
+
+  async #credentialWithInlineContent(credential: idOSCredential): Promise<idOSCredential> {
+    if (credential.content) {
+      return credential;
+    }
+
+    return {
+      ...credential,
+      content: base64Encode(await this.#getCredentialEncryptedContent(credential)),
+      content_uri: null,
+      content_size: null,
+    };
+  }
+
+  async #decryptCredentialContent(credential: idOSCredential): Promise<Uint8Array> {
+    await this.enclaveProvider.ensureUserEncryptionProfile();
+
+    return this.enclaveProvider.decrypt(
+      await this.#getCredentialEncryptedContent(credential),
+      base64Decode(credential.encryptor_public_key),
+    );
+  }
+
+  async #getCredentialEncryptedContent(credential: idOSCredential): Promise<Uint8Array> {
+    return resolveCredentialEncryptedContent(credential, this.blobGateway);
   }
 }
 
@@ -643,10 +696,17 @@ export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;
+  /**
+   * Optional blob gateway base URL. Defaults to `nodeUrl`.
+   * In the browser this must share KGW's session-cookie Domain
+   * (typically the same host), because reads use `credentials: "include"`.
+   */
+  blobGatewayUrl?: string;
   enclaveOptions: Omit<IframeEnclave["options"], "mode">;
 }): idOSClientConfiguration<IframeEnclave> {
   return new idOSClientConfiguration({
     nodeUrl: params.nodeUrl,
+    blobGatewayUrl: params.blobGatewayUrl,
     enclaveOptions: params.enclaveOptions,
   });
 }

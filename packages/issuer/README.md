@@ -22,11 +22,10 @@ pnpm add @idos-network/issuer
 ```typescript
 import { idOSIssuer as idOSIssuerClass } from "@idos-network/issuer";
 
-// Initialize with your signing and encryption keys
+// Initialize with your signing keypair
 const idOSIssuer = await idOSIssuerClass.init({
   nodeUrl: "https://nodes.idos.network",
   signingKeyPair, // Your signing keypair
-  encryptionSecretKey, // Your encryption secret key
 });
 
 // Create a user profile
@@ -35,8 +34,12 @@ await idOSIssuer.createUser(user, wallet);
 // Build and issue a W3C Verifiable Credential
 const credential = await idOSIssuer.buildCredential(credentialFields, credentialSubject, issuer);
 
-// Write credential using delegated write grant
-await idOSIssuer.createCredentialByDelegatedWriteGrant(credentialPayload, delegatedWriteGrant);
+// Write blob-backed credential using delegated write grant
+await idOSIssuer.createCredentialByDelegatedWriteGrant(
+  credentialPayload,
+  delegatedWriteGrant,
+  consumerEncryptionPublicKey,
+);
 ```
 
 ## Documentation
