@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   CreatePreliminaryCredentialsByDwgInputSchema,
   SharePreliminaryCredentialInputSchema,
+  UpsertWalletAsInserterInputSchema,
+  walletTypeSchema,
 } from "./actions";
 
 const validPreliminaryCredentialsByDwgInput = {
@@ -111,5 +113,25 @@ describe("SharePreliminaryCredentialInputSchema", () => {
         content_size,
       }),
     ).toThrow();
+  });
+});
+
+describe("MM wallet type schemas", () => {
+  it("accepts MM as a wallet type", () => {
+    expect(walletTypeSchema.parse("MM")).toBe("MM");
+  });
+
+  it("accepts MM wallets created by trusted inserters", () => {
+    expect(() =>
+      UpsertWalletAsInserterInputSchema.parse({
+        id: "00000000-0000-4000-8000-000000000008",
+        user_id: "00000000-0000-4000-8000-000000000009",
+        address: "mm-signing-public-key",
+        public_key: "mm-signing-public-key",
+        wallet_type: "MM",
+        message: "",
+        signature: "",
+      }),
+    ).not.toThrow();
   });
 });
