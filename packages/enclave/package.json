@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/enclave",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "idOS Enclave JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
@@ -48,7 +48,7 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@types/chrome": "^0.1.42",
+    "@types/chrome": "^0.2.5",
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
     "jsdom": "^22.1.0",
@@ -57,8 +57,8 @@
     "vitest": "catalog:testing"
   },
   "peerDependencies": {
-    "@partisiablockchain/abi-client": "^5.207.0",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^5.310.0",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.214.0",
     "ethers": "catalog:ethereum"
   },
   "peerDependenciesMeta": {
