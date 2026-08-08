@@ -20,13 +20,13 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
-    "@size-limit/file": "^11.2.0",
-    "@size-limit/time": "^11.2.0",
+    "@size-limit/file": "^13.0.0",
+    "@size-limit/time": "^13.0.0",
     "audit-ci": "^7.1.0",
-    "lefthook": "1.13.6",
+    "lefthook": "2.1.10",
     "oxfmt": "^0.62.0",
     "oxlint": "^1.77.0",
-    "size-limit": "^11.2.0",
+    "size-limit": "^13.0.0",
     "turbo": "^2.10.8",
     "vite-plugin-node-polyfills": "catalog:build"
   },

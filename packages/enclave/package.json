@@ -51,14 +51,14 @@
     "@types/chrome": "^0.2.5",
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
-    "jsdom": "^22.1.0",
+    "jsdom": "^30.0.0",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing"
   },
   "peerDependencies": {
-    "@partisiablockchain/abi-client": "^5.310.0",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.214.0",
+    "@partisiablockchain/abi-client": "^5.310.0 || ^6.0.0",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.214.0 || ^6.0.0",
     "ethers": "catalog:ethereum"
   },
   "peerDependenciesMeta": {
