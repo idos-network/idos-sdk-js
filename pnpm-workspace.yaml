@@ -24,7 +24,7 @@ catalogs:
     "@types/node": "25.9.5"
     "tsdown": "^0.22.14"
     "typescript": "^5.9.3"
-    "vite": "8.2.0"
+    "vite": "8.2.1"
     "vite-plugin-node-polyfills": "0.28.0"
 
   core:
@@ -41,7 +41,7 @@ catalogs:
   ethereum:
     "@wagmi/core": "3.6.4"
     "ethers": "^6.17.0"
-    "viem": "2.55.11"
+    "viem": "2.55.13"
     "wagmi": "3.7.6"
 
   near:
@@ -72,8 +72,8 @@ catalogs:
     # This version needs to be 1.7.20 untill this
     # https://github.com/reown-com/appkit/issues/5481
     # is solved.
-    "@reown/appkit": "1.7.20"
-    "@reown/appkit-adapter-wagmi": "1.7.20"
+    "@reown/appkit": "1.8.23"
+    "@reown/appkit-adapter-wagmi": "1.8.23"
 
   stellar:
     "@creit.tech/stellar-wallets-kit": "^1.9.5"
@@ -143,8 +143,8 @@ onlyBuiltDependencies:
 
 overrides:
   # LRU-cache includes now forced dependency to node:diagnostic internal library
-  "@idos-network/kwil-js>lru-cache": "11.2.7"
-  "path-scurry>lru-cache": "11.2.7"
+  "@idos-network/kwil-js>lru-cache": "11.5.2"
+  "path-scurry>lru-cache": "11.5.2"
 
   # Overrides for security-updates (floors match top-level / catalog pins)
   axios: ">=1.19.0"

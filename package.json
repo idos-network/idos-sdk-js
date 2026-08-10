@@ -24,7 +24,7 @@
     "@size-limit/time": "^11.2.0",
     "audit-ci": "^7.1.0",
     "lefthook": "1.13.6",
-    "oxfmt": "^0.62.0",
+    "oxfmt": "^0.63.0",
     "oxlint": "^1.77.0",
     "size-limit": "^11.2.0",
     "turbo": "^2.10.8",
@@ -68,5 +68,5 @@
       "limit": "20 KB"
     }
   ],
-  "packageManager": "pnpm@11.20.0"
+  "packageManager": "pnpm@11.21.0"
 }
