@@ -10,7 +10,7 @@ export const WALLET_TYPES = ["EVM", "NEAR", "XRPL", "Stellar", "FaceSign", "MM"]
 export type WalletType = (typeof WALLET_TYPES)[number];
 
 export const walletTypeSchema: z.ZodType<WalletType> = z.enum(WALLET_TYPES);
-export const ENCRYPTION_PASSWORD_STORES = ["user", "mpc"] as const;
+export const ENCRYPTION_PASSWORD_STORES = ["user", "mpc", "mm"] as const;
 
 export type EncryptionPasswordStore = (typeof ENCRYPTION_PASSWORD_STORES)[number];
 
