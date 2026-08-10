@@ -6,7 +6,7 @@ import type { KeyPair as NearKeyPair } from "near-api-js";
 import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 
 import { KwilSigner } from "@idos-network/kwil-js";
-import { bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
+import { base64UrlEncode, bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 
 import type { WalletType } from "./actions";
@@ -92,6 +92,17 @@ function isCustomKwilSigner(object: unknown): object is CustomKwilSigner {
     "signatureType" in object &&
     "publicKey" in object &&
     "signMessage" in object
+  );
+}
+
+function isMmTokenKwilSigner(object: unknown): object is KwilSigner {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "identifier" in object &&
+    "signatureType" in object &&
+    "signer" in object &&
+    object.signatureType === "mm_token"
   );
 }
 
@@ -236,6 +247,10 @@ export async function createClientKwilSigner(
       walletPublicKey,
       "XRPL",
     ];
+  }
+
+  if (isMmTokenKwilSigner(wallet)) {
+    return [wallet, base64UrlEncode(wallet.identifier), base64UrlEncode(wallet.identifier), "MM"];
   }
 
   if (isCustomKwilSigner(wallet) || wallet instanceof FaceSignSignerProvider) {
