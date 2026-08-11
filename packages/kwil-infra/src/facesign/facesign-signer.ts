@@ -1,3 +1,10 @@
+import type { Store } from "@idos-network/utils/store";
+
+import { KwilSigner } from "@idos-network/kwil-js";
+
+import type { KwilActionClient } from "../create-kwil-client";
+import type { ClientKwilSignerResult } from "../create-kwil-signer";
+
 // Buffer after showing the iframe before posting a message, giving the enclave time to be ready.
 const POST_MESSAGE_DELAY_MS = 300;
 // Safety net: reject proposals if the enclave doesn't respond within this window.
@@ -324,4 +331,32 @@ export class FaceSignSignerProvider {
       this.#container = null;
     }
   }
+}
+
+export async function createFaceSignKwilSigner(
+  provider: FaceSignSignerProvider,
+  store: Store,
+  kwilClient: KwilActionClient,
+): Promise<ClientKwilSignerResult> {
+  const storedAddress = await store.get<string>("signer-address");
+
+  if (storedAddress !== provider.publicAddress) {
+    store.set("signer-address", provider.publicAddress);
+    try {
+      await kwilClient.client.auth.logoutKGW();
+    } catch (error) {
+      console.log("error logoutKGW", error);
+    }
+  }
+
+  return {
+    kwilSigner: new KwilSigner(
+      async (msg: Uint8Array) => provider.signMessage(msg),
+      provider.publicAddress,
+      "ed25519",
+    ),
+    walletIdentifier: provider.publicAddress,
+    walletPublicKey: provider.publicKey,
+    walletType: provider.walletType as ClientKwilSignerResult["walletType"],
+  };
 }
