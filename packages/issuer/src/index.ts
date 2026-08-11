@@ -15,8 +15,8 @@ import type { SignKeyPair } from "tweetnacl";
 
 import {
   createKgwAuthenticatedBlobGateway,
+  createNaclKwilSigner,
   createNodeKwilClient,
-  createServerKwilSigner,
 } from "@idos-network/kwil-infra";
 
 import {
@@ -48,7 +48,7 @@ export class idOSIssuer {
       chainId: params.chainId,
     });
 
-    const [signer] = await createServerKwilSigner(params.signingKeyPair);
+    const [signer] = await createNaclKwilSigner(params.signingKeyPair);
     kwilClient.setSigner(signer);
 
     const blobGateway = createKgwAuthenticatedBlobGateway({

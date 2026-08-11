@@ -1,6 +1,8 @@
-import type { Wallet } from "@idos-network/kwil-infra";
+import type * as GemWalletApi from "@gemwallet/api";
+import type { KwilSigner } from "@idos-network/kwil-infra";
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
-import type { WalletSelector } from "@near-wallet-selector/core";
+import type { Wallet as NearWallet, WalletSelector } from "@near-wallet-selector/core";
+import type { JsonRpcSigner } from "ethers";
 
 import { getWalletClient } from "@wagmi/core";
 
@@ -20,7 +22,7 @@ export function clearFaceSignProvider() {
   faceSignProvider = null;
 }
 
-export async function createEvmSigner(): Promise<Wallet> {
+export async function createEvmSigner(): Promise<JsonRpcSigner> {
   const { BrowserProvider } = await import("ethers");
 
   // If we are reconnecting, we need to use the new wallet client
@@ -47,25 +49,19 @@ export async function createEvmSigner(): Promise<Wallet> {
   return provider.getSigner();
 }
 
-export async function createNearSigner(selector: WalletSelector): Promise<Wallet> {
-  const wallet = await selector.wallet();
-  return wallet as unknown as Wallet;
+export async function createNearSigner(selector: WalletSelector): Promise<NearWallet> {
+  return selector.wallet();
 }
 
-export async function createXrplSigner(): Promise<Wallet> {
-  const GemWallet = await import("@gemwallet/api");
-  // @ts-expect-error GemWallet type mismatch between versions
-  return GemWallet as Wallet;
+export async function createXrplSigner(): Promise<typeof GemWalletApi> {
+  return import("@gemwallet/api");
 }
 
-export async function createStellarSigner(
-  walletPublicKey: string,
-  walletAddress: string,
-): Promise<Wallet> {
+export async function createStellarSigner(walletPublicKey: string): Promise<KwilSigner> {
   const { default: stellarKit } = await import("./stellar-kit");
   const { KwilSigner } = await import("@idos-network/kwil-infra");
 
-  const stellarSigner = new KwilSigner(
+  return new KwilSigner(
     async (msg: Uint8Array): Promise<Uint8Array> => {
       const messageBase64 = Buffer.from(msg).toString("base64");
       const result = await stellarKit.signMessage(messageBase64);
@@ -80,12 +76,9 @@ export async function createStellarSigner(
     walletPublicKey,
     "ed25519",
   );
-  // @ts-expect-error KwilSigner doesn't have publicAddress in its type definition
-  stellarSigner.publicAddress = walletAddress;
-  return stellarSigner as unknown as Wallet;
 }
 
-export function createFaceSignSigner(): Wallet {
+export function createFaceSignSigner(): FaceSignSignerProvider {
   if (!faceSignProvider) {
     throw new Error("FaceSign provider not initialized. Connect via FaceSign first.");
   }

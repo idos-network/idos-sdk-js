@@ -1,4 +1,4 @@
-import type { Wallet } from "@idos-network/kwil-infra";
+import type { idOSClientWithUserSigner } from "@idos-network/client";
 
 import { idOSClientConfiguration } from "@idos-network/client";
 import { fromPromise } from "xstate";
@@ -30,32 +30,36 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
       });
     }
 
-    let signer: Wallet;
+    const newClient = await config.createClient();
+
+    let withSigner: idOSClientWithUserSigner;
     switch (walletType) {
       case "EVM":
-        signer = await createEvmSigner();
+        withSigner = await newClient.withEvmSigner(await createEvmSigner());
         break;
       case "NEAR":
         if (!nearSelector) {
           throw new Error("NEAR selector not available");
         }
-        signer = await createNearSigner(nearSelector);
+        withSigner = await newClient.withNearWallet(await createNearSigner(nearSelector));
         break;
       case "Stellar":
-        signer = await createStellarSigner(walletPublicKey, walletAddress);
+        withSigner = await newClient.withKwilSigner(
+          await createStellarSigner(walletPublicKey),
+          walletAddress,
+          walletPublicKey,
+          "Stellar",
+        );
         break;
       case "XRPL":
-        signer = await createXrplSigner();
+        withSigner = await newClient.withXrpWallet(await createXrplSigner());
         break;
       case "FaceSign":
-        signer = createFaceSignSigner();
+        withSigner = await newClient.withFaceSignSigner(createFaceSignSigner());
         break;
       default:
         throw new Error(`Unsupported wallet type: ${walletType}`);
     }
-
-    const newClient = await config.createClient();
-    const withSigner = await newClient.withUserSigner(signer);
 
     const profileExists = await withSigner.hasProfile();
     if (profileExists) {

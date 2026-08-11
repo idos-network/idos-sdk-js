@@ -64,16 +64,21 @@
     "xumm": "catalog:xrp"
   },
   "peerDependencies": {
+    "@gemwallet/api": "catalog:xrp",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
     "ethers": "catalog:ethereum",
     "near-api-js": "catalog:near",
     "ripple-keypairs": "catalog:xrp",
     "viem": "catalog:ethereum",
-    "xrpl": "catalog:xrp"
+    "xrpl": "catalog:xrp",
+    "xumm": "catalog:xrp"
   },
   "peerDependenciesMeta": {
     "near-api-js": {
+      "optional": true
+    },
+    "@gemwallet/api": {
       "optional": true
     },
     "@near-wallet-selector/core": {
@@ -89,6 +94,9 @@
       "optional": true
     },
     "xrpl": {
+      "optional": true
+    },
+    "xumm": {
       "optional": true
     }
   }

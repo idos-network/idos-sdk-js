@@ -3,17 +3,22 @@ import { parseCredential } from "@idos-network/credentials/parser";
 import { VerifiableCredentialKycV2 } from "@idos-network/credentials/schemas";
 import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
 import { verifyCredential } from "@idos-network/credentials/verifier";
+import { createNaclKwilSigner } from "@idos-network/kwil-infra";
 import nacl from "tweetnacl";
 
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
 export async function initIdOSConsumer() {
+  const consumerKeyPair = nacl.sign.keyPair.fromSecretKey(
+    Buffer.from(SERVER_ENV.IDOS_CONSUMER_SIGNER, "base64"),
+  );
+  const [consumerSigner, consumerAddress] = await createNaclKwilSigner(consumerKeyPair);
+
   return await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
-    consumerSigner: nacl.sign.keyPair.fromSecretKey(
-      Buffer.from(SERVER_ENV.IDOS_CONSUMER_SIGNER, "base64"),
-    ),
+    consumerSigner,
+    consumerAddress,
     recipientEncryptionPrivateKey: SERVER_ENV.IDOS_RECIPIENT_ENC_PRIVATE_KEY,
   });
 }

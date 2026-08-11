@@ -19,28 +19,9 @@ import {
 } from "@idos-network/utils/codecs";
 
 import type { KwilActionClient } from "../create-kwil-client";
+import type { ClientKwilSignerResult } from "../create-kwil-signer";
 
 import { getNearConnectionConfig } from "./get-config";
-
-const NEAR_WALLET_TYPES: string[] = [
-  "browser",
-  "injected",
-  "instant-link",
-  "hardware",
-  "bridge",
-] satisfies NearWallet["type"][];
-
-export function looksLikeNearWallet(signer: unknown): signer is NearWallet {
-  return (
-    signer !== null &&
-    typeof signer === "object" &&
-    "id" in signer &&
-    "metadata" in signer &&
-    "type" in signer &&
-    typeof signer.type === "string" &&
-    NEAR_WALLET_TYPES.includes(signer.type)
-  );
-}
 
 class KwilNonce {
   bytes: Uint8Array;
@@ -161,12 +142,14 @@ export async function signNearMessage(
 
 export async function createNearWalletKwilSigner(
   wallet: NearWallet,
-  currentAddress: string,
   store: Store,
   kwilClient: KwilActionClient,
   recipient = "idos.network",
-): Promise<{ kwilSigner: KwilSigner; publicKey: string }> {
+): Promise<ClientKwilSignerResult> {
   if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
+
+  const accounts = await wallet.getAccounts();
+  const currentAddress = accounts[0].accountId;
 
   if (wallet.id === "my-near-wallet") {
     const { accountId, signature, publicKey, error } = Object.fromEntries(
@@ -240,6 +223,8 @@ export async function createNearWalletKwilSigner(
 
   return {
     kwilSigner: new KwilSigner(signer, implicitAddressFromPublicKey(publicKey), "nep413"),
-    publicKey,
+    walletIdentifier: currentAddress,
+    walletPublicKey: publicKey,
+    walletType: "NEAR",
   };
 }
