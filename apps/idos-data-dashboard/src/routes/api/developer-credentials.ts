@@ -1,4 +1,5 @@
 import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+import { createNaclKwilSigner } from "@idos-network/kwil-infra";
 import * as Sentry from "@sentry/react-router";
 import nacl from "tweetnacl";
 
@@ -24,11 +25,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     return Response.json({ error: "Not found" }, { status: 404 });
   }
 
-  const consumerSigner = nacl.sign.keyPair.fromSecretKey(Buffer.from(user.consumerAuthKey, "hex"));
+  const consumerKeyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(user.consumerAuthKey, "hex"));
+  const [consumerSigner, consumerAddress] = await createNaclKwilSigner(consumerKeyPair);
 
   const consumer = await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.DEVELOPER_CONSOLE_IDOS_NODE_URL,
     consumerSigner,
+    consumerAddress,
     recipientEncryptionPrivateKey: user.consumerEncKey,
   });
 

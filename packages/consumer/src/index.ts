@@ -9,9 +9,7 @@ import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
-  createServerKwilSigner,
   type KwilActionClient,
-  type KwilSignerType,
 } from "@idos-network/kwil-infra";
 import {
   type GetAccessGrantsGrantedInput,
@@ -33,7 +31,9 @@ export type idOSConsumerConfig = {
   nodeUrl?: string;
   chainId?: string;
   blobGatewayUrl?: string;
-  consumerSigner: KwilSignerType;
+  /** Pre-resolve via e.g. `createNaclKwilSigner`/`createEthersWalletKwilSigner` from `@idos-network/kwil-infra`. */
+  consumerSigner: KwilSigner;
+  consumerAddress: string;
 };
 
 export class idOSConsumer {
@@ -48,14 +48,14 @@ export class idOSConsumer {
     nodeUrl = "https://nodes.idos.network",
     chainId,
     blobGatewayUrl,
-    consumerSigner,
+    consumerSigner: signer,
+    consumerAddress: address,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
       nodeUrl,
       chainId,
     });
 
-    const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
     const blobGateway = createKgwAuthenticatedBlobGateway({
       url: blobGatewayUrl ?? nodeUrl,

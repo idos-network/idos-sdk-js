@@ -6,6 +6,8 @@ import {
   utf8Encode,
 } from "@idos-network/utils/codecs";
 
+import type { ClientKwilSignerResult } from "../create-kwil-signer";
+
 const ED25519_PUBLIC_KEY_BYTES = 32;
 const ED25519_SIGNATURE_BYTES = 64;
 
@@ -111,4 +113,18 @@ export function createMmTokenKwilSigner(encodedEnvelope: string | MmTokenEnvelop
   }
 
   return new KwilSigner(async () => signatureData.slice(), signingPublicKeyBytes, "mm_token");
+}
+
+export async function createMmTokenKwilSignerResult(
+  encodedEnvelope: string | MmTokenEnvelope,
+): Promise<ClientKwilSignerResult> {
+  const kwilSigner = createMmTokenKwilSigner(encodedEnvelope);
+  const walletIdentifier = base64UrlEncode(kwilSigner.identifier as Uint8Array);
+
+  return {
+    kwilSigner,
+    walletIdentifier,
+    walletPublicKey: walletIdentifier,
+    walletType: "MM",
+  };
 }

@@ -14,8 +14,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@idos-network/kwil-infra", () => ({
   createKgwAuthenticatedBlobGateway: vi.fn(() => mocks.blobGateway),
+  createNaclKwilSigner: vi.fn(async () => [mocks.signer]),
   createNodeKwilClient: vi.fn(async () => mocks.kwilClient),
-  createServerKwilSigner: vi.fn(async () => [mocks.signer]),
 }));
 
 vi.mock("@idos-network/kwil-infra/actions", async (importOriginal) => ({
