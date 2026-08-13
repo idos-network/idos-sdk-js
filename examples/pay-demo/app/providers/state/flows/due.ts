@@ -232,7 +232,7 @@ export const actors = {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        dagId: input.ag?.id,
+        dagId: input.ag?.copy_id,
       }),
     });
 

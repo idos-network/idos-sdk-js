@@ -11,7 +11,11 @@ dictionaryDefinitions:
   - name: project-words
     path: ./project-words.txt
     addWords: true
+ignoreRegExpList:
+  - "/bafkrei[a-z0-9]+/"
+  - "/ipfs:\\/\\//"
 ignorePaths:
+  - "ort-results/**"
   - ".github/renovate.json"
   - "**/dist/**"
   - "**/assets/**"

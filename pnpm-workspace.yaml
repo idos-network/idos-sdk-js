@@ -10,6 +10,7 @@ allowBuilds:
   blake-hash: true
   bufferutil: true
   es5-ext: true
+  esbuild: true
   keccak: true
   lefthook: true
   msw: true
@@ -156,7 +157,6 @@ overrides:
   vite: ">= 8.2.0"
   postcss: ">= 8.5.18"
   react-router: ">= 8.3.0"
-  shell-quote: ">= 1.8.5"
   "@react-router/dev": ">=8.3.0"
   "@react-router/node": ">=8.3.0"
   "@react-router/serve": ">=8.3.0"
@@ -173,5 +173,16 @@ overrides:
   # Bs58 is broken < 6.0.0 together with vite 8.x
   # but the import is the same
   bs58: "6.0.0"
+
+  basic-ftp: "6.0.1"
+
+  # Security: js-yaml DoS (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj)
+  "js-yaml@3": "3.15.1"
+  "js-yaml@4": "4.3.1"
+  # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
+  "nanoid@3": "3.3.17"
+  "nanoid@5": "5.1.16"
+  # Security: shell-quote DoS (GHSA-395f-4hp3-45gv)
+  shell-quote: "1.10.0"
 
 strictDepBuilds: true

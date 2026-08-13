@@ -60,6 +60,11 @@ idOSSDK
 incentivized
 informationally
 insertable
+IPFS
+ipfs
+Ipfs
+chunker
+reauthenticated
 isbot
 jsigs
 jsonld
@@ -169,3 +174,4 @@ xsignature
 xstate
 XUMM
 ziif
+GHSA
