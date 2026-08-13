@@ -75,30 +75,44 @@ export function createKgwAuthenticatedFetch({
       ...withCookie(input, withMaterializedBody(bufferedRequest), cookie),
     );
 
-    if (!(await isAuthFailure(authFailureProbe(response)))) {
+    const probe = authFailureProbe(response);
+    if (!(await isAuthFailure(probe.response))) {
       return response;
     }
 
     // Discard the failed response so an unread body doesn't keep streaming.
-    await discardUnreadBody(response);
+    await discardUnreadBodies(probe.discardResponses);
     const refreshedCookie = await refreshCookie();
     return fetchFn(...withCookie(input, withMaterializedBody(bufferedRequest), refreshedCookie));
   };
 }
+
+type AuthFailureProbe = {
+  response: Response;
+  discardResponses: Response[];
+};
 
 /**
  * Body is one-shot. Only clone when the default predicate might call `.json()`
  * (JSON content-type). Cloning a large blob response would tee the stream and
  * risk buffering the download on an abandoned branch — and in Node, canceling
  * that unread tee branch hangs.
+ *
+ * When a cloned response is thrown away after an auth failure, cancel both tee
+ * branches together; canceling only one branch can wait forever for the other.
  */
-function authFailureProbe(response: Response): Response {
+function authFailureProbe(response: Response): AuthFailureProbe {
   const contentType = response.headers.get("content-type");
   if (contentType?.includes("application/json")) {
-    return response.clone();
+    const probe = response.clone();
+    return { response: probe, discardResponses: [response, probe] };
   }
 
-  return response;
+  return { response, discardResponses: [response] };
+}
+
+async function discardUnreadBodies(responses: Response[]): Promise<void> {
+  await Promise.all(responses.map(discardUnreadBody));
 }
 
 async function discardUnreadBody(response: Response): Promise<void> {
