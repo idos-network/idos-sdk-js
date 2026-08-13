@@ -1,0 +1,6 @@
+{
+  // extract-zip has no published patched release yet (GHSA-jmr9-qjv8-65gv).
+  // Advisory claims >=2.0.2, but that version is not on npm. Only reachable via
+  // @size-limit/time → puppeteer (dev/CI bundle-size tooling).
+  "allowlist": ["GHSA-jmr9-qjv8-65gv"],
+}

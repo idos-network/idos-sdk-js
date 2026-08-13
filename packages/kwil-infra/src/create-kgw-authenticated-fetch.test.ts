@@ -6,7 +6,10 @@ import { describe, expect, it, vi } from "vitest";
 import { createKgwAuthenticatedFetch } from "./create-kgw-authenticated-fetch";
 import { KwilActionClient } from "./create-kwil-client";
 
-function createTestClient(initialCookie?: string): {
+function createTestClient(
+  initialCookie?: string,
+  params?: { isAuthFailure?: (response: Response) => Promise<boolean> | boolean },
+): {
   authFetch: typeof fetch;
   fetchFn: ReturnType<typeof vi.fn<typeof fetch>>;
   refresh: ReturnType<typeof vi.fn<() => Promise<string>>>;
@@ -29,15 +32,36 @@ function createTestClient(initialCookie?: string): {
   nodeKwil.getKgwCookie = vi.fn(() => cookie);
   nodeKwil.authenticateKGWAndSetCookie = refresh;
 
+  const authFetchParams: Parameters<typeof createKgwAuthenticatedFetch>[0] = {
+    kwilClient,
+    signer: {} as KwilSigner,
+    fetchFn,
+  };
+  if (params?.isAuthFailure) {
+    authFetchParams.isAuthFailure = params.isAuthFailure;
+  }
+
   return {
-    authFetch: createKgwAuthenticatedFetch({
-      kwilClient,
-      signer: {} as KwilSigner,
-      fetchFn,
-    }),
+    authFetch: createKgwAuthenticatedFetch(authFetchParams),
     fetchFn,
     refresh,
   };
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => reject(new Error(message)), ms);
+      }),
+    ]);
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
 }
 
 function cookieHeader(call: Parameters<typeof fetch>): string | null {
@@ -173,6 +197,44 @@ describe("createKgwAuthenticatedFetch", () => {
     expect(fetchFn).toHaveBeenCalledTimes(2);
     expect(cookieHeader(fetchFn.mock.calls[0])).toBe("kgw_session=expired; Path=/");
     expect(cookieHeader(fetchFn.mock.calls[1])).toBe("kgw_session=fresh; Path=/");
+  });
+
+  // Regression: JSON 401 used to clone for the auth probe, then cancel the
+  // original while the clone tee stayed unread — undici hangs on that cancel.
+  it("retries after a JSON 401 without hanging on body cancel", async () => {
+    const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
+    fetchFn
+      .mockResolvedValueOnce(Response.json({ error: "unauthorized" }, { status: 401 }))
+      .mockResolvedValueOnce(new Response("ok"));
+
+    const response = await withTimeout(
+      authFetch("https://blob.example/upload"),
+      1000,
+      "hung discarding 401 body",
+    );
+
+    expect(response.ok).toBe(true);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("discards both tee branches when a custom predicate flags unread JSON", async () => {
+    const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/", {
+      isAuthFailure: (response) => response.status === 419,
+    });
+    fetchFn
+      .mockResolvedValueOnce(Response.json({ error: "session expired" }, { status: 419 }))
+      .mockResolvedValueOnce(new Response("ok"));
+
+    const response = await withTimeout(
+      authFetch("https://blob.example/upload"),
+      1000,
+      "hung discarding cloned JSON body",
+    );
+
+    expect(response.ok).toBe(true);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
   });
 
   it("returns the retry response when authentication keeps failing", async () => {
