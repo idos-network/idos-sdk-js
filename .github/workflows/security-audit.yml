@@ -33,4 +33,4 @@ jobs:
         run: pnpm install
 
       - name: Run audit
-        run: pnpm exec audit-ci --package-manager pnpm --high --critical
+        run: pnpm exec audit-ci --config ./audit-ci.jsonc --package-manager pnpm --high --critical
