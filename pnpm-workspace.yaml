@@ -176,9 +176,12 @@ overrides:
 
   basic-ftp: "6.0.1"
 
-  # Security: js-yaml DoS (GHSA-52cp-r559-cp3m)
-  "js-yaml@3": "3.15.0"
-  "js-yaml@4": "4.3.0"
+  # Security: js-yaml DoS (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj)
+  "js-yaml@3": "3.15.1"
+  "js-yaml@4": "4.3.1"
+  # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
+  "nanoid@3": "3.3.17"
+  "nanoid@5": "5.1.16"
   # Security: shell-quote DoS (GHSA-395f-4hp3-45gv)
   shell-quote: "1.10.0"
 
