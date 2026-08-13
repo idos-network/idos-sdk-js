@@ -204,9 +204,7 @@ describe("createKgwAuthenticatedFetch", () => {
   it("retries after a JSON 401 without hanging on body cancel", async () => {
     const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
     fetchFn
-      .mockResolvedValueOnce(
-        Response.json({ error: "unauthorized" }, { status: 401 }),
-      )
+      .mockResolvedValueOnce(Response.json({ error: "unauthorized" }, { status: 401 }))
       .mockResolvedValueOnce(new Response("ok"));
 
     const response = await withTimeout(
