@@ -38,6 +38,7 @@ facetec
 frontmost
 GABC
 gemwallet
+GHSA
 headlessui
 heroicons
 heroui
@@ -49,6 +50,7 @@ chakra
 changeset
 changesets
 chatset
+chunker
 iban
 ibans
 idos
@@ -60,11 +62,9 @@ idOSSDK
 incentivized
 informationally
 insertable
-IPFS
 ipfs
 Ipfs
-chunker
-reauthenticated
+IPFS
 isbot
 jsigs
 jsonld
@@ -115,6 +115,7 @@ pnpx
 preact
 publint
 qrcode
+reauthenticated
 Reown
 Revalidator
 rippletest
@@ -152,6 +153,8 @@ tweetnacl
 txjson
 typesafety
 uidotdev
+ukyc
+unpadded
 unstub
 Upserts
 usehooks
@@ -174,5 +177,3 @@ xsignature
 xstate
 XUMM
 ziif
-unpadded
-GHSA
