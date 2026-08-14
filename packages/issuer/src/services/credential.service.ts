@@ -35,7 +35,7 @@ export type DelegatedWriteGrantParams = {
 
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
   BuildPreliminaryIDOSCredentialArgs,
-  "signedReferenceSecretKey"
+  "issuerSigningSecretKey"
 >;
 
 export class CredentialService {
@@ -68,7 +68,7 @@ export class CredentialService {
     const originalCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
         ...credentialParams,
-        signedReferenceSecretKey: this.#signingKeyPair.secretKey,
+        issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
     };
@@ -80,7 +80,7 @@ export class CredentialService {
         ...credentialParams,
         publicNotes: "",
         recipientEncryptionPublicKey: consumerEncryptionPublicKey,
-        signedReferenceSecretKey: this.#signingKeyPair.secretKey,
+        issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
     };
