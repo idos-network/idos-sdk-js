@@ -330,14 +330,14 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     publicNotes: string,
     plaintextContent: Uint8Array<ArrayBufferLike>,
     // In case of credential creation on users behalf, this would be a issuer key
-    signedReferenceSecretKey?: Uint8Array,
+    issuerSigningSecretKey?: Uint8Array,
   ): Promise<Omit<idOSCredential, "user_id" | "content" | "inserter_type" | "inserter_id">> {
     const preliminaryCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
         publicNotes,
         plaintextContent,
         recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
-        signedReferenceSecretKey,
+        issuerSigningSecretKey,
       })),
       id: crypto.randomUUID(),
     };
@@ -351,7 +351,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       encryptor_public_key: preliminaryCredential.encryptorPublicKey,
       content_uri: preliminaryCredential.contentUri,
       content_size: preliminaryCredential.contentSize,
-      content_hash: hexEncodeSha256Hash(preliminaryCredential.encryptedContent),
+      content_hash: hexEncodeSha256Hash(plaintextContent),
       public_notes: preliminaryCredential.publicNotes,
       public_notes_signature: preliminaryCredential.publicNotesSignature,
       broader_signature: preliminaryCredential.broaderSignature,
