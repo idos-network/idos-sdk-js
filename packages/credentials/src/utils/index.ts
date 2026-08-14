@@ -1,5 +1,7 @@
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
+import { createBlobContentReference } from "@idos-network/utils/blob-gateway";
 import { base64Encode, hexEncode, utf8Encode, fileToBase85 } from "@idos-network/utils/codecs";
+import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 
@@ -10,6 +12,7 @@ import type {
   CredentialSubject,
   CredentialSubjectFaceId,
   CustomIssuerType,
+  idOSCredential,
   SignedCredentialContentReference,
 } from "../types";
 
@@ -235,7 +238,7 @@ export function recordFilter(
 export function buildSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
-  issuerSigningSecretKey: Uint8Array,
+  issuerSigningSecretKey: Uint8Array = nacl.sign.keyPair().secretKey,
 ): SignedCredentialContentReference {
   const { publicKey, secretKey } = nacl.sign.keyPair.fromSecretKey(issuerSigningSecretKey);
 
@@ -256,14 +259,68 @@ export function buildSignedCredentialContentReference(
   };
 }
 
-/** User-issued share copy: sign with a fresh ephemeral key (need not match original issuer). */
-export function buildEphemeralSignedCredentialContentReference(
-  publicNotes: string,
-  contentUri: string,
-): SignedCredentialContentReference {
-  return buildSignedCredentialContentReference(
-    publicNotes,
-    contentUri,
-    nacl.sign.keyPair().secretKey,
+export type PreliminaryIDOSCredential = {
+  id: string;
+  contentUri: string;
+  contentSize: number;
+  encryptedContent: Uint8Array;
+  publicNotes: string;
+  publicNotesSignature: string;
+  broaderSignature: string;
+  issuerAuthPublicKey: string;
+  encryptorPublicKey: string;
+};
+
+export function mapPreliminaryToIDOSCredential(
+  preliminaryCredential: PreliminaryIDOSCredential,
+): Omit<idOSCredential, "user_id"> {
+  return {
+    id: preliminaryCredential.id,
+    content_uri: preliminaryCredential.contentUri,
+    content_size: preliminaryCredential.contentSize,
+    public_notes: preliminaryCredential.publicNotes,
+    issuer_auth_public_key: preliminaryCredential.issuerAuthPublicKey,
+    encryptor_public_key: preliminaryCredential.encryptorPublicKey,
+  };
+}
+
+export interface BuildPreliminaryIDOSCredentialArgs {
+  publicNotes: string;
+  plaintextContent: Uint8Array;
+  recipientEncryptionPublicKey: Uint8Array;
+  signedReferenceSecretKey?: Uint8Array;
+}
+
+export async function buildPreliminaryIDOSCredential({
+  publicNotes,
+  plaintextContent,
+  recipientEncryptionPublicKey,
+  // For user-issued credentials, use a fresh ephemeral key for the signed reference
+  // For issuer-side, use the signing key pair
+  signedReferenceSecretKey = nacl.box.keyPair().secretKey,
+}: BuildPreliminaryIDOSCredentialArgs): Promise<Omit<PreliminaryIDOSCredential, "id">> {
+  const ephemeralKeyPair = nacl.box.keyPair();
+  const encryptedContent = encryptContent(
+    plaintextContent,
+    recipientEncryptionPublicKey, // user or dwg recipient
+    ephemeralKeyPair.secretKey,
   );
+
+  const contentReference = await createBlobContentReference(encryptedContent);
+  const signedReference = buildSignedCredentialContentReference(
+    publicNotes,
+    contentReference.uri,
+    signedReferenceSecretKey,
+  );
+
+  return {
+    contentUri: contentReference.uri,
+    contentSize: contentReference.size,
+    encryptedContent,
+    publicNotes,
+    publicNotesSignature: signedReference.public_notes_signature,
+    broaderSignature: signedReference.broader_signature,
+    issuerAuthPublicKey: signedReference.issuer_auth_public_key,
+    encryptorPublicKey: base64Encode(ephemeralKeyPair.publicKey),
+  };
 }

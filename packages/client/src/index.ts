@@ -6,8 +6,11 @@ import type {
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import {
-  buildEphemeralSignedCredentialContentReference,
+  buildPreliminaryIDOSCredential,
+  buildSignedCredentialContentReference,
+  mapPreliminaryToIDOSCredential,
   matchLevelOrHigher,
+  PreliminaryIDOSCredential,
   recordFilter,
 } from "@idos-network/credentials/utils";
 import {
@@ -23,6 +26,8 @@ import {
   addWallet,
   addWallets,
   addAttribute as createAttribute,
+  createPreliminaryCredential,
+  type CreatePreliminaryCredentialInput,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
   type GetWalletsOutput,
@@ -317,6 +322,47 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
     return dwgMessage(this.kwilClient, params).then((res) => res.message);
+  }
+
+  async createCredential(
+    publicNotes: string,
+    plaintextContent: Uint8Array<ArrayBufferLike>,
+    // In case of credential creation on users behalf, this would be a issuer key
+    signedReferenceSecretKey?: Uint8Array,
+  ): Promise<Omit<idOSCredential, "user_id" | "content" | "inserter_type" | "inserter_id">> {
+    const preliminaryCredential: PreliminaryIDOSCredential = {
+      ...(await buildPreliminaryIDOSCredential({
+        publicNotes,
+        plaintextContent,
+        recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
+        signedReferenceSecretKey,
+      })),
+      id: crypto.randomUUID(),
+    };
+
+    const requestId = crypto.randomUUID();
+
+    const payload: CreatePreliminaryCredentialInput = {
+      request_id: requestId,
+      credential_id: preliminaryCredential.id,
+      issuer_auth_public_key: preliminaryCredential.issuerAuthPublicKey,
+      encryptor_public_key: preliminaryCredential.encryptorPublicKey,
+      content_uri: preliminaryCredential.contentUri,
+      content_size: preliminaryCredential.contentSize,
+      content_hash: hexEncodeSha256Hash(preliminaryCredential.encryptedContent),
+      public_notes: preliminaryCredential.publicNotes,
+      public_notes_signature: preliminaryCredential.publicNotesSignature,
+      broader_signature: preliminaryCredential.broaderSignature,
+    };
+
+    await createPreliminaryCredential(this.kwilClient, payload);
+
+    await this.blobGateway.uploadCredentialBlobs({
+      requestId,
+      original: preliminaryCredential.encryptedContent,
+    });
+
+    return mapPreliminaryToIDOSCredential(preliminaryCredential);
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
@@ -629,7 +675,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // User issues the shared copy: sign content_uri with an ephemeral user-side key.
     // Copy issuer_auth_public_key need not match the original credential's issuer.
     const copyReference = await createBlobContentReference(content);
-    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
+    const signedReference = buildSignedCredentialContentReference("", copyReference.uri);
 
     const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,
