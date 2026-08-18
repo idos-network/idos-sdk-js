@@ -106,15 +106,6 @@ export async function getXrpAddress(wallet: Xumm | typeof GemWallet): Promise<st
   return wallet.user.account;
 }
 
-// Type guard to check if the wallet is an Xumm wallet
-export function looksLikeXrpWallet(wallet: unknown): wallet is Xumm | typeof GemWallet {
-  return (
-    wallet !== null &&
-    typeof wallet === "object" &&
-    ("authorize" in wallet || "isInstalled" in wallet)
-  );
-}
-
 export async function getXrpWalletType(object: Record<string, unknown>): Promise<XrpWallet> {
   if ("authorize" in object) {
     return "Xumm";

@@ -755,6 +755,9 @@ importers:
       '@idos-network/credentials':
         specifier: workspace:*
         version: link:../../packages/credentials
+      '@idos-network/kwil-infra':
+        specifier: workspace:*
+        version: link:../../packages/kwil-infra
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -888,6 +891,9 @@ importers:
 
   packages/client:
     dependencies:
+      '@gemwallet/api':
+        specifier: catalog:xrp
+        version: 3.8.0
       '@idos-network/credentials':
         specifier: workspace:*
         version: link:../credentials
@@ -903,9 +909,18 @@ importers:
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
+      '@near-wallet-selector/core':
+        specifier: catalog:near
+        version: 8.10.2(near-api-js@4.0.4)
+      ethers:
+        specifier: catalog:ethereum
+        version: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       tiny-invariant:
         specifier: catalog:core
         version: 1.3.3
+      xumm:
+        specifier: catalog:xrp
+        version: 1.8.0(supports-color@7.2.0)
     devDependencies:
       tsdown:
         specifier: catalog:build

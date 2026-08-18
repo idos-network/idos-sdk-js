@@ -1,9 +1,14 @@
+import type * as GemWallet from "@gemwallet/api";
 import type {
   BaseProvider,
   EncryptionPasswordStore,
   PublicEncryptionProfile,
 } from "@idos-network/enclave";
+import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import type { KwilSigner } from "@idos-network/kwil-js";
+import type { Wallet as NearWallet } from "@near-wallet-selector/core";
+import type { JsonRpcSigner } from "ethers";
+import type { Xumm } from "xumm";
 
 import {
   buildPreliminaryIDOSCredential,
@@ -16,11 +21,16 @@ import {
   type Addon,
 } from "@idos-network/credentials/utils";
 import {
-  createClientKwilSigner,
+  createEvmKwilSigner,
+  createFaceSignKwilSigner,
+  createMmTokenKwilSignerResult,
+  createNearWalletKwilSigner,
   createWebKwilClient,
+  createXrpKwilSigner,
+  type ClientKwilSignerResult,
   type KwilActionClient,
+  type MmTokenEnvelope,
   signNearMessage,
-  type Wallet,
 } from "@idos-network/kwil-infra";
 import {
   type AddAttributeInput,
@@ -84,6 +94,17 @@ export type idOSClient =
   | idOSClientIdle
   | idOSClientWithUserSigner
   | idOSClientLoggedIn;
+
+type MaybeSignMessage = { signMessage?: (message: string | Uint8Array) => Promise<unknown> };
+
+export type UserSigner =
+  | JsonRpcSigner
+  | NearWallet
+  | (Xumm & MaybeSignMessage)
+  | typeof GemWallet
+  | FaceSignSignerProvider
+  | (KwilSigner & MaybeSignMessage)
+  | { signMessage: (message: string) => Promise<{ signedMessage: string }> };
 
 export class idOSClientConfiguration<Provider extends BaseProvider = IframeEnclave> {
   readonly state: "configuration";
@@ -174,34 +195,62 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
   }
 
-  async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
-    let signer = _signer;
-    const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
-      await createClientKwilSigner(this.store, this.kwilClient, signer);
-
-    this.kwilClient.setSigner(kwilSigner);
-
-    if (walletType === "NEAR") {
-      const originalSigner = signer;
-      signer = {
-        signMessage: async (message: string) => {
-          const signature = await signNearMessage(
-            originalSigner as Parameters<typeof signNearMessage>[0],
-            message,
-          );
-          return { signedMessage: signature } as { signedMessage: string };
-        },
-      } as unknown as Wallet;
-    }
-
+  #finishWithSigner(signer: UserSigner, result: ClientKwilSignerResult): idOSClientWithUserSigner {
+    this.kwilClient.setSigner(result.kwilSigner);
     return new idOSClientWithUserSigner(
       this,
       signer,
+      result.kwilSigner,
+      result.walletIdentifier,
+      result.walletPublicKey,
+      result.walletType,
+    );
+  }
+
+  async withEvmSigner(signer: JsonRpcSigner): Promise<idOSClientWithUserSigner> {
+    const result = await createEvmKwilSigner(signer, this.store, this.kwilClient);
+    return this.#finishWithSigner(signer, result);
+  }
+
+  async withNearWallet(wallet: NearWallet): Promise<idOSClientWithUserSigner> {
+    const result = await createNearWalletKwilSigner(wallet, this.store, this.kwilClient);
+    const signer: UserSigner = {
+      signMessage: async (message: string) => {
+        const signature = await signNearMessage(wallet, message);
+        return { signedMessage: signature };
+      },
+    };
+    return this.#finishWithSigner(signer, result);
+  }
+
+  async withXrpWallet(wallet: Xumm | typeof GemWallet): Promise<idOSClientWithUserSigner> {
+    const result = await createXrpKwilSigner(wallet, this.store, this.kwilClient);
+    return this.#finishWithSigner(wallet, result);
+  }
+
+  async withFaceSignSigner(provider: FaceSignSignerProvider): Promise<idOSClientWithUserSigner> {
+    const result = await createFaceSignKwilSigner(provider, this.store, this.kwilClient);
+    return this.#finishWithSigner(provider, result);
+  }
+
+  async withMmToken(envelope: string | MmTokenEnvelope): Promise<idOSClientWithUserSigner> {
+    const result = await createMmTokenKwilSignerResult(envelope);
+    return this.#finishWithSigner(result.kwilSigner, result);
+  }
+
+  /** Escape hatch for hand-built signers with no dedicated `with*` method (e.g. Stellar). */
+  async withKwilSigner(
+    kwilSigner: KwilSigner,
+    walletIdentifier: string,
+    walletPublicKey: string | undefined,
+    walletType: WalletType,
+  ): Promise<idOSClientWithUserSigner> {
+    return this.#finishWithSigner(kwilSigner, {
       kwilSigner,
       walletIdentifier,
       walletPublicKey,
       walletType,
-    );
+    });
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -214,7 +263,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
-  readonly signer: Wallet;
+  readonly signer: UserSigner;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
@@ -223,7 +272,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
   constructor(
     idOSClientIdle: idOSClientIdle,
-    signer: Wallet,
+    signer: UserSigner,
     kwilSigner: KwilSigner,
     walletIdentifier: string,
     walletPublicKey: string | undefined,
@@ -295,7 +344,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
-  readonly signer: Wallet;
+  readonly signer: UserSigner;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
