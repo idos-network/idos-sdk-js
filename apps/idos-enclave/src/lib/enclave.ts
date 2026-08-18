@@ -121,7 +121,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
             return resolve({ encryptionPasswordStore });
           }
 
-          if (encryptionPasswordStore !== "user") {
+          if (!encryptionPasswordStore || encryptionPasswordStore === "mm") {
             return reject(new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`));
           }
         } catch (e) {

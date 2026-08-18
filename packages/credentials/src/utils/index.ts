@@ -288,7 +288,7 @@ export interface BuildPreliminaryIDOSCredentialArgs {
   publicNotes: string;
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
-  signedReferenceSecretKey?: Uint8Array;
+  issuerSigningSecretKey?: Uint8Array;
 }
 
 export async function buildPreliminaryIDOSCredential({
@@ -297,7 +297,7 @@ export async function buildPreliminaryIDOSCredential({
   recipientEncryptionPublicKey,
   // For user-issued credentials, use a fresh ephemeral key for the signed reference
   // For issuer-side, use the signing key pair
-  signedReferenceSecretKey = nacl.box.keyPair().secretKey,
+  issuerSigningSecretKey = nacl.sign.keyPair().secretKey,
 }: BuildPreliminaryIDOSCredentialArgs): Promise<Omit<PreliminaryIDOSCredential, "id">> {
   const ephemeralKeyPair = nacl.box.keyPair();
   const encryptedContent = encryptContent(
@@ -310,7 +310,7 @@ export async function buildPreliminaryIDOSCredential({
   const signedReference = buildSignedCredentialContentReference(
     publicNotes,
     contentReference.uri,
-    signedReferenceSecretKey,
+    issuerSigningSecretKey,
   );
 
   return {
