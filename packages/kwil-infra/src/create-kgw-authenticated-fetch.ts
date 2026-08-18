@@ -19,6 +19,7 @@ export type CreateKgwAuthenticatedFetchParams = {
 export type CreateKgwAuthenticatedBlobGatewayParams = CreateKgwAuthenticatedFetchParams & {
   url: string;
   maxFetchBytes?: BlobGatewayParams["maxFetchBytes"];
+  accessToken?: BlobGatewayParams["accessToken"];
 };
 
 type KgwSessionNodeKwil = NodeKwil & {
@@ -29,11 +30,13 @@ type KgwSessionNodeKwil = NodeKwil & {
 export function createKgwAuthenticatedBlobGateway({
   url,
   maxFetchBytes,
+  accessToken,
   ...fetchParams
 }: CreateKgwAuthenticatedBlobGatewayParams): BlobGateway {
   return new BlobGateway({
     url,
     maxFetchBytes,
+    accessToken,
     fetchFn: createKgwAuthenticatedFetch(fetchParams),
   });
 }
