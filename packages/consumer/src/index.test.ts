@@ -7,8 +7,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { idOSConsumer } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
-  blobGateway: { fetchBlob: vi.fn() },
+  blobGateway: { fetchBlob: vi.fn(), deleteCredentialBlob: vi.fn(), hasAccessToken: false },
   getCredentialShared: vi.fn(),
+  rescindSharedCredential: vi.fn(),
   kwilClient: {
     setSigner: vi.fn(),
   },
@@ -27,12 +28,13 @@ vi.mock("@idos-network/kwil-infra/actions", () => ({
   getCredentialShared: mocks.getCredentialShared,
   getCredentialsSharedByUser: vi.fn(),
   getGrants: vi.fn(),
-  rescindSharedCredential: vi.fn(),
+  rescindSharedCredential: mocks.rescindSharedCredential,
 }));
 
 describe("idOSConsumer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.blobGateway.hasAccessToken = false;
   });
 
   it("creates a KGW authenticated blob gateway for blob-backed reads", async () => {
@@ -103,6 +105,7 @@ describe("idOSConsumer", () => {
       consumer.getCredentialSharedContentDecrypted("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
     ).resolves.toBe("hello from blob");
     expect(mocks.blobGateway.fetchBlob).toHaveBeenCalledWith({
+      credentialId: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
       contentUri: "ipfs://bafkreiayiizdgzqnwn43lqmfurzsg5epvknle5egvpfrwplwj6jtnifsjm",
       expectedSize: encryptedContent.byteLength,
     });
@@ -142,5 +145,92 @@ describe("idOSConsumer", () => {
       consumer.getCredentialSharedContentDecrypted("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
     ).resolves.toBe("hello from inline");
     expect(mocks.blobGateway.fetchBlob).not.toHaveBeenCalled();
+  });
+
+  it("passes accessToken through to the blob gateway", async () => {
+    const { createKgwAuthenticatedBlobGateway } = await import("@idos-network/kwil-infra");
+
+    await idOSConsumer.init({
+      nodeUrl: "https://nodes.example",
+      blobGatewayUrl: "https://blob.example",
+      accessToken: "mm-envelope",
+      consumerSigner: nacl.sign.keyPair(),
+      recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
+    });
+
+    expect(createKgwAuthenticatedBlobGateway).toHaveBeenCalledWith({
+      url: "https://blob.example",
+      kwilClient: mocks.kwilClient,
+      signer: mocks.signer,
+      accessToken: "mm-envelope",
+    });
+  });
+
+  it("rescinds a legacy inline credential without calling blob-gateway delete", async () => {
+    mocks.getCredentialShared.mockResolvedValueOnce([
+      {
+        id: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
+        content_uri: null,
+      },
+    ]);
+
+    const consumer = await idOSConsumer.init({
+      nodeUrl: "https://nodes.example",
+      blobGatewayUrl: "https://blob.example",
+      consumerSigner: nacl.sign.keyPair(),
+      recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
+    });
+
+    await consumer.rescindSharedCredential("6796e664-3c0c-4e3f-b900-afe2dc49c08e");
+
+    expect(mocks.rescindSharedCredential).toHaveBeenCalledWith(mocks.kwilClient, {
+      credential_id: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
+    });
+    expect(mocks.blobGateway.deleteCredentialBlob).not.toHaveBeenCalled();
+  });
+
+  it("rescinds a blob-backed credential then deletes the blob", async () => {
+    mocks.getCredentialShared.mockResolvedValueOnce([
+      {
+        id: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
+        content_uri: "ipfs://bafkreiayiizdgzqnwn43lqmfurzsg5epvknle5egvpfrwplwj6jtnifsjm",
+      },
+    ]);
+
+    const consumer = await idOSConsumer.init({
+      nodeUrl: "https://nodes.example",
+      blobGatewayUrl: "https://blob.example",
+      consumerSigner: nacl.sign.keyPair(),
+      recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
+    });
+
+    await consumer.rescindSharedCredential("6796e664-3c0c-4e3f-b900-afe2dc49c08e");
+
+    expect(mocks.rescindSharedCredential).toHaveBeenCalledOnce();
+    expect(mocks.blobGateway.deleteCredentialBlob).toHaveBeenCalledWith({
+      credentialId: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
+    });
+  });
+
+  it("fails before Kwil when rescinding a ukyc:// credential without an accessToken", async () => {
+    mocks.getCredentialShared.mockResolvedValueOnce([
+      {
+        id: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
+        content_uri: "ukyc://object-1",
+      },
+    ]);
+
+    const consumer = await idOSConsumer.init({
+      nodeUrl: "https://nodes.example",
+      blobGatewayUrl: "https://blob.example",
+      consumerSigner: nacl.sign.keyPair(),
+      recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
+    });
+
+    await expect(
+      consumer.rescindSharedCredential("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
+    ).rejects.toThrow(/requires an accessToken/);
+    expect(mocks.rescindSharedCredential).not.toHaveBeenCalled();
+    expect(mocks.blobGateway.deleteCredentialBlob).not.toHaveBeenCalled();
   });
 });

@@ -51,9 +51,16 @@ const validShareCredentialInput = {
 };
 
 describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
-  it("accepts IPFS content URIs and positive integer sizes", () => {
+  it("accepts IPFS and UKYC content URIs and positive integer sizes", () => {
     expect(() =>
       CreatePreliminaryCredentialsByDwgInputSchema.parse(validPreliminaryCredentialsByDwgInput),
+    ).not.toThrow();
+    expect(() =>
+      CreatePreliminaryCredentialsByDwgInputSchema.parse({
+        ...validPreliminaryCredentialsByDwgInput,
+        original_content_uri: "ukyc://original",
+        copy_content_uri: "ukyc://copy",
+      }),
     ).not.toThrow();
   });
 
@@ -63,7 +70,7 @@ describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
       "bare CID",
       { copy_content_uri: "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku" },
     ],
-  ])("rejects non-IPFS content URI (%s)", (_label, override) => {
+  ])("rejects non-blob content URI (%s)", (_label, override) => {
     expect(() =>
       CreatePreliminaryCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
@@ -87,13 +94,19 @@ describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
 });
 
 describe("SharePreliminaryCredentialInputSchema", () => {
-  it("accepts IPFS content URIs and positive integer sizes", () => {
+  it("accepts IPFS and UKYC content URIs and positive integer sizes", () => {
     expect(() =>
       SharePreliminaryCredentialInputSchema.parse(validShareCredentialInput),
     ).not.toThrow();
+    expect(() =>
+      SharePreliminaryCredentialInputSchema.parse({
+        ...validShareCredentialInput,
+        content_uri: "ukyc://copy",
+      }),
+    ).not.toThrow();
   });
 
-  it("rejects non-IPFS content URIs", () => {
+  it("rejects non-blob content URIs", () => {
     expect(() =>
       SharePreliminaryCredentialInputSchema.parse({
         ...validShareCredentialInput,

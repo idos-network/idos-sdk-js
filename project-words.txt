@@ -41,12 +41,10 @@ frontmost
 GABC
 gemwallet
 GHSA
-GHSA
 headlessui
 heroicons
 heroui
 hexlify
-Holyheld
 Holyheld
 hono
 chakra
@@ -160,6 +158,8 @@ txjson
 typesafety
 uidotdev
 ukyc
+UKYC
+unpadded
 unpadded
 unparseable
 unstub
