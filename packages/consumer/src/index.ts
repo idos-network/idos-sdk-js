@@ -26,7 +26,11 @@ import {
   type idOSGrant,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
-import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
+import {
+  BlobGateway,
+  requireAccessTokenForUkycContent,
+  resolveCredentialEncryptedContent,
+} from "@idos-network/utils/blob-gateway";
 import { base64Decode, base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
@@ -36,6 +40,11 @@ export type idOSConsumerConfig = {
   nodeUrl?: string;
   chainId?: string;
   blobGatewayUrl?: string;
+  /**
+   * MM / UKYC capability token (same base64url envelope as `createMmTokenKwilSigner`).
+   * Sent on blob-gateway GET/DELETE. Re-init the consumer to change it.
+   */
+  accessToken?: string;
   consumerSigner: KwilSignerType;
 };
 
@@ -51,6 +60,7 @@ export class idOSConsumer {
     nodeUrl = "https://nodes.idos.network",
     chainId,
     blobGatewayUrl,
+    accessToken,
     consumerSigner,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
@@ -64,6 +74,7 @@ export class idOSConsumer {
       url: blobGatewayUrl ?? nodeUrl,
       kwilClient,
       signer,
+      ...(accessToken ? { accessToken } : {}),
     });
 
     return new idOSConsumer(
@@ -113,7 +124,25 @@ export class idOSConsumer {
   }
 
   async rescindSharedCredential(credentialId: string): Promise<void> {
-    return rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
+    const credential = await this.getCredentialSharedFromIDOS(credentialId);
+    invariant(credential, `Credential with id ${credentialId} not found`);
+
+    const contentUri = credential.content_uri ?? null;
+    requireAccessTokenForUkycContent(contentUri, this.#blobGateway?.hasAccessToken ?? false);
+
+    await rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
+
+    if (!contentUri) {
+      return;
+    }
+
+    if (!this.#blobGateway) {
+      throw new Error(
+        `Credential with id ${credentialId} is blob-backed, but blobGatewayUrl was not configured`,
+      );
+    }
+
+    await this.#blobGateway.deleteCredentialBlob({ credentialId });
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
