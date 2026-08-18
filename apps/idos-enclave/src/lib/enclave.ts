@@ -116,7 +116,12 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
             },
           ));
 
-          if (!encryptionPasswordStore) {
+          if (encryptionPasswordStore === "mpc") {
+            await this.acceptParentOrigin();
+            return resolve({ encryptionPasswordStore });
+          }
+
+          if (encryptionPasswordStore !== "user") {
             return reject(new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`));
           }
         } catch (e) {
