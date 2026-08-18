@@ -1,10 +1,7 @@
 import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it } from "vitest";
 
-import {
-  createMmTokenKwilSigner,
-  type MmTokenEnvelope,
-} from "./create-mm-token-kwil-signer.js";
+import { createMmTokenKwilSigner, type MmTokenEnvelope } from "./create-mm-token-kwil-signer.js";
 
 const signingPublicKeyBytes = new Uint8Array(Array.from({ length: 32 }, (_, index) => index + 1));
 const signatureBytes = new Uint8Array(Array.from({ length: 64 }, (_, index) => index + 64));
@@ -64,9 +61,7 @@ describe("createMmTokenKwilSigner", () => {
   it("rejects invalid signature length", () => {
     expect(() =>
       createMmTokenKwilSigner(
-        encodeEnvelope(
-          createEnvelope({ signature: base64UrlEncode(new Uint8Array(63)) }),
-        ),
+        encodeEnvelope(createEnvelope({ signature: base64UrlEncode(new Uint8Array(63)) })),
       ),
     ).toThrow("Invalid mm_token signature length: expected 64, got 63");
   });

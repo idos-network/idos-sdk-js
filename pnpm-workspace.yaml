@@ -180,8 +180,11 @@ overrides:
   "js-yaml@3": "3.15.1"
   "js-yaml@4": "4.3.1"
   # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
-  "nanoid@3": "3.3.17"
+  "nanoid@3": "3.3.18"
   "nanoid@5": "5.1.16"
+  # Security: deepmerge-ts stack exhaustion on recursive graphs (GHSA-ggr8-5vv4-36mx)
+  # Prisma still pins 7.1.5; no 7.x patch exists (fix is >=8.0.0).
+  deepmerge-ts: ">=8.0.1"
   # Security: shell-quote DoS (GHSA-395f-4hp3-45gv)
   shell-quote: "1.10.0"
 
