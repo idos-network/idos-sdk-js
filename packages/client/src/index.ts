@@ -17,6 +17,7 @@ import {
   createClientKwilSigner,
   createWebKwilClient,
   type KwilActionClient,
+  mmTokenStorageId,
   signNearMessage,
   type Wallet,
 } from "@idos-network/kwil-infra";
@@ -58,6 +59,7 @@ import {
 import {
   BlobGateway,
   createBlobContentReference,
+  createUkycContentUri,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
 } from "@idos-network/utils/blob-gateway";
@@ -77,6 +79,17 @@ type Properties<T> = {
   // oxlint-disable-next-line typescript/no-restricted-types -- All functions are to be removed.
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
 };
+
+function contentUriForWallet(
+  walletType: WalletType,
+  kwilSigner: KwilSigner,
+  credentialId: string,
+): string | undefined {
+  if (walletType !== "MM") {
+    return undefined;
+  }
+  return createUkycContentUri(mmTokenStorageId(kwilSigner), credentialId);
+}
 
 export type idOSClient =
   | idOSClientConfiguration
@@ -339,14 +352,16 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // In case of credential creation on users behalf, this would be a issuer key
     issuerSigningSecretKey?: Uint8Array,
   ): Promise<Omit<idOSCredential, "user_id" | "content" | "inserter_type" | "inserter_id">> {
+    const credentialId = crypto.randomUUID();
     const preliminaryCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
         publicNotes,
         plaintextContent,
         recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
         issuerSigningSecretKey,
+        contentUri: contentUriForWallet(this.walletType, this.kwilSigner, credentialId),
       })),
-      id: crypto.randomUUID(),
+      id: credentialId,
     };
 
     const requestId = crypto.randomUUID();
@@ -695,13 +710,17 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     // User issues the shared copy: sign content_uri with an ephemeral user-side key.
     // Copy issuer_auth_public_key need not match the original credential's issuer.
-    const copyReference = await createBlobContentReference(content);
+    const copyId = crypto.randomUUID();
+    const ukycContentUri = contentUriForWallet(this.walletType, this.kwilSigner, copyId);
+    const copyReference = ukycContentUri
+      ? { uri: ukycContentUri, size: content.byteLength }
+      : await createBlobContentReference(content);
     const signedReference = buildSignedCredentialContentReference("", copyReference.uri);
 
     const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,
       request_id: crypto.randomUUID(),
-      copy_id: crypto.randomUUID(),
+      copy_id: copyId,
       original_id: credential.id,
       content_uri: copyReference.uri,
       content_size: copyReference.size,

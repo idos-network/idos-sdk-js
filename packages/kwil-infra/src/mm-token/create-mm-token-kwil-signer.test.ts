@@ -1,7 +1,11 @@
 import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it } from "vitest";
 
-import { createMmTokenKwilSigner, type MmTokenEnvelope } from "./create-mm-token-kwil-signer.js";
+import {
+  createMmTokenKwilSigner,
+  mmTokenStorageId,
+  type MmTokenEnvelope,
+} from "./create-mm-token-kwil-signer.js";
 
 const signingPublicKeyBytes = new Uint8Array(Array.from({ length: 32 }, (_, index) => index + 1));
 const signatureBytes = new Uint8Array(Array.from({ length: 64 }, (_, index) => index + 64));
@@ -12,6 +16,7 @@ function createEnvelope(overrides: Partial<MmTokenEnvelope> = {}): MmTokenEnvelo
       version: 1,
       aud: "metamask:user-storage:ukyc",
       signing_public_key: base64UrlEncode(signingPublicKeyBytes),
+      storage_id: "storage-abc",
     },
     signature: base64UrlEncode(signatureBytes),
     ...overrides,
@@ -79,5 +84,26 @@ describe("createMmTokenKwilSigner", () => {
         ),
       ),
     ).toThrow("Invalid mm_token signing_public_key length: expected 32, got 31");
+  });
+
+  it("reads storage_id from the token payload", () => {
+    const signer = createMmTokenKwilSigner(encodeEnvelope(createEnvelope()));
+
+    expect(mmTokenStorageId(signer)).toBe("storage-abc");
+  });
+
+  it("fails when the token payload has no storage_id", () => {
+    const signer = createMmTokenKwilSigner(
+      encodeEnvelope(
+        createEnvelope({
+          payload: {
+            version: 1,
+            signing_public_key: base64UrlEncode(signingPublicKeyBytes),
+          },
+        }),
+      ),
+    );
+
+    expect(() => mmTokenStorageId(signer)).toThrow("mm_token payload is missing storage_id");
   });
 });

@@ -289,6 +289,8 @@ export interface BuildPreliminaryIDOSCredentialArgs {
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
   issuerSigningSecretKey?: Uint8Array;
+  /** When set (MM / `ukyc://`), skip IPFS CID hashing. */
+  contentUri?: string;
 }
 
 export async function buildPreliminaryIDOSCredential({
@@ -298,6 +300,7 @@ export async function buildPreliminaryIDOSCredential({
   // For user-issued credentials, use a fresh ephemeral key for the signed reference
   // For issuer-side, use the signing key pair
   issuerSigningSecretKey = nacl.sign.keyPair().secretKey,
+  contentUri,
 }: BuildPreliminaryIDOSCredentialArgs): Promise<Omit<PreliminaryIDOSCredential, "id">> {
   const ephemeralKeyPair = nacl.box.keyPair();
   const encryptedContent = encryptContent(
@@ -306,7 +309,9 @@ export async function buildPreliminaryIDOSCredential({
     ephemeralKeyPair.secretKey,
   );
 
-  const contentReference = await createBlobContentReference(encryptedContent);
+  const contentReference = contentUri
+    ? { uri: contentUri, size: encryptedContent.byteLength }
+    : await createBlobContentReference(encryptedContent);
   const signedReference = buildSignedCredentialContentReference(
     publicNotes,
     contentReference.uri,

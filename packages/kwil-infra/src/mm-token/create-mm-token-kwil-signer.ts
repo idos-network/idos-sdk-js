@@ -17,7 +17,19 @@ export interface MmTokenEnvelope {
 
 export interface MmTokenPayload {
   signing_public_key: string;
+  storage_id?: string;
   [key: string]: unknown;
+}
+
+const mmTokenPayloadBySigner = new WeakMap<KwilSigner, Record<string, unknown>>();
+
+/** `storage_id` from the capability token used to construct this signer. */
+export function mmTokenStorageId(signer: KwilSigner): string {
+  const storageId = mmTokenPayloadBySigner.get(signer)?.storage_id;
+  if (typeof storageId !== "string" || !storageId.trim()) {
+    throw new Error("mm_token payload is missing storage_id");
+  }
+  return storageId.trim();
 }
 
 function isMmTokenEnvelope(value: unknown): value is MmTokenEnvelope {
@@ -110,5 +122,11 @@ export function createMmTokenKwilSigner(encodedEnvelope: string | MmTokenEnvelop
     );
   }
 
-  return new KwilSigner(async () => signatureData.slice(), signingPublicKeyBytes, "mm_token");
+  const signer = new KwilSigner(
+    async () => signatureData.slice(),
+    signingPublicKeyBytes,
+    "mm_token",
+  );
+  mmTokenPayloadBySigner.set(signer, envelope.payload);
+  return signer;
 }
