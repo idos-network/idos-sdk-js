@@ -6,6 +6,7 @@ import { base64Encode, utf8Encode } from "../codecs";
 import {
   BlobGateway,
   createBlobContentReference,
+  createUkycContentUri,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
 } from "./index.js";
@@ -22,6 +23,17 @@ describe("requireAccessTokenForUkycContent", () => {
     );
   });
 });
+
+describe("createUkycContentUri", () => {
+  it("builds storage_id/blobs/blob_id", () => {
+    expect(createUkycContentUri("storage-abc", "blob-1")).toBe("ukyc://storage-abc/blobs/blob-1");
+  });
+
+  it("rejects a storage_id with path segments", () => {
+    expect(() => createUkycContentUri("storage-abc/extra", "blob-1")).toThrow(/storage_id/);
+  });
+});
+
 describe("createBlobContentReference", () => {
   it("creates a blob-gateway compatible content reference", async () => {
     const result = await createBlobContentReference(utf8Encode("hi"));

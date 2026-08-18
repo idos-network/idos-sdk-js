@@ -62,6 +62,19 @@ export function isUkycContentUri(uri: string | null | undefined): uri is string 
   return typeof uri === "string" && uri.startsWith(UKYC_URI_PREFIX);
 }
 
+/** `ukyc://{storage_id}/blobs/{blob_id}` — `/blobs/` is required. */
+export function createUkycContentUri(storageId: string, blobId: string): string {
+  const trimmedStorageId = storageId.trim();
+  const trimmedBlobId = blobId.trim();
+  if (!trimmedStorageId || trimmedStorageId.includes("/")) {
+    throw new Error("ukyc content uri requires a storage_id without path segments");
+  }
+  if (!trimmedBlobId || trimmedBlobId.includes("/")) {
+    throw new Error("ukyc content uri requires a blob_id without path segments");
+  }
+  return `${UKYC_URI_PREFIX}${trimmedStorageId}/blobs/${trimmedBlobId}`;
+}
+
 export function requireAccessTokenForUkycContent(
   contentUri: string | null | undefined,
   hasAccessToken: boolean,
