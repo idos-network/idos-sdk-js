@@ -1,4 +1,5 @@
 import { KwilSigner } from "@idos-network/kwil-js";
+import { createUkycContentUri } from "@idos-network/utils/blob-gateway";
 import {
   base64UrlDecode,
   base64UrlEncode,
@@ -17,7 +18,25 @@ export interface MmTokenEnvelope {
 
 export interface MmTokenPayload {
   signing_public_key: string;
+  storage_id?: string;
   [key: string]: unknown;
+}
+
+export type MmTokenKwilSigner = KwilSigner & {
+  readonly mmTokenPayload: MmTokenPayload | Record<string, unknown>;
+};
+
+/** `storage_id` from the capability token used to construct this signer. */
+export function mmTokenStorageId(signer: KwilSigner): string {
+  const storageId = (signer as Partial<MmTokenKwilSigner>).mmTokenPayload?.storage_id;
+  if (typeof storageId !== "string" || !storageId.trim()) {
+    throw new Error("mm_token payload is missing storage_id");
+  }
+  return storageId.trim();
+}
+
+export function mmTokenCredentialContentUri(signer: KwilSigner, credentialId: string): string {
+  return createUkycContentUri(mmTokenStorageId(signer), credentialId);
 }
 
 function isMmTokenEnvelope(value: unknown): value is MmTokenEnvelope {
@@ -59,7 +78,9 @@ function decodeBase64Url(value: string, errorMessage: string): Uint8Array {
  * `signMessage` always returns the UTF-8 bytes of that encoded string — KGW ignores the
  * request message and only verifies the envelope.
  */
-export function createMmTokenKwilSigner(encodedEnvelope: string | MmTokenEnvelope): KwilSigner {
+export function createMmTokenKwilSigner(
+  encodedEnvelope: string | MmTokenEnvelope,
+): MmTokenKwilSigner {
   let signatureData: Uint8Array;
   let envelope: MmTokenEnvelope;
 
@@ -110,5 +131,8 @@ export function createMmTokenKwilSigner(encodedEnvelope: string | MmTokenEnvelop
     );
   }
 
-  return new KwilSigner(async () => signatureData.slice(), signingPublicKeyBytes, "mm_token");
+  return Object.assign(
+    new KwilSigner(async () => signatureData.slice(), signingPublicKeyBytes, "mm_token"),
+    { mmTokenPayload: envelope.payload },
+  );
 }

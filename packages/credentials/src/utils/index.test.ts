@@ -1,9 +1,9 @@
-import { hexEncode } from "@idos-network/utils/codecs";
+import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
 import {
-  buildEphemeralSignedCredentialContentReference,
+  buildPreliminaryIDOSCredential,
   buildSignedCredentialContentReference,
   highestMatchingCredential,
   matchLevelOrHigher,
@@ -246,15 +246,40 @@ describe("buildSignedCredentialContentReference", () => {
     expect(result.broader_signature).toBeTruthy();
     expect(result.issuer_auth_public_key).toBe(hexEncode(keyPair.publicKey, true));
   });
-});
 
-describe("buildEphemeralSignedCredentialContentReference", () => {
   it("returns a signed reference with a public key", () => {
-    const result = buildEphemeralSignedCredentialContentReference("", "ipfs://cid");
+    const result = buildSignedCredentialContentReference("", "ipfs://cid");
 
     expect(result.public_notes).toBe("");
     expect(result.public_notes_signature).toBeTruthy();
     expect(result.broader_signature).toBeTruthy();
     expect(result.issuer_auth_public_key).toMatch(/^(0x)?[0-9a-f]+$/i);
+  });
+});
+
+describe("buildPreliminaryIDOSCredential", () => {
+  const recipient = nacl.box.keyPair();
+
+  it("hashes encrypted content to an ipfs:// uri by default", async () => {
+    const result = await buildPreliminaryIDOSCredential({
+      publicNotes: "{}",
+      plaintextContent: utf8Encode("secret"),
+      recipientEncryptionPublicKey: recipient.publicKey,
+    });
+
+    expect(result.contentUri).toMatch(/^ipfs:\/\//);
+    expect(result.contentSize).toBe(result.encryptedContent.byteLength);
+  });
+
+  it("uses a provided contentUri instead of hashing to ipfs", async () => {
+    const result = await buildPreliminaryIDOSCredential({
+      publicNotes: "{}",
+      plaintextContent: utf8Encode("secret"),
+      recipientEncryptionPublicKey: recipient.publicKey,
+      contentUri: "ukyc://storage-abc/blobs/blob-1",
+    });
+
+    expect(result.contentUri).toBe("ukyc://storage-abc/blobs/blob-1");
+    expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 });

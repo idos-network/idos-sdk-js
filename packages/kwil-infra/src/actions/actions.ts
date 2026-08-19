@@ -18,7 +18,13 @@ export const encryptionPasswordStoreSchema: z.ZodType<EncryptionPasswordStore> =
   ENCRYPTION_PASSWORD_STORES,
 );
 const IPFS_URI_PREFIX = "ipfs://";
-const ipfsContentUriSchema = z.string().startsWith(IPFS_URI_PREFIX);
+const UKYC_URI_PREFIX = "ukyc://";
+const blobContentUriSchema = z
+  .string()
+  .refine(
+    (value) => value.startsWith(IPFS_URI_PREFIX) || value.startsWith(UKYC_URI_PREFIX),
+    `content_uri must start with ${IPFS_URI_PREFIX} or ${UKYC_URI_PREFIX}`,
+  );
 const contentSizeSchema = z.number().int().positive();
 
 export type ActionSchemaElement = {
@@ -809,7 +815,7 @@ export const CreatePreliminaryCredentialInputSchema: z.ZodObject<{
   credential_id: z.uuid(),
   issuer_auth_public_key: z.string(),
   encryptor_public_key: z.string(),
-  content_uri: ipfsContentUriSchema,
+  content_uri: blobContentUriSchema,
   content_size: contentSizeSchema,
   content_hash: z.string(),
   public_notes: z.string(),
@@ -1000,7 +1006,7 @@ export const SharePreliminaryCredentialInputSchema: z.ZodObject<{
   public_notes: z.string(),
   public_notes_signature: z.string(),
   broader_signature: z.string(),
-  content_uri: ipfsContentUriSchema,
+  content_uri: blobContentUriSchema,
   content_size: contentSizeSchema,
   content_hash: z.string(),
   encryptor_public_key: z.string(),
@@ -1053,14 +1059,14 @@ export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   issuer_auth_public_key: z.string(),
   original_encryptor_public_key: z.string(),
   original_id: z.uuid(),
-  original_content_uri: ipfsContentUriSchema,
+  original_content_uri: blobContentUriSchema,
   original_content_size: contentSizeSchema,
   original_public_notes: z.string(),
   original_public_notes_signature: z.string(),
   original_broader_signature: z.string(),
   copy_encryptor_public_key: z.string(),
   copy_id: z.uuid(),
-  copy_content_uri: ipfsContentUriSchema,
+  copy_content_uri: blobContentUriSchema,
   copy_content_size: contentSizeSchema,
   copy_public_notes_signature: z.string(),
   copy_broader_signature: z.string(),
