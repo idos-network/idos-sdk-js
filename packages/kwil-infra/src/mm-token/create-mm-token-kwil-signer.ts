@@ -22,13 +22,36 @@ export interface MmTokenPayload {
   [key: string]: unknown;
 }
 
-export type MmTokenKwilSigner = KwilSigner & {
+/**
+ * One MM/UKYC capability, valid both as a KGW `mm_token` signer and as the
+ * `Authorization: AccessToken …` credential for UKYC blob requests.
+ */
+export type MmTokenAuth = KwilSigner & {
   readonly mmTokenPayload: MmTokenPayload | Record<string, unknown>;
+  /** Exact encoded envelope KGW and UKYC storage verify. Non-enumerable, so it stays out of logs. */
+  readonly accessToken: string;
+  /**
+   * A capability signs its own envelope, never an arbitrary message. Declared so callers
+   * handling a `Wallet` union can keep asking wallets for a message signature.
+   */
+  readonly signMessage?: undefined;
 };
+
+export function isMmTokenAuth(value: unknown): value is MmTokenAuth {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "signatureType" in value &&
+    value.signatureType === "mm_token" &&
+    "identifier" in value &&
+    "signer" in value &&
+    typeof (value as Partial<MmTokenAuth>).accessToken === "string"
+  );
+}
 
 /** `storage_id` from the capability token used to construct this signer. */
 export function mmTokenStorageId(signer: KwilSigner): string {
-  const storageId = (signer as Partial<MmTokenKwilSigner>).mmTokenPayload?.storage_id;
+  const storageId = (signer as Partial<MmTokenAuth>).mmTokenPayload?.storage_id;
   if (typeof storageId !== "string" || !storageId.trim()) {
     throw new Error("mm_token payload is missing storage_id");
   }
@@ -69,7 +92,7 @@ function decodeBase64Url(value: string, errorMessage: string): Uint8Array {
 }
 
 /**
- * Build a KwilSigner for KGW `mm_token` auth.
+ * Build the MM authentication object for one UKYC capability.
  *
  * Pass the MetaMask-issued capability token as a **base64url-encoded** envelope string
  * (what KGW verifies). A decoded `{ payload, signature }` object is also accepted and
@@ -78,10 +101,8 @@ function decodeBase64Url(value: string, errorMessage: string): Uint8Array {
  * `signMessage` always returns the UTF-8 bytes of that encoded string — KGW ignores the
  * request message and only verifies the envelope.
  */
-export function createMmTokenKwilSigner(
-  encodedEnvelope: string | MmTokenEnvelope,
-): MmTokenKwilSigner {
-  let signatureData: Uint8Array;
+export function createMmTokenAuth(encodedEnvelope: string | MmTokenEnvelope): MmTokenAuth {
+  let encodedToken: string;
   let envelope: MmTokenEnvelope;
 
   if (typeof encodedEnvelope === "string") {
@@ -89,8 +110,7 @@ export function createMmTokenKwilSigner(
     if (!trimmed) {
       throw new Error("Invalid mm_token envelope: empty");
     }
-    // KGW Verify receives UTF-8 of the base64url string, not the decoded JSON bytes.
-    signatureData = utf8Encode(trimmed);
+    encodedToken = trimmed;
     const envelopeBytes = decodeBase64Url(trimmed, "Invalid mm_token envelope encoding");
     const parsed = parseJson<unknown>(envelopeBytes, "Invalid mm_token envelope JSON");
     if (!isMmTokenEnvelope(parsed)) {
@@ -102,8 +122,11 @@ export function createMmTokenKwilSigner(
       throw new Error("Invalid mm_token envelope: expected payload object and signature string");
     }
     envelope = encodedEnvelope;
-    signatureData = utf8Encode(base64UrlEncode(utf8Encode(JSON.stringify(envelope))));
+    encodedToken = base64UrlEncode(utf8Encode(JSON.stringify(envelope)));
   }
+
+  // KGW Verify receives UTF-8 of the base64url string, not the decoded JSON bytes.
+  const signatureData = utf8Encode(encodedToken);
 
   const tokenSignatureBytes = decodeBase64Url(
     envelope.signature,
@@ -131,8 +154,13 @@ export function createMmTokenKwilSigner(
     );
   }
 
-  return Object.assign(
+  const auth = Object.assign(
     new KwilSigner(async () => signatureData.slice(), signingPublicKeyBytes, "mm_token"),
     { mmTokenPayload: envelope.payload },
   );
+
+  return Object.defineProperty(auth, "accessToken", {
+    value: encodedToken,
+    enumerable: false,
+  }) as MmTokenAuth;
 }

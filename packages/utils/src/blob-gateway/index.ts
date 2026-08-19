@@ -81,7 +81,7 @@ export function requireAccessTokenForUkycContent(
 ): void {
   if (isUkycContentUri(contentUri) && !hasAccessToken) {
     throw new Error(
-      "A ukyc:// credential requires an accessToken; re-init with the MM token",
+      "A ukyc:// credential requires an accessToken; use MM authentication for this session",
     );
   }
 }
@@ -154,6 +154,20 @@ export class BlobGateway {
 
   get hasAccessToken(): boolean {
     return this.#accessToken !== undefined;
+  }
+
+  /**
+   * Clone this gateway with a different UKYC access token, keeping URL, fetch behavior and
+   * size limits. Cloning instead of mutating keeps a gateway shared by another session or
+   * client state free of this token.
+   */
+  withAccessToken(accessToken?: string): BlobGateway {
+    return new BlobGateway({
+      url: this.#url,
+      fetchFn: this.#fetch,
+      maxFetchBytes: this.#maxFetchBytes,
+      accessToken,
+    });
   }
 
   async uploadCredentialBlobs({

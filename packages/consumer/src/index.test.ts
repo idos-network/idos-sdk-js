@@ -147,13 +147,14 @@ describe("idOSConsumer", () => {
     expect(mocks.blobGateway.fetchBlob).not.toHaveBeenCalled();
   });
 
-  it("passes accessToken through to the blob gateway", async () => {
+  it("passes the MM storage authority through to the blob gateway", async () => {
     const { createKgwAuthenticatedBlobGateway } = await import("@idos-network/kwil-infra");
+    const mmAuth = { accessToken: "mm-envelope" } as never;
 
     await idOSConsumer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
-      accessToken: "mm-envelope",
+      mmAuth,
       consumerSigner: nacl.sign.keyPair(),
       recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
     });
@@ -162,7 +163,7 @@ describe("idOSConsumer", () => {
       url: "https://blob.example",
       kwilClient: mocks.kwilClient,
       signer: mocks.signer,
-      accessToken: "mm-envelope",
+      mmAuth,
     });
   });
 

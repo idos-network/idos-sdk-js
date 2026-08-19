@@ -4,6 +4,7 @@ import type {
   VerifiableCredential,
 } from "@idos-network/credentials/types";
 import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";
+import type { MmTokenAuth } from "@idos-network/kwil-infra";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import {
@@ -38,10 +39,10 @@ export type idOSConsumerConfig = {
   chainId?: string;
   blobGatewayUrl?: string;
   /**
-   * MM / UKYC capability token (same base64url envelope as `createMmTokenKwilSigner`).
-   * Sent on blob-gateway GET/DELETE. Re-init the consumer to change it.
+   * UKYC storage authority for blob GET/DELETE, from `createMmTokenAuth`. Only needed when
+   * `consumerSigner` is not itself an MM authentication object. Re-init the consumer to change it.
    */
-  accessToken?: string;
+  mmAuth?: MmTokenAuth;
   consumerSigner: KwilSignerType;
 };
 
@@ -57,7 +58,7 @@ export class idOSConsumer {
     nodeUrl = "https://nodes.idos.network",
     chainId,
     blobGatewayUrl,
-    accessToken,
+    mmAuth,
     consumerSigner,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
@@ -71,7 +72,7 @@ export class idOSConsumer {
       url: blobGatewayUrl ?? nodeUrl,
       kwilClient,
       signer,
-      ...(accessToken ? { accessToken } : {}),
+      mmAuth,
     });
 
     return new idOSConsumer(

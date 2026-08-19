@@ -18,6 +18,7 @@ import {
 import {
   createClientKwilSigner,
   createWebKwilClient,
+  isMmTokenAuth,
   type KwilActionClient,
   mmTokenCredentialContentUri,
   signNearMessage,
@@ -103,7 +104,6 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
   readonly chainId?: string;
   readonly nodeUrl: string;
   readonly blobGatewayUrl?: string;
-  readonly accessToken?: string;
   readonly enclaveOptions: Omit<Provider["options"], "mode">;
   readonly store: Store;
   readonly enclaveProvider: BaseProvider;
@@ -117,11 +117,6 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
      * (typically the same host), because reads use `credentials: "include"`.
      */
     blobGatewayUrl?: string;
-    /**
-     * MM / UKYC capability token (same base64url envelope as `createMmTokenKwilSigner`).
-     * Sent on blob-gateway uploads, reads, and deletes. Re-init the client to change it.
-     */
-    accessToken?: string;
     enclaveOptions: Omit<Provider["options"], "mode">;
     enclaveProvider?: new (options: Omit<Provider["options"], "mode">) => Provider;
     store?: Store;
@@ -130,7 +125,6 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
     this.chainId = params.chainId;
     this.nodeUrl = params.nodeUrl;
     this.blobGatewayUrl = params.blobGatewayUrl;
-    this.accessToken = params.accessToken;
     this.enclaveOptions = params.enclaveOptions;
     this.store = params.store ?? new LocalStorageStore();
 
@@ -185,7 +179,6 @@ export class idOSClientIdle {
       // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
       // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
       fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
-      accessToken: params.accessToken,
     });
 
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
@@ -222,6 +215,10 @@ export class idOSClientIdle {
       walletIdentifier,
       walletPublicKey,
       walletType,
+      // UKYC blob authorization comes from the signed session, not from client configuration.
+      isMmTokenAuth(kwilSigner)
+        ? this.blobGateway.withAccessToken(kwilSigner.accessToken)
+        : this.blobGateway,
     );
   }
 
@@ -249,6 +246,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     walletIdentifier: string,
     walletPublicKey: string | undefined,
     walletType: WalletType,
+    blobGateway: BlobGateway,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -259,14 +257,20 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
-    this.blobGateway = idOSClientIdle.blobGateway;
+    this.blobGateway = blobGateway;
     // @ts-expect-error - TODO: Fix this
     this.enclaveProvider.setSigner(this.signer);
   }
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
+    return new idOSClientIdle(
+      this.store,
+      this.kwilClient,
+      this.enclaveProvider,
+      // Drop this session's UKYC authorization so it can't outlive the signer that granted it.
+      this.blobGateway.withAccessToken(),
+    );
   }
 
   async hasProfile(): Promise<boolean> {
@@ -340,7 +344,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
+    return new idOSClientIdle(
+      this.store,
+      this.kwilClient,
+      this.enclaveProvider,
+      // Drop this session's UKYC authorization so it can't outlive the signer that granted it.
+      this.blobGateway.withAccessToken(),
+    );
   }
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
@@ -792,13 +802,11 @@ export function createIDOSClient(params: {
    * (typically the same host), because reads use `credentials: "include"`.
    */
   blobGatewayUrl?: string;
-  accessToken?: string;
   enclaveOptions: Omit<IframeEnclave["options"], "mode">;
 }): idOSClientConfiguration<IframeEnclave> {
   return new idOSClientConfiguration({
     nodeUrl: params.nodeUrl,
     blobGatewayUrl: params.blobGatewayUrl,
-    accessToken: params.accessToken,
     enclaveOptions: params.enclaveOptions,
   });
 }

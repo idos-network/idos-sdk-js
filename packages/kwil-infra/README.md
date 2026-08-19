@@ -60,7 +60,7 @@ Decoded shape:
 ```
 
 ```ts
-import { createMmTokenKwilSigner, createNodeKwilClient } from "@idos-network/kwil-infra";
+import { createMmTokenAuth, createNodeKwilClient } from "@idos-network/kwil-infra";
 import { getCredentials } from "@idos-network/kwil-infra/actions";
 
 const kwil = await createNodeKwilClient({
@@ -71,15 +71,22 @@ const kwil = await createNodeKwilClient({
 const encodedMmToken =
   "eyJwYXlsb2FkIjp7InZlcnNpb24iOjEsImF1ZCI6Im1ldGFtYXNrOnVzZXItc3RvcmFnZTp1a3ljIiwiLi4uIjpudWxsfSwic2lnbmF0dXJlIjoiLi4uIn0";
 
-const mmSigner = createMmTokenKwilSigner(encodedMmToken);
-kwil.setSigner(mmSigner);
+const mmAuth = createMmTokenAuth(encodedMmToken);
+kwil.setSigner(mmAuth);
 
 await getCredentials(kwil);
 ```
 
-`createMmTokenKwilSigner` also accepts a decoded `{ payload, signature }` object and
+`createMmTokenAuth` also accepts a decoded `{ payload, signature }` object and
 re-encodes it. Prefer the encoded string from MetaMask so `signMessage` preserves the
 exact bytes KGW will verify.
+
+The returned object is one capability with two uses: it is a valid `KwilSigner` for KGW,
+and it carries the encoded envelope as `accessToken` for UKYC blob requests. Pass it to
+`client.withUserSigner()` or `idOSConsumer.init({ consumerSigner })` and the blob gateway
+picks up that authorization automatically — never pass the raw token separately. A consumer
+signing with a non-MM key can still read capability-authorized UKYC blobs by passing the
+same object as `mmAuth`.
 
 Note: `mm_token` callers cannot `add_wallet` / `remove_wallet` — MM wallets are inserted
 by a trusted issuer (`wallet_type: "MM"`, with `address` and `public_key` both set to

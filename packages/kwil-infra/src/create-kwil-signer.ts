@@ -11,8 +11,10 @@ import nacl from "tweetnacl";
 
 import type { WalletType } from "./actions";
 import type { KwilActionClient } from "./create-kwil-client";
+import type { MmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
 
 import { FaceSignSignerProvider } from "./facesign/facesign-signer";
+import { isMmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
 import {
   createNearWalletKwilSigner,
   implicitAddressFromPublicKey,
@@ -28,6 +30,7 @@ export type Wallet =
   | JsonRpcSigner
   | NearWallet
   | CustomKwilSigner
+  | MmTokenAuth
   | FaceSignSignerProvider;
 
 /**
@@ -95,17 +98,6 @@ function isCustomKwilSigner(object: unknown): object is CustomKwilSigner {
   );
 }
 
-function isMmTokenKwilSigner(object: unknown): object is KwilSigner {
-  return (
-    object !== null &&
-    typeof object === "object" &&
-    "identifier" in object &&
-    "signatureType" in object &&
-    "signer" in object &&
-    object.signatureType === "mm_token"
-  );
-}
-
 /**
  * Helper function to check if the given object is a XRP KeyPair (Server key pairs only).
  */
@@ -119,7 +111,8 @@ export type KwilSignerType =
   | nacl.SignKeyPair
   | JsonRpcSigner
   | StellarKeypair
-  | XrpKeyPair;
+  | XrpKeyPair
+  | MmTokenAuth;
 
 export type SignerAddress = string;
 export type SignerPublicKey = string | undefined;
@@ -133,6 +126,10 @@ export type SignerPublicKey = string | undefined;
 export async function createServerKwilSigner(
   signer: KwilSignerType,
 ): Promise<[KwilSigner, SignerAddress]> {
+  if (isMmTokenAuth(signer)) {
+    return [signer, base64UrlEncode(signer.identifier)];
+  }
+
   if (isNaclSignKeyPair(signer)) {
     return [
       new KwilSigner(
@@ -249,8 +246,21 @@ export async function createClientKwilSigner(
     ];
   }
 
-  if (isMmTokenKwilSigner(wallet)) {
-    return [wallet, base64UrlEncode(wallet.identifier), base64UrlEncode(wallet.identifier), "MM"];
+  if (isMmTokenAuth(wallet)) {
+    const currentAddress = base64UrlEncode(wallet.identifier);
+    const storedAddress = await store.get<string>("signer-address");
+
+    if (storedAddress !== currentAddress) {
+      // A different MM signing identity must not re-use the previous KGW cookie.
+      store.set("signer-address", currentAddress);
+      try {
+        await kwilClient.client.auth.logoutKGW();
+      } catch (error) {
+        console.log("error logoutKGW", error);
+      }
+    }
+
+    return [wallet, currentAddress, currentAddress, "MM"];
   }
 
   if (isCustomKwilSigner(wallet) || wallet instanceof FaceSignSignerProvider) {
