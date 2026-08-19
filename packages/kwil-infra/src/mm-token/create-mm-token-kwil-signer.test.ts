@@ -2,7 +2,8 @@ import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it } from "vitest";
 
 import {
-  createMmTokenKwilSigner,
+  createMmTokenAuth,
+  isMmTokenAuth,
   mmTokenCredentialContentUri,
   mmTokenStorageId,
   type MmTokenEnvelope,
@@ -28,17 +29,15 @@ function encodeEnvelope(envelope: MmTokenEnvelope): string {
   return base64UrlEncode(utf8Encode(JSON.stringify(envelope)));
 }
 
-async function signMessage(
-  signer: ReturnType<typeof createMmTokenKwilSigner>,
-): Promise<Uint8Array> {
+async function signMessage(signer: ReturnType<typeof createMmTokenAuth>): Promise<Uint8Array> {
   return await (signer.signer as (message: Uint8Array) => Promise<Uint8Array>)(
     new Uint8Array([1, 2, 3]),
   );
 }
 
-describe("createMmTokenKwilSigner", () => {
+describe("createMmTokenAuth", () => {
   it("uses mm_token auth type and decoded signing_public_key bytes as identity", () => {
-    const signer = createMmTokenKwilSigner(encodeEnvelope(createEnvelope()));
+    const signer = createMmTokenAuth(encodeEnvelope(createEnvelope()));
 
     expect(signer.signatureType).toBe("mm_token");
     expect(signer.identifier).toEqual(signingPublicKeyBytes);
@@ -46,27 +45,27 @@ describe("createMmTokenKwilSigner", () => {
 
   it("returns the exact encoded envelope bytes from signMessage", async () => {
     const encoded = encodeEnvelope(createEnvelope());
-    const signer = createMmTokenKwilSigner(encoded);
+    const signer = createMmTokenAuth(encoded);
 
     expect(await signMessage(signer)).toEqual(utf8Encode(encoded));
   });
 
   it("accepts a decoded envelope object and returns its encoded form", async () => {
     const envelope = createEnvelope();
-    const signer = createMmTokenKwilSigner(envelope);
+    const signer = createMmTokenAuth(envelope);
 
     expect(await signMessage(signer)).toEqual(utf8Encode(encodeEnvelope(envelope)));
   });
 
   it("rejects raw JSON envelope strings (must be base64url-encoded)", () => {
-    expect(() => createMmTokenKwilSigner(JSON.stringify(createEnvelope()))).toThrow(
+    expect(() => createMmTokenAuth(JSON.stringify(createEnvelope()))).toThrow(
       "Invalid mm_token envelope encoding",
     );
   });
 
   it("rejects invalid signature length", () => {
     expect(() =>
-      createMmTokenKwilSigner(
+      createMmTokenAuth(
         encodeEnvelope(createEnvelope({ signature: base64UrlEncode(new Uint8Array(63)) })),
       ),
     ).toThrow("Invalid mm_token signature length: expected 64, got 63");
@@ -74,7 +73,7 @@ describe("createMmTokenKwilSigner", () => {
 
   it("rejects signing_public_key with the wrong byte length", () => {
     expect(() =>
-      createMmTokenKwilSigner(
+      createMmTokenAuth(
         encodeEnvelope(
           createEnvelope({
             payload: {
@@ -87,8 +86,31 @@ describe("createMmTokenKwilSigner", () => {
     ).toThrow("Invalid mm_token signing_public_key length: expected 32, got 31");
   });
 
+  it("carries the exact encoded capability as a non-enumerable access token", () => {
+    const encoded = encodeEnvelope(createEnvelope());
+    const auth = createMmTokenAuth(encoded);
+
+    expect(auth.accessToken).toBe(encoded);
+    expect(isMmTokenAuth(auth)).toBe(true);
+    // Blob authorization must not leak through logging or serialization.
+    expect(Object.keys(auth)).not.toContain("accessToken");
+    expect(JSON.stringify(auth)).not.toContain(encoded);
+  });
+
+  it("re-encodes a decoded envelope object into the access token", () => {
+    const envelope = createEnvelope();
+
+    expect(createMmTokenAuth(envelope).accessToken).toBe(encodeEnvelope(envelope));
+  });
+
+  it("does not recognize a non-MM signer as MM authentication", () => {
+    expect(isMmTokenAuth({ identifier: "a", signer: () => {}, signatureType: "ed25519" })).toBe(
+      false,
+    );
+  });
+
   it("keeps the token payload and exposes its storage_id", () => {
-    const signer = createMmTokenKwilSigner(encodeEnvelope(createEnvelope()));
+    const signer = createMmTokenAuth(encodeEnvelope(createEnvelope()));
 
     expect(signer.mmTokenPayload.storage_id).toBe("storage-abc");
     expect(mmTokenStorageId(signer)).toBe("storage-abc");
@@ -97,7 +119,7 @@ describe("createMmTokenKwilSigner", () => {
   it("builds the credential ukyc:// URI from a base64url-encoded token", () => {
     const credentialId = "0198c21d-79cb-7000-8000-000000000001";
     const encodedToken = encodeEnvelope(createEnvelope());
-    const signer = createMmTokenKwilSigner(encodedToken);
+    const signer = createMmTokenAuth(encodedToken);
     const credential = {
       id: credentialId,
       content_uri: mmTokenCredentialContentUri(signer, credentialId),
@@ -110,7 +132,7 @@ describe("createMmTokenKwilSigner", () => {
   });
 
   it("fails when the token payload has no storage_id", () => {
-    const signer = createMmTokenKwilSigner(
+    const signer = createMmTokenAuth(
       encodeEnvelope(
         createEnvelope({
           payload: {

@@ -1,10 +1,27 @@
 // @vitest-environment node
 
 import { type KwilSigner, NodeKwil } from "@idos-network/kwil-js";
+import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it, vi } from "vitest";
 
-import { createKgwAuthenticatedFetch } from "./create-kgw-authenticated-fetch";
+import {
+  createKgwAuthenticatedBlobGateway,
+  createKgwAuthenticatedFetch,
+} from "./create-kgw-authenticated-fetch";
 import { KwilActionClient } from "./create-kwil-client";
+import { createMmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
+
+const mmEnvelopeToken = base64UrlEncode(
+  utf8Encode(
+    JSON.stringify({
+      payload: {
+        signing_public_key: base64UrlEncode(new Uint8Array(32).fill(7)),
+        storage_id: "storage-abc",
+      },
+      signature: base64UrlEncode(new Uint8Array(64).fill(9)),
+    }),
+  ),
+);
 
 function createTestClient(
   initialCookie?: string,
@@ -312,5 +329,49 @@ describe("createKgwAuthenticatedFetch", () => {
 
     expect(refresh).not.toHaveBeenCalled();
     expect(body).toEqual(payload);
+  });
+});
+
+describe("createKgwAuthenticatedBlobGateway", () => {
+  function kgwSessionClient(): KwilActionClient {
+    const nodeKwil = new NodeKwil({
+      kwilProvider: "https://nodes.example",
+      chainId: "test-chain",
+    }) as NodeKwil & {
+      authenticateKGWAndSetCookie: () => Promise<string>;
+      getKgwCookie: () => string | undefined;
+    };
+    nodeKwil.getKgwCookie = () => "kgw_session=valid; Path=/";
+    nodeKwil.authenticateKGWAndSetCookie = async () => "kgw_session=valid; Path=/";
+
+    return new KwilActionClient(nodeKwil);
+  }
+
+  it("infers UKYC authorization from an MM signer", () => {
+    const gateway = createKgwAuthenticatedBlobGateway({
+      url: "https://blob.example",
+      kwilClient: kgwSessionClient(),
+      signer: createMmTokenAuth(mmEnvelopeToken),
+    });
+
+    expect(gateway.hasAccessToken).toBe(true);
+  });
+
+  it("accepts an explicit MM authority for a non-MM signer, and none otherwise", () => {
+    const kwilClient = kgwSessionClient();
+    const signer = {} as KwilSigner;
+
+    expect(
+      createKgwAuthenticatedBlobGateway({
+        url: "https://blob.example",
+        kwilClient,
+        signer,
+        mmAuth: createMmTokenAuth(mmEnvelopeToken),
+      }).hasAccessToken,
+    ).toBe(true);
+    expect(
+      createKgwAuthenticatedBlobGateway({ url: "https://blob.example", kwilClient, signer })
+        .hasAccessToken,
+    ).toBe(false);
   });
 });

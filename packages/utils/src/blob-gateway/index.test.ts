@@ -325,6 +325,32 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.method).toBe("DELETE");
   });
 
+  it("clones with a new access token without mutating the source gateway", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example/",
+      maxFetchBytes: 1024,
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    const authorized = gateway.withAccessToken("mm-envelope");
+    expect(gateway.hasAccessToken).toBe(false);
+    expect(authorized.hasAccessToken).toBe(true);
+    expect(authorized.withAccessToken().hasAccessToken).toBe(false);
+
+    await authorized.deleteCredentialBlob({ credentialId: "credential-1" });
+    await gateway.deleteCredentialBlob({ credentialId: "credential-1" });
+
+    expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/credentials/credential-1");
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
+    expect(new Headers(calls[1]?.[1]?.headers).get("Authorization")).toBeNull();
+  });
+
   it("sends AccessToken on delete when configured at construct time", async () => {
     const calls: Parameters<typeof fetch>[] = [];
     const gateway = new BlobGateway({
