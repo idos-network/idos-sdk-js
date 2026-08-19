@@ -19,7 +19,7 @@ import {
   createClientKwilSigner,
   createWebKwilClient,
   type KwilActionClient,
-  mmTokenStorageId,
+  mmTokenCredentialContentUri,
   signNearMessage,
   type Wallet,
 } from "@idos-network/kwil-infra";
@@ -61,7 +61,6 @@ import {
 import {
   BlobGateway,
   createBlobContentReference,
-  createUkycContentUri,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
 } from "@idos-network/utils/blob-gateway";
@@ -90,7 +89,7 @@ function contentUriForWallet(
   if (walletType !== "MM") {
     return undefined;
   }
-  return createUkycContentUri(mmTokenStorageId(kwilSigner), credentialId);
+  return mmTokenCredentialContentUri(kwilSigner, credentialId);
 }
 
 export type idOSClient =

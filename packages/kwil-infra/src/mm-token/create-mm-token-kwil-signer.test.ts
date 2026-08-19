@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createMmTokenKwilSigner,
+  mmTokenCredentialContentUri,
   mmTokenStorageId,
   type MmTokenEnvelope,
 } from "./create-mm-token-kwil-signer.js";
@@ -14,7 +15,7 @@ function createEnvelope(overrides: Partial<MmTokenEnvelope> = {}): MmTokenEnvelo
   return {
     payload: {
       version: 1,
-      aud: "metamask:user-storage:ukyc",
+      aud: ["metamask:user-storage:ukyc", "idos:kwil"],
       signing_public_key: base64UrlEncode(signingPublicKeyBytes),
       storage_id: "storage-abc",
     },
@@ -86,10 +87,26 @@ describe("createMmTokenKwilSigner", () => {
     ).toThrow("Invalid mm_token signing_public_key length: expected 32, got 31");
   });
 
-  it("reads storage_id from the token payload", () => {
+  it("keeps the token payload and exposes its storage_id", () => {
     const signer = createMmTokenKwilSigner(encodeEnvelope(createEnvelope()));
 
+    expect(signer.mmTokenPayload.storage_id).toBe("storage-abc");
     expect(mmTokenStorageId(signer)).toBe("storage-abc");
+  });
+
+  it("builds the credential ukyc:// URI from a base64url-encoded token", () => {
+    const credentialId = "0198c21d-79cb-7000-8000-000000000001";
+    const encodedToken = encodeEnvelope(createEnvelope());
+    const signer = createMmTokenKwilSigner(encodedToken);
+    const credential = {
+      id: credentialId,
+      content_uri: mmTokenCredentialContentUri(signer, credentialId),
+    };
+
+    expect(credential).toEqual({
+      id: credentialId,
+      content_uri: `ukyc://storage-abc/blobs/${credentialId}`,
+    });
   });
 
   it("fails when the token payload has no storage_id", () => {
