@@ -1,15 +1,10 @@
-import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
+import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { createBlobContentReference } from "@idos-network/utils/blob-gateway";
-import { base64Encode, hexEncode, utf8Encode, fileToBase85 } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 
-import type {
-  AvailableIssuerType,
-  idOSCredential,
-  SignedCredentialContentReference,
-} from "../types";
+import type { idOSCredential, SignedCredentialContentReference } from "../types";
 
 // Proxying functions
 export * from "./issuer";
