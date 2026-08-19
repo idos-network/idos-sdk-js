@@ -19,7 +19,7 @@ export type BlobGatewayParams = {
   url: string;
   fetchFn?: typeof fetch;
   maxFetchBytes?: number;
-  /** MM / UKYC capability token. Sent as `Authorization: AccessToken …` on blob GET/DELETE. */
+  /** MM / UKYC capability token. Sent as `Authorization: AccessToken …` on blob requests. */
   accessToken?: string;
 };
 
@@ -81,7 +81,7 @@ export function requireAccessTokenForUkycContent(
 ): void {
   if (isUkycContentUri(contentUri) && !hasAccessToken) {
     throw new Error(
-      "Deleting a ukyc:// credential requires an accessToken; re-init with the MM token",
+      "A ukyc:// credential requires an accessToken; re-init with the MM token",
     );
   }
 }
@@ -182,10 +182,7 @@ export class BlobGateway {
 
     let response: Response;
     try {
-      response = await this.#fetch(uploadUrl, {
-        method: "POST",
-        body,
-      });
+      response = await this.#fetch(uploadUrl, this.#withAccessToken({ method: "POST", body }));
     } catch (error) {
       console.error("blob-gateway upload request failed before response");
       console.error(

@@ -119,7 +119,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
     blobGatewayUrl?: string;
     /**
      * MM / UKYC capability token (same base64url envelope as `createMmTokenKwilSigner`).
-     * Sent on blob-gateway GET/DELETE. Re-init the client to change it.
+     * Sent on blob-gateway uploads, reads, and deletes. Re-init the client to change it.
      */
     accessToken?: string;
     enclaveOptions: Omit<Provider["options"], "mode">;
@@ -364,6 +364,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       })),
       id: credentialId,
     };
+    requireAccessTokenForUkycContent(
+      preliminaryCredential.contentUri,
+      this.blobGateway.hasAccessToken,
+    );
 
     const requestId = crypto.randomUUID();
 
@@ -713,6 +717,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // Copy issuer_auth_public_key need not match the original credential's issuer.
     const copyId = crypto.randomUUID();
     const ukycContentUri = contentUriForWallet(this.walletType, this.kwilSigner, copyId);
+    requireAccessTokenForUkycContent(ukycContentUri, this.blobGateway.hasAccessToken);
     const copyReference = ukycContentUri
       ? { uri: ukycContentUri, size: content.byteLength }
       : await createBlobContentReference(content);

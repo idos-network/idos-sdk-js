@@ -125,6 +125,27 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
   });
 
+  it("sends AccessToken on upload when configured at construct time", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      accessToken: "mm-envelope",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return Response.json({ request_id: "request-1" });
+      },
+    });
+
+    await gateway.uploadCredentialBlobs({
+      requestId: "request-1",
+      original: utf8Encode("original"),
+    });
+
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
+  });
+
   it("uploads a copy blob without requiring an original blob", async () => {
     const copy = utf8Encode("copy");
     const { cid } = await createBlobContentReference(copy);
