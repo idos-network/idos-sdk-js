@@ -82,11 +82,17 @@ type Properties<T> = {
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
 };
 
+// Disable when UKYC Storage handles multipart ciphertext as raw bytes.
+const TEMP_UKYC_CIPHERTEXT_UTF8_WORKAROUND = true;
+
 function contentUriForWallet(
   walletType: WalletType,
   kwilSigner: KwilSigner,
   credentialId: string,
 ): string | undefined {
+  if (TEMP_UKYC_CIPHERTEXT_UTF8_WORKAROUND) {
+    return undefined;
+  }
   if (walletType !== "MM") {
     return undefined;
   }

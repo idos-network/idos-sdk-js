@@ -3,12 +3,12 @@
 import type { BaseProvider } from "@idos-network/enclave";
 
 import { createMmTokenAuth, type KwilActionClient } from "@idos-network/kwil-infra";
-import { BlobGateway } from "@idos-network/utils/blob-gateway";
-import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
+import { BlobGateway, createBlobContentReference } from "@idos-network/utils/blob-gateway";
+import { base64Encode, base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { MemoryStore } from "@idos-network/utils/store";
 import { describe, expect, it } from "vitest";
 
-import { idOSClientIdle } from "./index.js";
+import { idOSClientIdle, idOSClientLoggedIn, type idOSClientWithUserSigner } from "./index.js";
 
 const mmToken = base64UrlEncode(
   utf8Encode(
@@ -67,4 +67,60 @@ describe("UKYC blob authorization is scoped to the signed session", () => {
 
     expect(withSigner.blobGateway.hasAccessToken).toBe(false);
   });
+});
+
+describe("credential blob storage", () => {
+  it.each(["MM", "EVM"] as const)(
+    "creates %s credentials through the IPFS CID-validation flow",
+    async (walletType) => {
+      const plaintext = utf8Encode("private credential content");
+      let preliminaryInput: Record<string, unknown> | undefined;
+      let uploadedBytes: Uint8Array | undefined;
+      const kwilClient = {
+        execute: async ({ inputs }: { inputs: Record<string, unknown> }) => {
+          preliminaryInput = inputs;
+        },
+      } as unknown as KwilActionClient;
+      const blobGateway = new BlobGateway({
+        url: "https://blob.example",
+        accessToken: walletType === "MM" ? mmToken : undefined,
+        fetchFn: async (_input, init) => {
+          const body = init?.body;
+          if (!(body instanceof FormData)) throw new Error("Expected multipart upload");
+          const original = body.get("original");
+          if (!(original instanceof Blob)) throw new Error("Expected original blob");
+
+          uploadedBytes = new Uint8Array(await original.arrayBuffer());
+          const { cid } = await createBlobContentReference(uploadedBytes);
+          return Response.json({
+            request_id: preliminaryInput?.request_id,
+            original_cid: cid,
+          });
+        },
+      });
+      const withSigner = {
+        store: new MemoryStore(),
+        kwilClient,
+        enclaveProvider: {},
+        signer: {},
+        kwilSigner: {},
+        walletIdentifier: "wallet",
+        walletPublicKey: undefined,
+        walletType,
+        blobGateway,
+      } as unknown as idOSClientWithUserSigner;
+      const client = new idOSClientLoggedIn(withSigner, {
+        id: crypto.randomUUID(),
+        recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+        encryption_password_store: "user",
+      });
+
+      const credential = await client.createCredential("public notes", plaintext);
+
+      expect(credential.content_uri).toMatch(/^ipfs:\/\//);
+      expect(preliminaryInput?.content_uri).toBe(credential.content_uri);
+      expect(preliminaryInput?.content_size).toBe(plaintext.byteLength + 40);
+      expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
+    },
+  );
 });
