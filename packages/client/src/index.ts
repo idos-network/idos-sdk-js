@@ -15,6 +15,7 @@ import {
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
+  createNodeKwilClient,
   createWebKwilClient,
   isMmTokenAuth,
   type KwilActionClient,
@@ -171,10 +172,19 @@ export class idOSClientIdle {
   }
 
   static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
-    const kwilClient = await createWebKwilClient({
-      nodeUrl: params.nodeUrl,
-      chainId: params.chainId,
-    });
+    let kwilClient;
+
+    if (typeof window !== "undefined") {
+      kwilClient = await createWebKwilClient({
+        nodeUrl: params.nodeUrl,
+        chainId: params.chainId,
+      });
+    } else {
+      kwilClient = await createNodeKwilClient({
+        nodeUrl: params.nodeUrl,
+        chainId: params.chainId,
+      });
+    }
 
     await params.enclaveProvider.load();
 
@@ -469,6 +479,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
+  }
+
+  async getCredentialWithEncryptedContent(id: string): Promise<idOSCredential> {
+    const credential = await this.getCredentialById(id);
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+    return this.#credentialWithInlineContent(credential);
   }
 
   async getCredentialSharedContent(id: string): Promise<string> {
