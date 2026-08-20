@@ -152,6 +152,10 @@ export class BlobGateway {
     this.#accessToken = accessToken?.trim() || undefined;
   }
 
+  get url(): string {
+    return this.#url;
+  }
+
   get hasAccessToken(): boolean {
     return this.#accessToken !== undefined;
   }

@@ -340,6 +340,7 @@ describe("BlobGateway", () => {
     expect(gateway.hasAccessToken).toBe(false);
     expect(authorized.hasAccessToken).toBe(true);
     expect(authorized.withAccessToken().hasAccessToken).toBe(false);
+    expect(authorized.url).toBe("https://blob.example");
 
     await authorized.deleteCredentialBlob({ credentialId: "credential-1" });
     await gateway.deleteCredentialBlob({ credentialId: "credential-1" });
