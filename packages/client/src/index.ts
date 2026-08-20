@@ -3,7 +3,7 @@ import type {
   EncryptionPasswordStore,
   PublicEncryptionProfile,
 } from "@idos-network/enclave";
-import type { KwilSigner } from "@idos-network/kwil-js";
+import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 
 import {
   buildPreliminaryIDOSCredential,
@@ -17,6 +17,8 @@ import {
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
+  createKgwAuthenticatedBlobGateway,
+  createNodeKwilClient,
   createWebKwilClient,
   isMmTokenAuth,
   type KwilActionClient,
@@ -71,7 +73,7 @@ import {
   hexEncodeSha256Hash,
   utf8Decode,
 } from "@idos-network/utils/codecs";
-import { LocalStorageStore, type Store } from "@idos-network/utils/store";
+import { LocalStorageStore, MemoryStore, type Store } from "@idos-network/utils/store";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
@@ -84,6 +86,41 @@ type Properties<T> = {
 
 // Disable when UKYC Storage handles multipart ciphertext as raw bytes.
 const TEMP_UKYC_CIPHERTEXT_UTF8_WORKAROUND = true;
+
+function isBrowserRuntime(): boolean {
+  return typeof window !== "undefined";
+}
+
+function usesNodeKwil(kwilClient: KwilActionClient): boolean {
+  return kwilClient.client instanceof NodeKwil;
+}
+
+function idleBlobGateway(url: string): BlobGateway {
+  if (!isBrowserRuntime()) {
+    return new BlobGateway({ url });
+  }
+
+  return new BlobGateway({
+    url,
+    // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
+    // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
+    fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
+  });
+}
+
+function blobGatewayForSigner(idle: idOSClientIdle, kwilSigner: KwilSigner): BlobGateway {
+  if (usesNodeKwil(idle.kwilClient)) {
+    return createKgwAuthenticatedBlobGateway({
+      url: idle.blobGateway.url,
+      kwilClient: idle.kwilClient,
+      signer: kwilSigner,
+    });
+  }
+
+  return isMmTokenAuth(kwilSigner)
+    ? idle.blobGateway.withAccessToken(kwilSigner.accessToken)
+    : idle.blobGateway;
+}
 
 function contentUriForWallet(
   walletType: WalletType,
@@ -132,7 +169,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
     this.nodeUrl = params.nodeUrl;
     this.blobGatewayUrl = params.blobGatewayUrl;
     this.enclaveOptions = params.enclaveOptions;
-    this.store = params.store ?? new LocalStorageStore();
+    this.store = params.store ?? (isBrowserRuntime() ? new LocalStorageStore() : new MemoryStore());
 
     // TODO: This is a mess because of types...
     if (params.enclaveProvider) {
@@ -173,21 +210,21 @@ export class idOSClientIdle {
   }
 
   static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
-    const kwilClient = await createWebKwilClient({
+    const createKwilClient = isBrowserRuntime() ? createWebKwilClient : createNodeKwilClient;
+    const kwilClient = await createKwilClient({
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
 
     await params.enclaveProvider.load();
 
-    const blobGateway = new BlobGateway({
-      url: params.blobGatewayUrl ?? params.nodeUrl,
-      // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
-      // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
-      fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
-    });
-
-    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
+    const blobGatewayUrl = params.blobGatewayUrl ?? params.nodeUrl;
+    return new idOSClientIdle(
+      params.store,
+      kwilClient,
+      params.enclaveProvider,
+      idleBlobGateway(blobGatewayUrl),
+    );
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
@@ -221,10 +258,7 @@ export class idOSClientIdle {
       walletIdentifier,
       walletPublicKey,
       walletType,
-      // UKYC blob authorization comes from the signed session, not from client configuration.
-      isMmTokenAuth(kwilSigner)
-        ? this.blobGateway.withAccessToken(kwilSigner.accessToken)
-        : this.blobGateway,
+      blobGatewayForSigner(this, kwilSigner),
     );
   }
 
@@ -274,8 +308,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       this.store,
       this.kwilClient,
       this.enclaveProvider,
-      // Drop this session's UKYC authorization so it can't outlive the signer that granted it.
-      this.blobGateway.withAccessToken(),
+      idleBlobGateway(this.blobGateway.url),
     );
   }
 
@@ -354,8 +387,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       this.store,
       this.kwilClient,
       this.enclaveProvider,
-      // Drop this session's UKYC authorization so it can't outlive the signer that granted it.
-      this.blobGateway.withAccessToken(),
+      idleBlobGateway(this.blobGateway.url),
     );
   }
 
@@ -471,6 +503,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
+  }
+
+  async getCredentialWithEncryptedContent(id: string): Promise<idOSCredential> {
+    const credential = await this.getCredentialById(id);
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+    return this.#credentialWithInlineContent(credential);
   }
 
   async getCredentialSharedContent(id: string): Promise<string> {

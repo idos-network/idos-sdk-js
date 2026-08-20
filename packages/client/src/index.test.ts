@@ -1,14 +1,20 @@
 // @vitest-environment node
 
 import type { BaseProvider } from "@idos-network/enclave";
+import { NodeKwil } from "@idos-network/kwil-js";
 
-import { createMmTokenAuth, type KwilActionClient } from "@idos-network/kwil-infra";
+import { createMmTokenAuth, KwilActionClient } from "@idos-network/kwil-infra";
 import { BlobGateway, createBlobContentReference } from "@idos-network/utils/blob-gateway";
 import { base64Encode, base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { MemoryStore } from "@idos-network/utils/store";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { idOSClientIdle, idOSClientLoggedIn, type idOSClientWithUserSigner } from "./index.js";
+import {
+  idOSClientConfiguration,
+  idOSClientIdle,
+  idOSClientLoggedIn,
+  type idOSClientWithUserSigner,
+} from "./index.js";
 
 const mmToken = base64UrlEncode(
   utf8Encode(
@@ -33,6 +39,38 @@ function idleClient(): idOSClientIdle {
     new MemoryStore(),
     kwilClient,
     enclaveProvider,
+    new BlobGateway({ url: "https://blob.example" }),
+  );
+}
+
+function header(call: Parameters<typeof fetch> | undefined, name: string): string | null {
+  if (!call) {
+    return null;
+  }
+
+  return new Headers(call[1]?.headers).get(name);
+}
+
+function nodeIdleClient(): idOSClientIdle {
+  const nodeKwil = new NodeKwil({
+    kwilProvider: "https://nodes.example",
+    chainId: "test-chain",
+  }) as NodeKwil & {
+    authenticateKGWAndSetCookie: ReturnType<typeof vi.fn<() => Promise<string>>>;
+    getKgwCookie: ReturnType<typeof vi.fn<() => string | undefined>>;
+  };
+  let cookie: string | undefined;
+  nodeKwil.getKgwCookie = vi.fn(() => cookie);
+  nodeKwil.authenticateKGWAndSetCookie = vi.fn(async () => {
+    cookie = "kgw_session=fresh; Path=/";
+    return cookie;
+  });
+  nodeKwil.auth.logoutKGW = async () => ({}) as never;
+
+  return new idOSClientIdle(
+    new MemoryStore(),
+    new KwilActionClient(nodeKwil),
+    { setSigner: () => {} } as unknown as BaseProvider,
     new BlobGateway({ url: "https://blob.example" }),
   );
 }
@@ -66,6 +104,104 @@ describe("UKYC blob authorization is scoped to the signed session", () => {
     const withSigner = await idle.withUserSigner(customSigner as never);
 
     expect(withSigner.blobGateway.hasAccessToken).toBe(false);
+  });
+});
+
+describe("Node client defaults", () => {
+  it("defaults to MemoryStore outside the browser", () => {
+    class FakeEnclave {
+      constructor(_options: unknown) {}
+    }
+
+    const config = new idOSClientConfiguration({
+      nodeUrl: "https://nodes.example",
+      enclaveOptions: {} as never,
+      enclaveProvider: FakeEnclave as never,
+    });
+
+    expect(config.store).toBeInstanceOf(MemoryStore);
+  });
+});
+
+describe("Node KGW-authenticated blob sessions", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends the KGW cookie and MM AccessToken, then drops both on logout", async () => {
+    const ciphertext = utf8Encode("ciphertext");
+    const fetchFn = vi.fn<typeof fetch>(async () => {
+      return new Response("ciphertext", {
+        headers: { "content-length": String(ciphertext.byteLength) },
+      });
+    });
+    vi.stubGlobal("fetch", fetchFn);
+
+    const withSigner = await nodeIdleClient().withUserSigner(createMmTokenAuth(mmToken));
+    expect(withSigner.blobGateway.hasAccessToken).toBe(true);
+
+    await expect(
+      withSigner.blobGateway.fetchBlob({
+        credentialId: "credential-1",
+        expectedSize: ciphertext.byteLength,
+      }),
+    ).resolves.toEqual(ciphertext);
+
+    expect(header(fetchFn.mock.calls[0], "cookie")).toBe("kgw_session=fresh; Path=/");
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBe(`AccessToken ${mmToken}`);
+
+    const idle = await withSigner.logOut();
+    expect(idle.blobGateway.hasAccessToken).toBe(false);
+
+    fetchFn.mockClear();
+    await idle.blobGateway.fetchBlob({
+      credentialId: "credential-1",
+      expectedSize: ciphertext.byteLength,
+    });
+
+    expect(header(fetchFn.mock.calls[0], "cookie")).toBeNull();
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBeNull();
+  });
+
+  it("returns blob-backed ciphertext without decrypting", async () => {
+    const ciphertext = utf8Encode("encrypted-bytes");
+    const { uri, size } = await createBlobContentReference(ciphertext);
+    const credentialId = crypto.randomUUID();
+    const fetchFn = vi.fn<typeof fetch>(async () => {
+      return new Response("encrypted-bytes", {
+        headers: { "content-length": String(size) },
+      });
+    });
+    vi.stubGlobal("fetch", fetchFn);
+
+    const withSigner = await nodeIdleClient().withUserSigner(createMmTokenAuth(mmToken));
+    vi.spyOn(withSigner.kwilClient, "call").mockResolvedValue([
+      {
+        id: credentialId,
+        user_id: crypto.randomUUID(),
+        public_notes: "{}",
+        content: null,
+        content_uri: uri,
+        content_size: size,
+        encryptor_public_key: base64Encode(new Uint8Array(32).fill(1)),
+        issuer_auth_public_key: "issuer-key",
+        inserter_type: "user",
+        inserter_id: "wallet",
+      },
+    ]);
+
+    const client = new idOSClientLoggedIn(withSigner, {
+      id: crypto.randomUUID(),
+      recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+      encryption_password_store: "user",
+    });
+
+    const credential = await client.getCredentialWithEncryptedContent(credentialId);
+
+    expect(credential.content).toBe(base64Encode(ciphertext));
+    expect(credential.content_uri).toBeNull();
+    expect(header(fetchFn.mock.calls[0], "cookie")).toBe("kgw_session=fresh; Path=/");
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBe(`AccessToken ${mmToken}`);
   });
 });
 
