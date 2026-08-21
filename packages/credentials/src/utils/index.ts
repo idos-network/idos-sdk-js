@@ -8,7 +8,7 @@ import type { InsertableIDOSCredential } from "../types";
 // Proxying functions
 export * from "./issuer";
 
-export type BaseLevel = "basic" | "plus";
+export type BaseLevel = "unverified" | "basic" | "plus";
 export type Addon =
   | "liveness"
   | "email"

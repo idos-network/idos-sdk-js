@@ -21,8 +21,8 @@ export class Subject {
   person: Person;
 
   @Section(() => IdDocument)
-  @IsDefined()
-  idDocument: IdDocument;
+  @IsOptional()
+  idDocument?: IdDocument;
 
   @Section(() => Contact)
   @IsOptional()

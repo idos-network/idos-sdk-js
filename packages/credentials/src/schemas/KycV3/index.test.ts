@@ -68,6 +68,28 @@ describe("KycV3 validity", () => {
     expect(credential.level()).toBe("basic+liveness");
   });
 
+  it("can issue a level = 0 credentials", async () => {
+    const credential = new KycV3();
+    credential.setEnvelope({ id: "https://issuer.example/credentials/123" });
+    credential.setSubject({ id: "uuid:abc" });
+    credential.addSection("person", {
+      firstName: "John",
+      dateOfBirth: new Date("1990-01-01"),
+      nationality: "US",
+    });
+    credential.addSection("residentialAddress", {
+      verified: false,
+      street: "Main St",
+      city: "New York",
+      country: "US",
+    });
+    credential.addSection("contact", { phoneNumber: "+1234567890" });
+
+    expect(() => credential.checkValidity()).not.toThrow();
+    expect(credential.kycLevel()).toBe(0);
+    expect(credential.level()).toBe("unverified+phoneNumber");
+  });
+
   it("rejects a subject missing a required section", () => {
     const credential = new KycV3();
     credential.setEnvelope({ id: "https://issuer.example/credentials/123" });
