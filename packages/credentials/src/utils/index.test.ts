@@ -9,7 +9,7 @@ import {
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
-} from "./index.js";
+} from ".";
 
 describe("recordFilter", () => {
   [

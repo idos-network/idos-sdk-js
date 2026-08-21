@@ -34,7 +34,7 @@ export async function verifyCredential<K>(
 
     // Verify the signature
     const verifyCredentialResult = await vc.verifyCredential<K>({
-      credential: credential,
+      credential,
       suite: vcVerifyingSuite,
       controller,
       documentLoader: customDocumentLoader ?? defaultDocumentLoader,

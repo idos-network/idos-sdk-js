@@ -1,5 +1,5 @@
-import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { createBlobContentReference } from "@idos-network/utils/blob-gateway";
+import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
@@ -9,7 +9,7 @@ import type { idOSCredential, SignedCredentialContentReference } from "../types"
 // Proxying functions
 export * from "./issuer";
 
-export type BaseLevel = "basic" | "plus";
+export type BaseLevel = "unverified" | "basic" | "plus";
 export type Addon =
   | "liveness"
   | "email"

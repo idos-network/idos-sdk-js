@@ -14,18 +14,37 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
   }
 
   override level(): string {
-    const { residentialAddress, biometric, contact, edd, sourceOfWealth, screening, onboarding } =
-      this.subject;
+    const {
+      residentialAddress,
+      biometric,
+      contact,
+      edd,
+      sourceOfWealth,
+      screening,
+      onboarding,
+      person,
+      idDocument,
+    } = this.subject;
 
     // A verified address with a proof is the sign of plus.
-    const base =
+    let base = "unverified";
+
+    // When we have a idDocument and person, we can set "basic"
+    if (person && idDocument) {
+      base = "basic";
+    }
+
+    // When we also have a verified address, we can set "plus"
+    if (
+      base === "basic" &&
       residentialAddress?.proofFile &&
       residentialAddress.city &&
       residentialAddress.proofCategory &&
       residentialAddress.verified &&
       residentialAddress.country
-        ? "plus"
-        : "basic";
+    ) {
+      base = "plus";
+    }
 
     const addons = [
       biometric?.selfieFile && "liveness",

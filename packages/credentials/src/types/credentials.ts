@@ -42,10 +42,10 @@ export interface VerifiableCredential<K> {
   issuer: string;
   id: string;
   level: string;
-  kycLevel: number;
+  kycLevel?: number;
   issued: string;
   approvedAt: string;
-  expirationDate: string;
+  expirationDate?: string;
   credentialSubject: K;
   issuanceDate: string;
   proof: VerifiableCredentialProof;
