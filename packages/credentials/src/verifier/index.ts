@@ -3,18 +3,14 @@ import type { JsonLDDocumentLoaderInstance } from "jsonld-document-loader";
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import * as vc from "@digitalbazaar/vc";
 
-import type {
-  AvailableIssuerType,
-  VerifiableCredential,
-  VerifiableCredentialSubject,
-} from "../types";
+import type { AvailableIssuerType, VerifiableCredential } from "../types";
 
 import { issuerToKey } from "../utils";
-import { defaultDocumentLoader } from "./loader";
+import { defaultDocumentLoader } from "../utils/loader";
 
 export type VerifyCredentialResult = [boolean, Map<AvailableIssuerType, vc.VerifyCredentialResult>];
 
-export async function verifyCredential<K = VerifiableCredentialSubject>(
+export async function verifyCredential<K>(
   credential: VerifiableCredential<K>,
   issuers: AvailableIssuerType[],
   customDocumentLoader?: JsonLDDocumentLoaderInstance,
@@ -38,7 +34,7 @@ export async function verifyCredential<K = VerifiableCredentialSubject>(
 
     // Verify the signature
     const verifyCredentialResult = await vc.verifyCredential<K>({
-      credential: credential,
+      credential,
       suite: vcVerifyingSuite,
       controller,
       documentLoader: customDocumentLoader ?? defaultDocumentLoader,
