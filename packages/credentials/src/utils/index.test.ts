@@ -8,6 +8,8 @@ import {
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
+  type Addon,
+  type BaseLevel,
 } from ".";
 
 describe("recordFilter", () => {
@@ -64,6 +66,9 @@ describe("recordFilter", () => {
 
 describe("matchLevelOrHigher", () => {
   [
+    ["unverified", [], "unverified", true],
+    ["unverified", [], "basic", true],
+    ["basic", [], "unverified", false],
     ["basic", [], "basic+liveness", true],
     ["plus", [], "plus+liveness", true],
     ["plus", [], "basic", false],
@@ -74,11 +79,7 @@ describe("matchLevelOrHigher", () => {
   ].forEach(([level, requiredAddons, testLevel, expected]) => {
     it(`level=${level} requiredAddons=[${(requiredAddons as string[]).join(",")}] testLevel=${testLevel} => ${expected}`, () => {
       expect(
-        matchLevelOrHigher(
-          level as "basic" | "plus",
-          requiredAddons as ("liveness" | "email" | "phoneNumber")[],
-          testLevel as string,
-        ),
+        matchLevelOrHigher(level as BaseLevel, requiredAddons as Addon[], testLevel as string),
       ).toBe(expected as boolean);
     });
   });
@@ -103,6 +104,12 @@ describe("pickHighestMatchingLevel", () => {
       "plus",
       ["email", "phoneNumber"],
       null,
+    ],
+    [
+      ["unverified+phoneNumber", "basic+phoneNumber", "plus+phoneNumber"],
+      "unverified",
+      ["phoneNumber"],
+      "plus+phoneNumber",
     ],
     [["basic+liveness", "plus+liveness"], "basic", ["liveness"], "plus+liveness"],
   ].forEach(([levels, requiredLevel, requiredAddons, expected]) => {

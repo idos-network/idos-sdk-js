@@ -45,7 +45,12 @@ export function matchLevelOrHigher(
 ): boolean {
   const { base: currentBaseLevel, addons: currentAddons } = parseLevel(currentLevel);
 
-  // TODO: Consider pop+ or uniqueness+ scenarios
+  // Basic can only match basic or plus not unverified
+  if (level === "basic" && currentBaseLevel === "unverified") {
+    return false;
+  }
+
+  // Plus can only match plus
   if (level === "plus" && currentBaseLevel !== "plus") {
     return false;
   }
@@ -56,6 +61,10 @@ export function matchLevelOrHigher(
 export function levelScore(level: string): number {
   const { base, addons } = parseLevel(level);
   let score = 0;
+
+  if (base === "basic") {
+    score += 50;
+  }
 
   if (base === "plus") {
     score += 100;
