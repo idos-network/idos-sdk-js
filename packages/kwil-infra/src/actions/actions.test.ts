@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CreatePreliminaryCredentialsByDwgInputSchema,
+  getUser,
   SharePreliminaryCredentialInputSchema,
   UpsertWalletAsInserterInputSchema,
   walletTypeSchema,
@@ -146,5 +147,15 @@ describe("MM wallet type schemas", () => {
         signature: "",
       }),
     ).not.toThrow();
+  });
+});
+
+describe("getUser", () => {
+  it("throws an explicit not-found error when the view is empty", async () => {
+    await expect(
+      getUser({
+        call: async () => [],
+      } as never),
+    ).rejects.toThrow("get_user returned no user");
   });
 });
