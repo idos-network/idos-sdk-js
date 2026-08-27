@@ -3,7 +3,6 @@ import type {
   EncryptionPasswordStore,
   PublicEncryptionProfile,
 } from "@idos-network/enclave";
-import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 
 import {
   buildPreliminaryIDOSCredential,
@@ -59,6 +58,7 @@ import {
   sharePreliminaryCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
+import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 import {
   BlobGateway,
   createBlobContentReference,
@@ -81,9 +81,6 @@ type Properties<T> = {
   // oxlint-disable-next-line typescript/no-restricted-types -- All functions are to be removed.
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
 };
-
-// Disable when UKYC Storage handles multipart ciphertext as raw bytes.
-const TEMP_UKYC_CIPHERTEXT_UTF8_WORKAROUND = true;
 
 function isBrowserRuntime(): boolean {
   return typeof window !== "undefined";
@@ -125,9 +122,6 @@ function contentUriForWallet(
   kwilSigner: KwilSigner,
   credentialId: string,
 ): string | undefined {
-  if (TEMP_UKYC_CIPHERTEXT_UTF8_WORKAROUND) {
-    return undefined;
-  }
   if (walletType !== "MM") {
     return undefined;
   }
