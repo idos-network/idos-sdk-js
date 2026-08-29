@@ -29,8 +29,8 @@ catalogs:
       specifier: ^7.3.0
       version: 7.3.0
     '@idos-network/kwil-js':
-      specifier: 0.1.5
-      version: 0.1.5
+      specifier: 0.1.7
+      version: 0.1.7
     jsonld-document-loader:
       specifier: ^2.3.0
       version: 2.3.0
@@ -742,6 +742,67 @@ importers:
         specifier: catalog:build
         version: 0.28.0(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1))
 
+<<<<<<< HEAD
+=======
+  examples/functional-test-app: {}
+
+  examples/idos-throughput-benchmark:
+    dependencies:
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../../packages/credentials
+      '@idos-network/kwil-infra':
+        specifier: workspace:*
+        version: link:../../packages/kwil-infra
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
+      ethers:
+        specifier: catalog:ethereum
+        version: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+      tweetnacl:
+        specifier: catalog:core
+        version: 1.0.3
+    devDependencies:
+      '@types/node':
+        specifier: catalog:build
+        version: 25.9.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.1
+      typescript:
+        specifier: catalog:build
+        version: 5.9.3
+
+  examples/mm-token-ukyc-credential:
+    dependencies:
+      '@idos-network/client':
+        specifier: workspace:*
+        version: link:../../packages/client
+      '@idos-network/enclave':
+        specifier: workspace:*
+        version: link:../../packages/enclave
+      '@idos-network/kwil-infra':
+        specifier: workspace:*
+        version: link:../../packages/kwil-infra
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+    devDependencies:
+      '@types/node':
+        specifier: catalog:build
+        version: 25.9.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.1
+      typescript:
+        specifier: catalog:build
+        version: 5.9.3
+
+>>>>>>> feat/mm_token_auth
   examples/pay-demo:
     dependencies:
       '@base-ui/react':
@@ -900,7 +961,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.5(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -928,7 +989,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.5(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1072,7 +1133,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.5(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1097,7 +1158,7 @@ importers:
     dependencies:
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.5(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1789,8 +1850,8 @@ packages:
   '@hot-wallet/sdk@1.0.11':
     resolution: {integrity: sha512-qRDH/4yqnRCnk7L/Qd0/LDOKDUKWcFgvf6eRELJkP0OgxIe65i/iXaG+u2lL0mLbTGkiWYk67uAvEerNUv2gzA==}
 
-  '@idos-network/kwil-js@0.1.5':
-    resolution: {integrity: sha512-UtviGcYOYUg72DNPUC64VU3ZQJY1DWAtsKB7gDoJkAyBrM0wUyGcqX90WBmDJKP1bV9VANWLsil0w1f98F1MrA==}
+  '@idos-network/kwil-js@0.1.7':
+    resolution: {integrity: sha512-KR4FB7kRBVTUm+2aR2f/ySLX3YDYqWPllHnpmVXvxdobCD5NBOVWeY6/DBdni4MbuHNNn/9c2KidR4/kjlxHeA==}
     engines: {node: '>=18.0.0'}
 
   '@inquirer/ansi@2.0.7':
@@ -11181,7 +11242,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@idos-network/kwil-js@0.1.5(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)':
+  '@idos-network/kwil-js@0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)':
     dependencies:
       axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       ethers: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)

@@ -644,12 +644,15 @@ export const GetUserOutputSchema: z.ZodObject<{
 export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
 
 export async function getUser(kwilClient: KwilActionClient): Promise<GetUserOutput> {
-  return await kwilClient
-    .call<GetUserOutput[]>({
-      name: "get_user",
-      inputs: {},
-    })
-    .then((result) => result[0]);
+  const result = await kwilClient.call<GetUserOutput[]>({
+    name: "get_user",
+    inputs: {},
+  });
+  const user = result[0];
+  if (!user) {
+    throw new Error("get_user returned no user");
+  }
+  return user;
 }
 
 export const GetUserAsInserterInputSchema: z.ZodObject<{
