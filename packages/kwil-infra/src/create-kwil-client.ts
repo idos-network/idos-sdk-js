@@ -12,6 +12,9 @@ import invariant from "tiny-invariant";
 import type { ActionSchemaElement } from "./actions";
 
 import { actionSchema } from "./actions";
+import { waitForKwilTx } from "./wait-for-kwil-tx";
+
+export { KwilTxFailedError, KwilTxPollTimeoutError } from "./wait-for-kwil-tx";
 
 type CreateKwilClientParams = {
   chainId?: string;
@@ -87,12 +90,15 @@ export class KwilActionClient {
 
   /**
    * Executes an action on the kwil nodes. This similar to `POST` like request.
+   *
+   * When `synchronous` is true (default), the tx is broadcast without blocking the node,
+   * then confirmed by polling `txInfo` with exponential backoff.
    */
   async execute(
     params: KwilExecuteActionRequestParams,
     signer: KwilSigner | undefined = this.signer,
     synchronous = true,
-  ): Promise<string | undefined> {
+  ): Promise<string> {
     invariant(signer, "Signer is not set, you must set it before executing an action");
     const action: ActionBody = {
       name: params.name,
@@ -101,8 +107,18 @@ export class KwilActionClient {
       inputs: [this.#createActionInputs(params.name, params.inputs)],
       types: this.#actionTypes(params.name),
     };
-    const response = await this.client.execute(action, signer, synchronous);
-    return response.data?.tx_hash;
+    const response = await this.client.execute(action, signer, false);
+    const txHash = response.data?.tx_hash;
+
+    if (!txHash) {
+      throw new Error(`Kwil execute "${params.name}" did not return a transaction hash`);
+    }
+
+    if (synchronous) {
+      await waitForKwilTx((hash) => this.client.txInfo(hash), txHash);
+    }
+
+    return txHash;
   }
 
   setSigner(signer: KwilSigner | undefined): void {

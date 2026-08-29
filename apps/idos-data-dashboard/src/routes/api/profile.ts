@@ -36,7 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 const ProfileSchema = z.object({
   recipientEncryptionPublicKey: z.string(),
-  encryptionPasswordStore: z.enum(["user", "mpc"]),
+  encryptionPasswordStore: z.enum(["user", "mpc", "mm"]),
   walletType: z.enum(WalletType),
   walletAddress: z.string(),
   walletPublicKey: z.string(),
@@ -69,7 +69,6 @@ export async function action({ request }: Route.ActionArgs) {
   const issuer = await idOSIssuer.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
-    encryptionSecretKey: hexDecode(SERVER_ENV.IDOS_ISSUER_ENCRYPTION_SECRET_KEY),
   });
 
   const {

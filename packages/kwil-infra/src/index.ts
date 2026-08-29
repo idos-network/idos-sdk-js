@@ -1,5 +1,7 @@
 export * from "./create-kwil-client";
+export * from "./create-kgw-authenticated-fetch";
 export * from "./create-kwil-signer";
+export * from "./mm-token/create-mm-token-kwil-signer";
 export {
   getNearFullAccessPublicKeys,
   implicitAddressFromPublicKey,

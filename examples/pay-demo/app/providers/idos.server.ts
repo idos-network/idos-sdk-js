@@ -1,9 +1,8 @@
-import {
-  type Credential,
-  idOSConsumer as idOSConsumerClass,
-  type idOSCredential,
-} from "@idos-network/consumer";
+import { idOSConsumer as idOSConsumerClass, type idOSCredential } from "@idos-network/consumer";
+import { parseCredential } from "@idos-network/credentials/parser";
+import { VerifiableCredentialKycV2 } from "@idos-network/credentials/schemas";
 import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
+import { verifyCredential } from "@idos-network/credentials/verifier";
 import nacl from "tweetnacl";
 
 import { COMMON_ENV } from "./envFlags.common";
@@ -19,7 +18,10 @@ export async function initIdOSConsumer() {
   });
 }
 
-export async function getCredentialShared(credentialId: string, inserterId?: string) {
+export async function getCredentialShared(
+  credentialId: string,
+  inserterId?: string,
+): Promise<VerifiableCredentialKycV2> {
   const idOSConsumer = await initIdOSConsumer();
 
   const grants = await idOSConsumer.getAccessGrantsForCredential(credentialId);
@@ -38,7 +40,7 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   const credentialContents: string =
     await idOSConsumer.getCredentialSharedContentDecrypted(credentialId);
 
-  const data = JSON.parse(credentialContents) as Credential;
+  const data = JSON.parse(credentialContents);
 
   const issuer = {
     issuer: SERVER_ENV.RELAY_ISSUER,
@@ -46,13 +48,19 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   };
 
   // Verify the credential
-  const [verificationResult, error] = await idOSConsumer.verifyCredential(data, [issuer]);
+  const [verificationResult, error] = await verifyCredential(data, [issuer]);
 
   if (!verificationResult) {
     throw new Error(`Invalid credential signature. ${JSON.stringify(error.get(issuer))}`);
   }
 
-  return data;
+  const parsed = await parseCredential(data);
+
+  if (parsed instanceof VerifiableCredentialKycV2) {
+    return parsed;
+  }
+
+  throw new Error("Credential is not a valid KYC v2 credential");
 }
 
 export async function getUsableCredentialByUser(

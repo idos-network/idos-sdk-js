@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialRecord as idOSCredential } from "@idos-network/credentials/types";
 
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
@@ -7,6 +7,21 @@ import tweetnacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
 
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
+
+// ponytail: real scrypt (N=16384) runs on every obfuscated store read/write, which is
+// several hundred ms per test and times out on CI. The codec only needs a deterministic
+// key of the right length, not a real KDF.
+vi.mock("scrypt-js", () => ({
+  syncScrypt: (
+    _password: Uint8Array,
+    salt: Uint8Array,
+    _n: number,
+    _r: number,
+    _p: number,
+    dkLen: number,
+  ) =>
+    new Uint8Array(Array.from({ length: dkLen }, (_, index) => salt[index % salt.length] ^ index)),
+}));
 
 vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@idos-network/utils/encryption")>();
@@ -19,6 +34,14 @@ vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
   };
 });
 
+// Obfuscated store uses syncScrypt(N=16384); keep tests under vitest's default 5s timeout on CI.
+vi.mock("scrypt-js", () => ({
+  syncScrypt: vi.fn(
+    (_password: Uint8Array, _salt: Uint8Array, _N: number, _r: number, _p: number, dkLen: number) =>
+      new Uint8Array(dkLen).fill(7),
+  ),
+}));
+
 class TestEnclave extends LocalEnclave {
   async getPasswordContext() {
     return {
@@ -29,8 +52,71 @@ class TestEnclave extends LocalEnclave {
   }
 }
 
+class MPCTestEnclave extends LocalEnclave {
+  mpcPassword = "super-secret";
+
+  async getPasswordContext() {
+    return {
+      encryptionPasswordStore: "mpc",
+    } as const;
+  }
+
+  protected async ensureMPCPassword() {
+    return this.mpcPassword;
+  }
+}
+
 describe("LocalEnclave", () => {
   const userId = "9f51b3b2-4cbe-4c2b-8ea3-0b0c1b2f1a11";
+
+  it("rejects passwords whose derived public key does not match expectedUserEncryptionPublicKey", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({
+      userId,
+      store,
+      expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+    } as LocalEnclaveOptions);
+
+    await expect(
+      enclave.createEncryptionProfileFromPassword("super-secret", userId, "user"),
+    ).rejects.toThrow(
+      "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+    );
+  });
+
+  it("accepts passwords whose derived public key matches expectedUserEncryptionPublicKey", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const { keyPair } = await enclave.createEncryptionProfileFromPassword(
+      "super-secret",
+      userId,
+      "user",
+    );
+
+    const matchingEnclave = new TestEnclave({
+      userId,
+      store: new MemoryStore(),
+      expectedUserEncryptionPublicKey: base64Encode(keyPair.publicKey),
+    } as LocalEnclaveOptions);
+
+    await expect(
+      matchingEnclave.createEncryptionProfileFromPassword("super-secret", userId, "user"),
+    ).resolves.toMatchObject({ userId, encryptionPasswordStore: "user" });
+  });
+
+  it("rejects MPC unlock when the downloaded password derives a mismatched public key", async () => {
+    const store = new MemoryStore();
+    const enclave = new MPCTestEnclave({
+      userId,
+      store,
+      mode: "existing",
+      expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+    } as LocalEnclaveOptions);
+
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+    );
+  });
 
   it("creates and exposes a public encryption profile", async () => {
     const store = new MemoryStore();

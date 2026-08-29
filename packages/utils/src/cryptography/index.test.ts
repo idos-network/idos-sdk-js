@@ -44,7 +44,7 @@ describe("cryptography", () => {
     const recipient = nacl.box.keyPair();
     const fullMessage = encryptContent(secretMessage, recipient.publicKey, sender.secretKey);
     const box = new NoncedBox(recipient);
-    const plaintext = await box.decrypt(base64Encode(fullMessage), base64Encode(sender.publicKey));
+    const plaintext = await box.decrypt(fullMessage, sender.publicKey);
 
     expect(plaintext).toBe("secret");
   });
@@ -56,9 +56,7 @@ describe("cryptography", () => {
     const fullMessage = encryptContent(secretMessage, recipient.publicKey, sender.secretKey);
     const box = new NoncedBox(recipient);
 
-    await expect(
-      box.decrypt(base64Encode(fullMessage), base64Encode(attacker.publicKey)),
-    ).rejects.toThrow();
+    await expect(box.decrypt(fullMessage, attacker.publicKey)).rejects.toThrow();
   });
 
   it("nonceFromBase64SecretKey creates a usable box", async () => {
@@ -66,7 +64,7 @@ describe("cryptography", () => {
     const recipient = nacl.box.keyPair();
     const fullMessage = encryptContent(helloMessage, recipient.publicKey, sender.secretKey);
     const box = NoncedBox.nonceFromBase64SecretKey(base64Encode(recipient.secretKey));
-    const plaintext = await box.decrypt(base64Encode(fullMessage), base64Encode(sender.publicKey));
+    const plaintext = await box.decrypt(fullMessage, sender.publicKey);
 
     expect(plaintext).toBe("hello");
   });

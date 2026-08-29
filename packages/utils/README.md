@@ -51,12 +51,11 @@ await store.setRememberDuration(7); // days
 
 ## Cryptography
 
-NaCl box helpers and a convenience wrapper for nonce-prefixed, base64 messages.
+NaCl box helpers and a convenience wrapper for nonce-prefixed ciphertext.
 
 ```ts
 import nacl from "tweetnacl";
 import { encryptContent, NoncedBox } from "@idos-network/utils/cryptography";
-import { base64Encode } from "@idos-network/utils/codecs";
 
 const sender = nacl.box.keyPair();
 const recipient = nacl.box.keyPair();
@@ -65,7 +64,7 @@ const message = new TextEncoder().encode("hello");
 const fullMessage = encryptContent(message, recipient.publicKey, sender.secretKey);
 
 const box = new NoncedBox(recipient);
-const plaintext = await box.decrypt(base64Encode(fullMessage), base64Encode(sender.publicKey));
+const plaintext = await box.decrypt(fullMessage, sender.publicKey);
 ```
 
 ## Codecs

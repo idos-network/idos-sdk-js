@@ -1,122 +1,23 @@
-import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-import {
-  base64Decode,
-  base64Encode,
-  hexEncode,
-  utf8Encode,
-  fileToBase85,
-} from "@idos-network/utils/codecs";
+import { createBlobContentReference } from "@idos-network/utils/blob-gateway";
+import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
-import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-import type {
-  AvailableIssuerType,
-  CredentialFields,
-  CredentialResidentialAddress,
-  CredentialSubject,
-  CredentialSubjectFaceId,
-  CustomIssuerType,
-  InsertableIDOSCredential,
-} from "../types";
+import type { idOSCredential, SignedCredentialContentReference } from "../types";
 
-export function capitalizeFirstLetter(str: string): string {
-  return str[0].toUpperCase() + str.slice(1);
-}
+// Proxying functions
+export * from "./issuer";
 
-function isIssuerKey(issuer: AvailableIssuerType): issuer is Ed25519VerificationKey2020 {
-  return (
-    typeof issuer === "object" &&
-    issuer !== null &&
-    "type" in issuer &&
-    "id" in issuer &&
-    "controller" in issuer
-  );
-}
-
-function isCustomIssuerType(issuer: AvailableIssuerType): issuer is CustomIssuerType {
-  return (
-    typeof issuer === "object" &&
-    issuer !== null &&
-    "issuer" in issuer &&
-    "publicKeyMultibase" in issuer
-  );
-}
-
-export async function issuerToKey(
-  issuer: AvailableIssuerType,
-): Promise<Ed25519VerificationKey2020> {
-  if (isIssuerKey(issuer)) {
-    return issuer;
-  }
-
-  if (isCustomIssuerType(issuer)) {
-    return await Ed25519VerificationKey2020.from({
-      id: `${issuer.issuer}/keys/1`,
-      controller: `${issuer.issuer}/issuers/1`,
-      publicKeyMultibase: issuer.publicKeyMultibase,
-      privateKeyMultibase: issuer.privateKeyMultibase,
-      type: "Ed25519VerificationKey2020",
-    });
-  }
-
-  return await Ed25519VerificationKey2020.from({ ...issuer, type: "Ed25519VerificationKey2020" });
-}
-
-export function convertValues<
-  K extends
-    | CredentialFields
-    | CredentialSubject
-    | CredentialResidentialAddress
-    | CredentialSubjectFaceId,
->(fields: K, prefix?: string): Record<string, unknown> {
-  const acc: Record<string, unknown> = {};
-
-  for (const key in fields) {
-    if (Object.hasOwn(fields, key)) {
-      const value = fields[key];
-      const name = prefix ? `${prefix}${capitalizeFirstLetter(key)}` : key;
-      if (value instanceof Date) {
-        acc[name] = value.toISOString();
-      } else if (value instanceof Buffer) {
-        // Convert file to base85
-        acc[name] = fileToBase85(value);
-      } else {
-        acc[name] = value;
-      }
-    }
-  }
-
-  return acc;
-}
-
-type BaseLevel = "basic" | "plus";
-type Addon = "liveness" | "email" | "phoneNumber";
-
-export function deriveLevel(credential: CredentialSubject): string {
-  let level: BaseLevel = "basic";
-
-  // Address is a sign for plus+
-  const address = credential.residentialAddress;
-  if (address?.proofFile && address?.city && address?.proofCategory) {
-    level = "plus";
-  }
-
-  const addons: Addon[] = [];
-  if (credential.selfieFile) {
-    addons.push("liveness");
-  }
-
-  if (credential.email) {
-    addons.push("email");
-  }
-
-  if (credential.phoneNumber) {
-    addons.push("phoneNumber");
-  }
-
-  return [level, ...addons].join("+");
-}
+export type BaseLevel = "unverified" | "basic" | "plus";
+export type Addon =
+  | "liveness"
+  | "email"
+  | "phoneNumber"
+  | "edd"
+  | "sow"
+  | "screening"
+  | "onboarding";
 
 export function parseLevel(level: string): {
   base: BaseLevel;
@@ -126,6 +27,18 @@ export function parseLevel(level: string): {
   return { base, addons };
 }
 
+export function assertNoExtraFields(
+  section: string,
+  expectedFields: ReadonlySet<string>,
+  value: object | undefined,
+): void {
+  const extraFields = Object.keys(value ?? {}).filter((field) => !expectedFields.has(field));
+
+  if (extraFields.length > 0) {
+    throw new Error(`Unexpected ${section} fields: ${extraFields.join(", ")}`);
+  }
+}
+
 export function matchLevelOrHigher(
   level: BaseLevel,
   requiredAddons: Addon[],
@@ -133,7 +46,12 @@ export function matchLevelOrHigher(
 ): boolean {
   const { base: currentBaseLevel, addons: currentAddons } = parseLevel(currentLevel);
 
-  // TODO: Consider pop+ or uniqueness+ scenarios
+  // Basic can only match basic or plus not unverified
+  if (level === "basic" && currentBaseLevel === "unverified") {
+    return false;
+  }
+
+  // Plus can only match plus
   if (level === "plus" && currentBaseLevel !== "plus") {
     return false;
   }
@@ -144,6 +62,10 @@ export function matchLevelOrHigher(
 export function levelScore(level: string): number {
   const { base, addons } = parseLevel(level);
   let score = 0;
+
+  if (base === "basic") {
+    score += 50;
+  }
 
   if (base === "plus") {
     score += 100;
@@ -239,36 +161,97 @@ export function recordFilter(
   return true;
 }
 
-export function buildInsertableIDOSCredential(
-  userId: string,
+export function buildSignedCredentialContentReference(
   publicNotes: string,
-  content: string,
-  encryptorPublicKey: string,
-): InsertableIDOSCredential {
-  invariant(encryptorPublicKey, "Missing `encryptorPublicKey`");
+  contentUri: string,
+  issuerSigningSecretKey: Uint8Array = nacl.sign.keyPair().secretKey,
+): SignedCredentialContentReference {
+  const { publicKey, secretKey } = nacl.sign.keyPair.fromSecretKey(issuerSigningSecretKey);
 
-  const ephemeralAuthenticationKeyPair = nacl.sign.keyPair();
-
-  const publicNotesSignature = nacl.sign.detached(
-    utf8Encode(publicNotes),
-    ephemeralAuthenticationKeyPair.secretKey,
-  );
+  const publicNotesSignature = nacl.sign.detached(utf8Encode(publicNotes), secretKey);
 
   return {
-    user_id: userId,
-    content,
-
     public_notes: publicNotes,
     public_notes_signature: base64Encode(publicNotesSignature),
 
     broader_signature: base64Encode(
       nacl.sign.detached(
-        Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
-        ephemeralAuthenticationKeyPair.secretKey,
+        Uint8Array.from([...publicNotesSignature, ...utf8Encode(contentUri)]),
+        secretKey,
       ),
     ),
 
-    issuer_auth_public_key: hexEncode(ephemeralAuthenticationKeyPair.publicKey, true),
-    encryptor_public_key: encryptorPublicKey,
+    issuer_auth_public_key: hexEncode(publicKey, true),
+  };
+}
+
+export type PreliminaryIDOSCredential = {
+  id: string;
+  contentUri: string;
+  contentSize: number;
+  encryptedContent: Uint8Array;
+  publicNotes: string;
+  publicNotesSignature: string;
+  broaderSignature: string;
+  issuerAuthPublicKey: string;
+  encryptorPublicKey: string;
+};
+
+export function mapPreliminaryToIDOSCredential(
+  preliminaryCredential: PreliminaryIDOSCredential,
+): Omit<idOSCredential, "user_id"> {
+  return {
+    id: preliminaryCredential.id,
+    content_uri: preliminaryCredential.contentUri,
+    content_size: preliminaryCredential.contentSize,
+    public_notes: preliminaryCredential.publicNotes,
+    issuer_auth_public_key: preliminaryCredential.issuerAuthPublicKey,
+    encryptor_public_key: preliminaryCredential.encryptorPublicKey,
+  };
+}
+
+export interface BuildPreliminaryIDOSCredentialArgs {
+  publicNotes: string;
+  plaintextContent: Uint8Array;
+  recipientEncryptionPublicKey: Uint8Array;
+  issuerSigningSecretKey?: Uint8Array;
+  /** When set (MM / `ukyc://`), skip IPFS CID hashing. */
+  contentUri?: string;
+}
+
+export async function buildPreliminaryIDOSCredential({
+  publicNotes,
+  plaintextContent,
+  recipientEncryptionPublicKey,
+  // For user-issued credentials, use a fresh ephemeral key for the signed reference
+  // For issuer-side, use the signing key pair
+  issuerSigningSecretKey = nacl.sign.keyPair().secretKey,
+  contentUri,
+}: BuildPreliminaryIDOSCredentialArgs): Promise<Omit<PreliminaryIDOSCredential, "id">> {
+  const ephemeralKeyPair = nacl.box.keyPair();
+  const encryptedContent = encryptContent(
+    plaintextContent,
+    recipientEncryptionPublicKey, // user or dwg recipient
+    ephemeralKeyPair.secretKey,
+  );
+
+  const contentReference = contentUri
+    ? { uri: contentUri, size: encryptedContent.byteLength }
+    : await createBlobContentReference(encryptedContent);
+  const signedReference = buildSignedCredentialContentReference(
+    publicNotes,
+    contentReference.uri,
+    issuerSigningSecretKey,
+  );
+
+  return {
+    contentUri: contentReference.uri,
+    contentSize: contentReference.size,
+    encryptedContent,
+    publicNotes,
+    publicNotesSignature: signedReference.public_notes_signature,
+    broaderSignature: signedReference.broader_signature,
+    issuerAuthPublicKey: signedReference.issuer_auth_public_key,
+    encryptorPublicKey: base64Encode(ephemeralKeyPair.publicKey),
   };
 }

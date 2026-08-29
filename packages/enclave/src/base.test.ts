@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialRecord as idOSCredential } from "@idos-network/credentials/types";
 
 import { base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it, vi } from "vitest";

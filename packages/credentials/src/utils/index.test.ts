@@ -1,26 +1,17 @@
+import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
-import type { CredentialSubject } from "../types";
-
 import {
-  deriveLevel,
+  buildPreliminaryIDOSCredential,
+  buildSignedCredentialContentReference,
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
-} from "./";
-
-const defaultCredential: CredentialSubject = {
-  id: "uuid:1234",
-  firstName: "John",
-  familyName: "Doe",
-  idDocumentType: "PASSPORT",
-  dateOfBirth: new Date("1990-01-01"),
-  idDocumentCountry: "US",
-  idDocumentNumber: "123456789",
-  idDocumentFrontFile: Buffer.from("ID Document Front"),
-  selfieFile: Buffer.alloc(0),
-};
+  type Addon,
+  type BaseLevel,
+} from ".";
 
 describe("recordFilter", () => {
   [
@@ -76,6 +67,9 @@ describe("recordFilter", () => {
 
 describe("matchLevelOrHigher", () => {
   [
+    ["unverified", [], "unverified", true],
+    ["unverified", [], "basic", true],
+    ["basic", [], "unverified", false],
     ["basic", [], "basic+liveness", true],
     ["plus", [], "plus+liveness", true],
     ["plus", [], "basic", false],
@@ -86,11 +80,7 @@ describe("matchLevelOrHigher", () => {
   ].forEach(([level, requiredAddons, testLevel, expected]) => {
     it(`level=${level} requiredAddons=[${(requiredAddons as string[]).join(",")}] testLevel=${testLevel} => ${expected}`, () => {
       expect(
-        matchLevelOrHigher(
-          level as "basic" | "plus",
-          requiredAddons as ("liveness" | "email" | "phoneNumber")[],
-          testLevel as string,
-        ),
+        matchLevelOrHigher(level as BaseLevel, requiredAddons as Addon[], testLevel as string),
       ).toBe(expected as boolean);
     });
   });
@@ -115,6 +105,12 @@ describe("pickHighestMatchingLevel", () => {
       "plus",
       ["email", "phoneNumber"],
       null,
+    ],
+    [
+      ["unverified+phoneNumber", "basic+phoneNumber", "plus+phoneNumber"],
+      "unverified",
+      ["phoneNumber"],
+      "plus+phoneNumber",
     ],
     [["basic+liveness", "plus+liveness"], "basic", ["liveness"], "plus+liveness"],
   ].forEach(([levels, requiredLevel, requiredAddons, expected]) => {
@@ -247,57 +243,50 @@ describe("highestMatchingCredential", () => {
   });
 });
 
-describe("deriveLevel", () => {
-  it("basic only", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        // @ts-expect-error - to test absence of selfieFile
-        selfieFile: undefined,
-      }),
-    ).toBe("basic");
+describe("buildSignedCredentialContentReference", () => {
+  it("derives issuer_auth_public_key from the signing secret key", () => {
+    const keyPair = nacl.sign.keyPair();
+    const result = buildSignedCredentialContentReference("", "ipfs://cid", keyPair.secretKey);
+
+    expect(result.public_notes).toBe("");
+    expect(result.public_notes_signature).toBeTruthy();
+    expect(result.broader_signature).toBeTruthy();
+    expect(result.issuer_auth_public_key).toBe(hexEncode(keyPair.publicKey, true));
   });
 
-  it("basic+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-      }),
-    ).toBe("basic+liveness");
+  it("returns a signed reference with a public key", () => {
+    const result = buildSignedCredentialContentReference("", "ipfs://cid");
+
+    expect(result.public_notes).toBe("");
+    expect(result.public_notes_signature).toBeTruthy();
+    expect(result.broader_signature).toBeTruthy();
+    expect(result.issuer_auth_public_key).toMatch(/^(0x)?[0-9a-f]+$/i);
+  });
+});
+
+describe("buildPreliminaryIDOSCredential", () => {
+  const recipient = nacl.box.keyPair();
+
+  it("hashes encrypted content to an ipfs:// uri by default", async () => {
+    const result = await buildPreliminaryIDOSCredential({
+      publicNotes: "{}",
+      plaintextContent: utf8Encode("secret"),
+      recipientEncryptionPublicKey: recipient.publicKey,
+    });
+
+    expect(result.contentUri).toMatch(/^ipfs:\/\//);
+    expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 
-  it("plus+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness");
-  });
+  it("uses a provided contentUri instead of hashing to ipfs", async () => {
+    const result = await buildPreliminaryIDOSCredential({
+      publicNotes: "{}",
+      plaintextContent: utf8Encode("secret"),
+      recipientEncryptionPublicKey: recipient.publicKey,
+      contentUri: "ukyc://storage-abc/blobs/blob-1",
+    });
 
-  it("plus+liveness+phoneNumber", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        selfieFile: Buffer.from("Selfie"),
-        phoneNumber: "+1234567890",
-        email: "john.doe@example.com",
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness+email+phoneNumber");
+    expect(result.contentUri).toBe("ukyc://storage-abc/blobs/blob-1");
+    expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 });

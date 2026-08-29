@@ -1,23 +1,20 @@
-import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
 import type {
   AvailableIssuerType,
-  IDDocumentType,
-  idOSCredential,
+  idOSCredentialRecord as idOSCredential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
 } from "@idos-network/credentials/types";
+import type { MmTokenAuth } from "@idos-network/kwil-infra";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
-import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import { type VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import {
+  createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
   createServerKwilSigner,
   type KwilActionClient,
   type KwilSignerType,
 } from "@idos-network/kwil-infra";
 import {
-  type CreateAgByDagForCopyInput,
-  createAgByDagForCopy,
   type GetAccessGrantsGrantedInput,
   getAccessGrantsForCredential,
   getAccessGrantsGrantedCount,
@@ -27,7 +24,12 @@ import {
   type idOSGrant,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
-import { base64Encode } from "@idos-network/utils/codecs";
+import {
+  BlobGateway,
+  requireAccessTokenForUkycContent,
+  resolveCredentialEncryptedContent,
+} from "@idos-network/utils/blob-gateway";
+import { base64Decode, base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 
@@ -35,6 +37,12 @@ export type idOSConsumerConfig = {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
+  blobGatewayUrl?: string;
+  /**
+   * UKYC storage authority for blob GET/DELETE, from `createMmTokenAuth`. Only needed when
+   * `consumerSigner` is not itself an MM authentication object. Re-init the consumer to change it.
+   */
+  mmAuth?: MmTokenAuth;
   consumerSigner: KwilSignerType;
 };
 
@@ -43,11 +51,14 @@ export class idOSConsumer {
   #kwilClient: KwilActionClient;
   #noncedBox: NoncedBox;
   #signer: KwilSigner;
+  #blobGateway?: BlobGateway;
 
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
+    blobGatewayUrl,
+    mmAuth,
     consumerSigner,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
@@ -57,12 +68,19 @@ export class idOSConsumer {
 
     const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
+    const blobGateway = createKgwAuthenticatedBlobGateway({
+      url: blobGatewayUrl ?? nodeUrl,
+      kwilClient,
+      signer,
+      mmAuth,
+    });
 
     return new idOSConsumer(
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
       address,
       signer,
+      blobGateway,
     );
   }
 
@@ -71,11 +89,13 @@ export class idOSConsumer {
     kwilClient: KwilActionClient,
     address: string,
     signer: KwilSigner,
+    blobGateway?: BlobGateway,
   ) {
     this.#noncedBox = noncedBox;
     this.#kwilClient = kwilClient;
     this.address = address;
     this.#signer = signer;
+    this.#blobGateway = blobGateway;
   }
 
   get signer(): KwilSigner {
@@ -96,13 +116,31 @@ export class idOSConsumer {
     invariant(credentialCopy, `Credential with id ${dataId} not found`);
 
     return await this.#noncedBox.decrypt(
-      credentialCopy.content,
-      credentialCopy.encryptor_public_key,
+      await resolveCredentialEncryptedContent(credentialCopy, this.#blobGateway),
+      base64Decode(credentialCopy.encryptor_public_key),
     );
   }
 
   async rescindSharedCredential(credentialId: string): Promise<void> {
-    return rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
+    const credential = await this.getCredentialSharedFromIDOS(credentialId);
+    invariant(credential, `Credential with id ${credentialId} not found`);
+
+    const contentUri = credential.content_uri ?? null;
+    requireAccessTokenForUkycContent(contentUri, this.#blobGateway?.hasAccessToken ?? false);
+
+    await rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
+
+    if (!contentUri) {
+      return;
+    }
+
+    if (!this.#blobGateway) {
+      throw new Error(
+        `Credential with id ${credentialId} is blob-backed, but blobGatewayUrl was not configured`,
+      );
+    }
+
+    await this.#blobGateway.deleteCredentialBlob({ credentialId });
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
@@ -135,29 +173,12 @@ export class idOSConsumer {
       totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
   }
-
-  async createAccessGrantByDag(
-    params: CreateAgByDagForCopyInput,
-  ): Promise<CreateAgByDagForCopyInput> {
-    await createAgByDagForCopy(this.#kwilClient, params);
-    return params;
-  }
-
-  async verifyCredential<K = VerifiableCredentialSubject>(
-    credentials: VerifiableCredential<K>,
-    issuers: AvailableIssuerType[],
-  ): Promise<VerifyCredentialResult> {
-    return verifyCredential<K>(credentials, issuers);
-  }
 }
 
 export type {
   idOSCredential,
   idOSGrant,
-  Credential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
   VerifyCredentialResult,
   AvailableIssuerType,
-  IDDocumentType,
 };
