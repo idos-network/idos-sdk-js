@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { base64Encode, utf8Encode } from "../codecs";
 import {
   BlobGateway,
+  BlobGatewayHttpError,
   createBlobContentReference,
   createUkycContentUri,
   requireAccessTokenForUkycContent,
@@ -165,6 +166,63 @@ describe("BlobGateway", () => {
 
     expect(result).toEqual({ request_id: "request-1", copy_cid: cid });
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
+  });
+
+  it("does not include opaque HTML response bodies in upload errors", async () => {
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () =>
+        new Response("<!DOCTYPE html><html><body>blocked by edge</body></html>", {
+          status: 403,
+          headers: {
+            "content-type": "text/html",
+            "x-request-id": "gateway-request-42",
+          },
+        }),
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayHttpError",
+      message:
+        "blob gateway upload failed with 403 (BLOB_GATEWAY_HTTP_ERROR, request gateway-request-42)",
+      operation: "upload",
+      status: 403,
+      code: "BLOB_GATEWAY_HTTP_ERROR",
+      requestId: "gateway-request-42",
+      detail: undefined,
+    } satisfies Partial<BlobGatewayHttpError>);
+  });
+
+  it("preserves structured gateway error codes without logging the raw response", async () => {
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () =>
+        Response.json(
+          {
+            error: "UKYC storage upload request failed",
+            code: "UKYC_UPLOAD_FAILED",
+          },
+          { status: 502, headers: { "x-request-id": "gateway-request-43" } },
+        ),
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toMatchObject({
+      message:
+        "blob gateway upload failed with 502 (UKYC_UPLOAD_FAILED, request gateway-request-43): UKYC storage upload request failed",
+      status: 502,
+      code: "UKYC_UPLOAD_FAILED",
+      requestId: "gateway-request-43",
+    });
   });
 
   it("rejects upload responses whose CID does not match the uploaded bytes", async () => {
