@@ -19,6 +19,8 @@ export type BlobGatewayParams = {
   url: string;
   fetchFn?: typeof fetch;
   maxFetchBytes?: number;
+  /** MM / UKYC capability token. Sent as `Authorization: AccessToken …` on blob requests. */
+  accessToken?: string;
 };
 
 type CredentialBlobParts =
@@ -31,9 +33,14 @@ export type UploadCredentialBlobsParams = {
 } & CredentialBlobParts;
 
 export type FetchBlobParams = {
-  contentUri: string;
+  credentialId: string;
+  contentUri?: string | null;
   expectedSize?: number | string | bigint | null;
   maxBytes?: number;
+};
+
+export type DeleteCredentialBlobParams = {
+  credentialId: string;
 };
 
 export type BlobBackedCredentialContent = {
@@ -43,8 +50,63 @@ export type BlobBackedCredentialContent = {
   content_size?: number | string | bigint | null;
 };
 
-const IPFS_URI_PREFIX = "ipfs://";
+export const IPFS_URI_PREFIX = "ipfs://";
+export const UKYC_URI_PREFIX = "ukyc://";
 export const DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES: number = 20 * 1024 * 1024;
+const MAX_BLOB_GATEWAY_ERROR_BYTES = 4 * 1024;
+
+type BlobGatewayOperation = "upload" | "fetch" | "delete";
+
+export class BlobGatewayHttpError extends Error {
+  constructor(
+    public readonly operation: BlobGatewayOperation,
+    public readonly status: number,
+    public readonly code: string,
+    public readonly requestId?: string,
+    public readonly detail?: string,
+  ) {
+    const context = [code, requestId ? `request ${requestId}` : undefined]
+      .filter(Boolean)
+      .join(", ");
+    super(
+      `blob gateway ${operation} failed with ${status}${context ? ` (${context})` : ""}` +
+        `${detail ? `: ${detail}` : ""}`,
+    );
+    this.name = "BlobGatewayHttpError";
+  }
+}
+
+export function isIpfsContentUri(uri: string | null | undefined): uri is string {
+  return typeof uri === "string" && uri.startsWith(IPFS_URI_PREFIX);
+}
+
+export function isUkycContentUri(uri: string | null | undefined): uri is string {
+  return typeof uri === "string" && uri.startsWith(UKYC_URI_PREFIX);
+}
+
+/** `ukyc://{storage_id}/blobs/{blob_id}` — `/blobs/` is required. */
+export function createUkycContentUri(storageId: string, blobId: string): string {
+  const trimmedStorageId = storageId.trim();
+  const trimmedBlobId = blobId.trim();
+  if (!trimmedStorageId || trimmedStorageId.includes("/")) {
+    throw new Error("ukyc content uri requires a storage_id without path segments");
+  }
+  if (!trimmedBlobId || trimmedBlobId.includes("/")) {
+    throw new Error("ukyc content uri requires a blob_id without path segments");
+  }
+  return `${UKYC_URI_PREFIX}${trimmedStorageId}/blobs/${trimmedBlobId}`;
+}
+
+export function requireAccessTokenForUkycContent(
+  contentUri: string | null | undefined,
+  hasAccessToken: boolean,
+): void {
+  if (isUkycContentUri(contentUri) && !hasAccessToken) {
+    throw new Error(
+      "A ukyc:// credential requires an accessToken; use MM authentication for this session",
+    );
+  }
+}
 
 const CID_IMPORT_POLICY = {
   cidVersion: 1,
@@ -80,6 +142,7 @@ export async function resolveCredentialEncryptedContent(
     }
 
     return blobGateway.fetchBlob({
+      credentialId: credential.id,
       contentUri: credential.content_uri,
       expectedSize: normalizeByteCount(credential.content_size, "content_size"),
     });
@@ -96,16 +159,41 @@ export class BlobGateway {
   readonly #url: string;
   readonly #fetch: typeof fetch;
   readonly #maxFetchBytes: number;
+  readonly #accessToken?: string;
 
   constructor({
     url,
     fetchFn = fetch,
     maxFetchBytes = DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES,
+    accessToken,
   }: BlobGatewayParams) {
     this.#url = url.replace(/\/$/, "");
     // Native `fetch` must not be stored unbound — calling it as this.#fetch() throws in browsers.
     this.#fetch = (input, init) => fetchFn(input, init);
     this.#maxFetchBytes = normalizeByteCount(maxFetchBytes, "maxFetchBytes") ?? maxFetchBytes;
+    this.#accessToken = accessToken?.trim() || undefined;
+  }
+
+  get url(): string {
+    return this.#url;
+  }
+
+  get hasAccessToken(): boolean {
+    return this.#accessToken !== undefined;
+  }
+
+  /**
+   * Clone this gateway with a different UKYC access token, keeping URL, fetch behavior and
+   * size limits. Cloning instead of mutating keeps a gateway shared by another session or
+   * client state free of this token.
+   */
+  withAccessToken(accessToken?: string): BlobGateway {
+    return new BlobGateway({
+      url: this.#url,
+      fetchFn: this.#fetch,
+      maxFetchBytes: this.#maxFetchBytes,
+      accessToken,
+    });
   }
 
   async uploadCredentialBlobs({
@@ -114,7 +202,6 @@ export class BlobGateway {
     copy,
   }: UploadCredentialBlobsParams): Promise<BlobGatewayUploadResponse> {
     const uploadUrl = `${this.#url}/blob/v1/requests/${encodeURIComponent(requestId)}/upload`;
-    const startedAt = Date.now();
     const body = new FormData();
     if (original) {
       body.append("original", new Blob([toArrayBuffer(original)]), "original.blob");
@@ -132,41 +219,13 @@ export class BlobGateway {
       ? createBlobContentReference(copy).then((reference) => reference.cid)
       : undefined;
 
-    let response: Response;
-    try {
-      response = await this.#fetch(uploadUrl, {
-        method: "POST",
-        body,
-      });
-    } catch (error) {
-      console.error("blob-gateway upload request failed before response");
-      console.error(
-        JSON.stringify(
-          {
-            request_id: requestId,
-            url: uploadUrl,
-            elapsed_ms: Date.now() - startedAt,
-            error: error instanceof Error ? error.message : String(error),
-            cause:
-              error instanceof Error && error.cause
-                ? error.cause instanceof Error
-                  ? error.cause.message
-                  : String(error.cause)
-                : undefined,
-          },
-          null,
-          2,
-        ),
-      );
-      throw error;
+    const response = await this.#fetch(uploadUrl, this.#withAccessToken({ method: "POST", body }));
+
+    if (!response.ok) {
+      throw await readBlobGatewayHttpError(response, "upload");
     }
 
     const responseText = await response.text();
-
-    if (!response.ok) {
-      throw new Error(`blob gateway upload failed with ${response.status}: ${responseText}`);
-    }
-
     const parsed = JSON.parse(responseText) as BlobGatewayUploadResponse;
     const [originalCid, copyCid] = await Promise.all([expectedOriginalCid, expectedCopyCid]);
 
@@ -176,8 +235,12 @@ export class BlobGateway {
     return parsed;
   }
 
-  async fetchBlob({ contentUri, expectedSize, maxBytes }: FetchBlobParams): Promise<Uint8Array> {
-    const cid = rootCidFromContentUri(contentUri);
+  async fetchBlob({
+    credentialId,
+    contentUri,
+    expectedSize,
+    maxBytes,
+  }: FetchBlobParams): Promise<Uint8Array> {
     const expectedByteLength = normalizeByteCount(expectedSize, "expectedSize");
     const explicitMaxBytes = normalizeByteCount(maxBytes, "maxBytes");
     const maxFetchBytes = explicitMaxBytes ?? this.#maxFetchBytes;
@@ -189,16 +252,14 @@ export class BlobGateway {
     }
 
     const maxResponseBytes = expectedByteLength ?? maxFetchBytes;
-    const fetchUrl = `${this.#url}/blob/v1/ipfs/${encodeURIComponent(cid)}`;
+    const fetchUrl = this.#credentialUrl(credentialId);
 
-    const response = await this.#fetch(fetchUrl);
+    const response = await this.#fetch(fetchUrl, this.#withAccessToken());
     const contentLength = response.headers.get("content-length");
     const declaredContentLength = parseContentLength(contentLength);
 
     if (!response.ok) {
-      const responseText = await response.text();
-
-      throw new Error(`blob gateway fetch failed with ${response.status}: ${responseText}`);
+      throw await readBlobGatewayHttpError(response, "fetch");
     }
 
     if (declaredContentLength !== undefined && declaredContentLength > maxResponseBytes) {
@@ -218,16 +279,87 @@ export class BlobGateway {
       );
     }
 
-    const contentCid = await ipfsOnlyHash(content, CID_IMPORT_POLICY);
+    if (isIpfsContentUri(contentUri)) {
+      const cid = rootCidFromContentUri(contentUri);
+      const contentCid = await ipfsOnlyHash(content, CID_IMPORT_POLICY);
 
-    if (contentCid.toString() !== cid) {
-      throw new Error(
-        `blob gateway returned content with CID ${contentCid.toString()}, expected ${cid}`,
-      );
+      if (contentCid.toString() !== cid) {
+        throw new Error(
+          `blob gateway returned content with CID ${contentCid.toString()}, expected ${cid}`,
+        );
+      }
     }
 
     return content;
   }
+
+  async deleteCredentialBlob({ credentialId }: DeleteCredentialBlobParams): Promise<void> {
+    const response = await this.#fetch(
+      this.#credentialUrl(credentialId),
+      this.#withAccessToken({ method: "DELETE" }),
+    );
+
+    if (!response.ok) {
+      throw await readBlobGatewayHttpError(response, "delete");
+    }
+  }
+
+  #credentialUrl(credentialId: string): string {
+    return `${this.#url}/blob/v1/credentials/${encodeURIComponent(credentialId)}`;
+  }
+
+  #withAccessToken(init?: RequestInit): RequestInit | undefined {
+    if (!this.#accessToken) {
+      return init;
+    }
+
+    const headers = new Headers(init?.headers);
+    headers.set("Authorization", `AccessToken ${this.#accessToken}`);
+    return { ...init, headers };
+  }
+}
+
+async function readBlobGatewayHttpError(
+  response: Response,
+  operation: BlobGatewayOperation,
+): Promise<BlobGatewayHttpError> {
+  let responseText = "";
+  try {
+    responseText = new TextDecoder().decode(
+      await readResponseBytes(response, MAX_BLOB_GATEWAY_ERROR_BYTES),
+    );
+  } catch {
+    // Opaque or oversized intermediary responses must not leak into application logs.
+  }
+  return blobGatewayHttpError(response, operation, responseText);
+}
+
+function blobGatewayHttpError(
+  response: Response,
+  operation: BlobGatewayOperation,
+  responseText: string,
+): BlobGatewayHttpError {
+  let parsed: { code?: unknown; error?: unknown } = {};
+  if (response.headers.get("content-type")?.toLowerCase().includes("json")) {
+    try {
+      parsed = JSON.parse(responseText) as { code?: unknown; error?: unknown };
+    } catch {
+      // Malformed error responses are represented by status and request ID only.
+    }
+  }
+  const code = typeof parsed.code === "string" ? parsed.code : "BLOB_GATEWAY_HTTP_ERROR";
+  const candidate = typeof parsed.error === "string" ? parsed.error.trim() : "";
+  const detail =
+    candidate && !/<(?:!doctype|html|body|script)\b/i.test(candidate)
+      ? candidate.replace(/\s+/g, " ").slice(0, 200)
+      : undefined;
+  return new BlobGatewayHttpError(
+    operation,
+    response.status,
+    code,
+    response.headers.get("x-request-id") ?? undefined,
+    detail,
+  );
 }
 
 function rootCidFromContentUri(contentUri: string): string {

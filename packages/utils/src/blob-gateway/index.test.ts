@@ -5,9 +5,35 @@ import { describe, expect, it, vi } from "vitest";
 import { base64Encode, utf8Encode } from "../codecs";
 import {
   BlobGateway,
+  BlobGatewayHttpError,
   createBlobContentReference,
+  createUkycContentUri,
+  requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
 } from "./index.js";
+
+describe("requireAccessTokenForUkycContent", () => {
+  it("allows ipfs and inline deletes without an accessToken", () => {
+    expect(() => requireAccessTokenForUkycContent("ipfs://cid", false)).not.toThrow();
+    expect(() => requireAccessTokenForUkycContent(null, false)).not.toThrow();
+  });
+
+  it("rejects ukyc deletes when no accessToken was configured", () => {
+    expect(() => requireAccessTokenForUkycContent("ukyc://object-1", false)).toThrow(
+      /requires an accessToken/,
+    );
+  });
+});
+
+describe("createUkycContentUri", () => {
+  it("builds storage_id/blobs/blob_id", () => {
+    expect(createUkycContentUri("storage-abc", "blob-1")).toBe("ukyc://storage-abc/blobs/blob-1");
+  });
+
+  it("rejects a storage_id with path segments", () => {
+    expect(() => createUkycContentUri("storage-abc/extra", "blob-1")).toThrow(/storage_id/);
+  });
+});
 
 describe("createBlobContentReference", () => {
   it("creates a blob-gateway compatible content reference", async () => {
@@ -100,6 +126,27 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
   });
 
+  it("sends AccessToken on upload when configured at construct time", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      accessToken: "mm-envelope",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return Response.json({ request_id: "request-1" });
+      },
+    });
+
+    await gateway.uploadCredentialBlobs({
+      requestId: "request-1",
+      original: utf8Encode("original"),
+    });
+
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
+  });
+
   it("uploads a copy blob without requiring an original blob", async () => {
     const copy = utf8Encode("copy");
     const { cid } = await createBlobContentReference(copy);
@@ -119,6 +166,63 @@ describe("BlobGateway", () => {
 
     expect(result).toEqual({ request_id: "request-1", copy_cid: cid });
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
+  });
+
+  it("does not include opaque HTML response bodies in upload errors", async () => {
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () =>
+        new Response("<!DOCTYPE html><html><body>blocked by edge</body></html>", {
+          status: 403,
+          headers: {
+            "content-type": "text/html",
+            "x-request-id": "gateway-request-42",
+          },
+        }),
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayHttpError",
+      message:
+        "blob gateway upload failed with 403 (BLOB_GATEWAY_HTTP_ERROR, request gateway-request-42)",
+      operation: "upload",
+      status: 403,
+      code: "BLOB_GATEWAY_HTTP_ERROR",
+      requestId: "gateway-request-42",
+      detail: undefined,
+    } satisfies Partial<BlobGatewayHttpError>);
+  });
+
+  it("preserves structured gateway error codes without logging the raw response", async () => {
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () =>
+        Response.json(
+          {
+            error: "UKYC storage upload request failed",
+            code: "UKYC_UPLOAD_FAILED",
+          },
+          { status: 502, headers: { "x-request-id": "gateway-request-43" } },
+        ),
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toMatchObject({
+      message:
+        "blob gateway upload failed with 502 (UKYC_UPLOAD_FAILED, request gateway-request-43): UKYC storage upload request failed",
+      status: 502,
+      code: "UKYC_UPLOAD_FAILED",
+      requestId: "gateway-request-43",
+    });
   });
 
   it("rejects upload responses whose CID does not match the uploaded bytes", async () => {
@@ -151,12 +255,15 @@ describe("BlobGateway", () => {
       },
     });
 
-    const result = await gateway.fetchBlob({ contentUri: uri, expectedSize: size });
+    const result = await gateway.fetchBlob({
+      credentialId: "credential-1",
+      contentUri: uri,
+      expectedSize: size,
+    });
 
     expect(result).toEqual(content);
-    expect(calls[0]?.[0]).toBe(
-      `https://blob.example/blob/v1/ipfs/${encodeURIComponent(uri.slice("ipfs://".length))}`,
-    );
+    expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/credentials/credential-1");
+    expect(calls[0]?.[1]?.headers).toBeUndefined();
   });
 
   it("rejects fetched blobs whose bytes do not match the content URI CID", async () => {
@@ -166,9 +273,9 @@ describe("BlobGateway", () => {
       fetchFn: async () => new Response(utf8Encode("tampered")),
     });
 
-    await expect(gateway.fetchBlob({ contentUri: uri })).rejects.toThrow(
-      /blob gateway returned content with CID .+, expected .+/,
-    );
+    await expect(
+      gateway.fetchBlob({ credentialId: "credential-1", contentUri: uri }),
+    ).rejects.toThrow(/blob gateway returned content with CID .+, expected .+/);
   });
 
   it("rejects fetched blobs larger than the expected size while reading", async () => {
@@ -180,7 +287,11 @@ describe("BlobGateway", () => {
     });
 
     await expect(
-      gateway.fetchBlob({ contentUri: uri, expectedSize: content.byteLength - 1 }),
+      gateway.fetchBlob({
+        credentialId: "credential-1",
+        contentUri: uri,
+        expectedSize: content.byteLength - 1,
+      }),
     ).rejects.toThrow("blob gateway fetch exceeded maximum size of 6 bytes");
   });
 
@@ -196,9 +307,9 @@ describe("BlobGateway", () => {
       fetchFn: async () => response,
     });
 
-    await expect(gateway.fetchBlob({ contentUri: uri, maxBytes: 6 })).rejects.toThrow(
-      "blob gateway response content-length 7 exceeds maximum fetch size 6",
-    );
+    await expect(
+      gateway.fetchBlob({ credentialId: "credential-1", contentUri: uri, maxBytes: 6 }),
+    ).rejects.toThrow("blob gateway response content-length 7 exceeds maximum fetch size 6");
     expect(cancel).toHaveBeenCalled();
   });
 
@@ -212,7 +323,108 @@ describe("BlobGateway", () => {
     });
 
     await expect(
-      gateway.fetchBlob({ contentUri: uri, expectedSize: content.byteLength }),
+      gateway.fetchBlob({
+        credentialId: "credential-1",
+        contentUri: uri,
+        expectedSize: content.byteLength,
+      }),
     ).rejects.toThrow("blob gateway expected size 7 exceeds maximum fetch size 4");
+  });
+
+  it("skips CID checks for ukyc:// blobs and only verifies size", async () => {
+    const content = utf8Encode("ukyc-bytes");
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(content),
+    });
+
+    await expect(
+      gateway.fetchBlob({
+        credentialId: "credential-1",
+        contentUri: "ukyc://object-1",
+        expectedSize: content.byteLength,
+      }),
+    ).resolves.toEqual(content);
+  });
+
+  it("sends AccessToken on fetch when configured at construct time", async () => {
+    const content = utf8Encode("content");
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      accessToken: "mm-envelope",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(content);
+      },
+    });
+
+    await gateway.fetchBlob({ credentialId: "credential-1", contentUri: "ukyc://object-1" });
+
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
+  });
+
+  it("deletes credential blobs by id and treats 204 as success", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    await expect(
+      gateway.deleteCredentialBlob({ credentialId: "credential-1" }),
+    ).resolves.toBeUndefined();
+    expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/credentials/credential-1");
+    expect(calls[0]?.[1]?.method).toBe("DELETE");
+  });
+
+  it("clones with a new access token without mutating the source gateway", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example/",
+      maxFetchBytes: 1024,
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    const authorized = gateway.withAccessToken("mm-envelope");
+    expect(gateway.hasAccessToken).toBe(false);
+    expect(authorized.hasAccessToken).toBe(true);
+    expect(authorized.withAccessToken().hasAccessToken).toBe(false);
+    expect(authorized.url).toBe("https://blob.example");
+
+    await authorized.deleteCredentialBlob({ credentialId: "credential-1" });
+    await gateway.deleteCredentialBlob({ credentialId: "credential-1" });
+
+    expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/credentials/credential-1");
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
+    expect(new Headers(calls[1]?.[1]?.headers).get("Authorization")).toBeNull();
+  });
+
+  it("sends AccessToken on delete when configured at construct time", async () => {
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      accessToken: "mm-envelope",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    await gateway.deleteCredentialBlob({ credentialId: "credential-1" });
+
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
   });
 });

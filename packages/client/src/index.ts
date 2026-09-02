@@ -3,17 +3,23 @@ import type {
   EncryptionPasswordStore,
   PublicEncryptionProfile,
 } from "@idos-network/enclave";
-import type { KwilSigner } from "@idos-network/kwil-js";
 
 import {
-  buildEphemeralSignedCredentialContentReference,
+  buildPreliminaryIDOSCredential,
+  buildSignedCredentialContentReference,
+  mapPreliminaryToIDOSCredential,
   matchLevelOrHigher,
+  PreliminaryIDOSCredential,
   recordFilter,
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
+  createKgwAuthenticatedBlobGateway,
+  createNodeKwilClient,
   createWebKwilClient,
+  isMmTokenAuth,
   type KwilActionClient,
+  mmTokenCredentialContentUri,
   signNearMessage,
   type Wallet,
 } from "@idos-network/kwil-infra";
@@ -23,6 +29,8 @@ import {
   addWallet,
   addWallets,
   addAttribute as createAttribute,
+  createPreliminaryCredential,
+  type CreatePreliminaryCredentialInput,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
   type GetWalletsOutput,
@@ -50,9 +58,11 @@ import {
   sharePreliminaryCredential,
   type WalletType,
 } from "@idos-network/kwil-infra/actions";
+import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 import {
   BlobGateway,
   createBlobContentReference,
+  requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
 } from "@idos-network/utils/blob-gateway";
 import {
@@ -61,7 +71,7 @@ import {
   hexEncodeSha256Hash,
   utf8Decode,
 } from "@idos-network/utils/codecs";
-import { LocalStorageStore, type Store } from "@idos-network/utils/store";
+import { LocalStorageStore, MemoryStore, type Store } from "@idos-network/utils/store";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
@@ -71,6 +81,52 @@ type Properties<T> = {
   // oxlint-disable-next-line typescript/no-restricted-types -- All functions are to be removed.
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
 };
+
+function isBrowserRuntime(): boolean {
+  return typeof window !== "undefined";
+}
+
+function usesNodeKwil(kwilClient: KwilActionClient): boolean {
+  return kwilClient.client instanceof NodeKwil;
+}
+
+function idleBlobGateway(url: string): BlobGateway {
+  if (!isBrowserRuntime()) {
+    return new BlobGateway({ url });
+  }
+
+  return new BlobGateway({
+    url,
+    // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
+    // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
+    fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
+  });
+}
+
+function blobGatewayForSigner(idle: idOSClientIdle, kwilSigner: KwilSigner): BlobGateway {
+  if (usesNodeKwil(idle.kwilClient)) {
+    return createKgwAuthenticatedBlobGateway({
+      url: idle.blobGateway.url,
+      kwilClient: idle.kwilClient,
+      signer: kwilSigner,
+    });
+  }
+
+  return isMmTokenAuth(kwilSigner)
+    ? idle.blobGateway.withAccessToken(kwilSigner.accessToken)
+    : idle.blobGateway;
+}
+
+function contentUriForWallet(
+  walletType: WalletType,
+  kwilSigner: KwilSigner,
+  credentialId: string,
+): string | undefined {
+  if (walletType !== "MM") {
+    return undefined;
+  }
+  return mmTokenCredentialContentUri(kwilSigner, credentialId);
+}
 
 export type idOSClient =
   | idOSClientConfiguration
@@ -105,7 +161,7 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
     this.nodeUrl = params.nodeUrl;
     this.blobGatewayUrl = params.blobGatewayUrl;
     this.enclaveOptions = params.enclaveOptions;
-    this.store = params.store ?? new LocalStorageStore();
+    this.store = params.store ?? (isBrowserRuntime() ? new LocalStorageStore() : new MemoryStore());
 
     // TODO: This is a mess because of types...
     if (params.enclaveProvider) {
@@ -146,21 +202,21 @@ export class idOSClientIdle {
   }
 
   static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
-    const kwilClient = await createWebKwilClient({
+    const createKwilClient = isBrowserRuntime() ? createWebKwilClient : createNodeKwilClient;
+    const kwilClient = await createKwilClient({
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
 
     await params.enclaveProvider.load();
 
-    const blobGateway = new BlobGateway({
-      url: params.blobGatewayUrl ?? params.nodeUrl,
-      // Browser blob reads need the KGW HttpOnly session cookie. That only works if the
-      // blob gateway is covered by the cookie's Domain (typically same host as nodeUrl/KGW).
-      fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
-    });
-
-    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider, blobGateway);
+    const blobGatewayUrl = params.blobGatewayUrl ?? params.nodeUrl;
+    return new idOSClientIdle(
+      params.store,
+      kwilClient,
+      params.enclaveProvider,
+      idleBlobGateway(blobGatewayUrl),
+    );
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
@@ -194,6 +250,7 @@ export class idOSClientIdle {
       walletIdentifier,
       walletPublicKey,
       walletType,
+      blobGatewayForSigner(this, kwilSigner),
     );
   }
 
@@ -221,6 +278,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     walletIdentifier: string,
     walletPublicKey: string | undefined,
     walletType: WalletType,
+    blobGateway: BlobGateway,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -231,14 +289,19 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
-    this.blobGateway = idOSClientIdle.blobGateway;
+    this.blobGateway = blobGateway;
     // @ts-expect-error - TODO: Fix this
     this.enclaveProvider.setSigner(this.signer);
   }
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
+    return new idOSClientIdle(
+      this.store,
+      this.kwilClient,
+      this.enclaveProvider,
+      idleBlobGateway(this.blobGateway.url),
+    );
   }
 
   async hasProfile(): Promise<boolean> {
@@ -312,15 +375,79 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider, this.blobGateway);
+    return new idOSClientIdle(
+      this.store,
+      this.kwilClient,
+      this.enclaveProvider,
+      idleBlobGateway(this.blobGateway.url),
+    );
   }
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
     return dwgMessage(this.kwilClient, params).then((res) => res.message);
   }
 
+  async createCredential(
+    publicNotes: string,
+    plaintextContent: Uint8Array<ArrayBufferLike>,
+    // In case of credential creation on users behalf, this would be a issuer key
+    issuerSigningSecretKey?: Uint8Array,
+  ): Promise<Omit<idOSCredential, "user_id" | "content" | "inserter_type" | "inserter_id">> {
+    const credentialId = crypto.randomUUID();
+    const preliminaryCredential: PreliminaryIDOSCredential = {
+      ...(await buildPreliminaryIDOSCredential({
+        publicNotes,
+        plaintextContent,
+        recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
+        issuerSigningSecretKey,
+        contentUri: contentUriForWallet(this.walletType, this.kwilSigner, credentialId),
+      })),
+      id: credentialId,
+    };
+    requireAccessTokenForUkycContent(
+      preliminaryCredential.contentUri,
+      this.blobGateway.hasAccessToken,
+    );
+
+    const requestId = crypto.randomUUID();
+
+    const payload: CreatePreliminaryCredentialInput = {
+      request_id: requestId,
+      credential_id: preliminaryCredential.id,
+      issuer_auth_public_key: preliminaryCredential.issuerAuthPublicKey,
+      encryptor_public_key: preliminaryCredential.encryptorPublicKey,
+      content_uri: preliminaryCredential.contentUri,
+      content_size: preliminaryCredential.contentSize,
+      content_hash: hexEncodeSha256Hash(plaintextContent),
+      public_notes: preliminaryCredential.publicNotes,
+      public_notes_signature: preliminaryCredential.publicNotesSignature,
+      broader_signature: preliminaryCredential.broaderSignature,
+    };
+
+    await createPreliminaryCredential(this.kwilClient, payload);
+
+    await this.blobGateway.uploadCredentialBlobs({
+      requestId,
+      original: preliminaryCredential.encryptedContent,
+    });
+
+    return mapPreliminaryToIDOSCredential(preliminaryCredential);
+  }
+
   async removeCredential(id: string): Promise<{ id: string }> {
+    const credential = await this.getCredentialById(id);
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+
+    const contentUri = credential.content_uri ?? null;
+    requireAccessTokenForUkycContent(contentUri, this.blobGateway.hasAccessToken);
+
     await removeCredential(this.kwilClient, { id });
+
+    if (!contentUri) {
+      return { id };
+    }
+
+    await this.blobGateway.deleteCredentialBlob({ credentialId: id });
     return { id };
   }
 
@@ -368,6 +495,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const plaintext = await this.#decryptCredentialContent(credential);
 
     return utf8Decode(plaintext);
+  }
+
+  async getCredentialWithEncryptedContent(id: string): Promise<idOSCredential> {
+    const credential = await this.getCredentialById(id);
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+    return this.#credentialWithInlineContent(credential);
   }
 
   async getCredentialSharedContent(id: string): Promise<string> {
@@ -628,13 +761,18 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     // User issues the shared copy: sign content_uri with an ephemeral user-side key.
     // Copy issuer_auth_public_key need not match the original credential's issuer.
-    const copyReference = await createBlobContentReference(content);
-    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
+    const copyId = crypto.randomUUID();
+    const ukycContentUri = contentUriForWallet(this.walletType, this.kwilSigner, copyId);
+    requireAccessTokenForUkycContent(ukycContentUri, this.blobGateway.hasAccessToken);
+    const copyReference = ukycContentUri
+      ? { uri: ukycContentUri, size: content.byteLength }
+      : await createBlobContentReference(content);
+    const signedReference = buildSignedCredentialContentReference("", copyReference.uri);
 
     const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,
       request_id: crypto.randomUUID(),
-      copy_id: crypto.randomUUID(),
+      copy_id: copyId,
       original_id: credential.id,
       content_uri: copyReference.uri,
       content_size: copyReference.size,

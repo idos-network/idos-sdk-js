@@ -36,7 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 const ProfileSchema = z.object({
   recipientEncryptionPublicKey: z.string(),
-  encryptionPasswordStore: z.enum(["user", "mpc"]),
+  encryptionPasswordStore: z.enum(["user", "mpc", "mm"]),
   walletType: z.enum(WalletType),
   walletAddress: z.string(),
   walletPublicKey: z.string(),
