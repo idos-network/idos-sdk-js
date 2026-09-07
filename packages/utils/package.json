@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@noble/hashes": "^2.3.0",
-    "@scure/bip39": "2.2.0",
+    "@scure/bip39": "2.4.0",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/binary": "catalog:utils",
     "@stablelib/bytes": "catalog:utils",
