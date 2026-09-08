@@ -1,26 +1,16 @@
+import { base64Decode, base64Encode, hexDecode, utf8Encode } from "@idos-network/utils/codecs";
+import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
-import type { CredentialSubject } from "../types";
-
 import {
-  deriveLevel,
+  buildInsertableIDOSCredential,
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
-} from "./";
-
-const defaultCredential: CredentialSubject = {
-  id: "uuid:1234",
-  firstName: "John",
-  familyName: "Doe",
-  idDocumentType: "PASSPORT",
-  dateOfBirth: new Date("1990-01-01"),
-  idDocumentCountry: "US",
-  idDocumentNumber: "123456789",
-  idDocumentFrontFile: Buffer.from("ID Document Front"),
-  selfieFile: Buffer.alloc(0),
-};
+  type Addon,
+  type BaseLevel,
+} from ".";
 
 describe("recordFilter", () => {
   [
@@ -76,6 +66,9 @@ describe("recordFilter", () => {
 
 describe("matchLevelOrHigher", () => {
   [
+    ["unverified", [], "unverified", true],
+    ["unverified", [], "basic", true],
+    ["basic", [], "unverified", false],
     ["basic", [], "basic+liveness", true],
     ["plus", [], "plus+liveness", true],
     ["plus", [], "basic", false],
@@ -86,11 +79,7 @@ describe("matchLevelOrHigher", () => {
   ].forEach(([level, requiredAddons, testLevel, expected]) => {
     it(`level=${level} requiredAddons=[${(requiredAddons as string[]).join(",")}] testLevel=${testLevel} => ${expected}`, () => {
       expect(
-        matchLevelOrHigher(
-          level as "basic" | "plus",
-          requiredAddons as ("liveness" | "email" | "phoneNumber")[],
-          testLevel as string,
-        ),
+        matchLevelOrHigher(level as BaseLevel, requiredAddons as Addon[], testLevel as string),
       ).toBe(expected as boolean);
     });
   });
@@ -115,6 +104,12 @@ describe("pickHighestMatchingLevel", () => {
       "plus",
       ["email", "phoneNumber"],
       null,
+    ],
+    [
+      ["unverified+phoneNumber", "basic+phoneNumber", "plus+phoneNumber"],
+      "unverified",
+      ["phoneNumber"],
+      "plus+phoneNumber",
     ],
     [["basic+liveness", "plus+liveness"], "basic", ["liveness"], "plus+liveness"],
   ].forEach(([levels, requiredLevel, requiredAddons, expected]) => {
@@ -247,57 +242,47 @@ describe("highestMatchingCredential", () => {
   });
 });
 
-describe("deriveLevel", () => {
-  it("basic only", () => {
+describe("buildInsertableIDOSCredential", () => {
+  it("builds an insertable credential with verifiable signatures", () => {
+    const userId = "user-1";
+    const publicNotes = JSON.stringify({ type: "kyc", level: "basic" });
+    const content = base64Encode(utf8Encode(JSON.stringify({ firstName: "Ada" })));
+    const encryptorPublicKey = base64Encode(new Uint8Array([1, 2, 3, 4]));
+
+    const credential = buildInsertableIDOSCredential(
+      userId,
+      publicNotes,
+      content,
+      encryptorPublicKey,
+    );
+
+    const issuerAuthPublicKey = hexDecode(credential.issuer_auth_public_key);
+    const publicNotesSignature = base64Decode(credential.public_notes_signature);
+
+    expect(credential).toMatchObject({
+      user_id: userId,
+      content,
+      public_notes: publicNotes,
+      encryptor_public_key: encryptorPublicKey,
+    });
+    expect(issuerAuthPublicKey).toHaveLength(nacl.sign.publicKeyLength);
+    expect(publicNotesSignature).toHaveLength(nacl.sign.signatureLength);
+    expect(base64Decode(credential.broader_signature)).toHaveLength(nacl.sign.signatureLength);
     expect(
-      deriveLevel({
-        ...defaultCredential,
-        // @ts-expect-error - to test absence of selfieFile
-        selfieFile: undefined,
-      }),
-    ).toBe("basic");
+      nacl.sign.detached.verify(utf8Encode(publicNotes), publicNotesSignature, issuerAuthPublicKey),
+    ).toBe(true);
+    expect(
+      nacl.sign.detached.verify(
+        Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
+        base64Decode(credential.broader_signature),
+        issuerAuthPublicKey,
+      ),
+    ).toBe(true);
   });
 
-  it("basic+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-      }),
-    ).toBe("basic+liveness");
-  });
-
-  it("plus+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness");
-  });
-
-  it("plus+liveness+phoneNumber", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        selfieFile: Buffer.from("Selfie"),
-        phoneNumber: "+1234567890",
-        email: "john.doe@example.com",
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness+email+phoneNumber");
+  it("requires an encryptor public key", () => {
+    expect(() => buildInsertableIDOSCredential("user-1", "{}", "content", "")).toThrow(
+      "Missing `encryptorPublicKey`",
+    );
   });
 });

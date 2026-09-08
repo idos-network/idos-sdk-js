@@ -1,122 +1,22 @@
-import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-import {
-  base64Decode,
-  base64Encode,
-  hexEncode,
-  utf8Encode,
-  fileToBase85,
-} from "@idos-network/utils/codecs";
+import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-import type {
-  AvailableIssuerType,
-  CredentialFields,
-  CredentialResidentialAddress,
-  CredentialSubject,
-  CredentialSubjectFaceId,
-  CustomIssuerType,
-  InsertableIDOSCredential,
-} from "../types";
+import type { InsertableIDOSCredential } from "../types";
 
-export function capitalizeFirstLetter(str: string): string {
-  return str[0].toUpperCase() + str.slice(1);
-}
+// Proxying functions
+export * from "./issuer";
 
-function isIssuerKey(issuer: AvailableIssuerType): issuer is Ed25519VerificationKey2020 {
-  return (
-    typeof issuer === "object" &&
-    issuer !== null &&
-    "type" in issuer &&
-    "id" in issuer &&
-    "controller" in issuer
-  );
-}
-
-function isCustomIssuerType(issuer: AvailableIssuerType): issuer is CustomIssuerType {
-  return (
-    typeof issuer === "object" &&
-    issuer !== null &&
-    "issuer" in issuer &&
-    "publicKeyMultibase" in issuer
-  );
-}
-
-export async function issuerToKey(
-  issuer: AvailableIssuerType,
-): Promise<Ed25519VerificationKey2020> {
-  if (isIssuerKey(issuer)) {
-    return issuer;
-  }
-
-  if (isCustomIssuerType(issuer)) {
-    return await Ed25519VerificationKey2020.from({
-      id: `${issuer.issuer}/keys/1`,
-      controller: `${issuer.issuer}/issuers/1`,
-      publicKeyMultibase: issuer.publicKeyMultibase,
-      privateKeyMultibase: issuer.privateKeyMultibase,
-      type: "Ed25519VerificationKey2020",
-    });
-  }
-
-  return await Ed25519VerificationKey2020.from({ ...issuer, type: "Ed25519VerificationKey2020" });
-}
-
-export function convertValues<
-  K extends
-    | CredentialFields
-    | CredentialSubject
-    | CredentialResidentialAddress
-    | CredentialSubjectFaceId,
->(fields: K, prefix?: string): Record<string, unknown> {
-  const acc: Record<string, unknown> = {};
-
-  for (const key in fields) {
-    if (Object.hasOwn(fields, key)) {
-      const value = fields[key];
-      const name = prefix ? `${prefix}${capitalizeFirstLetter(key)}` : key;
-      if (value instanceof Date) {
-        acc[name] = value.toISOString();
-      } else if (value instanceof Buffer) {
-        // Convert file to base85
-        acc[name] = fileToBase85(value);
-      } else {
-        acc[name] = value;
-      }
-    }
-  }
-
-  return acc;
-}
-
-type BaseLevel = "basic" | "plus";
-type Addon = "liveness" | "email" | "phoneNumber";
-
-export function deriveLevel(credential: CredentialSubject): string {
-  let level: BaseLevel = "basic";
-
-  // Address is a sign for plus+
-  const address = credential.residentialAddress;
-  if (address?.proofFile && address?.city && address?.proofCategory) {
-    level = "plus";
-  }
-
-  const addons: Addon[] = [];
-  if (credential.selfieFile) {
-    addons.push("liveness");
-  }
-
-  if (credential.email) {
-    addons.push("email");
-  }
-
-  if (credential.phoneNumber) {
-    addons.push("phoneNumber");
-  }
-
-  return [level, ...addons].join("+");
-}
+export type BaseLevel = "unverified" | "basic" | "plus";
+export type Addon =
+  | "liveness"
+  | "email"
+  | "phoneNumber"
+  | "edd"
+  | "sow"
+  | "screening"
+  | "onboarding";
 
 export function parseLevel(level: string): {
   base: BaseLevel;
@@ -126,6 +26,18 @@ export function parseLevel(level: string): {
   return { base, addons };
 }
 
+export function assertNoExtraFields(
+  section: string,
+  expectedFields: ReadonlySet<string>,
+  value: object | undefined,
+): void {
+  const extraFields = Object.keys(value ?? {}).filter((field) => !expectedFields.has(field));
+
+  if (extraFields.length > 0) {
+    throw new Error(`Unexpected ${section} fields: ${extraFields.join(", ")}`);
+  }
+}
+
 export function matchLevelOrHigher(
   level: BaseLevel,
   requiredAddons: Addon[],
@@ -133,7 +45,12 @@ export function matchLevelOrHigher(
 ): boolean {
   const { base: currentBaseLevel, addons: currentAddons } = parseLevel(currentLevel);
 
-  // TODO: Consider pop+ or uniqueness+ scenarios
+  // Basic can only match basic or plus not unverified
+  if (level === "basic" && currentBaseLevel === "unverified") {
+    return false;
+  }
+
+  // Plus can only match plus
   if (level === "plus" && currentBaseLevel !== "plus") {
     return false;
   }
@@ -144,6 +61,10 @@ export function matchLevelOrHigher(
 export function levelScore(level: string): number {
   const { base, addons } = parseLevel(level);
   let score = 0;
+
+  if (base === "basic") {
+    score += 50;
+  }
 
   if (base === "plus") {
     score += 100;

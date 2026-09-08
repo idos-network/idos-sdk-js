@@ -1,14 +1,12 @@
-import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
 import type {
   AvailableIssuerType,
-  IDDocumentType,
   idOSCredential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
 } from "@idos-network/credentials/types";
+import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
-import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import { verifyCredential } from "@idos-network/credentials/verifier";
 import {
   createNodeKwilClient,
   createServerKwilSigner,
@@ -143,7 +141,7 @@ export class idOSConsumer {
     return params;
   }
 
-  async verifyCredential<K = VerifiableCredentialSubject>(
+  async verifyCredential<K>(
     credentials: VerifiableCredential<K>,
     issuers: AvailableIssuerType[],
   ): Promise<VerifyCredentialResult> {
@@ -154,10 +152,7 @@ export class idOSConsumer {
 export type {
   idOSCredential,
   idOSGrant,
-  Credential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
   VerifyCredentialResult,
   AvailableIssuerType,
-  IDDocumentType,
 };
