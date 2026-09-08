@@ -152,6 +152,7 @@ tweetnacl
 txjson
 typesafety
 uidotdev
+unminified
 unparseable
 unstub
 Upserts
