@@ -26,6 +26,20 @@ export type idOSUserAttribute = GetAttributesOutput;
 export type idOSWallet = UpsertWalletAsInserterInput;
 export type idOSDelegatedWriteGrant = DwgMessageInput;
 
+/** @deprecated Prefer the `*Preliminary*` names matching the Kwil actions. */
+export type {
+  SharePreliminaryCredentialInput as ShareCredentialInput,
+  CreatePreliminaryCredentialsByDwgInput as CreateCredentialsByDwgInput,
+} from "./actions";
+
+/** @deprecated Prefer the `*Preliminary*` names matching the Kwil actions. */
+export {
+  SharePreliminaryCredentialInputSchema as ShareCredentialInputSchema,
+  sharePreliminaryCredential as shareCredential,
+  CreatePreliminaryCredentialsByDwgInputSchema as CreateCredentialsByDwgInputSchema,
+  createPreliminaryCredentialsByDwg as createCredentialsByDwg,
+} from "./actions";
+
 export async function addWallets(
   kwilClient: KwilActionClient,
   wallets: AddWalletInput[],

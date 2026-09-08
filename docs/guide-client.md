@@ -45,6 +45,8 @@ import { createIDOSClient } from "@idos-network/client";
 
 const idOSClientIdle = await createIDOSClient({
   nodeUrl: "https://nodes.idos.network",
+  // Must share KGW's session-cookie Domain (typically same host as nodeUrl).
+  blobGatewayUrl: "https://blob-gateway.idos.network",
   enclaveOptions: {
     container: "#idos-enclave",
   },
@@ -118,7 +120,7 @@ The SDK decrypts through the enclave provider, so plaintext handling stays in th
 
 ## 5) Share a credential (request access grant)
 
-To share a credential with a consumer app/service, create an access grant:
+To share a credential with a consumer app/service, create a blob-backed access grant from the logged-in user session:
 
 ```ts
 const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
@@ -128,7 +130,7 @@ const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
 });
 ```
 
-`requestAccessGrant(...)` creates a shared credential copy encrypted for the consumer and returns the created grant payload.
+`issuer_auth_public_key` on a credential row is whoever **issued that row**. For a shared copy, the **user** is the issuer: the client signs the copy `content_uri` with an ephemeral user-side key. That key need not match the original credential's issuer (often a server app). Kwil verifies the copy signatures under the submitted key and that the original belongs to the caller.
 
 ## 6) Manage wallets
 

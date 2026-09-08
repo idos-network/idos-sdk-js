@@ -136,22 +136,10 @@ export async function filterAndGrantFlow(idosWithUser: IdosWithUser) {
 }
 
 declare const selectedCredential: { id: string };
-declare const userWalletIdentifier: string;
-declare const lockedUntilUnixTimestamp: number;
 
 export async function requestGrantIfNeeded(idosWithUser: IdosWithUser) {
   const accessGrant = await idosWithUser.requestAccessGrant(selectedCredential.id);
   return accessGrant;
-}
-
-export async function requestDelegatedGrantMessage(idosWithUser: IdosWithUser) {
-  const dag = await idosWithUser.requestDAGMessage({
-    dag_owner_wallet_identifier: userWalletIdentifier,
-    dag_grantee_wallet_identifier: publicConfig.IDOS_CONSUMER_PUBLIC_IDENTIFIER,
-    dag_data_id: selectedCredential.id,
-    dag_locked_until: lockedUntilUnixTimestamp,
-  });
-  return dag;
 }
 
 // =============================================================================
@@ -301,18 +289,6 @@ export async function listGrantsExample() {
     size: 20,
   });
   return { grants, totalCount };
-}
-
-declare const dagPayload: {
-  dag_data_id: string;
-  dag_owner_wallet_identifier: string;
-  dag_grantee_wallet_identifier: string;
-  dag_signature: string;
-  dag_locked_until: number;
-};
-
-export async function insertDagGrantExample() {
-  await idosConsumer.createAccessGrantByDag(dagPayload);
 }
 
 declare const grant: { data_id: string };

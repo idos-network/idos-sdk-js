@@ -197,17 +197,6 @@ const existingGrant = grants.find(
 const accessGrant = await idosWithUser.requestAccessGrant(selectedCredential.id);
 ```
 
-- If the app needs delegated access grants, request a DAG message on the frontend and send it to the backend for insertion:
-
-```ts
-const dag = await idosWithUser.requestDAGMessage({
-  dag_owner_wallet_identifier: userWalletIdentifier,
-  dag_grantee_wallet_identifier: publicConfig.IDOS_CONSUMER_PUBLIC_IDENTIFIER,
-  dag_data_id: selectedCredential.id,
-  dag_locked_until: lockedUntilUnixTimestamp,
-});
-```
-
 - Store only non-sensitive grant metadata on the frontend. Retrieve credential contents on the backend.
 
 ---
@@ -366,18 +355,6 @@ const { grants, totalCount } = await idosConsumer.getAccessGrants({
 });
 ```
 
-- If the frontend sends a delegated access grant message, insert it on the backend:
-
-```ts
-await idosConsumer.createAccessGrantByDag({
-  dag_data_id,
-  dag_owner_wallet_identifier,
-  dag_grantee_wallet_identifier,
-  dag_signature,
-  dag_locked_until,
-});
-```
-
 - Retrieve decrypted credential contents from an approved grant:
 
 ```ts
@@ -455,9 +432,8 @@ if (!verificationResult?.verified) {
 - Frontend client initialization: `createIDOSClient`, `withUserSigner`
 - Frontend profile check: `addressHasProfile`
 - Frontend credential filtering: `filterCredentials`
-- Frontend grants: `getAccessGrantsOwned`, `requestAccessGrant`, `requestDAGMessage`
+- Frontend grants: `getAccessGrantsOwned`, `requestAccessGrant`
 - Backend consumer initialization: `idOSConsumer.init`
 - Backend grant listing: `getAccessGrants`
-- Backend delegated grant insertion: `createAccessGrantByDag`
 - Backend credential retrieval: `getCredentialSharedContentDecrypted`
 - Backend credential verification: `verifyCredential`

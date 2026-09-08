@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialRecord as idOSCredential } from "@idos-network/credentials/types";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,

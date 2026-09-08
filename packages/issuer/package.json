@@ -27,6 +27,7 @@
     "build": "tsdown",
     "dev": "tsdown  --watch",
     "publint": "pnpx publint --strict",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -38,7 +39,8 @@
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core",
-    "tsdown": "catalog:build"
+    "tsdown": "catalog:build",
+    "vitest": "catalog:testing"
   },
   "peerDependencies": {
     "typescript": "catalog:build"

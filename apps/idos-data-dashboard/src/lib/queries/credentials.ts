@@ -1,6 +1,5 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
 
-import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 import type { SharedGrant, idOSCredentialWithShares } from "@/components/credentials/types";
@@ -50,16 +49,9 @@ export function useFetchCredentialDetails({ credentialId }: { credentialId: stri
         throw new Error(`"idOSCredential" with id ${credentialId} not found`);
       }
 
-      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
+      const content = await idOSClient.getCredentialContent(credentialId);
 
-      const decryptedContent = await idOSClient.enclaveProvider.decrypt(
-        base64Decode(credential.content),
-        base64Decode(credential.encryptor_public_key),
-      );
-
-      Object.assign(credential, { content: utf8Decode(decryptedContent) });
-
-      return credential;
+      return { ...credential, content };
     },
   });
 }
@@ -135,16 +127,9 @@ export function useFetchSharedCredentialDetails({ credentialId }: { credentialId
         throw new Error(`Shared credential with id ${credentialId} not found`);
       }
 
-      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
+      const content = await idOSClient.getCredentialSharedContent(credentialId);
 
-      const decryptedContent = await idOSClient.enclaveProvider.decrypt(
-        base64Decode(credential.content),
-        base64Decode(credential.encryptor_public_key),
-      );
-
-      Object.assign(credential, { content: utf8Decode(decryptedContent) });
-
-      return credential;
+      return { ...credential, content };
     },
   });
 }

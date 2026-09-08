@@ -25,12 +25,10 @@ See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulat
 
 > 🛑 DANGER 🛑
 >
-> Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
+> Make sure you don't lose access to your signing secret key. Otherwise, you won't be able to authenticate to idOS nodes. The idOS team won't be able to help you.
 
 You'll need:
 
-- `encryptionSecretKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to encrypt the credentials you issue to your users
-  - see [Encryption](encryption.md) for more information
 - `signingKeyPair`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
   - see [Signatures](signatures.md) for more information
 
@@ -96,7 +94,6 @@ import { idOSIssuer as idOSIssuerClass } from "@idos-network/issuer";
 const idOSIssuer = await idOSIssuerClass.init({
   nodeUrl: KWIL_NODE_URL,
   signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
-  encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
 });
 ```
 
@@ -328,26 +325,31 @@ const credentialsPublicNotes = {
 const credentialContent = JSON.stringify(credential);
 
 const credentialPayload = {
-  id: crypto.randomUUID(),
-  user_id: userId,
   plaintextContent: Utf8Codec.encode(credentialContent),
   recipientEncryptionPublicKey: Utf8Codec.encode(userEncryptionPublicKey),
   publicNotes: JSON.stringify(credentialsPublicNotes),
 };
 
-await idOSIssuer.createCredentialByDelegatedWriteGrant(credentialPayload, {
-  id: delegatedWriteGrant.id,
-  ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
-  consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
-  issuerPublicKey: delegatedWriteGrant.issuer_public_key,
-  accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
-  notUsableBefore: delegatedWriteGrant.not_usable_before,
-  notUsableAfter: delegatedWriteGrant.not_usable_after,
-  signature,
-});
+// The copy credential is encrypted to the delegated write grant grantee.
+const copyEncryptionPublicKey = Utf8Codec.encode(granteeEncryptionPublicKey);
+
+await idOSIssuer.createCredentialByDelegatedWriteGrant(
+  credentialPayload,
+  {
+    id: delegatedWriteGrant.id,
+    ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
+    consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
+    issuerPublicKey: delegatedWriteGrant.issuer_public_key,
+    accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
+    notUsableBefore: delegatedWriteGrant.not_usable_before,
+    notUsableAfter: delegatedWriteGrant.not_usable_after,
+    signature,
+  },
+  copyEncryptionPublicKey,
+);
 ```
 
-This will create a credential for the user in the idOS and a copy for you.
+This will create blob-backed original and copy credentials in idOS.
 
 ### [ backend ] Revoking and editing credentials
 

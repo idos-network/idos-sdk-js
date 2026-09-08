@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialRecord as idOSCredential } from "@idos-network/credentials/types";
 
 import { recordFilter } from "@idos-network/credentials/utils";
 import { base64Decode, fromBytesToJson, hexEncode } from "@idos-network/utils/codecs";
@@ -238,6 +238,10 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
 
     const decrypted = await Promise.all(
       credentials.map(async (credential: idOSCredential) => {
+        if (!credential.content) {
+          throw new Error(`Credential ${credential.id} has no inline content`);
+        }
+
         const content = await this.decrypt(
           base64Decode(credential.content),
           base64Decode(credential.encryptor_public_key),
