@@ -1,3 +1,5 @@
+import type { KwilSigner } from "@idos-network/kwil-js";
+
 import { base64Encode } from "@idos-network/utils/codecs";
 import { utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
@@ -13,13 +15,12 @@ const mocks = vi.hoisted(() => ({
   kwilClient: {
     setSigner: vi.fn(),
   },
-  signer: { publicKey: "signer" },
+  signer: { publicKey: "signer" } as unknown as KwilSigner,
 }));
 
 vi.mock("@idos-network/kwil-infra", () => ({
   createKgwAuthenticatedBlobGateway: vi.fn(() => mocks.blobGateway),
   createNodeKwilClient: vi.fn(async () => mocks.kwilClient),
-  createServerKwilSigner: vi.fn(async () => [mocks.signer, "consumer-address"]),
 }));
 
 vi.mock("@idos-network/kwil-infra/actions", () => ({
@@ -43,7 +44,8 @@ describe("idOSConsumer", () => {
     await idOSConsumer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
-      consumerSigner: nacl.sign.keyPair(),
+      consumerSigner: mocks.signer,
+      consumerAddress: "consumer-address",
       recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
     });
 
@@ -59,7 +61,8 @@ describe("idOSConsumer", () => {
 
     await idOSConsumer.init({
       nodeUrl: "https://nodes.example",
-      consumerSigner: nacl.sign.keyPair(),
+      consumerSigner: mocks.signer,
+      consumerAddress: "consumer-address",
       recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
     });
 
@@ -97,7 +100,8 @@ describe("idOSConsumer", () => {
     const consumer = await idOSConsumer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
-      consumerSigner: nacl.sign.keyPair(),
+      consumerSigner: mocks.signer,
+      consumerAddress: "consumer-address",
       recipientEncryptionPrivateKey: base64Encode(recipientKeyPair.secretKey),
     });
 
@@ -137,7 +141,8 @@ describe("idOSConsumer", () => {
     const consumer = await idOSConsumer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
-      consumerSigner: nacl.sign.keyPair(),
+      consumerSigner: mocks.signer,
+      consumerAddress: "consumer-address",
       recipientEncryptionPrivateKey: base64Encode(recipientKeyPair.secretKey),
     });
 

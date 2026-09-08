@@ -10,9 +10,7 @@ import { type VerifyCredentialResult } from "@idos-network/credentials/verifier"
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
-  createServerKwilSigner,
   type KwilActionClient,
-  type KwilSignerType,
 } from "@idos-network/kwil-infra";
 import {
   type GetAccessGrantsGrantedInput,
@@ -43,7 +41,9 @@ export type idOSConsumerConfig = {
    * `consumerSigner` is not itself an MM authentication object. Re-init the consumer to change it.
    */
   mmAuth?: MmTokenAuth;
-  consumerSigner: KwilSignerType;
+  /** Pre-resolve via e.g. `createNaclKwilSigner`/`createEthersWalletKwilSigner` from `@idos-network/kwil-infra`. */
+  consumerSigner: KwilSigner;
+  consumerAddress: string;
 };
 
 export class idOSConsumer {
@@ -59,14 +59,14 @@ export class idOSConsumer {
     chainId,
     blobGatewayUrl,
     mmAuth,
-    consumerSigner,
+    consumerSigner: signer,
+    consumerAddress: address,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
       nodeUrl,
       chainId,
     });
 
-    const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
     const blobGateway = createKgwAuthenticatedBlobGateway({
       url: blobGatewayUrl ?? nodeUrl,

@@ -103,7 +103,7 @@ export const actors = {
     // @ts-expect-error
     const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
 
-    return await idleClient.withUserSigner(signer);
+    return await idleClient.withEvmSigner(signer);
   }),
 
   checkProfile: fromPromise(async ({ input }: { input: { client: Context["client"] } }) => {
