@@ -38,7 +38,9 @@
     "tiny-invariant": "catalog:core"
   },
   "devDependencies": {
-    "tsdown": "catalog:build"
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
   },
   "engines": {
     "node": ">=22.19.0"

@@ -3,10 +3,10 @@ import type {
   idOSCredentialRecord as idOSCredential,
   VerifiableCredential,
 } from "@idos-network/credentials/types";
-import type { VerifyCredentialResult } from "@idos-network/credentials/verifier";
+import type { MmTokenAuth } from "@idos-network/kwil-infra";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
-import { verifyCredential } from "@idos-network/credentials/verifier";
+import { type VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
@@ -24,7 +24,11 @@ import {
   type idOSGrant,
   rescindSharedCredential,
 } from "@idos-network/kwil-infra/actions";
-import { BlobGateway, resolveCredentialEncryptedContent } from "@idos-network/utils/blob-gateway";
+import {
+  BlobGateway,
+  requireAccessTokenForUkycContent,
+  resolveCredentialEncryptedContent,
+} from "@idos-network/utils/blob-gateway";
 import { base64Decode, base64Encode } from "@idos-network/utils/codecs";
 import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
@@ -34,6 +38,11 @@ export type idOSConsumerConfig = {
   nodeUrl?: string;
   chainId?: string;
   blobGatewayUrl?: string;
+  /**
+   * UKYC storage authority for blob GET/DELETE, from `createMmTokenAuth`. Only needed when
+   * `consumerSigner` is not itself an MM authentication object. Re-init the consumer to change it.
+   */
+  mmAuth?: MmTokenAuth;
   consumerSigner: KwilSignerType;
 };
 
@@ -49,6 +58,7 @@ export class idOSConsumer {
     nodeUrl = "https://nodes.idos.network",
     chainId,
     blobGatewayUrl,
+    mmAuth,
     consumerSigner,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
@@ -62,6 +72,7 @@ export class idOSConsumer {
       url: blobGatewayUrl ?? nodeUrl,
       kwilClient,
       signer,
+      mmAuth,
     });
 
     return new idOSConsumer(
@@ -111,7 +122,25 @@ export class idOSConsumer {
   }
 
   async rescindSharedCredential(credentialId: string): Promise<void> {
-    return rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
+    const credential = await this.getCredentialSharedFromIDOS(credentialId);
+    invariant(credential, `Credential with id ${credentialId} not found`);
+
+    const contentUri = credential.content_uri ?? null;
+    requireAccessTokenForUkycContent(contentUri, this.#blobGateway?.hasAccessToken ?? false);
+
+    await rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
+
+    if (!contentUri) {
+      return;
+    }
+
+    if (!this.#blobGateway) {
+      throw new Error(
+        `Credential with id ${credentialId} is blob-backed, but blobGatewayUrl was not configured`,
+      );
+    }
+
+    await this.#blobGateway.deleteCredentialBlob({ credentialId });
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
@@ -143,13 +172,6 @@ export class idOSConsumer {
       grants: await getGrants(this.#kwilClient, params),
       totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
-  }
-
-  async verifyCredential<K>(
-    credentials: VerifiableCredential<K>,
-    issuers: AvailableIssuerType[],
-  ): Promise<VerifyCredentialResult> {
-    return verifyCredential<K>(credentials, issuers);
   }
 }
 

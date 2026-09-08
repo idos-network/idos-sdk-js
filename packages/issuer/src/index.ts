@@ -3,7 +3,6 @@ import type {
   idOSCredential,
   idOSCredentialRecord,
 } from "@idos-network/credentials/types";
-
 import type {
   EditPublicNotesAsIssuerInput,
   idOSDelegatedWriteGrant,
@@ -13,6 +12,7 @@ import type {
   idOSWallet,
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
+
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
