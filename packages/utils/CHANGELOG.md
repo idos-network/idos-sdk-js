@@ -1,5 +1,12 @@
 # @idos-network/utils
 
+## 2.0.1
+
+### Patch Changes
+
+- 1fb5dff: Update libraries
+- 1fb5dff: Libraries update
+
 ## 2.0.0
 
 ## 1.5.0

@@ -1,5 +1,18 @@
 # data-dashboard
 
+## 1.4.2
+
+### Patch Changes
+
+- Updated dependencies [1fb5dff]
+- Updated dependencies [1fb5dff]
+  - @idos-network/client@2.0.1
+  - @idos-network/utils@2.0.1
+  - @idos-network/consumer@2.0.1
+  - @idos-network/credentials@2.0.1
+  - @idos-network/issuer@2.0.1
+  - @idos-network/kwil-infra@2.0.1
+
 ## 1.4.1
 
 ### Patch Changes

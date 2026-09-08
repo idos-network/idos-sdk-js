@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/client",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "idOS Client JavaScript SDK for browser environments",
   "homepage": "https://idos.network",
   "license": "MIT",
