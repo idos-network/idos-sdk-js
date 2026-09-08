@@ -39,10 +39,10 @@ catalogs:
     "zod": "4.5.4"
 
   ethereum:
-    "@wagmi/core": "3.6.5"
+    "@wagmi/core": "3.6.4"
     "ethers": "^6.17.0"
-    "viem": "2.56.3"
-    "wagmi": "3.7.7"
+    "viem": "2.55.11"
+    "wagmi": "3.7.6"
 
   near:
     "@near-wallet-selector/core": "8.10.2"
