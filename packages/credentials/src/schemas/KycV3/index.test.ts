@@ -333,8 +333,6 @@ describe("KycV3 derived fields", () => {
       type: "kyc",
       level: "plus+liveness+sow+onboarding",
       kycLevel: 3,
-      proofOfResidency: { category: "UTILITY_BILL", dateOfIssue: new Date("2021-01-01") },
-      proofOfIdentity: { type: "PASSPORT", dateOfExpiry: undefined },
     });
   });
 });
@@ -419,8 +417,6 @@ describe("KycV3 serialization", () => {
       type: "kyc",
       level,
       kycLevel: 3,
-      proofOfResidency: { category: "UTILITY_BILL", dateOfIssue: new Date("2021-01-01") },
-      proofOfIdentity: { type: "PASSPORT", dateOfExpiry: new Date("2030-01-01") },
     });
 
     const envelope = credential.serializeEnvelope();

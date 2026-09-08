@@ -84,24 +84,10 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
   }
 
   override publicNotes(): PublicNotes {
-    const { residentialAddress, idDocument } = this.subject;
-
     return {
       type: "kyc",
       level: this.level(),
       kycLevel: this.kycLevel(),
-
-      /* Metadata from the credential */
-      proofOfResidency:
-        residentialAddress?.proofCategory && residentialAddress.verified
-          ? {
-              category: residentialAddress.proofCategory,
-              dateOfIssue: residentialAddress.proofDateOfIssue,
-            }
-          : undefined,
-      proofOfIdentity: idDocument?.type
-        ? { type: idDocument.type, dateOfExpiry: idDocument.dateOfExpiry }
-        : undefined,
     };
   }
 

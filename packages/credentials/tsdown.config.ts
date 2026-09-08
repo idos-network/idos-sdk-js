@@ -10,6 +10,9 @@ export default defineConfig({
     "./src/schemas/index.ts",
   ],
   dts: true,
+  // ponytail: dist ships unminified otherwise; ~35% of the gzipped bundle was whitespace
+  // and comments. Sourcemaps still emitted.
+  minify: true,
   deps: {
     neverBundle: [
       "@digitalbazaar/ed25519-signature-2020",
