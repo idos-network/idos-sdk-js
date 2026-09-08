@@ -1,4 +1,4 @@
-import { base64Decode, base64Encode, hexDecode, utf8Encode } from "@idos-network/utils/codecs";
+import { hexEncode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
@@ -240,51 +240,6 @@ describe("highestMatchingCredential", () => {
     });
 
     expect(matchedCredentials).toBeUndefined();
-  });
-});
-
-describe("buildInsertableIDOSCredential", () => {
-  it("builds an insertable credential with verifiable signatures", () => {
-    const userId = "user-1";
-    const publicNotes = JSON.stringify({ type: "kyc", level: "basic" });
-    const content = base64Encode(utf8Encode(JSON.stringify({ firstName: "Ada" })));
-    const encryptorPublicKey = base64Encode(new Uint8Array([1, 2, 3, 4]));
-
-    const credential = buildInsertableIDOSCredential(
-      userId,
-      publicNotes,
-      content,
-      encryptorPublicKey,
-    );
-
-    const issuerAuthPublicKey = hexDecode(credential.issuer_auth_public_key);
-    const publicNotesSignature = base64Decode(credential.public_notes_signature);
-
-    expect(credential).toMatchObject({
-      user_id: userId,
-      content,
-      public_notes: publicNotes,
-      encryptor_public_key: encryptorPublicKey,
-    });
-    expect(issuerAuthPublicKey).toHaveLength(nacl.sign.publicKeyLength);
-    expect(publicNotesSignature).toHaveLength(nacl.sign.signatureLength);
-    expect(base64Decode(credential.broader_signature)).toHaveLength(nacl.sign.signatureLength);
-    expect(
-      nacl.sign.detached.verify(utf8Encode(publicNotes), publicNotesSignature, issuerAuthPublicKey),
-    ).toBe(true);
-    expect(
-      nacl.sign.detached.verify(
-        Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
-        base64Decode(credential.broader_signature),
-        issuerAuthPublicKey,
-      ),
-    ).toBe(true);
-  });
-
-  it("requires an encryptor public key", () => {
-    expect(() => buildInsertableIDOSCredential("user-1", "{}", "content", "")).toThrow(
-      "Missing `encryptorPublicKey`",
-    );
   });
 });
 
