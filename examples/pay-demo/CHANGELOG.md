@@ -1,5 +1,19 @@
 # pay-demo
 
+## 0.8.0
+
+### Minor Changes
+
+- 8d06f30: New versioned verifiable credentials support
+
+### Patch Changes
+
+- Updated dependencies [8d06f30]
+  - @idos-network/consumer@2.0.0
+  - @idos-network/client@2.0.0
+  - @idos-network/credentials@2.0.0
+  - @idos-network/utils@2.0.0
+
 ## 0.7.0
 
 ### Minor Changes
