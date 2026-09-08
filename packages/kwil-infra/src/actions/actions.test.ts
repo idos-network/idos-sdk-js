@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   CreatePreliminaryCredentialsByDwgInputSchema,
+  getUser,
   SharePreliminaryCredentialInputSchema,
+  UpsertWalletAsInserterInputSchema,
+  walletTypeSchema,
 } from "./actions";
 
 const validPreliminaryCredentialsByDwgInput = {
@@ -49,9 +52,16 @@ const validShareCredentialInput = {
 };
 
 describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
-  it("accepts IPFS content URIs and positive integer sizes", () => {
+  it("accepts IPFS and UKYC content URIs and positive integer sizes", () => {
     expect(() =>
       CreatePreliminaryCredentialsByDwgInputSchema.parse(validPreliminaryCredentialsByDwgInput),
+    ).not.toThrow();
+    expect(() =>
+      CreatePreliminaryCredentialsByDwgInputSchema.parse({
+        ...validPreliminaryCredentialsByDwgInput,
+        original_content_uri: "ukyc://original",
+        copy_content_uri: "ukyc://copy",
+      }),
     ).not.toThrow();
   });
 
@@ -61,7 +71,7 @@ describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
       "bare CID",
       { copy_content_uri: "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku" },
     ],
-  ])("rejects non-IPFS content URI (%s)", (_label, override) => {
+  ])("rejects non-blob content URI (%s)", (_label, override) => {
     expect(() =>
       CreatePreliminaryCredentialsByDwgInputSchema.parse({
         ...validPreliminaryCredentialsByDwgInput,
@@ -85,13 +95,19 @@ describe("CreatePreliminaryCredentialsByDwgInputSchema", () => {
 });
 
 describe("SharePreliminaryCredentialInputSchema", () => {
-  it("accepts IPFS content URIs and positive integer sizes", () => {
+  it("accepts IPFS and UKYC content URIs and positive integer sizes", () => {
     expect(() =>
       SharePreliminaryCredentialInputSchema.parse(validShareCredentialInput),
     ).not.toThrow();
+    expect(() =>
+      SharePreliminaryCredentialInputSchema.parse({
+        ...validShareCredentialInput,
+        content_uri: "ukyc://copy",
+      }),
+    ).not.toThrow();
   });
 
-  it("rejects non-IPFS content URIs", () => {
+  it("rejects non-blob content URIs", () => {
     expect(() =>
       SharePreliminaryCredentialInputSchema.parse({
         ...validShareCredentialInput,
@@ -111,5 +127,35 @@ describe("SharePreliminaryCredentialInputSchema", () => {
         content_size,
       }),
     ).toThrow();
+  });
+});
+
+describe("MM wallet type schemas", () => {
+  it("accepts MM as a wallet type", () => {
+    expect(walletTypeSchema.parse("MM")).toBe("MM");
+  });
+
+  it("accepts MM wallets created by trusted inserters", () => {
+    expect(() =>
+      UpsertWalletAsInserterInputSchema.parse({
+        id: "00000000-0000-4000-8000-000000000008",
+        user_id: "00000000-0000-4000-8000-000000000009",
+        address: "mm-signing-public-key",
+        public_key: "mm-signing-public-key",
+        wallet_type: "MM",
+        message: "",
+        signature: "",
+      }),
+    ).not.toThrow();
+  });
+});
+
+describe("getUser", () => {
+  it("throws an explicit not-found error when the view is empty", async () => {
+    await expect(
+      getUser({
+        call: async () => [],
+      } as never),
+    ).rejects.toThrow("get_user returned no user");
   });
 });

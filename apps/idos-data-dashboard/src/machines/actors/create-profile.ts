@@ -27,6 +27,9 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
         signature = `0x${signature}`;
       }
 
+      // ProfileData uses the dashboard Prisma WalletType
+      const walletType = client.walletType as ProfileData["walletType"];
+
       const profileData: ProfileData = {
         recipientEncryptionPublicKey: encryptionProfile.userEncryptionPublicKey,
         encryptionPasswordStore: encryptionProfile.encryptionPasswordStore,
@@ -34,7 +37,7 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
         // This is ok, that it differentiate from the response
         // for idOS this is mandatory, for UI we need public key...
         walletPublicKey: client.walletPublicKey ?? "",
-        walletType: client.walletType,
+        walletType,
         signature: signature as string,
       };
 
@@ -55,7 +58,7 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
       return {
         walletAddress: client.walletIdentifier,
         walletPublicKey: client.walletPublicKey ?? client.walletIdentifier,
-        walletType: client.walletType,
+        walletType,
         nearSelector: null,
       };
     } catch (error) {

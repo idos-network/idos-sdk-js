@@ -2,6 +2,7 @@ import { idOSConsumer as idOSConsumerClass, type idOSCredential } from "@idos-ne
 import { parseCredential } from "@idos-network/credentials/parser";
 import { VerifiableCredentialKycV2 } from "@idos-network/credentials/schemas";
 import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
+import { verifyCredential } from "@idos-network/credentials/verifier";
 import nacl from "tweetnacl";
 
 import { COMMON_ENV } from "./envFlags.common";
@@ -47,7 +48,7 @@ export async function getCredentialShared(
   };
 
   // Verify the credential
-  const [verificationResult, error] = await idOSConsumer.verifyCredential(data, [issuer]);
+  const [verificationResult, error] = await verifyCredential(data, [issuer]);
 
   if (!verificationResult) {
     throw new Error(`Invalid credential signature. ${JSON.stringify(error.get(issuer))}`);

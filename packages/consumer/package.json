@@ -39,6 +39,7 @@
   "devDependencies": {
     "tsdown": "catalog:build",
     "tweetnacl": "catalog:core",
+    "typescript": "catalog:build",
     "vitest": "catalog:testing"
   },
   "engines": {
