@@ -5,7 +5,6 @@
 ### Patch Changes
 
 - Updated dependencies [1fb5dff]
-- Updated dependencies [1fb5dff]
   - @idos-network/utils@2.0.1
   - @idos-network/kwil-infra@2.0.1
 

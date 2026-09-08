@@ -4,9 +4,6 @@
 
 ### Patch Changes
 
-- 1fb5dff: Update libraries
-- 1fb5dff: Libraries update
-- Updated dependencies [1fb5dff]
 - Updated dependencies [1fb5dff]
   - @idos-network/utils@2.0.1
 

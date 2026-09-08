@@ -4,8 +4,7 @@
 
 ### Patch Changes
 
-- 1fb5dff: Update libraries
-- 1fb5dff: Libraries update
+- Updated dependencies [1fb5dff]
 
 ## 2.0.0
 
