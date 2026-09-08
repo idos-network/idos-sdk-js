@@ -1,5 +1,12 @@
 # embedded-wallet
 
+## 0.4.1
+
+### Patch Changes
+
+- @idos-network/utils@2.0.0
+- @idos-network/kwil-infra@2.0.0
+
 ## 0.4.0
 
 ### Minor Changes
