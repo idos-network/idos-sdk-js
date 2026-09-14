@@ -5,8 +5,8 @@ import type {
 } from "@idos-network/enclave";
 
 import {
+  buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
-  buildSignedCredentialContentReference,
   mapPreliminaryToIDOSCredential,
   matchLevelOrHigher,
   type PreliminaryIDOSCredential,
@@ -769,7 +769,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const copyReference = ukycContentUri
       ? { uri: ukycContentUri, size: content.byteLength }
       : await createBlobContentReference(content);
-    const signedReference = buildSignedCredentialContentReference("", copyReference.uri);
+    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
 
     const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,

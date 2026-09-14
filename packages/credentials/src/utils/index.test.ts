@@ -3,6 +3,7 @@ import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
 import {
+  buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
   buildSignedCredentialContentReference,
   highestMatchingCredential,
@@ -253,9 +254,11 @@ describe("buildSignedCredentialContentReference", () => {
     expect(result.broader_signature).toBeTruthy();
     expect(result.issuer_auth_public_key).toBe(hexEncode(keyPair.publicKey, true));
   });
+});
 
+describe("buildEphemeralSignedCredentialContentReference", () => {
   it("returns a signed reference with a public key", () => {
-    const result = buildSignedCredentialContentReference("", "ipfs://cid");
+    const result = buildEphemeralSignedCredentialContentReference("", "ipfs://cid");
 
     expect(result.public_notes).toBe("");
     expect(result.public_notes_signature).toBeTruthy();

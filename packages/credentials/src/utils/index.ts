@@ -164,7 +164,7 @@ export function recordFilter(
 export function buildSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
-  issuerSigningSecretKey: Uint8Array = nacl.sign.keyPair().secretKey,
+  issuerSigningSecretKey: Uint8Array,
 ): SignedCredentialContentReference {
   const { publicKey, secretKey } = nacl.sign.keyPair.fromSecretKey(issuerSigningSecretKey);
 
@@ -183,6 +183,18 @@ export function buildSignedCredentialContentReference(
 
     issuer_auth_public_key: hexEncode(publicKey, true),
   };
+}
+
+/** User-issued share copy: sign with a fresh ephemeral key (need not match original issuer). */
+export function buildEphemeralSignedCredentialContentReference(
+  publicNotes: string,
+  contentUri: string,
+): SignedCredentialContentReference {
+  return buildSignedCredentialContentReference(
+    publicNotes,
+    contentUri,
+    nacl.sign.keyPair().secretKey,
+  );
 }
 
 export type PreliminaryIDOSCredential = {
