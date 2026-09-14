@@ -35,8 +35,11 @@ export type DelegatedWriteGrantParams = {
 
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
   BuildPreliminaryIDOSCredentialArgs,
-  "issuerSigningSecretKey"
->;
+  "issuerSigningSecretKey" | "contentUri"
+> & {
+  originalContentUri?: string;
+  copyContentUri?: string;
+};
 
 export class CredentialService {
   readonly #kwilClient: KwilActionClient;
@@ -65,9 +68,11 @@ export class CredentialService {
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
   }> {
+    const { originalContentUri, copyContentUri, ...sharedCredentialParams } = credentialParams;
     const originalCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
-        ...credentialParams,
+        ...sharedCredentialParams,
+        contentUri: originalContentUri,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
@@ -77,13 +82,19 @@ export class CredentialService {
 
     const copyCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
-        ...credentialParams,
+        ...sharedCredentialParams,
+        contentUri: copyContentUri,
         publicNotes: "",
         recipientEncryptionPublicKey: consumerEncryptionPublicKey,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
     };
+
+    invariant(
+      originalCredential.contentUri !== copyCredential.contentUri,
+      "Original and copy credentials must use distinct content URIs",
+    );
 
     const requestId = crypto.randomUUID();
     const payload: CreatePreliminaryCredentialsByDwgInput = {
