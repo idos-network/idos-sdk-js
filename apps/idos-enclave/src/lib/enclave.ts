@@ -93,19 +93,19 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
-        if (this.options.encryptionPasswordStore === "mpc") {
-          // We are skipping the dialog for MPC
-          // so the line below is skipped, and the user will be asked
-          // to asked during encryption again... so we should accept origin.
-          await this.acceptParentOrigin();
-          return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
-        }
-
-        let encryptionPasswordStore: EncryptionPasswordStore | undefined;
-        let password: string | undefined;
-        let duration: number | undefined;
-
         try {
+          if (this.options.encryptionPasswordStore === "mpc") {
+            // We are skipping the dialog for MPC
+            // so the line below is skipped, and the user will be asked
+            // to asked during encryption again... so we should accept origin.
+            await this.acceptParentOrigin();
+            return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
+          }
+
+          let encryptionPasswordStore: EncryptionPasswordStore | undefined;
+          let password: string | undefined;
+          let duration: number | undefined;
+
           // Don't remove the empty object, it's used to trigger the dialog
           ({ encryptionPasswordStore, password, duration } = await this.openDialog(
             "getPasswordContext",
@@ -122,17 +122,17 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           }
 
           if (!encryptionPasswordStore || encryptionPasswordStore === "mm") {
-            return reject(new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`));
+            throw new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`);
           }
-        } catch (e) {
-          return reject(e);
+
+          // User providing the password also means that they want to authorize the origin
+          await this.acceptParentOrigin();
+
+          // oxlint-disable-next-line typescript/no-non-null-assertion -- This needs to be properly typed.
+          return resolve({ encryptionPasswordStore, password: password!, duration });
+        } catch (error) {
+          return reject(error);
         }
-
-        // User providing the password also means that they want to authorize the origin
-        await this.acceptParentOrigin();
-
-        // oxlint-disable-next-line typescript/no-non-null-assertion -- This needs to be properly typed.
-        return resolve({ encryptionPasswordStore, password: password!, duration });
       });
     });
   }
