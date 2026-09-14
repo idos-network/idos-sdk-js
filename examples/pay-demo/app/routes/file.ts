@@ -20,8 +20,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const credentials = await getCredentialShared(decoded.credentialId);
 
     // Decode the file
-    const encodedFile =
-      credentials.credentialSubject[decoded.fileType as keyof typeof credentials.credentialSubject];
+    const encodedFile = credentials.subject[decoded.fileType as keyof typeof credentials.subject];
 
     if (!encodedFile || typeof encodedFile !== "string") {
       throw new Error("File not found in credential");

@@ -1,8 +1,5 @@
 import type {
   AvailableIssuerType,
-  CredentialFields,
-  CredentialSubject,
-  CredentialSubjectFaceId,
   idOSCredential,
   idOSCredentialRecord,
 } from "@idos-network/credentials/types";
@@ -16,13 +13,6 @@ import type {
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
 
-import {
-  buildCredential,
-  buildFaceIdCredential,
-  type Credential,
-  type FaceIdCredential,
-} from "@idos-network/credentials/builder";
-import { deriveLevel } from "@idos-network/credentials/utils";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
@@ -135,28 +125,6 @@ export class idOSIssuer {
   async getCredentialShared(id: string): Promise<idOSCredentialRecord | null> {
     return this.#credentialService.getCredentialShared(id);
   }
-
-  async buildCredential(
-    fields: CredentialFields,
-    subject: CredentialSubject,
-    issuer: AvailableIssuerType,
-    validate = true,
-  ): Promise<Credential> {
-    return buildCredential(fields, subject, issuer, validate);
-  }
-
-  deriveCredentialLevel(subject: CredentialSubject): string {
-    return deriveLevel(subject);
-  }
-
-  async buildFaceIdCredential(
-    fields: CredentialFields,
-    subject: CredentialSubjectFaceId,
-    issuer: AvailableIssuerType,
-    validate = true,
-  ): Promise<FaceIdCredential> {
-    return buildFaceIdCredential(fields, subject, issuer, validate);
-  }
 }
 
 export type {
@@ -166,11 +134,6 @@ export type {
   idOSUserAttribute,
   idOSDelegatedWriteGrant,
   idOSWallet,
-  CredentialFields,
-  CredentialSubject,
   AvailableIssuerType,
-  Credential,
-  CredentialSubjectFaceId,
-  FaceIdCredential,
   CredentialByDelegatedWriteGrantBaseParams,
 };
