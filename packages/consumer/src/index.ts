@@ -1,15 +1,12 @@
-import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
 import type {
   AvailableIssuerType,
-  IDDocumentType,
   idOSCredentialRecord as idOSCredential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
 } from "@idos-network/credentials/types";
 import type { MmTokenAuth } from "@idos-network/kwil-infra";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
-import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import { type VerifyCredentialResult } from "@idos-network/credentials/verifier";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
@@ -176,22 +173,12 @@ export class idOSConsumer {
       totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
   }
-
-  async verifyCredential<K = VerifiableCredentialSubject>(
-    credentials: VerifiableCredential<K>,
-    issuers: AvailableIssuerType[],
-  ): Promise<VerifyCredentialResult> {
-    return verifyCredential<K>(credentials, issuers);
-  }
 }
 
 export type {
   idOSCredential,
   idOSGrant,
-  Credential,
   VerifiableCredential,
-  VerifiableCredentialSubject,
   VerifyCredentialResult,
   AvailableIssuerType,
-  IDDocumentType,
 };

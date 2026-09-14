@@ -8,6 +8,21 @@ import { describe, expect, it, vi } from "vitest";
 
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 
+// ponytail: real scrypt (N=16384) runs on every obfuscated store read/write, which is
+// several hundred ms per test and times out on CI. The codec only needs a deterministic
+// key of the right length, not a real KDF.
+vi.mock("scrypt-js", () => ({
+  syncScrypt: (
+    _password: Uint8Array,
+    salt: Uint8Array,
+    _n: number,
+    _r: number,
+    _p: number,
+    dkLen: number,
+  ) =>
+    new Uint8Array(Array.from({ length: dkLen }, (_, index) => salt[index % salt.length] ^ index)),
+}));
+
 vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@idos-network/utils/encryption")>();
 

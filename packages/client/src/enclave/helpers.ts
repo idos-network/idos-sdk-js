@@ -13,13 +13,17 @@ export type MethodArg<T> = T extends (arg: infer A) => any ? A : never;
 export type MethodReturn<T> = T extends (...args: any[]) => infer R ? R : never;
 
 export type BaseProviderMethodArgs = {
-  [K in keyof BaseProviderInstance as BaseProviderInstance[K] extends (...args: any[]) => any
-    ? K
-    : never]: Parameters<BaseProviderInstance[K]>;
+  [
+    K in keyof BaseProviderInstance as BaseProviderInstance[K] extends (...args: any[]) => any
+      ? K
+      : never
+  ]: Parameters<BaseProviderInstance[K]>;
 };
 
 export type BaseProviderMethodReturn = {
-  [K in keyof BaseProviderInstance as BaseProviderInstance[K] extends (...args: any[]) => any
-    ? K
-    : never]: ReturnType<BaseProviderInstance[K]>;
+  [
+    K in keyof BaseProviderInstance as BaseProviderInstance[K] extends (...args: any[]) => any
+      ? K
+      : never
+  ]: ReturnType<BaseProviderInstance[K]>;
 };

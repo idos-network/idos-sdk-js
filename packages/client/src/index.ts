@@ -9,8 +9,10 @@ import {
   buildSignedCredentialContentReference,
   mapPreliminaryToIDOSCredential,
   matchLevelOrHigher,
-  PreliminaryIDOSCredential,
+  type PreliminaryIDOSCredential,
   recordFilter,
+  type BaseLevel,
+  type Addon,
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
@@ -641,8 +643,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       omit: Parameters<typeof recordFilter>[2];
     };
     credentialLevelOrHigherFilter?: {
-      userLevel: "basic" | "plus";
-      requiredAddons: ("liveness" | "email" | "phoneNumber")[];
+      userLevel: BaseLevel;
+      requiredAddons: Addon[];
     };
   }): Promise<idOSCredentialListItem[]> {
     const credentials = await this.getAllCredentials();

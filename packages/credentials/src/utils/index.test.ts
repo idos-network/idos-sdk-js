@@ -2,29 +2,16 @@ import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
-import type { CredentialSubject } from "../types";
-
 import {
   buildPreliminaryIDOSCredential,
   buildSignedCredentialContentReference,
-  deriveLevel,
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
-} from "./index.js";
-
-const defaultCredential: CredentialSubject = {
-  id: "uuid:1234",
-  firstName: "John",
-  familyName: "Doe",
-  idDocumentType: "PASSPORT",
-  dateOfBirth: new Date("1990-01-01"),
-  idDocumentCountry: "US",
-  idDocumentNumber: "123456789",
-  idDocumentFrontFile: Buffer.from("ID Document Front"),
-  selfieFile: Buffer.alloc(0),
-};
+  type Addon,
+  type BaseLevel,
+} from ".";
 
 describe("recordFilter", () => {
   [
@@ -80,6 +67,9 @@ describe("recordFilter", () => {
 
 describe("matchLevelOrHigher", () => {
   [
+    ["unverified", [], "unverified", true],
+    ["unverified", [], "basic", true],
+    ["basic", [], "unverified", false],
     ["basic", [], "basic+liveness", true],
     ["plus", [], "plus+liveness", true],
     ["plus", [], "basic", false],
@@ -90,11 +80,7 @@ describe("matchLevelOrHigher", () => {
   ].forEach(([level, requiredAddons, testLevel, expected]) => {
     it(`level=${level} requiredAddons=[${(requiredAddons as string[]).join(",")}] testLevel=${testLevel} => ${expected}`, () => {
       expect(
-        matchLevelOrHigher(
-          level as "basic" | "plus",
-          requiredAddons as ("liveness" | "email" | "phoneNumber")[],
-          testLevel as string,
-        ),
+        matchLevelOrHigher(level as BaseLevel, requiredAddons as Addon[], testLevel as string),
       ).toBe(expected as boolean);
     });
   });
@@ -119,6 +105,12 @@ describe("pickHighestMatchingLevel", () => {
       "plus",
       ["email", "phoneNumber"],
       null,
+    ],
+    [
+      ["unverified+phoneNumber", "basic+phoneNumber", "plus+phoneNumber"],
+      "unverified",
+      ["phoneNumber"],
+      "plus+phoneNumber",
     ],
     [["basic+liveness", "plus+liveness"], "basic", ["liveness"], "plus+liveness"],
   ].forEach(([levels, requiredLevel, requiredAddons, expected]) => {
@@ -248,61 +240,6 @@ describe("highestMatchingCredential", () => {
     });
 
     expect(matchedCredentials).toBeUndefined();
-  });
-});
-
-describe("deriveLevel", () => {
-  it("basic only", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        // @ts-expect-error - to test absence of selfieFile
-        selfieFile: undefined,
-      }),
-    ).toBe("basic");
-  });
-
-  it("basic+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-      }),
-    ).toBe("basic+liveness");
-  });
-
-  it("plus+liveness", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness");
-  });
-
-  it("plus+liveness+phoneNumber", () => {
-    expect(
-      deriveLevel({
-        ...defaultCredential,
-        selfieFile: Buffer.from("Selfie"),
-        phoneNumber: "+1234567890",
-        email: "john.doe@example.com",
-        residentialAddress: {
-          street: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "US",
-          proofCategory: "UTILITY_BILL",
-          proofFile: Buffer.from("Utility Bill"),
-        },
-      }),
-    ).toBe("plus+liveness+email+phoneNumber");
   });
 });
 
