@@ -57,6 +57,18 @@ const MAX_BLOB_GATEWAY_ERROR_BYTES = 4 * 1024;
 
 type BlobGatewayOperation = "upload" | "fetch" | "delete";
 
+function isSecureGatewayOrigin(url: string): boolean {
+  try {
+    const { hostname, protocol } = new URL(url);
+    return (
+      protocol === "https:" ||
+      (protocol === "http:" && (hostname === "localhost" || hostname === "127.0.0.1"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 export class BlobGatewayHttpError extends Error {
   constructor(
     public readonly operation: BlobGatewayOperation,
@@ -167,11 +179,18 @@ export class BlobGateway {
     maxFetchBytes = DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES,
     accessToken,
   }: BlobGatewayParams) {
+    const normalizedAccessToken = accessToken?.trim() || undefined;
+    if (normalizedAccessToken && !isSecureGatewayOrigin(url)) {
+      throw new Error(
+        "Blob gateway accessToken requires HTTPS, except for HTTP localhost or 127.0.0.1",
+      );
+    }
+
     this.#url = url.replace(/\/$/, "");
     // Native `fetch` must not be stored unbound — calling it as this.#fetch() throws in browsers.
     this.#fetch = (input, init) => fetchFn(input, init);
     this.#maxFetchBytes = normalizeByteCount(maxFetchBytes, "maxFetchBytes") ?? maxFetchBytes;
-    this.#accessToken = accessToken?.trim() || undefined;
+    this.#accessToken = normalizedAccessToken;
   }
 
   get url(): string {

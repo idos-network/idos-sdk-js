@@ -104,6 +104,21 @@ describe("resolveCredentialEncryptedContent", () => {
 });
 
 describe("BlobGateway", () => {
+  it("requires a secure gateway origin when configuring an access token", () => {
+    expect(
+      () => new BlobGateway({ url: "http://blob.example", accessToken: "mm-envelope" }),
+    ).toThrow("Blob gateway accessToken requires HTTPS");
+
+    const insecureGateway = new BlobGateway({ url: "http://blob.example" });
+    expect(() => insecureGateway.withAccessToken("mm-envelope")).toThrow(
+      "Blob gateway accessToken requires HTTPS",
+    );
+
+    for (const url of ["https://blob.example", "http://localhost:8091", "http://127.0.0.1:8091"]) {
+      expect(() => new BlobGateway({ url, accessToken: "mm-envelope" })).not.toThrow();
+    }
+  });
+
   it("uploads credential blobs through the initialized gateway URL", async () => {
     const calls: Parameters<typeof fetch>[] = [];
     const gateway = new BlobGateway({
