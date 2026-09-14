@@ -205,6 +205,7 @@ describe("Node KGW-authenticated blob sessions", () => {
   });
 });
 
+const NACL_BOX_ENCRYPTION_OVERHEAD_BYTES = 24 + 16; // nonce + authentication tag
 const credentialPlaintext = utf8Encode("private credential content");
 
 async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
@@ -266,7 +267,9 @@ describe("credential blob storage", () => {
 
     expect(credential.content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\//);
     expect(preliminaryInput?.content_uri).toBe(credential.content_uri);
-    expect(preliminaryInput?.content_size).toBe(credentialPlaintext.byteLength + 40);
+    expect(preliminaryInput?.content_size).toBe(
+      credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,
+    );
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
   });
 
@@ -275,7 +278,9 @@ describe("credential blob storage", () => {
 
     expect(credential.content_uri).toMatch(/^ipfs:\/\//);
     expect(preliminaryInput?.content_uri).toBe(credential.content_uri);
-    expect(preliminaryInput?.content_size).toBe(credentialPlaintext.byteLength + 40);
+    expect(preliminaryInput?.content_size).toBe(
+      credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,
+    );
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
   });
 });
