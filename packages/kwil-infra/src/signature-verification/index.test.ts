@@ -108,7 +108,7 @@ describe("verifySignature", () => {
     expect(result).toBe(true);
   });
 
-  it("accepts MM wallets without signature verification", async () => {
+  it("rejects MM wallets without trusted capability validation", async () => {
     vi.clearAllMocks();
 
     const result = await verifySignature({
@@ -119,7 +119,7 @@ describe("verifySignature", () => {
       public_key: ["mm-signing-public-key"],
     });
 
-    expect(result).toBe(true);
+    expect(result).toBe(false);
     expect(verifyEvmSignature).not.toHaveBeenCalled();
     expect(verifyNearSignature).not.toHaveBeenCalled();
     expect(verifyRippleSignature).not.toHaveBeenCalled();

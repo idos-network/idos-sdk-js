@@ -21,8 +21,8 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
   invariant(walletPayload.wallet_type, "Wallet type is required");
 
   if (walletPayload.wallet_type === "MM") {
-    invariant(walletPayload.public_key?.[0], "Wallet public_key is required for non-EVM wallets");
-    return true;
+    // MM authentication requires capability validation by a trusted service such as KGW.
+    return false;
   }
 
   invariant(walletPayload.message, "Wallet message is required");
