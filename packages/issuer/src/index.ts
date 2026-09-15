@@ -22,7 +22,9 @@ import {
 import {
   CredentialService,
   type CredentialByDelegatedWriteGrantBaseParams,
+  type DelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
+  type RequestDelegatedWriteGrantMessageOutput,
 } from "./services/credential.service";
 import {
   type CreateProfileReqParams,
@@ -92,7 +94,9 @@ export class idOSIssuer {
     return this.#userService.getUser({ id });
   }
 
-  async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+  async requestDelegatedWriteGrantMessage(
+    params: idOSDelegatedWriteGrant,
+  ): Promise<RequestDelegatedWriteGrantMessageOutput> {
     return this.#credentialService.requestDelegatedWriteGrantMessage(params);
   }
 
@@ -136,4 +140,7 @@ export type {
   idOSWallet,
   AvailableIssuerType,
   CredentialByDelegatedWriteGrantBaseParams,
+  DelegatedWriteGrantBaseParams,
+  DelegatedWriteGrantParams,
+  RequestDelegatedWriteGrantMessageOutput,
 };

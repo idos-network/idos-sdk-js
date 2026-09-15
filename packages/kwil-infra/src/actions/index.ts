@@ -26,6 +26,30 @@ export type idOSUserAttribute = GetAttributesOutput;
 export type idOSWallet = UpsertWalletAsInserterInput;
 export type idOSDelegatedWriteGrant = DwgMessageInput;
 
+export type DelegatedWriteGrantBaseParams = {
+  id: string;
+  ownerWalletIdentifier: string;
+  consumerWalletIdentifier: string;
+  issuerPublicKey: string;
+  accessGrantTimelock: string;
+  notUsableBefore: string;
+  notUsableAfter: string;
+};
+
+export function toDelegatedWriteGrantBaseParams(
+  params: idOSDelegatedWriteGrant,
+): DelegatedWriteGrantBaseParams {
+  return {
+    id: params.id,
+    ownerWalletIdentifier: params.owner_wallet_identifier,
+    consumerWalletIdentifier: params.grantee_wallet_identifier,
+    issuerPublicKey: params.issuer_public_key,
+    accessGrantTimelock: params.access_grant_timelock,
+    notUsableBefore: params.not_usable_before,
+    notUsableAfter: params.not_usable_after,
+  };
+}
+
 /** @deprecated Prefer the `*Preliminary*` names matching the Kwil actions. */
 export type {
   SharePreliminaryCredentialInput as ShareCredentialInput,

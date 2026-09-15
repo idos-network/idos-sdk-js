@@ -1,5 +1,6 @@
 import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { MemoryStore } from "@idos-network/utils/store";
+import nacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
 
 import type { KwilActionClient } from "./create-kwil-client";
@@ -64,5 +65,16 @@ describe("createServerKwilSigner with MM authentication", () => {
     const auth = createMmTokenAuth(mmToken(7));
 
     expect(await createServerKwilSigner(auth)).toEqual([auth, base64UrlEncode(auth.identifier)]);
+  });
+});
+
+describe("createServerKwilSigner with Nacl sign key pair", () => {
+  it("emits lowercase hex SignerAddress matching kwild ed25519 @caller format", async () => {
+    const keyPair = nacl.sign.keyPair();
+    const [kwilSigner, signerAddress] = await createServerKwilSigner(keyPair);
+
+    expect(signerAddress).toMatch(/^[0-9a-f]{64}$/);
+    expect(signerAddress).toBe(signerAddress.toLowerCase());
+    expect(kwilSigner).toBeDefined();
   });
 });
