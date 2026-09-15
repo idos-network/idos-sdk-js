@@ -12,49 +12,75 @@ with the kwil round-trips it triggers nested underneath.
 pnpm add @idos-network/instrumentation @opentelemetry/api
 ```
 
-## Node (`@idos-network/issuer`, `@idos-network/consumer`)
+## Setup
+
+Every target is a class method, which lives on a prototype or a constructor —
+ordinary mutable objects. So patching needs no module loader hook: import the
+idOS module and hand its namespace over, once per package you use.
 
 ```ts
+import * as issuer from "@idos-network/issuer";
+import * as kwil from "@idos-network/kwil-infra";
 import { IdosInstrumentation } from "@idos-network/instrumentation";
+
+const instrumentation = new IdosInstrumentation();
+instrumentation.setTracerProvider(provider); // omit to use the global provider
+
+instrumentation.patchModuleExports("@idos-network/issuer", issuer);
+instrumentation.patchModuleExports("@idos-network/kwil-infra", kwil);
+```
+
+This is the same call in Node and in the browser, and it survives bundling.
+Patching a prototype also applies to instances that already exist, so there is
+no race with `idOSIssuer.init()`.
+
+In the browser, `new IdosInstrumentation({ requireParentSpan: true })` is worth
+it: without it, an idOS call made outside a user-interaction span produces a
+single-span orphan trace.
+
+### Automatic patching in Node (optional)
+
+`InstrumentationBase` can also patch on import, with no app code at all. The
+idOS packages are ESM-only, so that needs Node's loader hook — and two separate
+things have to happen before the app imports any idOS package:
+
+```ts
+// telemetry.mjs
+import { register } from "node:module";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
-
-registerInstrumentations({ instrumentations: [new IdosInstrumentation()] });
-```
-
-The idOS packages are ESM-only, so Node's ESM loader hook has to be registered
-**before** anything imports them — the same requirement every OpenTelemetry
-instrumentation has for ESM. Either use
-`--import @opentelemetry/instrumentation/hook.mjs`, or put the
-`registerInstrumentations` call in a file you load with `node --import ./telemetry.mjs`.
-
-## Browser (`@idos-network/client`)
-
-There are no module loader hooks in a browser, and a bundler has already frozen
-the import graph by the time your code runs. Hand the imported namespace over
-instead:
-
-```ts
-import * as idosClient from "@idos-network/client";
 import { IdosInstrumentation } from "@idos-network/instrumentation";
 
-const instrumentation = new IdosInstrumentation({ requireParentSpan: true });
-instrumentation.setTracerProvider(provider);
-instrumentation.patchModuleExports("@idos-network/client", idosClient);
+register("@opentelemetry/instrumentation/hook.mjs", import.meta.url); // installs the loader
+registerInstrumentations({ instrumentations: [new IdosInstrumentation()] }); // says what to patch
 ```
 
-`requireParentSpan` is worth turning on in the browser: without it, an idOS call
-made outside a user-interaction span produces a single-span orphan trace.
+```sh
+node --import ./telemetry.mjs ./app.mjs
+```
+
+Worth it if you already launch with `--import`; otherwise prefer
+`patchModuleExports`, which has no launch-flag to forget in a Dockerfile.
+
+Two things that look like they should work and do not:
+
+- `--import @opentelemetry/instrumentation/hook.mjs` on its own. `hook.mjs` is a
+  loader module exporting `resolve`/`load`/`initialize`, so importing it
+  registers nothing — it has to be passed to `register()`.
+- `registerInstrumentations` called from inside your app. By then the idOS
+  modules are loaded and their namespaces are sealed.
 
 ## What gets traced
 
-| Module                      | Spans                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `@idos-network/kwil-infra`  | `KwilActionClient.call` / `.execute` — the idOS equivalent of `pg.Client.query` — and `.waitForTx` |
-| `@idos-network/client`      | `idOSClientConfiguration` / `Idle` / `WithUserSigner` / `LoggedIn` methods, and `IframeEnclave`    |
-| `@idos-network/issuer`      | `idOSIssuer` methods and `idOSIssuer.init`                                                         |
-| `@idos-network/consumer`    | `idOSConsumer` methods and `idOSConsumer.init`                                                     |
-| `@idos-network/credentials` | `verifyCredential`                                                                                 |
-| `@idos-network/enclave`     | `LocalEnclave` methods                                                                             |
+| Module                     | Spans                                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| `@idos-network/kwil-infra` | `KwilActionClient.call` / `.execute` — the idOS equivalent of `pg.Client.query` — and `.waitForTx` |
+| `@idos-network/client`     | `idOSClientConfiguration` / `Idle` / `WithUserSigner` / `LoggedIn` methods                          |
+| `@idos-network/issuer`     | `idOSIssuer` methods and `idOSIssuer.init`                                                         |
+| `@idos-network/consumer`   | `idOSConsumer` methods and `idOSConsumer.init`                                                     |
+
+The enclave is not traced: it is local key material and iframe/MPC work, not
+where request latency lives. `verifyCredential` is covered as
+`idOSConsumer.verifyCredential`, which delegates straight to it.
 
 Kwil spans carry `db.system.name=kwil`, `db.namespace=main` and
 `db.operation.name=<action>`; `execute` also records `idos.kwil.tx_hash`. Every

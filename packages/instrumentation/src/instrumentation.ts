@@ -4,12 +4,11 @@ import { context, SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   InstrumentationBase,
   InstrumentationNodeModuleDefinition,
-  InstrumentationNodeModuleFile,
   isWrapped,
 } from "@opentelemetry/instrumentation";
 import { ATTR_ERROR_TYPE } from "@opentelemetry/semantic-conventions";
 
-import type { MethodTarget, ModuleTarget, PatchTarget } from "./targets";
+import type { MethodTarget, ModuleTarget } from "./targets";
 import type { IdosInstrumentationConfig } from "./types";
 
 import { ATTR_IDOS_SDK_CLASS, ATTR_IDOS_SDK_METHOD, ATTR_IDOS_SDK_PACKAGE } from "./semconv";
@@ -39,15 +38,6 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
           target.supportedVersions,
           (moduleExports: unknown) => this.applyPatch(target.name, target, moduleExports),
           (moduleExports: unknown) => this.removePatch(target.name, target, moduleExports),
-          (target.files ?? []).map(
-            (file) =>
-              new InstrumentationNodeModuleFile(
-                `${target.name}/${file.path}`,
-                target.supportedVersions,
-                (moduleExports: unknown) => this.applyPatch(target.name, file, moduleExports),
-                (moduleExports: unknown) => this.removePatch(target.name, file, moduleExports),
-              ),
-          ),
         ),
     );
   }
@@ -56,31 +46,30 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
    * Patch a module namespace you already imported.
    *
    * The automatic hooking in {@link InstrumentationBase} needs Node's module
-   * loader hooks (`import-in-the-middle`), which do not exist in a browser or in
-   * an app that was bundled ahead of time. There, import the idOS module and
-   * hand its namespace over instead. Exports the module does not have are skipped.
+   * loader hook (`import-in-the-middle`), which has to be installed with
+   * `module.register()` before the import — and does not exist at all in a
+   * browser or a bundled app. This is the alternative everywhere: import the
+   * idOS module and hand its namespace over. Exports the module does not have
+   * are skipped.
    */
   patchModuleExports(moduleName: string, moduleExports: unknown): void {
-    this.forEachTarget(moduleName, (target) => this.applyPatch(moduleName, target, moduleExports));
+    const target = this.findTarget(moduleName);
+    if (target) this.applyPatch(moduleName, target, moduleExports);
   }
 
   /** Reverse of {@link patchModuleExports}. */
   unpatchModuleExports(moduleName: string, moduleExports: unknown): void {
-    this.forEachTarget(moduleName, (target) => this.removePatch(moduleName, target, moduleExports));
+    const target = this.findTarget(moduleName);
+    if (target) this.removePatch(moduleName, target, moduleExports);
   }
 
-  private forEachTarget(moduleName: string, apply: (target: PatchTarget) => void): void {
-    const module: ModuleTarget | undefined = TARGETS.find((t) => t.name === moduleName);
-    if (!module) {
-      this._diag.warn(`No instrumentation targets known for "${moduleName}"`);
-      return;
-    }
-    // Subpath exports (`@idos-network/enclave/local`) are separate namespaces at
-    // runtime but are reached by the same specifier here, so try them all.
-    for (const target of [module, ...(module.files ?? [])]) apply(target);
+  private findTarget(moduleName: string): ModuleTarget | undefined {
+    const target = TARGETS.find((t) => t.name === moduleName);
+    if (!target) this._diag.warn(`No instrumentation targets known for "${moduleName}"`);
+    return target;
   }
 
-  private applyPatch(moduleName: string, target: PatchTarget, moduleExports: unknown): unknown {
+  private applyPatch(moduleName: string, target: ModuleTarget, moduleExports: unknown): unknown {
     this.eachMember(moduleName, target, moduleExports, (owner, name, method, className) => {
       if (isWrapped(owner[name])) this._unwrap(owner, name);
       this._wrap(owner, name, (original) =>
@@ -90,7 +79,7 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
     return moduleExports;
   }
 
-  private removePatch(moduleName: string, target: PatchTarget, moduleExports: unknown): unknown {
+  private removePatch(moduleName: string, target: ModuleTarget, moduleExports: unknown): unknown {
     this.eachMember(moduleName, target, moduleExports, (owner, name) => {
       if (isWrapped(owner[name])) this._unwrap(owner, name);
     });
@@ -100,7 +89,7 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
   /** Resolves every target method to the object that owns it, skipping what is absent. */
   private eachMember(
     moduleName: string,
-    target: PatchTarget,
+    target: ModuleTarget,
     moduleExports: unknown,
     visit: (
       owner: Record<string, unknown>,
@@ -131,7 +120,7 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
       }
     };
 
-    for (const klass of target.classes ?? []) {
+    for (const klass of target.classes) {
       const ctor = namespace[klass.className];
       if (typeof ctor !== "function") {
         this._diag.debug(`${moduleName}: class ${klass.className} not exported, skipping`);
@@ -147,8 +136,6 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
         visitOne(ctor as unknown as Record<string, unknown>, member, klass.className);
       }
     }
-
-    for (const member of target.functions ?? []) visitOne(namespace, member, undefined);
   }
 
   private traced(
