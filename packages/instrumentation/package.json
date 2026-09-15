@@ -1,0 +1,67 @@
+{
+  "name": "@idos-network/instrumentation",
+  "version": "2.0.1",
+  "description": "OpenTelemetry instrumentation for the idOS JavaScript SDK",
+  "keywords": [
+    "idos",
+    "instrumentation",
+    "observability",
+    "opentelemetry",
+    "tracing"
+  ],
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": "github:idos-network/idos-sdk-js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/instrumentation": "catalog:otel",
+    "@opentelemetry/semantic-conventions": "catalog:otel"
+  },
+  "devDependencies": {
+    "@idos-network/client": "workspace:*",
+    "@idos-network/consumer": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/enclave": "workspace:*",
+    "@idos-network/issuer": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
+    "@opentelemetry/api": "catalog:otel",
+    "@opentelemetry/context-async-hooks": "catalog:otel",
+    "@opentelemetry/sdk-trace-base": "catalog:otel",
+    "@types/node": "catalog:build",
+    "@vitest/coverage-v8": "catalog:testing",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": "catalog:otel"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}
