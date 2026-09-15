@@ -387,15 +387,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
   }
 
-  async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<{
-    message: string;
-    params: DelegatedWriteGrantBaseParams;
-  }> {
-    const { message } = await dwgMessage(this.kwilClient, params);
-    return {
-      message,
-      params: toDelegatedWriteGrantBaseParams(params),
-    };
+  async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+    return dwgMessage(this.kwilClient, params).then((res) => res.message);
   }
 
   async createCredential(
@@ -847,7 +840,7 @@ export type {
   idOSWallet,
 };
 
-export { signNearMessage };
+export { signNearMessage, toDelegatedWriteGrantBaseParams };
 
 export function createIDOSClient(params: {
   nodeUrl: string;

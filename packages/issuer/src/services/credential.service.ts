@@ -17,7 +17,6 @@ import {
   getSiblingCredentialId,
   type idOSDelegatedWriteGrant,
   type DelegatedWriteGrantBaseParams,
-  toDelegatedWriteGrantBaseParams,
 } from "@idos-network/kwil-infra/actions";
 import { BlobGateway } from "@idos-network/utils/blob-gateway";
 import { hexEncodeSha256Hash } from "@idos-network/utils/codecs";
@@ -28,11 +27,6 @@ export type { DelegatedWriteGrantBaseParams };
 
 export type DelegatedWriteGrantParams = DelegatedWriteGrantBaseParams & {
   signature: string;
-};
-
-export type RequestDelegatedWriteGrantMessageOutput = {
-  message: string;
-  params: DelegatedWriteGrantBaseParams;
 };
 
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
@@ -58,14 +52,8 @@ export class CredentialService {
     this.#blobGateway = blobGateway;
   }
 
-  async requestDelegatedWriteGrantMessage(
-    params: idOSDelegatedWriteGrant,
-  ): Promise<RequestDelegatedWriteGrantMessageOutput> {
-    const { message } = await dwgMessage(this.#kwilClient, params);
-    return {
-      message,
-      params: toDelegatedWriteGrantBaseParams(params),
-    };
+  async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+    return dwgMessage(this.#kwilClient, params).then((res) => res.message);
   }
 
   async createCredentialByDelegatedWriteGrant(

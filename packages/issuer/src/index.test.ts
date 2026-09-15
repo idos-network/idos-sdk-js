@@ -1,7 +1,7 @@
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { idOSIssuer } from "./index.js";
+import { idOSIssuer, toDelegatedWriteGrantBaseParams } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn(), uploadCredentialBlobs: vi.fn() },
@@ -153,7 +153,7 @@ describe("idOSIssuer", () => {
     expect(mocks.createPreliminaryCredentialsByDwg).toHaveBeenCalledOnce();
   });
 
-  it("returns message and exact params to reuse from requestDelegatedWriteGrantMessage, submitting them for creation", async () => {
+  it("maps request params for createCredentialByDelegatedWriteGrant via toDelegatedWriteGrantBaseParams", async () => {
     const issuer = await idOSIssuer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
@@ -170,7 +170,8 @@ describe("idOSIssuer", () => {
       not_usable_after: "2026-01-02T00:00:00Z",
     };
 
-    const { message, params } = await issuer.requestDelegatedWriteGrantMessage(dwgInput);
+    const message = await issuer.requestDelegatedWriteGrantMessage(dwgInput);
+    const params = toDelegatedWriteGrantBaseParams(dwgInput);
 
     expect(message).toBe("dwg-message-string");
     expect(params).toEqual({

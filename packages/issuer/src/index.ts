@@ -24,7 +24,6 @@ import {
   type CredentialByDelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
-  type RequestDelegatedWriteGrantMessageOutput,
 } from "./services/credential.service";
 import {
   type CreateProfileReqParams,
@@ -94,9 +93,7 @@ export class idOSIssuer {
     return this.#userService.getUser({ id });
   }
 
-  async requestDelegatedWriteGrantMessage(
-    params: idOSDelegatedWriteGrant,
-  ): Promise<RequestDelegatedWriteGrantMessageOutput> {
+  async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
     return this.#credentialService.requestDelegatedWriteGrantMessage(params);
   }
 
@@ -142,5 +139,6 @@ export type {
   CredentialByDelegatedWriteGrantBaseParams,
   DelegatedWriteGrantBaseParams,
   DelegatedWriteGrantParams,
-  RequestDelegatedWriteGrantMessageOutput,
 };
+
+export { toDelegatedWriteGrantBaseParams } from "@idos-network/kwil-infra/actions";

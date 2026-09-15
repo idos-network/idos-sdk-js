@@ -14,6 +14,7 @@ import {
   idOSClientIdle,
   idOSClientLoggedIn,
   type idOSClientWithUserSigner,
+  toDelegatedWriteGrantBaseParams,
 } from "./index.js";
 
 const mmToken = base64UrlEncode(
@@ -284,7 +285,7 @@ describe("credential blob storage", () => {
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
   });
 
-  it("returns message and exact params to reuse from requestDWGMessage", async () => {
+  it("returns the dwg message string and maps params via toDelegatedWriteGrantBaseParams", async () => {
     const callAction = vi.fn(async () => [{ message: "mock-dwg-message" }]);
     const kwilClient = {
       call: callAction,
@@ -308,7 +309,8 @@ describe("credential blob storage", () => {
       not_usable_after: "2026-01-02T00:00:00Z",
     };
 
-    const { message, params } = await client.requestDWGMessage(dwgInput);
+    const message = await client.requestDWGMessage(dwgInput);
+    const params = toDelegatedWriteGrantBaseParams(dwgInput);
 
     expect(message).toBe("mock-dwg-message");
     expect(params).toEqual({
