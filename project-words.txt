@@ -184,3 +184,4 @@ xsignature
 xstate
 XUMM
 ziif
+checksummed
