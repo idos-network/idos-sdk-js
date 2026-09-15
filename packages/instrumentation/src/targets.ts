@@ -36,23 +36,18 @@ export type ClassTarget = {
   staticMethods?: (string | MethodTarget)[];
 };
 
-export type PatchTarget = {
-  classes?: ClassTarget[];
-  /** Module-level function exports. */
-  functions?: (string | MethodTarget)[];
-};
-
-export type FileTarget = PatchTarget & {
-  /** Path inside the package, as resolved at runtime. Couples to the package's build output. */
-  path: string;
-};
-
-export type ModuleTarget = PatchTarget & {
+export type ModuleTarget = {
   /** Module specifier. */
   name: string;
   supportedVersions: string[];
-  /** Subpath exports, which have to be matched by their built file path. */
-  files?: FileTarget[];
+  /**
+   * Only classes. Every method lives on a prototype or a constructor, both of
+   * which are ordinary mutable objects — that is what lets
+   * {@link IdosInstrumentation.patchModuleExports} work without a loader hook.
+   * A bare function export would sit on the sealed module namespace instead,
+   * and could only be reached via `import-in-the-middle`.
+   */
+  classes: ClassTarget[];
 };
 
 const SUPPORTED = [">=2.0.0 <3"];
@@ -107,31 +102,6 @@ const CLIENT_LOGGED_IN_METHODS = [
   "filterCredentials",
   "requestAccessGrant",
   "logOut",
-];
-
-/** Enclave providers talk to an iframe or MPC nodes, which no HTTP instrumentation sees. */
-const ENCLAVE_METHODS = [
-  "load",
-  "reset",
-  "reconfigure",
-  "confirm",
-  "filterCredentials",
-  "encrypt",
-  "decrypt",
-  "backupUserEncryptionProfile",
-  "ensureUserEncryptionProfile",
-  "addAddressMessageToSign",
-  "removeAddressMessageToSign",
-  "addAddressToMpcSecret",
-  "removeAddressFromMpcSecret",
-];
-
-/** `LocalEnclave` holds the key material itself, so it has a few more entry points. */
-const LOCAL_ENCLAVE_METHODS = [
-  ...ENCLAVE_METHODS,
-  "getPrivateEncryptionProfile",
-  "getPasswordContext",
-  "createEncryptionProfileFromPassword",
 ];
 
 export const TARGETS: ModuleTarget[] = [
@@ -192,7 +162,6 @@ export const TARGETS: ModuleTarget[] = [
         methods: ["hasProfile", "createUserEncryptionProfile", "logIn", "logOut"],
       },
       { className: "idOSClientLoggedIn", methods: CLIENT_LOGGED_IN_METHODS },
-      { className: "IframeEnclave", methods: ENCLAVE_METHODS },
     ],
   },
   {
@@ -234,23 +203,6 @@ export const TARGETS: ModuleTarget[] = [
           "getAccessGrants",
           "verifyCredential",
         ],
-      },
-    ],
-  },
-  {
-    name: "@idos-network/credentials",
-    supportedVersions: SUPPORTED,
-    // `@idos-network/credentials/verifier` is a subpath export, so it is matched
-    // by its built file path rather than by module name.
-    files: [{ path: "dist/verifier/index.mjs", functions: ["verifyCredential"] }],
-  },
-  {
-    name: "@idos-network/enclave",
-    supportedVersions: SUPPORTED,
-    files: [
-      {
-        path: "dist/local.mjs",
-        classes: [{ className: "LocalEnclave", methods: LOCAL_ENCLAVE_METHODS }],
       },
     ],
   },

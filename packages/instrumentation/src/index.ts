@@ -9,7 +9,7 @@ export {
   IDOS_KWIL_SYSTEM,
 } from "./semconv";
 export { TARGETS } from "./targets";
-export type { ClassTarget, FileTarget, MethodTarget, ModuleTarget, PatchTarget } from "./targets";
+export type { ClassTarget, MethodTarget, ModuleTarget } from "./targets";
 export type {
   IdosInstrumentationConfig,
   IdosInstrumentationRequestHook,

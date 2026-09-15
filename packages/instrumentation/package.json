@@ -45,8 +45,6 @@
   "devDependencies": {
     "@idos-network/client": "workspace:*",
     "@idos-network/consumer": "workspace:*",
-    "@idos-network/credentials": "workspace:*",
-    "@idos-network/enclave": "workspace:*",
     "@idos-network/issuer": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
     "@opentelemetry/api": "catalog:otel",

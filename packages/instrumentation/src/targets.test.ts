@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { PatchTarget } from "./targets";
+import type { ClassTarget, MethodTarget } from "./targets";
 
 import { TARGETS } from "./targets";
 
@@ -10,17 +10,11 @@ import { TARGETS } from "./targets";
  * against the real modules so drift fails the build instead.
  */
 
-/** File targets are matched at runtime by built path; here they are imported by specifier. */
-const SUBPATH_SPECIFIERS: Record<string, string> = {
-  "dist/verifier/index.mjs": "@idos-network/credentials/verifier",
-  "dist/local.mjs": "@idos-network/enclave/local",
-};
-
-const unresolved = (namespace: Record<string, unknown>, target: PatchTarget): string[] => {
+const unresolved = (namespace: Record<string, unknown>, classes: ClassTarget[]): string[] => {
   const problems: string[] = [];
 
-  const probe = (owner: unknown, members: PatchTarget["functions"], label: string): void => {
-    for (const member of members ?? []) {
+  const probe = (owner: unknown, members: (string | MethodTarget)[], label: string): void => {
+    for (const member of members) {
       const name = typeof member === "string" ? member : member.name;
       if (typeof (owner as Record<string, unknown> | null)?.[name] !== "function") {
         problems.push(`${label}${name}`);
@@ -28,37 +22,30 @@ const unresolved = (namespace: Record<string, unknown>, target: PatchTarget): st
     }
   };
 
-  for (const klass of target.classes ?? []) {
+  for (const klass of classes) {
     const ctor = namespace[klass.className] as { prototype?: unknown } | undefined;
     if (typeof ctor !== "function") {
       problems.push(klass.className);
       continue;
     }
     probe(ctor.prototype, klass.methods, `${klass.className}.`);
-    probe(ctor, klass.staticMethods, `${klass.className}.`);
+    probe(ctor, klass.staticMethods ?? [], `${klass.className}.`);
   }
-  probe(namespace, target.functions, "");
 
   return problems;
 };
 
 describe("TARGETS", () => {
   for (const target of TARGETS) {
-    if (target.classes || target.functions) {
-      it(`resolves every target in ${target.name}`, async () => {
-        const namespace = (await import(target.name)) as Record<string, unknown>;
-        expect(unresolved(namespace, target)).toEqual([]);
-      });
-    }
-
-    for (const file of target.files ?? []) {
-      const specifier = SUBPATH_SPECIFIERS[file.path];
-
-      it(`resolves every target in ${specifier ?? `${target.name}/${file.path}`}`, async () => {
-        expect(specifier, `no test specifier mapped for ${file.path}`).toBeDefined();
-        const namespace = (await import(specifier)) as Record<string, unknown>;
-        expect(unresolved(namespace, file)).toEqual([]);
-      });
-    }
+    it(`resolves every target in ${target.name}`, async () => {
+      const namespace = (await import(target.name)) as Record<string, unknown>;
+      expect(unresolved(namespace, target.classes)).toEqual([]);
+    });
   }
+
+  // Every method has to sit on a prototype or constructor for the no-loader-hook
+  // path to reach it; a bare function export would need `import-in-the-middle`.
+  it("has no bare function exports as targets", () => {
+    expect(TARGETS.every((t) => t.classes.length > 0)).toBe(true);
+  });
 });

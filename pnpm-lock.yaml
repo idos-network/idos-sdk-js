@@ -1098,12 +1098,6 @@ importers:
       '@idos-network/consumer':
         specifier: workspace:*
         version: link:../consumer
-      '@idos-network/credentials':
-        specifier: workspace:*
-        version: link:../credentials
-      '@idos-network/enclave':
-        specifier: workspace:*
-        version: link:../enclave
       '@idos-network/issuer':
         specifier: workspace:*
         version: link:../issuer
