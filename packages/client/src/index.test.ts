@@ -290,14 +290,11 @@ describe("credential blob storage", () => {
     const kwilClient = {
       call: callAction,
     } as unknown as KwilActionClient;
-    const client = new idOSClientLoggedIn(
-      { kwilClient } as unknown as idOSClientWithUserSigner,
-      {
-        id: crypto.randomUUID(),
-        recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
-        encryption_password_store: "user",
-      },
-    );
+    const client = new idOSClientLoggedIn({ kwilClient } as unknown as idOSClientWithUserSigner, {
+      id: crypto.randomUUID(),
+      recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+      encryption_password_store: "user",
+    });
 
     const dwgInput = {
       id: crypto.randomUUID(),

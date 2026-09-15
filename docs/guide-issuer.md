@@ -242,7 +242,7 @@ const delegatedWriteGrant = {
   grantee_wallet_identifier: signingKeyPair.address,
   issuer_public_key: signingKeyPair.publicKey,
   id: crypto.randomUUID(),
-  access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
+  access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"), // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
   not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
   not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
 };
