@@ -22,6 +22,7 @@ import {
 import {
   CredentialService,
   type CredentialByDelegatedWriteGrantBaseParams,
+  type DelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
 import {
@@ -136,4 +137,8 @@ export type {
   idOSWallet,
   AvailableIssuerType,
   CredentialByDelegatedWriteGrantBaseParams,
+  DelegatedWriteGrantBaseParams,
+  DelegatedWriteGrantParams,
 };
+
+export { toDelegatedWriteGrantBaseParams } from "@idos-network/kwil-infra/actions";

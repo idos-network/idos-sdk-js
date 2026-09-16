@@ -119,7 +119,7 @@ function createNearWalletSigner(
 
 export function implicitAddressFromPublicKey(publicKey: string): string {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  return hexEncode(bs58Decode(key_without_prefix));
+  return hexEncode(bs58Decode(key_without_prefix), true);
 }
 
 export async function getNearFullAccessPublicKeys(

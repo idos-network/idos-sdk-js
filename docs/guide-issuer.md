@@ -216,12 +216,12 @@ If the user doesn’t already have your credential, you can proceed to requestin
 
 In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done using a Delegated Write Grant (DWG).
 
-A Delegated Write Grant (DWG) is a permission given by the user that allows a specific issuer to create a credential and it's copy for the issuer itself on the user's behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile. A DWG is a ERC-191 message that the user signs. The message contains fields:
+A Delegated Write Grant (DWG) is a permission given by the user that allows a specific issuer to create a credential and it's copy for the issuer itself on the user's behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile. A DWG is a signed message containing:
 
 ```
 * operation: delegatedWriteGrant
 * owner: user_wallet_identifier
-* consumer: grantee_wallet_identifier
+* grantee: grantee_wallet_identifier
 * issuer public key: ed25519_public_key_hex_encoded
 * id: _DWG_identifier
 * access grant timelock: RFC3339_date_time_till_access_grant_will_be_locked
@@ -229,7 +229,9 @@ A Delegated Write Grant (DWG) is a permission given by the user that allows a sp
 * not usable after: RFC3339_date_time_DWG_can_not_be_used_after
 ```
 
-To do this, you must first to ask a user to sign DWG message:
+> **Note on identifier casing:** Wallet identifiers (owner and grantee) are used verbatim except EVM addresses, which are canonicalized to EIP-55 checksummed format. Because exact matching is enforced, the values passed when requesting the DWG message must be the exact values submitted with the credential. `toDelegatedWriteGrantBaseParams` maps the snake_case request input to the camelCase object `createCredentialByDelegatedWriteGrant` expects.
+
+To do this, you must first ask a user to sign the DWG message:
 
 ```js
 const currentTimestamp = Date.now();
@@ -240,17 +242,17 @@ const delegatedWriteGrant = {
   grantee_wallet_identifier: signingKeyPair.address,
   issuer_public_key: signingKeyPair.publicKey,
   id: crypto.randomUUID(),
-  access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
+  access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"), // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
   not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
   not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
 };
 
-const message: string = await idOSClient.requestDWGMessage(delegatedWriteGrant);
+const message = await idOSClient.requestDWGMessage(delegatedWriteGrant);
 
 const signature = await signer.signMessage(message);
 ```
 
-Be sure you have the DWG message parameters and its signature kept. You need to use them on server side later.
+Be sure you keep the DWG message parameters and its signature. You need to use them on the server side later.
 
 ### [ backend ] Issuing and writing credentials
 
@@ -336,13 +338,7 @@ const copyEncryptionPublicKey = Utf8Codec.encode(granteeEncryptionPublicKey);
 await idOSIssuer.createCredentialByDelegatedWriteGrant(
   credentialPayload,
   {
-    id: delegatedWriteGrant.id,
-    ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
-    consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
-    issuerPublicKey: delegatedWriteGrant.issuer_public_key,
-    accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
-    notUsableBefore: delegatedWriteGrant.not_usable_before,
-    notUsableAfter: delegatedWriteGrant.not_usable_after,
+    ...toDelegatedWriteGrantBaseParams(delegatedWriteGrant),
     signature,
   },
   copyEncryptionPublicKey,

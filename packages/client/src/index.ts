@@ -49,6 +49,8 @@ import {
   type idOSCredential,
   type idOSCredentialListItem,
   type idOSDelegatedWriteGrant,
+  type DelegatedWriteGrantBaseParams,
+  toDelegatedWriteGrantBaseParams,
   type idOSGrant,
   type idOSUser,
   type idOSUserAttribute,
@@ -771,6 +773,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       : await createBlobContentReference(content);
     const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
 
+    // Integrator-supplied. ed25519 @caller is lowercase hex; after exact grantee
+    // matching, uppercase hex would store a grant the consumer cannot read. Other
+    // identifier encodings (NEAR, XRPL, Stellar, MM) are case-sensitive, so leave them.
+    const granteeWalletIdentifier = /^[0-9a-fA-F]{64}$/.test(consumerAuthPublicKey)
+      ? consumerAuthPublicKey.toLowerCase()
+      : consumerAuthPublicKey;
+
     const preliminaryCredential: SharePreliminaryCredentialInput = {
       ...signedReference,
       request_id: crypto.randomUUID(),
@@ -779,7 +788,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       content_uri: copyReference.uri,
       content_size: copyReference.size,
       encryptor_public_key: base64Encode(encryptorPublicKey),
-      grantee_wallet_identifier: consumerAuthPublicKey,
+      grantee_wallet_identifier: granteeWalletIdentifier,
       locked_until: lockedUntil,
       content_hash: contentHash,
     };
@@ -822,6 +831,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
 export type {
   idOSDelegatedWriteGrant,
+  DelegatedWriteGrantBaseParams,
   idOSCredential,
   idOSCredentialListItem,
   idOSGrant,
@@ -830,7 +840,7 @@ export type {
   idOSWallet,
 };
 
-export { signNearMessage };
+export { signNearMessage, toDelegatedWriteGrantBaseParams };
 
 export function createIDOSClient(params: {
   nodeUrl: string;

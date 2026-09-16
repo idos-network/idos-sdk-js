@@ -16,20 +16,16 @@ import {
   getCredentialShared,
   getSiblingCredentialId,
   type idOSDelegatedWriteGrant,
+  type DelegatedWriteGrantBaseParams,
 } from "@idos-network/kwil-infra/actions";
 import { BlobGateway } from "@idos-network/utils/blob-gateway";
 import { hexEncodeSha256Hash } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-export type DelegatedWriteGrantParams = {
-  id: string;
-  ownerWalletIdentifier: string;
-  consumerWalletIdentifier: string;
-  issuerPublicKey: string;
-  accessGrantTimelock: string;
-  notUsableBefore: string;
-  notUsableAfter: string;
+export type { DelegatedWriteGrantBaseParams };
+
+export type DelegatedWriteGrantParams = DelegatedWriteGrantBaseParams & {
   signature: string;
 };
 

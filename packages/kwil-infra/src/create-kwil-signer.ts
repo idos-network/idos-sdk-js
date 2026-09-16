@@ -142,10 +142,11 @@ export async function createServerKwilSigner(
   }
 
   if (isNearKeyPair(signer)) {
-    const publicKey = implicitAddressFromPublicKey(signer.getPublicKey().toString());
+    const rawPublicKey = signer.getPublicKey().toString();
+    const hexPublicKey = implicitAddressFromPublicKey(rawPublicKey);
     return [
-      new KwilSigner(kwilNep413Signer("idos-issuer")(signer), publicKey, "nep413"),
-      publicKey,
+      new KwilSigner(kwilNep413Signer("idos-issuer")(signer), hexPublicKey, "nep413"),
+      rawPublicKey,
     ];
   }
 

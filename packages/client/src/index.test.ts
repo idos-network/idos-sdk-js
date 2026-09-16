@@ -14,6 +14,7 @@ import {
   idOSClientIdle,
   idOSClientLoggedIn,
   type idOSClientWithUserSigner,
+  toDelegatedWriteGrantBaseParams,
 } from "./index.js";
 
 const mmToken = base64UrlEncode(
@@ -282,5 +283,42 @@ describe("credential blob storage", () => {
       credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,
     );
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
+  });
+
+  it("returns the dwg message string and maps params via toDelegatedWriteGrantBaseParams", async () => {
+    const callAction = vi.fn(async () => [{ message: "mock-dwg-message" }]);
+    const kwilClient = {
+      call: callAction,
+    } as unknown as KwilActionClient;
+    const client = new idOSClientLoggedIn({ kwilClient } as unknown as idOSClientWithUserSigner, {
+      id: crypto.randomUUID(),
+      recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+      encryption_password_store: "user",
+    });
+
+    const dwgInput = {
+      id: crypto.randomUUID(),
+      owner_wallet_identifier: "0x311CEe6648df431EbbeA38dfB680C28661c893Ea",
+      grantee_wallet_identifier: "0x1111111111111111111111111111111111111111",
+      issuer_public_key: "issuer-key",
+      access_grant_timelock: "2026-01-01T00:00:00Z",
+      not_usable_before: "2026-01-01T00:00:00Z",
+      not_usable_after: "2026-01-02T00:00:00Z",
+    };
+
+    const message = await client.requestDWGMessage(dwgInput);
+    const params = toDelegatedWriteGrantBaseParams(dwgInput);
+
+    expect(message).toBe("mock-dwg-message");
+    expect(params).toEqual({
+      id: dwgInput.id,
+      ownerWalletIdentifier: dwgInput.owner_wallet_identifier,
+      consumerWalletIdentifier: dwgInput.grantee_wallet_identifier,
+      issuerPublicKey: dwgInput.issuer_public_key,
+      accessGrantTimelock: dwgInput.access_grant_timelock,
+      notUsableBefore: dwgInput.not_usable_before,
+      notUsableAfter: dwgInput.not_usable_after,
+    });
+    expect(callAction).toHaveBeenCalledWith({ name: "dwg_message", inputs: dwgInput });
   });
 });

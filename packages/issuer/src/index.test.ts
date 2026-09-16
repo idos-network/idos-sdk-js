@@ -1,11 +1,12 @@
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { idOSIssuer } from "./index.js";
+import { idOSIssuer, toDelegatedWriteGrantBaseParams } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn(), uploadCredentialBlobs: vi.fn() },
   createPreliminaryCredentialsByDwg: vi.fn(),
+  dwgMessage: vi.fn(async () => ({ message: "dwg-message-string" })),
   kwilClient: {
     setSigner: vi.fn(),
   },
@@ -21,6 +22,7 @@ vi.mock("@idos-network/kwil-infra", () => ({
 vi.mock("@idos-network/kwil-infra/actions", async (importOriginal) => ({
   ...((await importOriginal()) as object),
   createPreliminaryCredentialsByDwg: mocks.createPreliminaryCredentialsByDwg,
+  dwgMessage: mocks.dwgMessage,
 }));
 
 describe("idOSIssuer", () => {
@@ -149,5 +151,64 @@ describe("idOSIssuer", () => {
       ),
     ).rejects.toThrow("Original and copy credentials must use distinct content URIs");
     expect(mocks.createPreliminaryCredentialsByDwg).toHaveBeenCalledOnce();
+  });
+
+  it("maps request params for createCredentialByDelegatedWriteGrant via toDelegatedWriteGrantBaseParams", async () => {
+    const issuer = await idOSIssuer.init({
+      nodeUrl: "https://nodes.example",
+      blobGatewayUrl: "https://blob.example",
+      signingKeyPair: nacl.sign.keyPair(),
+    });
+
+    const dwgInput = {
+      id: crypto.randomUUID(),
+      owner_wallet_identifier: "0x311CEe6648df431EbbeA38dfB680C28661c893Ea",
+      grantee_wallet_identifier: "0x1111111111111111111111111111111111111111",
+      issuer_public_key: "issuer-key",
+      access_grant_timelock: "2026-01-01T00:00:00Z",
+      not_usable_before: "2026-01-01T00:00:00Z",
+      not_usable_after: "2026-01-02T00:00:00Z",
+    };
+
+    const message = await issuer.requestDelegatedWriteGrantMessage(dwgInput);
+    const params = toDelegatedWriteGrantBaseParams(dwgInput);
+
+    expect(message).toBe("dwg-message-string");
+    expect(params).toEqual({
+      id: dwgInput.id,
+      ownerWalletIdentifier: dwgInput.owner_wallet_identifier,
+      consumerWalletIdentifier: dwgInput.grantee_wallet_identifier,
+      issuerPublicKey: dwgInput.issuer_public_key,
+      accessGrantTimelock: dwgInput.access_grant_timelock,
+      notUsableBefore: dwgInput.not_usable_before,
+      notUsableAfter: dwgInput.not_usable_after,
+    });
+
+    const userEncryptionKeyPair = nacl.box.keyPair();
+    const copyEncryptionKeyPair = nacl.box.keyPair();
+
+    await issuer.createCredentialByDelegatedWriteGrant(
+      {
+        publicNotes: "{}",
+        plaintextContent: new Uint8Array([1, 2, 3]),
+        recipientEncryptionPublicKey: userEncryptionKeyPair.publicKey,
+      },
+      {
+        ...params,
+        signature: "0xsignature",
+      },
+      copyEncryptionKeyPair.publicKey,
+    );
+
+    expect(mocks.createPreliminaryCredentialsByDwg).toHaveBeenCalled();
+    const payload = mocks.createPreliminaryCredentialsByDwg.mock.calls.at(-1)?.[1];
+    expect(payload.dwg_id).toBe(params.id);
+    expect(payload.dwg_owner).toBe(params.ownerWalletIdentifier);
+    expect(payload.dwg_grantee).toBe(params.consumerWalletIdentifier);
+    expect(payload.dwg_issuer_public_key).toBe(params.issuerPublicKey);
+    expect(payload.dwg_access_grant_timelock).toBe(params.accessGrantTimelock);
+    expect(payload.dwg_not_before).toBe(params.notUsableBefore);
+    expect(payload.dwg_not_after).toBe(params.notUsableAfter);
+    expect(payload.dwg_signature).toBe("0xsignature");
   });
 });
