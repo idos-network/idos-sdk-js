@@ -286,6 +286,12 @@ export class LocalEnclave<
     }
 
     // The stored profile can't be used, or we have to create a new one.
+    if (this.options.encryptionPasswordStore === "mm") {
+      throw new Error(
+        "MM encryption profiles require an externally supplied encryption private key",
+      );
+    }
+
     let password: string | undefined;
     let encryptionPasswordStore: EncryptionPasswordStore | undefined;
 

@@ -1,4 +1,9 @@
-import { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
+import {
+  decode as base64Decode,
+  decodeURLSafe,
+  encode as base64Encode,
+  encodeURLSafe,
+} from "@stablelib/base64";
 import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
 import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
@@ -40,6 +45,14 @@ export function bs58Encode(data: Uint8Array): string {
 
 export function bs58Decode(data: string): Uint8Array {
   return bs58.decode(data);
+}
+
+export function base64UrlEncode(data: Uint8Array): string {
+  return encodeURLSafe(data).replace(/=+$/, "");
+}
+
+export function base64UrlDecode(data: string): Uint8Array {
+  return decodeURLSafe(data);
 }
 
 export function toBytes(obj: Parameters<typeof JSON.stringify>[0]): Uint8Array {

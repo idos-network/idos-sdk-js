@@ -118,6 +118,20 @@ describe("LocalEnclave", () => {
     );
   });
 
+  it("does not request a password context for an MM profile without a stored key", async () => {
+    const enclave = new TestEnclave({
+      userId,
+      store: new MemoryStore(),
+      encryptionPasswordStore: "mm",
+    });
+    const passwordContextSpy = vi.spyOn(enclave, "getPasswordContext");
+
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "MM encryption profiles require an externally supplied encryption private key",
+    );
+    expect(passwordContextSpy).not.toHaveBeenCalled();
+  });
+
   it("creates and exposes a public encryption profile", async () => {
     const store = new MemoryStore();
     const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);

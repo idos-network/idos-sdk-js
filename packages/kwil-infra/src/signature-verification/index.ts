@@ -18,9 +18,15 @@ export interface WalletSignature {
 
 export const verifySignature = async (walletPayload: WalletSignature): Promise<boolean> => {
   invariant(walletPayload.address, "Wallet address is required");
+  invariant(walletPayload.wallet_type, "Wallet type is required");
+
+  if (walletPayload.wallet_type === "MM") {
+    // MM authentication requires capability validation by a trusted service such as KGW.
+    return false;
+  }
+
   invariant(walletPayload.message, "Wallet message is required");
   invariant(walletPayload.signature, "Wallet signature is required");
-  invariant(walletPayload.wallet_type, "Wallet type is required");
 
   if (walletPayload.wallet_type !== "EVM") {
     invariant(walletPayload.public_key?.[0], "Wallet public_key is required for non-EVM wallets");

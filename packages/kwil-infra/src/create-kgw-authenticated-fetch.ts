@@ -2,6 +2,9 @@ import { type KwilSigner, NodeKwil } from "@idos-network/kwil-js";
 import { BlobGateway, type BlobGatewayParams } from "@idos-network/utils/blob-gateway";
 
 import type { KwilActionClient } from "./create-kwil-client";
+import type { MmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
+
+import { isMmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
 
 const KGW_AUTH_ERROR_CODE = -901;
 
@@ -19,6 +22,11 @@ export type CreateKgwAuthenticatedFetchParams = {
 export type CreateKgwAuthenticatedBlobGatewayParams = CreateKgwAuthenticatedFetchParams & {
   url: string;
   maxFetchBytes?: BlobGatewayParams["maxFetchBytes"];
+  /**
+   * UKYC storage authority for blob requests. Defaults to `signer` when that signer
+   * is itself an MM authentication object, so the capability is never passed twice.
+   */
+  mmAuth?: MmTokenAuth;
 };
 
 type KgwSessionNodeKwil = NodeKwil & {
@@ -29,11 +37,16 @@ type KgwSessionNodeKwil = NodeKwil & {
 export function createKgwAuthenticatedBlobGateway({
   url,
   maxFetchBytes,
+  mmAuth,
   ...fetchParams
 }: CreateKgwAuthenticatedBlobGatewayParams): BlobGateway {
+  const storageAuth =
+    mmAuth ?? (isMmTokenAuth(fetchParams.signer) ? fetchParams.signer : undefined);
+
   return new BlobGateway({
     url,
     maxFetchBytes,
+    accessToken: storageAuth?.accessToken,
     fetchFn: createKgwAuthenticatedFetch(fetchParams),
   });
 }

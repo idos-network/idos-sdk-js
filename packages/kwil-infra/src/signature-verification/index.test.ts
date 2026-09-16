@@ -107,4 +107,22 @@ describe("verifySignature", () => {
 
     expect(result).toBe(true);
   });
+
+  it("rejects MM wallets without trusted capability validation", async () => {
+    vi.clearAllMocks();
+
+    const result = await verifySignature({
+      address: "mm-signing-public-key",
+      signature: "",
+      message: "",
+      wallet_type: "MM",
+      public_key: ["mm-signing-public-key"],
+    });
+
+    expect(result).toBe(false);
+    expect(verifyEvmSignature).not.toHaveBeenCalled();
+    expect(verifyNearSignature).not.toHaveBeenCalled();
+    expect(verifyRippleSignature).not.toHaveBeenCalled();
+    expect(verifyStellarSignature).not.toHaveBeenCalled();
+  });
 });
