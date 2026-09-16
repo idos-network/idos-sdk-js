@@ -2,7 +2,6 @@ import * as z from "zod";
 
 export const serverEnvSchema = z.object({
   IDOS_ISSUER_SECRET_KEY: z.string(),
-  IDOS_ISSUER_ENCRYPTION_SECRET_KEY: z.string(),
   SECRET_KEY_BASE: z.string(),
   SECURE_AUTH_COOKIE: z.enum(["true", "false"]).transform((v) => v === "true"),
   DATABASE_URL: z.url().optional(),

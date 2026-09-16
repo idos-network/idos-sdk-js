@@ -1,4 +1,8 @@
-import type { AvailableIssuerType, idOSCredential } from "@idos-network/credentials/types";
+import type {
+  AvailableIssuerType,
+  idOSCredential,
+  idOSCredentialRecord,
+} from "@idos-network/credentials/types";
 import type {
   EditPublicNotesAsIssuerInput,
   idOSDelegatedWriteGrant,
@@ -9,14 +13,17 @@ import type {
 } from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
 
-import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
+import {
+  createKgwAuthenticatedBlobGateway,
+  createNodeKwilClient,
+  createServerKwilSigner,
+} from "@idos-network/kwil-infra";
 
 import {
   CredentialService,
-  type DelegatedWriteGrantBaseParams,
+  type CredentialByDelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
-import { type CreateAccessGrantFromDAGParams, GrantService } from "./services/grant.service";
 import {
   type CreateProfileReqParams,
   type CreateWalletReqParams,
@@ -27,13 +34,12 @@ import {
 type CreateIssuerParams = {
   chainId?: string;
   nodeUrl: string;
+  blobGatewayUrl?: string;
   signingKeyPair: SignKeyPair;
-  encryptionSecretKey: Uint8Array;
 };
 
 export class idOSIssuer {
   readonly #credentialService: CredentialService;
-  readonly #grantService: GrantService;
   readonly #userService: UserService;
 
   static async init(params: CreateIssuerParams): Promise<idOSIssuer> {
@@ -45,25 +51,20 @@ export class idOSIssuer {
     const [signer] = await createServerKwilSigner(params.signingKeyPair);
     kwilClient.setSigner(signer);
 
-    const credentialService = new CredentialService(
+    const blobGateway = createKgwAuthenticatedBlobGateway({
+      url: params.blobGatewayUrl ?? params.nodeUrl,
       kwilClient,
-      params.signingKeyPair,
-      params.encryptionSecretKey,
-    );
+      signer,
+    });
 
-    const grantService = new GrantService(kwilClient, params.encryptionSecretKey);
+    const credentialService = new CredentialService(kwilClient, params.signingKeyPair, blobGateway);
     const userService = new UserService(kwilClient);
 
-    return new idOSIssuer(credentialService, grantService, userService);
+    return new idOSIssuer(credentialService, userService);
   }
 
-  private constructor(
-    credentialService: CredentialService,
-    grantService: GrantService,
-    userService: UserService,
-  ) {
+  private constructor(credentialService: CredentialService, userService: UserService) {
     this.#credentialService = credentialService;
-    this.#grantService = grantService;
     this.#userService = userService;
   }
 
@@ -96,9 +97,9 @@ export class idOSIssuer {
   }
 
   async createCredentialByDelegatedWriteGrant(
-    credentialParams: DelegatedWriteGrantBaseParams,
+    credentialParams: CredentialByDelegatedWriteGrantBaseParams,
     delegatedWriteGrant: DelegatedWriteGrantParams,
-    consumerEncryptionPublicKey?: Uint8Array,
+    consumerEncryptionPublicKey: Uint8Array,
   ): Promise<{
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
@@ -121,18 +122,8 @@ export class idOSIssuer {
     return this.#credentialService.getCredentialIdByContentHash(contentHash);
   }
 
-  async getCredentialShared(id: string): Promise<idOSCredential | null> {
+  async getCredentialShared(id: string): Promise<idOSCredentialRecord | null> {
     return this.#credentialService.getCredentialShared(id);
-  }
-
-  async createAccessGrantFromDAG(
-    params: CreateAccessGrantFromDAGParams,
-  ): Promise<CreateAccessGrantFromDAGParams | null> {
-    return this.#grantService.createAccessGrantFromDAG(
-      params,
-      (contentHash: string) => this.getCredentialIdByContentHash(contentHash),
-      (id: string) => this.getCredentialShared(id),
-    );
   }
 }
 
@@ -144,4 +135,5 @@ export type {
   idOSDelegatedWriteGrant,
   idOSWallet,
   AvailableIssuerType,
+  CredentialByDelegatedWriteGrantBaseParams,
 };

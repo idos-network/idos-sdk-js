@@ -26,6 +26,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "publint": "pnpx publint --strict",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -36,7 +37,9 @@
     "tiny-invariant": "catalog:core"
   },
   "devDependencies": {
-    "tsdown": "catalog:build"
+    "tsdown": "catalog:build",
+    "tweetnacl": "catalog:core",
+    "vitest": "catalog:testing"
   },
   "engines": {
     "node": ">=22.19.0"

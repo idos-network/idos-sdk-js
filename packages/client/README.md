@@ -28,6 +28,8 @@ import {
 
 const idOSClientWithoutSigner = await createIDOSClient({
   nodeUrl: "https://nodes.idos.network",
+  // Must share KGW's session-cookie Domain (typically same host as nodeUrl).
+  blobGatewayUrl: "https://blob-gateway.idos.network",
   enclaveOptions: {
     container: "#idosContainer",
   },
@@ -53,14 +55,6 @@ const credentials = await loggedInClient.filterCredentials({
   },
 });
 
-// If we found a credentials which we can use, we will ask user for AccessGrant
-// which we later can use in our consumer to get the users data
-const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
-  consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
-  consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
-  lockedUntil: lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
-});
-
 // Also when the user is logged in, we can ask him to add another wallet
 // wallet type is required.
 await loggedInClient.addWallet({
@@ -70,6 +64,18 @@ await loggedInClient.addWallet({
   message: "Sign this message to prove you own this wallet",
   signature: "0x...", // Signature of the message
   wallet_type: "EVM", // Required: "EVM", "NEAR", "XRPL"...
+});
+```
+
+### Request an access grant
+
+The logged-in user issues the shared copy (ephemeral user-side signing key). No original-issuer secret is required.
+
+```typescript
+const ag = await loggedInClient.requestAccessGrant(credentials[0].id, {
+  consumerAuthPublicKey: "CONSUMER_PUBLIC_KEY",
+  consumerEncryptionPublicKey: "CONSUMER_ENC_PUBLIC_KEY",
+  lockedUntil: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 3 months from now
 });
 ```
 
@@ -94,7 +100,7 @@ For complete documentation, examples, and implementation guides:
 - **Profile & Session Lifecycle** - Check profile existence, attach a wallet signer, and log users in/out
 - **Enclave-Backed Encryption** - Generate user encryption profiles and decrypt credential content safely via the enclave
 - **Credential Access & Filtering** - Fetch credentials, read decrypted content, and filter by issuer, level, and field rules
-- **Credential Sharing Flows** - Request DAG/DWG messages, create access grants, and share credentials with controlled lock times
+- **Credential Sharing Flows** - Request DWG messages, create access grants, and share credentials with controlled lock times
 - **Wallet Management** - Add, list, and remove wallets (single or batch), including MPC-aware wallet synchronization
 - **Multi-Chain Wallet Support** - Works with EVM, NEAR, XRPL, and Stellar wallet types
 

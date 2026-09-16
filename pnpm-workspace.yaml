@@ -10,6 +10,7 @@ allowBuilds:
   blake-hash: true
   bufferutil: true
   es5-ext: true
+  esbuild: true
   keccak: true
   lefthook: true
   msw: true
@@ -121,6 +122,8 @@ minimumReleaseAgeExclude:
   - axios@1.19.0
   - vite@8.2.0
   - "@noble/hashes@2.3.0"
+  # KGW cookie helpers for blob gateway (feat/blob_gateway)
+  - "@idos-network/kwil-js@0.1.5"
 
 onlyBuiltDependencies:
   - "@swc/core"
@@ -156,7 +159,6 @@ overrides:
   vite: ">= 8.2.0"
   postcss: ">= 8.5.18"
   react-router: ">= 8.3.0"
-  shell-quote: ">= 1.8.5"
   "@react-router/dev": ">=8.3.0"
   "@react-router/node": ">=8.3.0"
   "@react-router/serve": ">=8.3.0"
@@ -165,6 +167,9 @@ overrides:
   "brace-expansion": ">= 5.0.9"
   "nanoid": ">= 5.1.11"
   "toml": ">= 4.1.2"
+  basic-ftp: ">=6.0.1"
+  deepmerge-ts: ">=8.0.0"
+  mysql2: ">=3.22.0"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
@@ -175,5 +180,14 @@ overrides:
   # Bs58 is broken < 6.0.0 together with vite 8.x
   # but the import is the same
   bs58: "6.0.0"
+
+  # Security: js-yaml DoS (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj)
+  "js-yaml@3": "3.15.2"
+  "js-yaml@4": "4.3.2"
+  # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
+  "nanoid@3": "3.3.18"
+  "nanoid@5": "5.1.16"
+  # Security: shell-quote DoS (GHSA-395f-4hp3-45gv)
+  shell-quote: "1.10.0"
 
 strictDepBuilds: true
