@@ -92,6 +92,7 @@ export function App({ enclave }: AppProps) {
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
       if (event.source !== enclave) return;
+      if (event.origin !== window.origin) return;
 
       const { data: requestData, ports } = event;
 
