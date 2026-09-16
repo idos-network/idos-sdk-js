@@ -5,16 +5,22 @@ import type { Xumm } from "xumm";
 import { KwilSigner } from "@idos-network/kwil-js";
 
 import type { KwilActionClient } from "../create-kwil-client";
+import type { ClientKwilSignerResult } from "../create-kwil-signer";
 
-import { getXrpTxHash } from "./utils";
+import { getXrpPublicKey, getXrpTxHash } from "./utils";
 
 export async function createXrpKwilSigner(
   wallet: Xumm | typeof GemWallet,
-  currentAddress: string,
   store: Store,
   kwilClient: KwilActionClient,
-  walletPublicKey: string,
-): Promise<KwilSigner> {
+): Promise<ClientKwilSignerResult> {
+  const { address: currentAddress, publicKey: walletPublicKey } = (await getXrpPublicKey(
+    wallet,
+  )) as { address: string; publicKey: string };
+  if (!currentAddress) {
+    throw new Error("Failed to get XRP address");
+  }
+
   const storedAddress = await store.get<string>("signer-address");
   const storePublicKey = await store.get<string>("signer-public-key");
 
@@ -39,5 +45,10 @@ export async function createXrpKwilSigner(
     return Buffer.from(signature, "hex");
   };
 
-  return new KwilSigner(signer, walletPublicKey, "xrpl");
+  return {
+    kwilSigner: new KwilSigner(signer, walletPublicKey, "xrpl"),
+    walletIdentifier: currentAddress,
+    walletPublicKey,
+    walletType: "XRPL",
+  };
 }
