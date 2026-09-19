@@ -1978,6 +1978,7 @@ export declare class FaceTecCustomizations {
   static setCustomization: (updatedCustomization: FaceTecCustomization) => void;
   private static readonly checkGuardRails;
   static getSuccessResultMessageOrOverrideResultScreenSuccessMessage: () => string;
+  private static readonly checkURLParamForValueEquals;
   private static lowLightCustomization;
   private static dynamicDimmingCustomization;
   static currentCustomization: FaceTecCustomization;
