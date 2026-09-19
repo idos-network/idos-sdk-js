@@ -1,5 +1,11 @@
 # facesign-enclave
 
+## 0.4.3
+
+### Patch Changes
+
+- @idos-network/utils@2.1.0
+
 ## 0.4.2
 
 ### Patch Changes

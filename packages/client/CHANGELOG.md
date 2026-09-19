@@ -1,5 +1,20 @@
 # @idos-network/client
 
+## 2.1.0
+
+### Minor Changes
+
+- a98e872: Add blob gateway uploads and KGW-authenticated reads for consumer and issuer credential flows.
+- e0a220c: Export `toDelegatedWriteGrantBaseParams` so DWG request input maps 1:1 into `createCredentialByDelegatedWriteGrant`. Canonicalize ed25519 signer identifiers and 64-character hexadecimal grantee identifiers to lowercase hex to match kwild `@caller`.
+
+### Patch Changes
+
+- Updated dependencies [e0a220c]
+  - @idos-network/kwil-infra@2.1.0
+  - @idos-network/enclave@2.1.0
+  - @idos-network/credentials@2.1.0
+  - @idos-network/utils@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes
