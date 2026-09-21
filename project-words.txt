@@ -14,6 +14,13 @@ Borsh
 bowser
 Bundesdruckerei
 CCPA
+certutil
+chakra
+changeset
+changesets
+chatset
+checksummed
+chunker
 ciphertext
 codegen
 comlink
@@ -48,11 +55,6 @@ hexlify
 Holyheld
 Holyheld
 hono
-chakra
-changeset
-changesets
-chatset
-chunker
 iban
 ibans
 idos
@@ -81,9 +83,11 @@ kwilteam
 KYCV
 LCVJ
 libc
+libnss
 lucide
 Metadatas
 Mindshare
+mkcert
 monerium
 multibase
 multicall
@@ -184,4 +188,3 @@ xsignature
 xstate
 XUMM
 ziif
-checksummed
