@@ -1,0 +1,49 @@
+name: E2E
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - playground
+      - main
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: read
+
+jobs:
+  idos-enclave:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build:packages
+
+      - name: Install certificate utilities
+        # The vite-plugin-mkcert preview server installs its local CA with
+        # `mkcert -install`, which needs `certutil` from the NSS tools.
+        run: sudo apt-get update && sudo apt-get install -y libnss3-tools
+
+      - name: Install Chromium and system dependencies
+        run: pnpm --filter idos-enclave exec playwright install --with-deps chromium
+
+      - name: Run enclave E2E tests
+        run: pnpm --filter idos-enclave test:e2e

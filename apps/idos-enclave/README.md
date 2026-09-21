@@ -13,3 +13,6 @@ pnpm --filter idos-enclave test:e2e
 
 The tests build the app and serve it locally. They cover normal password submission and
 rejecting a forged reply port after the dialog's opener navigates to another origin.
+
+The [E2E workflow](../../.github/workflows/e2e.yml) also runs these tests in Chromium on
+pull requests and pushes to `main` and `playground`.
