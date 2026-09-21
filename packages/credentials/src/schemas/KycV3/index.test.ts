@@ -28,6 +28,8 @@ function basicCredential(): KycV3 {
     number: "123456789",
     country: "US",
     frontFile: Buffer.from("Front"),
+    frontFileType: "image/jpeg",
+    frontFileName: "front.jpg",
   });
 
   return credential;
@@ -160,6 +162,8 @@ describe("KycV3 validity", () => {
         city: "Boston",
         country: "US",
         proofFile: "not-a-buffer" as never,
+        proofFileType: "image/jpeg",
+        proofFileName: "proof.jpg",
       }),
     ).toThrow(/proofFile/);
   });
@@ -298,6 +302,8 @@ describe("KycV3 derived fields", () => {
       country: "US",
       dateOfExpiry: new Date("2030-06-01"),
       frontFile: Buffer.from("Front"),
+      frontFileType: "image/jpeg",
+      frontFileName: "front.jpg",
     });
 
     credential.checkValidity();
@@ -316,6 +322,8 @@ describe("KycV3 derived fields", () => {
       proofCategory: "UTILITY_BILL",
       proofDateOfIssue: new Date("2021-01-01"),
       proofFile: Buffer.from("Proof"),
+      proofFileType: "image/jpeg",
+      proofFileName: "proof.jpg",
     });
     credential.addSection("sourceOfWealth", { type: "SALARY" });
     credential.addSection("onboarding", {
@@ -365,7 +373,11 @@ describe("KycV3 serialization", () => {
       dateOfExpiry: new Date("2030-01-01"),
       issuingAuthority: "US Department of State",
       frontFile: Buffer.from("Front"),
+      frontFileType: "image/jpeg",
+      frontFileName: "front.jpg",
       backFile: Buffer.from("Back"),
+      backFileType: "image/jpeg",
+      backFileName: "back.jpg",
       // cspell:disable-next-line
       mrzLine1: "P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<",
     });
@@ -379,6 +391,8 @@ describe("KycV3 serialization", () => {
       proofCategory: "UTILITY_BILL",
       proofDateOfIssue: new Date("2021-01-01"),
       proofFile: Buffer.from("Proof"),
+      proofFileType: "image/jpeg",
+      proofFileName: "proof.jpg",
       ipCountry: "US",
     });
     credential.addSection("screening", {
@@ -391,6 +405,8 @@ describe("KycV3 serialization", () => {
       occupation: "REAL_ESTATE",
       sourceOfFundsCategory: "SALARY",
       sourceOfFundsProofFile: Buffer.from("Funds"),
+      sourceOfFundsProofFileType: "application/pdf",
+      sourceOfFundsProofFileName: "funds.pdf",
     });
     credential.addSection("sourceOfWealth", {
       type: "SALARY",
@@ -437,6 +453,10 @@ describe("KycV3 serialization", () => {
     expect(serialized.idDocumentDateOfIssue).toBe(new Date("2020-01-01").toISOString());
     expect(base85ToFile(serialized.idDocumentFrontFile as string)?.toString()).toBe("Front");
     expect(base85ToFile(serialized.idDocumentBackFile as string)?.toString()).toBe("Back");
+    expect(serialized.idDocumentFrontFileType).toBe("image/jpeg");
+    expect(serialized.idDocumentFrontFileName).toBe("front.jpg");
+    expect(serialized.idDocumentBackFileType).toBe("image/jpeg");
+    expect(serialized.idDocumentBackFileName).toBe("back.jpg");
     expect(serialized.contactEmail).toBe("john@example.com");
     expect(base85ToFile(serialized.biometricSelfieFile as string)?.toString()).toBe("Selfie");
     expect(serialized.biometricSelfieMatch).toBe(99);

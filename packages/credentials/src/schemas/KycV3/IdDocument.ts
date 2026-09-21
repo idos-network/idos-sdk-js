@@ -1,7 +1,7 @@
-import { IsIn, IsOptional, IsISO31661Alpha2, Length } from "class-validator";
+import { IsIn, IsOptional, IsISO31661Alpha2, Length, IsString, IsMimeType } from "class-validator";
 
 import { IDDocumentTypes, type IDDocumentType } from "../enums";
-import { Base85FileField, IsoDateField } from "../utils";
+import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
 
 export class IdDocument {
   /* The type of identity document used for verification (e.g. PASSPORT, ID_CARD, DRIVERS). */
@@ -35,10 +35,30 @@ export class IdDocument {
   @Base85FileField()
   frontFile: Buffer;
 
+  /* Type of the document provided as front of the identity document. */
+  @IsString()
+  @IsMimeType()
+  frontFileType: string;
+
+  /* Name of the document provided as front of the identity document. */
+  @IsString()
+  frontFileName: string;
+
   /* The file containing the back of the identity document. */
   @IsOptional()
   @Base85FileField()
   backFile?: Buffer;
+
+  /* Type of the document provided as back of the identity document. */
+  @RequiredWhen((idDocument: IdDocument) => !!idDocument.backFile)
+  @IsString()
+  @IsMimeType()
+  backFileType?: string;
+
+  /* Name of the document provided as back of the identity document. */
+  @RequiredWhen((idDocument: IdDocument) => !!idDocument.backFile)
+  @IsString()
+  backFileName?: string;
 
   /* The Machine-Readable Zone (MRZ) line from the document. Includes mrzLine2 and mrzLine3. */
   @IsOptional()

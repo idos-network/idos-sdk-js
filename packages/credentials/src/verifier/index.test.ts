@@ -51,6 +51,8 @@ async function issueKycV3(key: Ed25519VerificationKey2020) {
     number: "123456789",
     country: "US",
     frontFile: Buffer.from("Front"),
+    frontFileType: "image/jpeg",
+    frontFileName: "front.jpg",
   });
   credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
   return credential.issue(key);

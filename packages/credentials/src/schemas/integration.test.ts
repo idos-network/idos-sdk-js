@@ -159,7 +159,11 @@ describe("all versions issue + verify + parse", () => {
         dateOfIssue: new Date("2020-01-01"),
         issuingAuthority: "DOS",
         frontFile: Buffer.from("F"),
+        frontFileType: "image/jpeg",
+        frontFileName: "front.jpg",
         backFile: Buffer.from("B"),
+        backFileType: "image/jpeg",
+        backFileName: "back.jpg",
         mrzLine1: "P<USA",
         title: "Dr",
         extendedValidUntil: new Date("2031-01-01"),
@@ -181,6 +185,8 @@ describe("all versions issue + verify + parse", () => {
         proofCategory: "UTILITY_BILL",
         proofDateOfIssue: new Date("2021-01-01"),
         proofFile: Buffer.from("P"),
+        proofFileType: "image/jpeg",
+        proofFileName: "proof.jpg",
         ipCountry: "US",
       })
       .addSection("screening", {
@@ -193,6 +199,8 @@ describe("all versions issue + verify + parse", () => {
         occupation: "REAL_ESTATE",
         sourceOfFundsCategory: "SALARY",
         sourceOfFundsProofFile: Buffer.from("F"),
+        sourceOfFundsProofFileType: "application/pdf",
+        sourceOfFundsProofFileName: "funds.pdf",
       })
       .addSection("sourceOfWealth", {
         type: "SALARY",
