@@ -37,9 +37,10 @@ function formatFilesInDirectory(directory) {
 }
 
 /*
- * Reflection over the classes. A field's declared TypeScript type comes from
- * `emitDecoratorMetadata`; its validators name the finer distinctions that type erases, such as
- * an integer from a float.
+ * Reflection over the classes, by way of their validators: the package builds without
+ * `emitDecoratorMetadata` (see tsconfig.json), so `design:type` is not in `dist/`. The
+ * validators carry it anyway, along with the finer distinctions a TypeScript type erases, such
+ * as an integer from a float.
  */
 
 const storage = getMetadataStorage();
@@ -79,19 +80,17 @@ function sectionsOf(cls) {
 
 /*
  * `dateType` differs per credential half: an envelope date carries a full timestamp, a subject
- * date only ever a day. Both hold a `Date`, so the type alone cannot tell them apart.
+ * date only ever a day. Both validate as `isDate`, so the field alone cannot tell them apart.
  */
 function contextTypeOf(cls, property, dateType) {
-  const type = Reflect.getMetadata("design:type", cls.prototype, property)?.name;
+  const validators = validatorsOf(cls, property);
 
-  if (type === "Boolean") return "xsd:boolean";
-  if (type === "Date") return dateType;
+  if (validators.includes("isBoolean")) return "xsd:boolean";
+  if (validators.includes("isDate")) return dateType;
+  if (validators.includes("isInt")) return "xsd:integer";
+  if (validators.includes("isNumber")) return "xsd:double";
 
-  if (type === "Number") {
-    return validatorsOf(cls, property).includes("isInt") ? "xsd:integer" : "xsd:double";
-  }
-
-  // Files cross the wire as ascii85, so a Buffer is a string here too.
+  // Anything else crosses the wire as a string, a file included: those are ascii85.
   return "xsd:string";
 }
 
@@ -107,8 +106,9 @@ const legacyKycFieldContextOverrides = {
 };
 
 /*
- * One entry per generated context. `envelope` names the envelope class to reflect over; the
- * others name a credential version, whose subject class is read from an instance.
+ * One entry per generated context. Both `envelope` and `version` name an export of
+ * `dist/schemas`: an envelope class is reflected over directly, a credential version has its
+ * subject class read from an instance.
  *
  * `dateType` is per context rather than derived: a `Date` field says nothing about whether the
  * wire form carries a timestamp, and these contexts are published — v1 declared its `approvedAt`
@@ -126,11 +126,11 @@ const configuration = [
     dateType: "xsd:dateTime",
   },
   {
-    version: "KycV3",
+    version: "VerifiableCredentialKycV3",
     jsonLd: "idos-credential-subject-v3",
   },
   {
-    version: "KycV1",
+    version: "VerifiableCredentialKycV1",
     jsonLd: "idos-credential-subject-v1",
     extraContext: {
       aux: legacyCountryCodesContext,
@@ -138,7 +138,7 @@ const configuration = [
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
   {
-    version: "KycV2",
+    version: "VerifiableCredentialKycV2",
     jsonLd: "idos-credential-subject-v2",
     extraContext: {
       aux: legacyCountryCodesContext,
@@ -146,11 +146,11 @@ const configuration = [
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
   {
-    version: "FaceIdV1",
+    version: "VerifiableCredentialFaceIdV1",
     jsonLd: "idos-credential-subject-face-id-v1",
   },
   {
-    version: "EddV1",
+    version: "VerifiableCredentialEddV1",
     jsonLd: "idos-credential-subject-edd-v1",
   },
 ];
