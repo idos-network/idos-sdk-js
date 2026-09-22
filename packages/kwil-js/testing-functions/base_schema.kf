@@ -1,0 +1,15 @@
+database base_schema;
+
+table foo {
+  id uuid primary
+}
+
+procedure return_hello () public view returns (message text) {
+  return 'hello world';
+}
+
+procedure add_foo () public {
+  $id uuid := uuid_generate_v5('64f6822c-28bf-408e-b214-59421a5012ba'::uuid, @txid);
+  INSERT INTO foo (id) VALUES ($id);
+}
+
