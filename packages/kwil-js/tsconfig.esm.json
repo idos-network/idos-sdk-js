@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist-esm",
+    "rootDir": "./src",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "declaration": false,
+    "declarationDir": null,
+    "declarationMap": false,
+    "sourceMap": false,
+    "resolveJsonModule": false
+  },
+  "include": ["src/**/*.ts"]
+}

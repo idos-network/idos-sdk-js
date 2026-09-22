@@ -1,0 +1,70 @@
+database mydb;
+
+table posts {
+    id uuid primary notnull,
+    name text notnull,
+    post_title text notnull,
+    post_body text notnull
+}
+
+procedure add_post ($user text, $title text, $body text) public {
+    $id uuid := uuid_generate_v5('455f60aa-0569-4aaa-8469-63be2ec4dd96'::uuid, @txid);
+    INSERT INTO posts (id, name, post_title, post_body) VALUES ($id, $user, $title, $body);
+}   
+
+action update_post ($body, $id) public {
+    UPDATE posts SET post_body = $body WHERE id = $id;
+}
+
+action delete_post ($id) public {
+    DELETE FROM posts WHERE id = $id;
+}
+
+action read_posts () public view {
+    SELECT count(*) FROM posts;
+}
+
+action view_with_param ($title) public view {
+    SELECT * from posts WHERE post_title = $title;
+}
+
+@kgw(authn='true')
+action view_must_sign () public view {
+    SELECT * from posts;
+} 
+
+@kgw(authn='true')
+action view_caller () public view {
+    SELECT @caller AS caller;
+}
+
+procedure proc_add_user($user text , $title text, $body text) public {
+  $count int;
+  for $amnt in SELECT count(*) AS count FROM posts {
+    $count := $amnt.count + 1;
+  }
+  $id uuid := uuid_generate_v5('455f60aa-0569-4aaa-8469-63be2ec4dd96'::uuid, @txid);
+  INSERT INTO posts (id, name, post_title, post_body)
+  VALUES ($id, $user, $title, $body);
+}
+
+procedure get_post_by_title($title text) public view returns (post_title text, post_body text) {
+    for $row in SELECT post_title, post_body FROM posts WHERE post_title = $title {
+        return $row.post_title, $row.post_body; // will return on the first iteration
+    }
+
+    error(format('record with title = "%s" not found', $title));
+}
+
+foreign procedure call_base_view() returns (text)
+
+procedure proc_call_base ($dbid text) public view returns (original text) {
+    $message text := call_base_view[$dbid, 'return_hello']();
+    return $message;
+}
+
+foreign procedure call_base_insert()
+
+procedure proc_insert_base ($dbid text) public {
+    call_base_insert[$dbid, 'add_foo']();
+}

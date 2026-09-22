@@ -1,0 +1,14 @@
+/node_modules
+/node
+/web
+/bundles
+/debug-cli/testfiles/**/*
+.idea
+.task
+yarn.lock
+.env
+/testing-functions
+/testapp
+/src
+/pkg
+/tests

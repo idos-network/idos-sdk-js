@@ -1,0 +1,28 @@
+database latin_schema;
+
+procedure return_caller () public view returns (caller text) {
+    return @caller;
+}
+
+table special_chars {
+    id int primary,
+    char text notnull
+}
+
+procedure insert_char ($id int, $char text) public {
+    insert into special_chars (id, char) values ($id, $char);
+}
+
+procedure get_char($id int) public view returns (special_character text) {
+    $special_character text;
+
+    for $hummm in SELECT char AS special_character FROM special_chars WHERE id = $id {
+        $special_character := $hummm.special_character;
+    }
+
+    return $special_character;
+}
+
+procedure delete_char($id int) public {
+    delete from special_chars where id = $id;   
+}

@@ -1,0 +1,52 @@
+database variable_test;
+
+table var_table {
+    uuid_col uuid primary,
+    text_col text,
+    int_col int,
+    bool_col bool,
+    dec_col decimal(5,2),
+    big_dec_col decimal(20, 10),
+    blob_col blob,
+    uint256_col uint256
+}
+
+action insert_uuid ($id) public {
+    INSERT INTO var_table(uuid_col)
+    VALUES ($id);
+}
+
+action insert_text ($id, $text) public {
+    INSERT INTO var_table (uuid_col, text_col)
+    VALUES ($id, $text);
+}
+
+action insert_int ($id, $int) public {
+    INSERT INTO var_table (uuid_col, int_col)
+    VALUES($id, $int);
+}
+
+action insert_dec ($id, $dec) public {
+    INSERT INTO var_table (uuid_col, dec_col)
+    VALUES($id, $dec);
+}
+
+action insert_bool ($id, $bool) public {
+    INSERT INTO var_table (uuid_col, bool_col)
+    VALUES ($id, $bool);
+}
+
+action insert_blob ($id, $blob) public {
+    INSERT INTO var_table (uuid_col, blob_col)
+    VALUES ($id, $blob);
+}
+
+action insert_uint256 ($id, $uint256) public {
+    INSERT INTO var_table (uuid_col, uint256_col)
+    VALUES ($id, $uint256);
+}
+
+action insert_big_dec ($id, $big_dec) public {
+    INSERT INTO var_table (uuid_col, big_dec_col)
+    VALUES ($id, $big_dec);
+}
