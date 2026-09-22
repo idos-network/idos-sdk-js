@@ -1,7 +1,7 @@
 import { Base64String, EncodedQueryParams, HexString } from "../utils/types";
 import { KGWAuthInfo, AuthenticatedBody } from "./auth";
 import { Database } from "./database";
-import { AccountKeyType, AccountStatus, BroadcastSyncType, BytesEncodingStatus } from "./enums";
+import { AccountStatus, BroadcastSyncType, BytesEncodingStatus } from "./enums";
 import { MsgData } from "./message";
 import { AccountId, DatasetInfoServer } from "./network";
 import { TxnData } from "./tx";
@@ -152,11 +152,6 @@ export type CallResponse = {
   logs?: string;
   error?: string;
 };
-
-// This is the older response type for query.  Keeping now for reference.
-interface EncodedResult {
-  result: Base64String;
-}
 
 export interface QueryResponse {
   column_names: string[];

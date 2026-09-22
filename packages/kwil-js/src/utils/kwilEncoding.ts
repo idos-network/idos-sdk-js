@@ -90,7 +90,7 @@ export function encodeActionExecution(
 
 export function encodeRawStatement(statement: RawStatementPayload): string {
   // to encode RawStatement, we need to concat a bytes array of all the required properties.
-  // the order of each property on the interfaces is important. If the bytes are concated in an incorrect order, the database engine will not know how to decode them.
+  // the order of each property on the interfaces is important. If the bytes are concatenated in an incorrect order, the database engine will not know how to decode them.
 
   // ~ITEMS TO ENCODE~
 
@@ -99,7 +99,7 @@ export function encodeRawStatement(statement: RawStatementPayload): string {
   // This is used in case we different interfaces in the future and want to maintain backwards compatibility.
   const rawStatementVersion = 0;
 
-  // rsVersion should be converted to Uint16 and concactenated with the rest of our bytes
+  // rsVersion should be converted to Uint16 and concatenated with the rest of our bytes
   const encodedVersion = numberToUint16LittleEndian(rawStatementVersion);
 
   // Item 2. Rawstatement.statement
@@ -175,7 +175,7 @@ function encodeEncodedValue(ev: EncodedValue): Uint8Array {
     encodedData = concatBytes(encodedData, prefixBytesLength(data));
   }
 
-  // Concact bytes together in correct order
+  // Concatenate bytes together in correct order
   return concatBytes(encodedVersion, encodedType, encodedData);
 }
 

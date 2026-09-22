@@ -9,6 +9,6 @@
 export interface TransferBody {
   to: string | Uint8Array;
   keyType?: string;
-  amount: BigInt;
+  amount: bigint;
   description?: string;
 }

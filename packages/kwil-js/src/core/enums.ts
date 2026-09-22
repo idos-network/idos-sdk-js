@@ -35,7 +35,7 @@ export enum IndexType {
 
 export enum EncodingType {
   INVALID_ENCODING_TYPE = 0,
-  RLP_ENCODING,
+  RLP_ENCODING = 1,
 }
 
 export enum PayloadType {

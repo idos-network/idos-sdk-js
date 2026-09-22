@@ -151,25 +151,26 @@ export function resolveValueType(value: ValueType | ValueType[]): {
         varType = VarType.UUID;
       }
       break;
-    case "number":
+    case "number": {
       const numAnalysis = analyzeNumber(value);
 
       return {
         metadata: [numAnalysis.precision, numAnalysis.scale],
         varType: numAnalysis.hasDecimal ? VarType.NUMERIC : VarType.INT8,
       };
+    }
     case "boolean":
       varType = VarType.BOOL;
       break;
-    case "object":
+    case "object": {
       if (value instanceof Uint8Array) {
         varType = VarType.BYTEA;
         break;
       }
-      if (value === null) {
-        varType = VarType.NULL;
-        break;
-      }
+      // any other object (including null) is sent as null
+      varType = VarType.NULL;
+      break;
+    }
     case "undefined":
       varType = VarType.NULL;
       break;

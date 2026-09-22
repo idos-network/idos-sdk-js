@@ -1,126 +1,63 @@
 {
   "name": "@idos-network/kwil-js",
   "version": "0.1.9",
-  "description": "",
+  "description": "Kwil database client for the idOS JavaScript SDK",
+  "homepage": "https://idos.network",
   "license": "MIT",
-  "author": "idOS Network <engineering@idos.network>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/idos-network/kwilteam-kwil-js.git"
-  },
+  "repository": "github:idos-network/idos-sdk-js",
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "dist-esm/**/*.js",
-    "dist-esm/**/*.mjs",
-    "dist-esm/**/*.d.ts",
-    "dist-esm/package.json",
-    "!dist/**/*.map",
-    "!dist/**/*.test.js",
-    "!dist/**/*.test.ts",
-    "!dist-esm/**/*.map",
-    "CHANGELOG.md",
-    "README.md",
-    "LICENSE"
+    "dist/**/*",
+    "src/**/*"
   ],
+  "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "module": "./dist-esm/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "import": "./dist-esm/index.mjs",
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     },
-    "./dist/api_client/config": {
-      "import": "./dist-esm/api_client/config.mjs",
-      "types": "./dist/api_client/config.d.ts",
-      "require": "./dist/api_client/config.js"
+    "./config": {
+      "types": "./dist/api_client/config.d.mts",
+      "import": "./dist/api_client/config.mjs"
     },
-    "./dist/core/action": {
-      "import": "./dist-esm/core/action.mjs",
-      "types": "./dist/core/action.d.ts",
-      "require": "./dist/core/action.js"
+    "./action": {
+      "types": "./dist/core/action.d.mts",
+      "import": "./dist/core/action.mjs"
     },
-    "./dist/core/database": {
-      "import": "./dist-esm/core/database.mjs",
-      "types": "./dist/core/database.d.ts",
-      "require": "./dist/core/database.js"
-    },
-    "./package.json": "./package.json"
+    "./database": {
+      "types": "./dist/core/database.d.mts",
+      "import": "./dist/core/database.mjs"
+    }
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "clean": "rimraf dist/* dist-esm/*",
-    "build": "pnpm run clean && tsc && node build-esm.js",
-    "type-check:esm": "tsc -p tsconfig.esm.json --noEmit",
-    "commit": "git add . && git-cz",
-    "prepare": "husky install",
-    "release": "standard-version",
-    "pack_build": "pnpm run clean && tsc --outDir ./dist --sourceMap false --declarationDir ./dist",
-    "pack_pre": "copyfiles package.json README.md dist && rimraf ./kwil*.tgz",
-    "pack_post": "copyfiles ./kwil*.tgz ./pkg && rimraf ./kwil*.tgz",
-    "pack": "pnpm run build && pnpm run pack_pre && pnpm pack && pnpm run pack_post",
-    "integration": "jest --runInBand --testPathPattern=tests/integration --testTimeout=30000",
-    "test": "jest",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "type-check": "tsc --noEmit"
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "axios": "^1.11.0",
-    "ethers": "^6.9.1",
-    "jssha": "^3.2.0",
-    "long": "^5.2.1",
-    "lru-cache": "^11.1.0",
-    "uuid": "^11.1.0"
+    "@noble/hashes": "^2.3.0",
+    "axios": "^1.19.0",
+    "lru-cache": "11.5.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.7.1",
-    "@commitlint/config-conventional": "^17.7.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^18.11.17",
-    "@types/uuid": "^9.0.8",
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.38.0",
-    "commitizen": "^4.3.0",
-    "copyfiles": "^2.4.1",
-    "cz-conventional-changelog": "^3.3.0",
-    "dotenv": "^16.4.5",
-    "esbuild": "^0.25.10",
-    "esbuild-plugin-file-path-extensions": "^2.1.4",
-    "eslint": "^8.23.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "glob": "^11.0.3",
-    "husky": "^8.0.3",
-    "jest": "^29.7.0",
-    "near-api-js": "^2.1.4",
-    "prettier": "^2.7.1",
-    "release-it": "^19.0.4",
-    "release-it-pnpm": "^4.6.6",
-    "rimraf": "^3.0.2",
-    "scrypt-js": "^3.0.1",
-    "standard-version": "^9.5.0",
-    "ts-jest": "^29.4.0",
-    "ts-node": "^10.9.2",
-    "tweetnacl": "^1.0.3",
-    "typescript": "^4.9.5"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    },
-    "husky": {
-      "hooks": {
-        "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-      }
-    }
+    "@types/node": "catalog:build",
+    "@vitest/coverage-v8": "catalog:testing",
+    "ethers": "catalog:ethereum",
+    "tsdown": "catalog:build",
+    "tweetnacl": "catalog:core",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.19.0"
   }
 }

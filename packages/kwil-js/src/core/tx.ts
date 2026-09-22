@@ -1,5 +1,5 @@
 import { strings } from "../utils/strings";
-import { Base64String, HexString, Nil, Nillable, NonNil } from "../utils/types";
+import { Base64String, HexString, Nillable, NonNil } from "../utils/types";
 import { PayloadType, SerializationType, BytesEncodingStatus, PayloadBytesTypes } from "./enums";
 import { Signature, SignatureType } from "./signature";
 
