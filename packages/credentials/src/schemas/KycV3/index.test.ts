@@ -1,4 +1,4 @@
-import { base85ToFile, fileToBase85 } from "@idos-network/utils/codecs";
+import { fileToBase85 } from "@idos-network/utils/codecs";
 import { describe, expect, it } from "vitest";
 
 import type { VerifiableCredential } from "../../types";
@@ -28,6 +28,8 @@ function basicCredential(): KycV3 {
     number: "123456789",
     country: "US",
     frontFile: Buffer.from("Front"),
+    frontFileType: "image/jpeg",
+    frontFileName: "front.jpg",
   });
 
   return credential;
@@ -160,6 +162,8 @@ describe("KycV3 validity", () => {
         city: "Boston",
         country: "US",
         proofFile: "not-a-buffer" as never,
+        proofFileType: "image/jpeg",
+        proofFileName: "proof.jpg",
       }),
     ).toThrow(/proofFile/);
   });
@@ -298,6 +302,8 @@ describe("KycV3 derived fields", () => {
       country: "US",
       dateOfExpiry: new Date("2030-06-01"),
       frontFile: Buffer.from("Front"),
+      frontFileType: "image/jpeg",
+      frontFileName: "front.jpg",
     });
 
     credential.checkValidity();
@@ -316,6 +322,8 @@ describe("KycV3 derived fields", () => {
       proofCategory: "UTILITY_BILL",
       proofDateOfIssue: new Date("2021-01-01"),
       proofFile: Buffer.from("Proof"),
+      proofFileType: "image/jpeg",
+      proofFileName: "proof.jpg",
     });
     credential.addSection("sourceOfWealth", { type: "SALARY" });
     credential.addSection("onboarding", {
@@ -365,7 +373,11 @@ describe("KycV3 serialization", () => {
       dateOfExpiry: new Date("2030-01-01"),
       issuingAuthority: "US Department of State",
       frontFile: Buffer.from("Front"),
+      frontFileType: "image/jpeg",
+      frontFileName: "front.jpg",
       backFile: Buffer.from("Back"),
+      backFileType: "image/jpeg",
+      backFileName: "back.jpg",
       // cspell:disable-next-line
       mrzLine1: "P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<",
     });
@@ -379,6 +391,8 @@ describe("KycV3 serialization", () => {
       proofCategory: "UTILITY_BILL",
       proofDateOfIssue: new Date("2021-01-01"),
       proofFile: Buffer.from("Proof"),
+      proofFileType: "image/jpeg",
+      proofFileName: "proof.jpg",
       ipCountry: "US",
     });
     credential.addSection("screening", {
@@ -391,6 +405,8 @@ describe("KycV3 serialization", () => {
       occupation: "REAL_ESTATE",
       sourceOfFundsCategory: "SALARY",
       sourceOfFundsProofFile: Buffer.from("Funds"),
+      sourceOfFundsProofFileType: "application/pdf",
+      sourceOfFundsProofFileName: "funds.pdf",
     });
     credential.addSection("sourceOfWealth", {
       type: "SALARY",
@@ -412,6 +428,7 @@ describe("KycV3 serialization", () => {
 
     expect(credential.level()).toBe(level);
     expect(credential.kycLevel()).toBe(3);
+    expect(() => credential.checkValidity()).not.toThrow();
 
     expect(credential.publicNotes()).toEqual({
       type: "kyc",
@@ -419,51 +436,75 @@ describe("KycV3 serialization", () => {
       kycLevel: 3,
     });
 
-    const envelope = credential.serializeEnvelope();
-    expect(envelope.level).toBe(level);
-    expect(envelope.kycLevel).toBe(3);
-    expect(envelope.expirationDate).toBe(new Date("2030-01-01").toISOString());
-    expect(envelope.approvedAt).toBe(new Date("2022-01-02").toISOString());
+    expect(credential.serializeEnvelope()).toEqual({
+      id: "https://issuer.example/credentials/123",
+      level: level,
+      kycLevel: 3,
+      issued: new Date("2022-01-01").toISOString(),
+      approvedAt: new Date("2022-01-02").toISOString(),
+      expirationDate: new Date("2030-01-01").toISOString(),
+    });
 
-    const serialized = credential.serializeSubject();
-
-    expect(serialized["@context"]).toEqual([
-      "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json",
-    ]);
-    expect(serialized.id).toBe("uuid:abc");
-    expect(serialized.personFirstName).toBe("John");
-    expect(serialized.personDateOfBirth).toBe(new Date("1990-01-01").toISOString());
-    expect(serialized.idDocumentType).toBe("PASSPORT");
-    expect(serialized.idDocumentDateOfIssue).toBe(new Date("2020-01-01").toISOString());
-    expect(base85ToFile(serialized.idDocumentFrontFile as string)?.toString()).toBe("Front");
-    expect(base85ToFile(serialized.idDocumentBackFile as string)?.toString()).toBe("Back");
-    expect(serialized.contactEmail).toBe("john@example.com");
-    expect(base85ToFile(serialized.biometricSelfieFile as string)?.toString()).toBe("Selfie");
-    expect(serialized.biometricSelfieMatch).toBe(99);
-    expect(serialized.residentialAddressStreet).toBe("Main St");
-    expect(serialized.residentialAddressProofDateOfIssue).toBe(
-      new Date("2021-01-01").toISOString(),
-    );
-    expect(base85ToFile(serialized.residentialAddressProofFile as string)?.toString()).toBe(
-      "Proof",
-    );
-    expect(serialized.screeningSanctionsCheckResult).toBe("CLEAR");
-    expect(serialized.eddOccupation).toBe("REAL_ESTATE");
-    expect(base85ToFile(serialized.eddSourceOfFundsProofFile as string)?.toString()).toBe("Funds");
-    expect(serialized.sourceOfWealthType).toBe("SALARY");
-    expect(serialized.sourceOfWealthYearlyGrossIncome).toBe("LESS_THAN_20000");
-    expect(serialized.sourceOfWealthYearlyGrossIncomeCurrency).toBe("EUR");
-    expect(serialized.sourceOfWealthApproximateNetWorth).toBe("UP_TO_25000");
-    expect(serialized.sourceOfWealthApproximateNetWorthCurrency).toBe("EUR");
-    expect(
-      base85ToFile(serialized.sourceOfWealthSourceOfWealthProofFile as string)?.toString(),
-    ).toBe("Proof");
-    expect(serialized.onboardingEmploymentStatus).toBe("EMPLOYED");
-    expect(serialized.onboardingExpectedMonthlyTransactionCount).toBe("LESS_THAN_5");
-    expect(serialized.onboardingExpectedMonthlyTransactionVolume).toBe(
-      "MORE_THAN_500_LESS_THAN_2000",
-    );
-    expect(serialized.onboardingExpectedMonthlyTransactionVolumeCurrency).toBe("EUR");
+    expect(credential.serializeSubject()).toEqual({
+      "@context": [
+        "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v3.json",
+      ],
+      id: "uuid:abc",
+      personFirstName: "John",
+      personFamilyName: "Doe",
+      personGender: "M",
+      personNationality: "US",
+      personDateOfBirth: new Date("1990-01-01").toISOString(),
+      personPlaceOfBirth: "New York, NY",
+      idDocumentType: "PASSPORT",
+      idDocumentNumber: "123456789",
+      idDocumentCountry: "US",
+      idDocumentDateOfIssue: new Date("2020-01-01").toISOString(),
+      idDocumentDateOfExpiry: new Date("2030-01-01").toISOString(),
+      idDocumentIssuingAuthority: "US Department of State",
+      idDocumentFrontFile: fileToBase85(Buffer.from("Front")),
+      idDocumentFrontFileType: "image/jpeg",
+      idDocumentFrontFileName: "front.jpg",
+      idDocumentBackFile: fileToBase85(Buffer.from("Back")),
+      idDocumentBackFileType: "image/jpeg",
+      idDocumentBackFileName: "back.jpg",
+      // cspell:disable-next-line
+      idDocumentMrzLine1: "P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<",
+      contactEmail: "john@example.com",
+      contactPhoneNumber: "+1234567890",
+      biometricSelfieFile: fileToBase85(Buffer.from("Selfie")),
+      biometricSelfieMatch: 99,
+      residentialAddressVerified: true,
+      residentialAddressStreet: "Main St",
+      residentialAddressCity: "New York",
+      residentialAddressCountry: "US",
+      residentialAddressProofCategory: "UTILITY_BILL",
+      residentialAddressProofDateOfIssue: new Date("2021-01-01").toISOString(),
+      residentialAddressProofFile: fileToBase85(Buffer.from("Proof")),
+      residentialAddressProofFileType: "image/jpeg",
+      residentialAddressProofFileName: "proof.jpg",
+      residentialAddressIpCountry: "US",
+      screeningSanctionsCheckResult: "CLEAR",
+      screeningSanctionsConfidenceScore: 95,
+      screeningPepCheckResult: "NOT_CHECKED",
+      screeningPepConfidenceScore: 10,
+      eddOccupation: "REAL_ESTATE",
+      eddSourceOfFundsCategory: "SALARY",
+      eddSourceOfFundsProofFile: fileToBase85(Buffer.from("Funds")),
+      eddSourceOfFundsProofFileType: "application/pdf",
+      eddSourceOfFundsProofFileName: "funds.pdf",
+      sourceOfWealthType: "SALARY",
+      sourceOfWealthYearlyGrossIncome: "LESS_THAN_20000",
+      sourceOfWealthYearlyGrossIncomeCurrency: "EUR",
+      sourceOfWealthApproximateNetWorth: "UP_TO_25000",
+      sourceOfWealthApproximateNetWorthCurrency: "EUR",
+      sourceOfWealthSourceOfWealthProofFile: fileToBase85(Buffer.from("Proof")),
+      onboardingIntendedUse: "INVESTING",
+      onboardingEmploymentStatus: "EMPLOYED",
+      onboardingExpectedMonthlyTransactionCount: "LESS_THAN_5",
+      onboardingExpectedMonthlyTransactionVolume: "MORE_THAN_500_LESS_THAN_2000",
+      onboardingExpectedMonthlyTransactionVolumeCurrency: "EUR",
+    });
   });
 
   it("omits absent optional fields rather than emitting undefined", () => {

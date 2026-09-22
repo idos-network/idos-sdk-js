@@ -1,7 +1,7 @@
-import { IsIn, IsOptional, IsString } from "class-validator";
+import { IsIn, IsMimeType, IsOptional, IsString } from "class-validator";
 
 import { Occupations, type Occupation } from "../enums";
-import { Base85FileField } from "../utils";
+import { Base85FileField, RequiredWhen } from "../utils";
 
 export class EDD {
   /* The person's occupation or job title. */
@@ -18,4 +18,15 @@ export class EDD {
   @IsOptional()
   @Base85FileField()
   sourceOfFundsProofFile?: Buffer;
+
+  /* Type of the document provided as proof of the person's source of funds. */
+  @RequiredWhen((edd: EDD) => !!edd.sourceOfFundsProofFile)
+  @IsString()
+  @IsMimeType()
+  sourceOfFundsProofFileType?: string;
+
+  /* Name of the document provided as proof of the person's source of funds. */
+  @RequiredWhen((edd: EDD) => !!edd.sourceOfFundsProofFile)
+  @IsString()
+  sourceOfFundsProofFileName?: string;
 }

@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, IsISO31661Alpha2 } from "class-validator";
+import { IsBoolean, IsOptional, IsString, IsISO31661Alpha2, IsMimeType } from "class-validator";
 
 import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
 
@@ -56,6 +56,17 @@ export class ResidentialAddress {
   @RequiredWhen((address: ResidentialAddress) => address.verified)
   @Base85FileField()
   proofFile?: Buffer;
+
+  /* Type of the document provided as address proof. */
+  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @IsString()
+  @IsMimeType()
+  proofFileType?: string;
+
+  /* Name of the document provided as address proof. */
+  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @IsString()
+  proofFileName?: string;
 
   /* Country code derived from the IP address used when the applicant registered. */
   @IsOptional()
