@@ -1,6 +1,4 @@
 // The GRPC gateway "bytes" type requires base64url encoded strings.
-import Long from "long";
-
 // Convert function to Uint16Array
 export function numberToUint16BigEndian(num: number): Uint8Array {
   if (num < 0 || num > 65535 || !Number.isInteger(num)) {
@@ -23,11 +21,8 @@ export function uint16BigEndianToNumber(uint16: Uint8Array): number {
 }
 
 export function numberToUint64LittleEndian(num: number): Uint8Array {
-  const longNum = Long.fromNumber(num, true);
   const buffer = new ArrayBuffer(8);
-  const view = new DataView(buffer);
-  view.setUint32(0, longNum.low, true);
-  view.setUint32(4, longNum.high, true);
+  new DataView(buffer).setBigUint64(0, BigInt(Math.trunc(num)), true);
   return new Uint8Array(buffer);
 }
 

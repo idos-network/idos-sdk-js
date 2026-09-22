@@ -11,7 +11,6 @@ import {
   PositionalParams,
   transformActionInput,
 } from "../core/action";
-import { Database, DeployBody, DropBody } from "../core/database";
 import {
   AuthenticationMode,
   AuthErrorCodes,
@@ -22,7 +21,7 @@ import {
 import { SelectQueryRequest } from "../core/jsonrpc";
 import { KwilSigner } from "../core/kwilSigner";
 import { Message, MsgReceipt } from "../core/message";
-import { Account, ChainInfo, ChainInfoOpts, DatasetInfo } from "../core/network";
+import { Account, ChainInfo, ChainInfoOpts } from "../core/network";
 import { RawStatementPayload } from "../core/payload";
 import { GenericResponse } from "../core/resreq";
 import { AuthBody } from "../core/signature";
@@ -52,7 +51,7 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
 
   private authMode?: string; // To store the mode on the class for subsequent requests
 
-  private actionsCache: LRUCache<string, Object[]>;
+  private actionsCache: LRUCache<string, object[]>;
 
   protected constructor(opts: KwilConfig) {
     super(opts);
@@ -63,7 +62,7 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
     this.autoAuthenticate = opts.autoAuthenticate ?? true;
 
     // create cache
-    this.actionsCache = new LRUCache<string, Object[]>({
+    this.actionsCache = new LRUCache<string, object[]>({
       max: 500,
       ttl: 24 * 1000 * 60 * 60, // 1 day TTL
     });
@@ -99,7 +98,7 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    * @param namespace - The namespace of the actions to retrieve.
    * @returns A promise that resolves to the actions in the database.
    */
-  public async getActions(namespace: string): Promise<GenericResponse<Object[]>> {
+  public async getActions(namespace: string): Promise<GenericResponse<object[]>> {
     if (!validateNamespace(namespace)) {
       throw new Error("Please provide a valid namespace");
     }
@@ -110,7 +109,7 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
       return {
         status: 200,
         data: cached,
-      } as GenericResponse<Object[]>;
+      } as GenericResponse<object[]>;
     }
 
     // Fetch from database
@@ -137,17 +136,12 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
     owner: string | Uint8Array,
     keyType?: string,
   ): Promise<GenericResponse<Account>> {
-    if (!keyType) {
-      keyType = inferKeyType(owner);
-    }
-
-    if (owner instanceof Uint8Array) {
-      owner = bytesToHex(owner);
-    }
+    const resolvedKeyType = keyType ?? inferKeyType(owner);
+    const identifier = owner instanceof Uint8Array ? bytesToHex(owner) : owner;
 
     return await this.getAccountClient({
-      identifier: owner,
-      key_type: keyType,
+      identifier,
+      key_type: resolvedKeyType,
     });
   }
 
@@ -219,18 +213,18 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    * @param params - Optional array of parameters to bind to the query ($1, $2, etc.)
    * @returns Promise resolving to query results
    */
-  public async selectQuery<T extends Object>(
+  public async selectQuery<T extends object>(
     query: string,
     params?: QueryParams,
   ): Promise<GenericResponse<T[]>>;
   /**
    * @deprecated Use selectQuery(query, params?) instead. This method will be removed in next major version.
    */
-  public async selectQuery(dbid: string, query: string): Promise<GenericResponse<Object[]>>;
+  public async selectQuery(dbid: string, query: string): Promise<GenericResponse<object[]>>;
   public async selectQuery(
     query: string,
     params?: QueryParams | string,
-  ): Promise<GenericResponse<Object[]>> {
+  ): Promise<GenericResponse<object[]>> {
     // If params is a string, we're using the legacy method call
     if (typeof params === "string") {
       return this.legacySelectQuery(query, params);
@@ -246,7 +240,7 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
     return await this.selectQueryClient(q);
   }
 
-  private async legacySelectQuery(dbid: string, query: string): Promise<GenericResponse<Object[]>> {
+  private async legacySelectQuery(dbid: string, query: string): Promise<GenericResponse<object[]>> {
     console.warn(
       "WARNING: selectQuery(dbid, query) is deprecated and will be removed in the next major version. Use selectQuery(query, params?) instead.",
     );
@@ -385,83 +379,6 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
   }
 
   /**
-   * Retrieves the schema of a database given its unique identifier (DBID).
-   *
-   * @param dbid - The unique identifier of the database. The DBID can be generated using the kwil.getDBID method.
-   * @deprecated Use `kwil.selectQuery(query, params?)` instead. This method will be removed in the next major version.
-   * @returns A promise that resolves to the schema of the database.
-   */
-  public async getSchema(dbid: string): Promise<GenericResponse<Database>> {
-    console.warn(
-      "WARNING: `getSchema()` is deprecated and will be removed in the next major version. Please use `kwil.selectQuery()` instead.",
-    );
-    throw new Error(
-      "The `getSchema()` method is no longer supported. Please use `kwil.selectQuery(query, params?)` instead.",
-    );
-  }
-
-  /**
-   * Deploys a database to the Kwil network.
-   *
-   * @param deployBody - The body of the database to deploy. This should use the `DeployBody` interface.
-   * @param kwilSigner - The signer for the database deployment.
-   * @param synchronous - (optional) If true, the broadcast will wait for the transaction to be mined before returning. If false, the broadcast will return the transaction hash immediately, regardless of if the transaction is successful. Defaults to false.
-   * @deprecated Use `kwil.execSql()` instead. This method will be removed in the next major version.
-   * @returns A promise that resolves to the receipt of the transaction.
-   */
-  public async deploy(
-    deployBody: DeployBody,
-    kwilSigner: KwilSigner,
-    synchronous?: boolean,
-  ): Promise<GenericResponse<TxReceipt>> {
-    console.warn(
-      "WARNING: `deploy()` is deprecated and will be removed in the next major version. Please use `kwil.execSql()` instead.",
-    );
-    throw new Error(
-      "The `deploy()` method is no longer supported. Please use `kwil.execSql()` instead.",
-    );
-  }
-
-  /**
-   * Drops a database from the Kwil network.
-   *
-   * @param dropBody - The body of the database to drop. This should use the `DropBody` interface.
-   * @param kwilSigner - The signer for the database drop.
-   * @param synchronous - (optional) If true, the broadcast will wait for the transaction to be mined before returning. If false, the broadcast will return the transaction hash immediately, regardless of if the transaction is successful. Defaults to false.
-   * @deprecated Use `kwil.execSql()` instead. This method will be removed in the next major version.
-   * @returns A promise that resolves to the receipt of the transaction.
-   */
-  public async drop(
-    dropBody: DropBody,
-    kwilSigner: KwilSigner,
-    synchronous?: boolean,
-  ): Promise<GenericResponse<TxReceipt>> {
-    console.warn(
-      "WARNING: `drop()` is deprecated and will be removed in the next major version. Please use `kwil.execSql()` instead.",
-    );
-    throw new Error(
-      "The `drop()` method is no longer supported. Please use `kwil.execSql()` instead.",
-    );
-  }
-
-  /**
-   * Lists all databases owned by a particular owner.
-   *
-   * @param owner (optional) - Lists the databases on a network. Can pass and owner identifier to see all the databases deployed by a specific account, or leave empty to see al the databases deployed on the network. The owner's public key (Ethereum or NEAR Protocol). Ethereum keys can be passed as a hex string (0x123...) or as bytes (Uint8Array).
-   * @deprecated Use `kwil.selectQuery(query, params?)` instead. This method will be removed in the next major version.
-   * @returns A promise that resolves to a list of database names.
-   */
-
-  public async listDatabases(owner?: string | Uint8Array): Promise<GenericResponse<DatasetInfo[]>> {
-    console.warn(
-      "WARNING: `listDatabases()` is deprecated and will be removed in the next major version. Please use `kwil.selectQuery(query, params?)` instead.",
-    );
-    throw new Error(
-      "The `listDatabases()` method is no longer supported. Please use `kwil.selectQuery(query, params?)` instead.",
-    );
-  }
-
-  /**
    * Calls a Kwil node. This can be used to execute read-only ('view') actions on Kwil.
    *
    * @param {CallBody} callBody - The message to send. The message can be built using the buildMsg() method in the Action class.
@@ -469,7 +386,7 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    * @param {(...args: any) => void} cookieHandlerCallback (optional) - the callback to handle the cookie if in the NODE environment
    * @returns A promise that resolves to the receipt of the message.
    */
-  protected async baseCall<T extends Object>(
+  protected async baseCall<T extends object>(
     callBody: CallBody,
     kwilSigner?: KwilSigner,
     cookieHandlerCallback?: { setCookie: () => void; resetCookie: () => void },

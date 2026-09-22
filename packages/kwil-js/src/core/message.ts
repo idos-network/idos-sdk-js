@@ -1,7 +1,7 @@
 import { Base64String, HexString, Nillable, NonNil } from "../utils/types";
 import { BytesEncodingStatus, PayloadBytesTypes, PayloadType } from "./enums";
 import { UnencodedActionPayload } from "./payload";
-import { AnySignatureType, Signature, SignatureType } from "./signature";
+import { AnySignatureType, SignatureType } from "./signature";
 
 /**
  * `MsgReceipt` is the interface for a payload structure for a response from the Kwil `call` GRPC endpoint.
@@ -114,7 +114,7 @@ export namespace Msg {
       signature: null,
     };
 
-    // Pass the 'msg' object to the 'configure' function allowing external modification of its propoerties before instantiation of BaseMessage.
+    // Pass the 'msg' object to the 'configure' function allowing external modification of its properties before instantiation of BaseMessage.
     configure(msg);
 
     return new BaseMessage(msg);
@@ -141,7 +141,7 @@ export namespace Msg {
       msg.sender = source.sender;
       msg.signature = source.signature;
 
-      // Pass the 'msg' object to the 'configure' function allowing external modification of its propoerties before instantiation of BaseMessage.
+      // Pass the 'msg' object to the 'configure' function allowing external modification of its properties before instantiation of BaseMessage.
       configure(msg);
     });
   }

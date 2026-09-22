@@ -2,15 +2,13 @@ import { AccountKeyType } from "../core/enums";
 import { hexToBytes, bytesToHex } from "./serial";
 
 export function inferKeyType(owner: string | Uint8Array): AccountKeyType {
-  if (typeof owner === "string") {
-    owner = hexToBytes(owner);
-  }
+  const key = typeof owner === "string" ? hexToBytes(owner) : owner;
 
-  if (owner.length === 32 || isXrplKey(owner) || isStellarAddress(owner)) {
+  if (key.length === 32 || isXrplKey(key) || isStellarAddress(key)) {
     return AccountKeyType.ED25519;
   }
 
-  if (owner.length === 20) {
+  if (key.length === 20) {
     return AccountKeyType.SECP256K1;
   }
 

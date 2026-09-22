@@ -119,7 +119,7 @@ export default class Client extends Api {
       return checkRes(res, (r) => {
         const cookie = res.headers["set-cookie"];
         if (!cookie) {
-          throw new Error("No cookie received from gateway. An error occured with logout.");
+          throw new Error("No cookie received from gateway. An error occurred with logout.");
         }
 
         // if the cookie is empty, set the cookie to undefined
@@ -204,8 +204,8 @@ export default class Client extends Api {
     const res = await super.post<JsonRPCResponse<BroadcastResponse>>(`/rpc/v1`, body);
     return checkRes(res, (r) => {
       // if r.result.result is included, it means that the user sent the transaction with a sync type of COMMIT
-      // if any error occured when submitting the transaction will be included in r.result.result
-      // if r.result.result.code is not zero, it means that an error occured when committing the transaction to a block
+      // if any error occurred when submitting the transaction will be included in r.result.result
+      // if r.result.result.code is not zero, it means that an error occurred when committing the transaction to a block
 
       if (r.result.result && r.result.result?.code !== 0) {
         throw new Error(JSON.stringify(r.result) || `Transaction failed after broadcast.`);
@@ -264,7 +264,7 @@ export default class Client extends Api {
     return checkRes(res, (r) => r.result.challenge);
   }
 
-  protected async selectQueryClient(query: SelectQueryRequest): Promise<GenericResponse<Object[]>> {
+  protected async selectQueryClient(query: SelectQueryRequest): Promise<GenericResponse<object[]>> {
     const body = this.buildJsonRpcRequest<SelectQueryRequest>(JSONRPCMethod.METHOD_QUERY, query);
     const res = await super.post<JsonRPCResponse<SelectQueryResponse>>(`/rpc/v1`, body);
 
@@ -345,7 +345,7 @@ export default class Client extends Api {
     return null;
   }
 
-  private parseQueryResponse(queryResponse: QueryResponse): Object[] {
+  private parseQueryResponse(queryResponse: QueryResponse): object[] {
     const { column_names, values } = queryResponse;
 
     if (!values || values.length === 0) {

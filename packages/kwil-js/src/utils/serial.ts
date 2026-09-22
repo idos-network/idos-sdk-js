@@ -1,5 +1,3 @@
-import Long from "long";
-
 import { base64ToBytes, bytesToBase64 } from "./base64";
 import { objects } from "./objects";
 import { strings } from "./strings";
@@ -71,10 +69,8 @@ export function hexToNumber(hex: HexString): number {
     throw new Error(`invalid hex string: ${hex}`);
   }
   // strip 0x prefix
-  if (hex.startsWith("0x")) {
-    hex = hex.slice(2);
-  }
-  return parseInt(hex, 16);
+  const digits = hex.startsWith("0x") ? hex.slice(2) : hex;
+  return Number.parseInt(digits, 16);
 }
 
 export function bytesToEthHex(bytes: Uint8Array): HexString {
@@ -92,13 +88,11 @@ export function hexToBytes(hex: string): Uint8Array {
   }
 
   // strip 0x prefix
-  if (hex.startsWith("0x")) {
-    hex = hex.slice(2);
-  }
+  const digits = hex.startsWith("0x") ? hex.slice(2) : hex;
 
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  const bytes = new Uint8Array(digits.length / 2);
+  for (let i = 0; i < digits.length; i += 2) {
+    bytes[i / 2] = Number.parseInt(digits.slice(i, i + 2), 16);
   }
   return bytes;
 }
@@ -143,11 +137,8 @@ export function bytesToInt32(bytes: Uint8Array): number {
 
 export function int64ToBytes(num: number): Uint8Array {
   objects.requireNonNilNumber(num);
-  const longNum = Long.fromNumber(num, true);
   const buffer = new ArrayBuffer(8);
-  const view = new DataView(buffer);
-  view.setInt32(0, longNum.low, true);
-  view.setInt32(4, longNum.high, true);
+  new DataView(buffer).setBigUint64(0, BigInt(Math.trunc(num)), true);
   return new Uint8Array(buffer);
 }
 

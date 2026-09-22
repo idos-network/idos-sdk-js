@@ -6,7 +6,6 @@ import {
   Extension,
   Index,
   Table,
-  Database,
   Procedure,
   ForeignProcedure,
   DataInfo,
@@ -50,7 +49,7 @@ interface NamedValue {
   // name is the name of the parameter
   // E.g,. for a query `INSERT INTO table VALUES $value`, the name would be $name
   name: string;
-  // value is same shape as `params.params[$variable_name]` from the selectQuery EXCEPT, rather than converting values to base64, you only need to conver them to Uint8array.
+  // value is same shape as `params.params[$variable_name]` from the selectQuery EXCEPT, rather than converting values to base64, you only need to convert them to Uint8array.
   value: EncodedValue;
 }
 
@@ -66,7 +65,7 @@ export interface TransferPayload {
 }
 
 /** DEPRECATED */
-/* EVERYTHNG BELOW CAN BE REMOVED WHEN DEPRECATED APIS ARE REMOVED */
+/* EVERYTHING BELOW CAN BE REMOVED WHEN DEPRECATED APIS ARE REMOVED */
 
 /**
  * `CompiledKuneiform` is the compiled version of the Kuneiform schema. This is the schema that is used to deploy a database.

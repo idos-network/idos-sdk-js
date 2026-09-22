@@ -19,7 +19,7 @@ export class WebKwil extends Kwil<EnvironmentType.BROWSER> {
    * @param {KwilSigner} kwilSigner (optional) - KwilSigner should be passed if the action requires authentication OR if the action uses a `@caller` contextual variable. If `@caller` is used and authentication is not required, the user will not be prompted to authenticate; however, the user's identifier will be passed as the sender.
    * @returns A `MsgReceipt` with `result`, optional `logs`, and optional `error`. `data.error` is set when the action executed but returned an application error via `error(...)` in Kuneiform. `data.result` may be empty in both error and "no rows" cases; check `data.error` first to distinguish.
    */
-  public async call<T extends Object>(
+  public async call<T extends object>(
     actionBody: CallBody,
     kwilSigner?: KwilSigner,
   ): Promise<GenericResponse<MsgReceipt<T>>> {
