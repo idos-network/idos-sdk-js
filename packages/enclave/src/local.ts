@@ -96,7 +96,7 @@ export class LocalEnclave<
   async reset(): Promise<void> {
     await super.reset();
     this.storedEncryptionProfile = undefined;
-    this.store.reset();
+    await this.store.reset();
   }
 
   /** @override parent method to reconfigure the enclave */
@@ -266,6 +266,12 @@ export class LocalEnclave<
    * @see BaseProvider#getPrivateEncryptionProfile
    */
   async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
+    // Remember duration is a key-use check. A long-lived iframe keeps this profile
+    // in memory, so construction-time store expiry is not enough.
+    if (this.storedEncryptionProfile && (await this.store.hasRememberDurationElapsed())) {
+      await this.reset();
+    }
+
     // In case there is a no key pair, which matches we don't need a new one.
     if (this.storedEncryptionProfile) {
       let canBeUsed = this.storedEncryptionProfile.userId === this.userId;
