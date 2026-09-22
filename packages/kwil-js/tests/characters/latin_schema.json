@@ -1,0 +1,84 @@
+{
+  "name": "latin_schema",
+  "owner": "",
+  "extensions": null,
+  "tables": [
+    {
+      "name": "special_chars",
+      "columns": [
+        {
+          "name": "id",
+          "type": { "name": "int", "is_array": false, "metadata": [0, 0] },
+          "attributes": [{ "type": "PRIMARY_KEY", "value": "" }]
+        },
+        {
+          "name": "char",
+          "type": { "name": "text", "is_array": false, "metadata": [0, 0] },
+          "attributes": [{ "type": "NOT_NULL", "value": "" }]
+        }
+      ],
+      "indexes": null,
+      "foreign_keys": null
+    }
+  ],
+  "actions": null,
+  "procedures": [
+    {
+      "name": "return_caller",
+      "parameters": null,
+      "public": true,
+      "modifiers": ["VIEW"],
+      "body": "return @caller;",
+      "return_types": {
+        "is_table": false,
+        "fields": [
+          { "name": "caller", "type": { "name": "text", "is_array": false, "metadata": [0, 0] } }
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "insert_char",
+      "parameters": [
+        { "name": "$id", "type": { "name": "int", "is_array": false, "metadata": [0, 0] } },
+        { "name": "$char", "type": { "name": "text", "is_array": false, "metadata": [0, 0] } }
+      ],
+      "public": true,
+      "modifiers": null,
+      "body": "insert into special_chars (id, char) values ($id, $char);",
+      "return_types": null,
+      "annotations": null
+    },
+    {
+      "name": "get_char",
+      "parameters": [
+        { "name": "$id", "type": { "name": "int", "is_array": false, "metadata": [0, 0] } }
+      ],
+      "public": true,
+      "modifiers": ["VIEW"],
+      "body": "$special_character text;\n\n    for $hummm in SELECT char AS special_character FROM special_chars WHERE id = $id {\n        $special_character := $hummm.special_character;\n    }\n\n    return $special_character;",
+      "return_types": {
+        "is_table": false,
+        "fields": [
+          {
+            "name": "special_character",
+            "type": { "name": "text", "is_array": false, "metadata": [0, 0] }
+          }
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "delete_char",
+      "parameters": [
+        { "name": "$id", "type": { "name": "int", "is_array": false, "metadata": [0, 0] } }
+      ],
+      "public": true,
+      "modifiers": null,
+      "body": "delete from special_chars where id = $id;",
+      "return_types": null,
+      "annotations": null
+    }
+  ],
+  "foreign_calls": null
+}
