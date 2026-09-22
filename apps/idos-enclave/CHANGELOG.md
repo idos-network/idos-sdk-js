@@ -1,5 +1,19 @@
 # idos-enclave
 
+## 0.4.0
+
+### Minor Changes
+
+- 4543af6: Ensure the parent window is still the expected embedder before responding.
+
+### Patch Changes
+
+- Updated dependencies [b3ca299]
+- Updated dependencies [0dc5952]
+  - @idos-network/credentials@2.1.0
+  - @idos-network/enclave@2.1.0
+  - @idos-network/utils@2.1.0
+
 ## 0.3.2
 
 ### Patch Changes

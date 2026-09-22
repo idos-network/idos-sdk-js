@@ -1,5 +1,16 @@
 # @idos-network/credentials
 
+## 2.1.0
+
+### Minor Changes
+
+- 0dc5952: Add file type and name into V3 credentials (extension, no need to release a V4)
+
+### Patch Changes
+
+- b3ca299: Fix credentials generator
+  - @idos-network/utils@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes
