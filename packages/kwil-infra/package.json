@@ -47,7 +47,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@idos-network/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "tiny-invariant": "catalog:core",
     "tweetnacl": "catalog:core",

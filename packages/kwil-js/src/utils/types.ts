@@ -25,11 +25,7 @@ export type Base64String = string;
 
 export type Promisy<T> = T extends null | undefined
   ? never
-  : T extends
-        | (() => infer R)
-        | (() => Awaited<infer R>)
-        | ((...x: any[]) => infer R)
-        | ((...x: any[]) => Awaited<infer R>)
+  : T extends (...x: any[]) => any
     ? T
     : T extends Function
       ? never

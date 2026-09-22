@@ -2,7 +2,7 @@ import { BytesEncodingStatus, PayloadType } from "../core/enums";
 import { BaseMessage, Message, Msg } from "../core/message";
 import { UnencodedActionPayload } from "../core/payload";
 import { SignerSupplier } from "../core/signature";
-import { AnySignatureType, SignatureType } from "../core/signature";
+import { AnySignatureType } from "../core/signature";
 import { encodeActionCall } from "../utils/kwilEncoding";
 import { objects } from "../utils/objects";
 import { bytesToHex } from "../utils/serial";

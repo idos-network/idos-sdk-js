@@ -27,7 +27,7 @@ export function resolveParamTypes(
   // if no types are provided, return paramtypes with no o property
   if (!types) {
     if (isNamedParam(i)) {
-      for (const [k, v] of Object.entries(i)) {
+      for (const v of Object.values(i)) {
         paramTypes.push({ v });
       }
     } else {
@@ -47,7 +47,7 @@ export function resolveParamTypes(
       }
     } else {
       // handle positional types, assume the order of the types matches the order of the parameters
-      Object.entries(i).forEach(([k, v], idx) => {
+      Object.entries(i).forEach(([, v], idx) => {
         paramTypes.push({ v, o: types[idx] });
       });
     }
@@ -397,8 +397,8 @@ export class ActionInput implements Iterable<EntryType> {
    */
 
   public put<T extends ValueType>(key: string, value: T): ActionInput {
-    key = lowercaseKey(key);
-    this.map[assertKey(key)] = value;
+    const lowerKey = lowercaseKey(key);
+    this.map[assertKey(lowerKey)] = value;
     return this;
   }
 
@@ -410,9 +410,9 @@ export class ActionInput implements Iterable<EntryType> {
    * @returns The current `ActionInput` instance for chaining.
    */
   public putIfAbsent<T extends ValueType>(key: string, value: T): ActionInput {
-    key = lowercaseKey(key);
-    if (!this.containsKey(key)) {
-      this.map[key] = value;
+    const lowerKey = lowercaseKey(key);
+    if (!this.containsKey(lowerKey)) {
+      this.map[lowerKey] = value;
     }
     return this;
   }
@@ -426,9 +426,9 @@ export class ActionInput implements Iterable<EntryType> {
    */
 
   public replace<T extends ValueType>(key: string, value: T): ActionInput {
-    key = lowercaseKey(key);
-    if (this.containsKey(key)) {
-      this.map[key] = value;
+    const lowerKey = lowercaseKey(key);
+    if (this.containsKey(lowerKey)) {
+      this.map[lowerKey] = value;
     }
     return this;
   }
@@ -441,8 +441,8 @@ export class ActionInput implements Iterable<EntryType> {
    */
 
   public get<T extends ValueType>(key: string): T {
-    key = lowercaseKey(key);
-    return this.map[assertKey(key)] as T;
+    const lowerKey = lowercaseKey(key);
+    return this.map[assertKey(lowerKey)] as T;
   }
 
   /**
@@ -454,8 +454,8 @@ export class ActionInput implements Iterable<EntryType> {
    */
 
   public getOrDefault<T extends ValueType>(key: string, defaultValue: T): T {
-    key = lowercaseKey(key);
-    return (this.map[assertKey(key)] ?? defaultValue) as T;
+    const lowerKey = lowercaseKey(key);
+    return (this.map[assertKey(lowerKey)] ?? defaultValue) as T;
   }
 
   /**
@@ -466,8 +466,8 @@ export class ActionInput implements Iterable<EntryType> {
    */
 
   public containsKey(key: string): boolean {
-    key = lowercaseKey(key);
-    return this.map.hasOwnProperty(assertKey(key));
+    const lowerKey = lowercaseKey(key);
+    return this.map.hasOwnProperty(assertKey(lowerKey));
   }
 
   /**
@@ -478,8 +478,8 @@ export class ActionInput implements Iterable<EntryType> {
    */
 
   public remove(key: string): boolean {
-    key = lowercaseKey(key);
-    return delete this.map[key];
+    const lowerKey = lowercaseKey(key);
+    return delete this.map[lowerKey];
   }
 
   /**

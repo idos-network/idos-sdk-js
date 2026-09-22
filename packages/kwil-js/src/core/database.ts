@@ -109,7 +109,7 @@ export namespace DataType {
 }
 
 /** DEPRECATED */
-/* EVERYTHNG BELOW CAN BE REMOVED WHEN DEPRECATED APIS ARE REMOVED */
+/* EVERYTHING BELOW CAN BE REMOVED WHEN DEPRECATED APIS ARE REMOVED */
 
 export interface Database {
   owner: Uint8Array;

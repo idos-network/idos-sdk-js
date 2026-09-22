@@ -1,6 +1,6 @@
 import { NonNil } from "./types";
 
-const NillablErrorSymbol = Symbol();
+const NillableErrorSymbol = Symbol();
 const NILL_ERROR_MESSAGE = "value cannot be null or undefined";
 
 export class NillableError extends Error {
@@ -8,14 +8,14 @@ export class NillableError extends Error {
     super((message as any) || NILL_ERROR_MESSAGE);
   }
 
-  private get [NillablErrorSymbol]() {
+  private get [NillableErrorSymbol]() {
     return true;
   }
 }
 
 export const objects = {
   isNilError: (error: Error): boolean => {
-    return (error as NillableError)[NillablErrorSymbol] === true;
+    return (error as NillableError)[NillableErrorSymbol] === true;
   },
   // returns true if the value is null or undefined,
   // else will return false.

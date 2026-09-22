@@ -32,7 +32,6 @@ catalogs:
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0"
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0"
     "@digitalbazaar/vc": "^7.3.0"
-    "@idos-network/kwil-js": "0.1.7"
     "jsonld-document-loader": "^2.3.0"
     "tiny-invariant": "^1.3.3"
     "tweetnacl": "^1.0.3"
@@ -122,7 +121,6 @@ minimumReleaseAgeExclude:
   - axios@1.19.0
   - vite@8.2.0
   - "@noble/hashes@2.3.0"
-  - "@idos-network/kwil-js@0.1.7"
 
 onlyBuiltDependencies:
   - "@swc/core"
@@ -145,7 +143,6 @@ onlyBuiltDependencies:
 
 overrides:
   # LRU-cache includes now forced dependency to node:diagnostic internal library
-  "@idos-network/kwil-js>lru-cache": "11.5.2"
   "path-scurry>lru-cache": "11.5.2"
 
   # Overrides for security-updates (floors match top-level / catalog pins)

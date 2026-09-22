@@ -1,6 +1,7 @@
 # Kwil
 
-This is a forked version from `@trufnetwork/kwil-js` that adds support for XRPL keys.
+This is idOS' fork of [`@trufnetwork/kwil-js`](https://github.com/trufnetwork/kwil-js), adding support for XRPL keys.
+It lives in this monorepo and is consumed by `@idos-network/kwil-infra`, `client`, `consumer` and `issuer`.
 
 Kwil-JS is a JavaScript/Typescript SDK for building browser and NodeJS applications to interact with Kwil databases.
 
@@ -17,7 +18,7 @@ Make sure to use the correct version of the Kwil-JS SDK for the version of the [
 ## Installation
 
 ```bash
-pnpm i @trufnetwork/kwil-js ethers
+pnpm i @idos-network/kwil-js ethers
 ```
 
 ## Initialization
@@ -27,31 +28,31 @@ Configure your `NodeKwil` or `WebKwil` class by providing the required configura
 ### Browser
 
 ```javascript
-import { BrowserProvider } from 'ethers';
-import { WebKwil } from '@trufnetwork/kwil-js';
+import { BrowserProvider } from "ethers";
+import { WebKwil } from "@idos-network/kwil-js";
 
 // to be used for funding and signing transactions
 const provider = new BrowserProvider(window.ethereum);
 
 const kwil = new WebKwil({
-  kwilProvider: 'kwil_provider_endpoint',
-  chainId: 'your_kwil_chain_id',
+  kwilProvider: "kwil_provider_endpoint",
+  chainId: "your_kwil_chain_id",
 });
 ```
 
 ### NodeJS
 
 ```javascript
-const { Wallet } = require('ethers');
-const kwiljs = require('@trufnetwork/kwil-js');
+const { Wallet } = require("ethers");
+const kwiljs = require("@idos-network/kwil-js");
 
 // to be used for signing transactions
 // instead of a provider, nodeJS requires a wallet
-const wallet = new Wallet('my_ethereum_private_key');
+const wallet = new Wallet("my_ethereum_private_key");
 
 const kwil = new kwiljs.NodeKwil({
-  kwilProvider: 'kwil_provider_endpoint',
-  chainId: 'your_kwil_chain_id',
+  kwilProvider: "kwil_provider_endpoint",
+  chainId: "your_kwil_chain_id",
 });
 ```
 
@@ -74,8 +75,8 @@ The account identifier can be passed as a hex string or as bytes.
 ### Browser
 
 ```javascript
-import { KwilSigner } from '@trufnetwork/kwil-js';
-import { BrowserProvider } from 'ethers';
+import { KwilSigner } from "@idos-network/kwil-js";
+import { BrowserProvider } from "ethers";
 
 const provider = new BrowserProvider(window.ethereum);
 const signer = await provider.getSigner();
@@ -90,10 +91,10 @@ const kwilSigner = new KwilSigner(signer, identifier);
 ### NodeJS
 
 ```javascript
-import { KwilSigner } from '@trufnetwork/kwil-js';
-import { Wallet } from 'ethers';
+import { KwilSigner } from "@idos-network/kwil-js";
+import { Wallet } from "ethers";
 
-const signer = new Wallet('my_ethereum_private_key');
+const signer = new Wallet("my_ethereum_private_key");
 const identifier = await signer.getAddress();
 
 // create kwil signer
@@ -110,13 +111,13 @@ If the signer has the required permissions, they can execute ad-hoc SQL queries 
 
 ```javascript
 const res = await kwil.execSql(
-  'INSERT INTO users (name, age) VALUES ($name, $age)',
+  "INSERT INTO users (name, age) VALUES ($name, $age)",
   {
-    $name: 'John Doe',
+    $name: "John Doe",
     $age: 30,
   },
   kwilSigner,
-  true // set to true to wait for the transaction to be confirmed
+  true, // set to true to wait for the transaction to be confirmed
 );
 
 /*
@@ -164,7 +165,7 @@ To read data on Kwil, you can (1) execute ad-hoc SELECT queries or (2) call view
 ### Ad-Hoc SELECT Queries
 
 ```javascript
-const res = await kwil.selectQuery('SELECT * FROM users WHERE age > $age', {
+const res = await kwil.selectQuery("SELECT * FROM users WHERE age > $age", {
   $age: 30,
 });
 
@@ -184,11 +185,11 @@ If the `view` action uses a `@caller` contextual variable, you must pass a `Kwil
 ```javascript
 const res = await kwil.call(
   {
-    namespace: 'db_namespace',
-    name: 'action_name',
-    inputs: ['input_value_1', 'input_value_2'],
+    namespace: "db_namespace",
+    name: "action_name",
+    inputs: ["input_value_1", "input_value_2"],
   },
-  kwilSigner
+  kwilSigner,
 );
 ```
 
@@ -218,10 +219,10 @@ If you are using a custom signer, you should pass the signer's enumerator as the
 
 ```javascript
 // using secp256k1 (Ethereum) signer or ed25519 signer
-const res = await kwil.getAccount('account_identifier');
+const res = await kwil.getAccount("account_identifier");
 
 // using custom signer
-const res = await kwil.getAccount('account_identifier', 'custom_signer_enumerator');
+const res = await kwil.getAccount("account_identifier", "custom_signer_enumerator");
 
 /*
     res.data = {
@@ -243,7 +244,7 @@ The examples below show how to override the input types for executing an action;
 Using named inputs:
 
 ```javascript
-import { Utils } from '@trufnetwork/kwil-js';
+import { Utils } from '@idos-network/kwil-js';
 const { DataType } = Utils;
 
 const body = {
@@ -262,7 +263,7 @@ await kwil.execute(body, kwilSigner);
 Using positional inputs:
 
 ```javascript
-import { Utils } from '@trufnetwork/kwil-js';
+import { Utils } from '@idos-network/kwil-js';
 const { DataType } = Utils;
 
 const body = {
@@ -290,15 +291,15 @@ Currently, Kwil supports two signature types:
 To use an ED25519 signature:
 
 ```javascript
-import nacl from 'tweetnacl';
-import { KwilSigner } from '@trufnetwork/kwil-js';
+import nacl from "tweetnacl";
+import { KwilSigner } from "@idos-network/kwil-js";
 
 // create keypair and signer
 const keys = nacl.sign.keyPair();
 const customSigner = (msg) => nacl.sign.detached(msg, keys.secretKey);
 const identifier = keys.publicKey;
 
-const kwilSigner = new KwilSigner(customSigner, identifier, 'ed25519');
+const kwilSigner = new KwilSigner(customSigner, identifier, "ed25519");
 ```
 
 ### Private Mode
@@ -308,8 +309,8 @@ Private RPC is a server-side configuration in kwild that enforces user authentic
 ```typescript
 const body: CallBody = {
   namespace,
-  name: 'your_action_name',
-  inputs: ['input_value_1', 'input_value_2'],
+  name: "your_action_name",
+  inputs: ["input_value_1", "input_value_2"],
 };
 
 // pass body AND kwilSigner if in Private Mode

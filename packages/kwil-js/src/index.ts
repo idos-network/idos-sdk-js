@@ -103,7 +103,7 @@ namespace Utils {
   /**
    * `DataType` holds the different data types that can be asserted as action inputs.
    */
-  export import DataType = _DataType;
+  export const DataType = _DataType;
 }
 
-export { NodeKwil, WebKwil, KwilSigner, Types, Utils, Client, EnvironmentType };
+export { NodeKwil, WebKwil, KwilSigner, type Types, Utils, Client, EnvironmentType };
