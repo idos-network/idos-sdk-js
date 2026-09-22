@@ -35,6 +35,10 @@ swapped.set("user_id", "33333333-3333-4333-8333-333333333333");
 assert.equal(readAddWalletRequest(swapped.toString()), null);
 assert.equal(readAddWalletRequest("user_id=not-a-uuid&request_id=also-no&message=hi"), null);
 
+const prefixed = new URLSearchParams(params);
+prefixed.set("message", `Extra line the signer should not accept.\n${message}`);
+assert.equal(readAddWalletRequest(prefixed.toString()), null);
+
 assert.equal(
   shouldAdvanceAfterConnect({ armed: true, wasConnected: false, connected: true }),
   true,

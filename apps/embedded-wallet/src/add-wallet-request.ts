@@ -10,17 +10,22 @@ function isUuid(value: string | null): value is string {
   return value !== null && UUID_PATTERN.test(value);
 }
 
-// The dashboard builds this message. Accept it only when it names the same profile and request as the URL.
+function canonicalAddWalletMessage(userId: string, requestId: string): string {
+  return [
+    "Sign this message to prove you own this wallet.",
+    `idOS profile: ${userId}`,
+    `Request: ${requestId}`,
+  ].join("\n");
+}
+
+// The dashboard builds this message. Accept it only when the whole text matches.
 export function readAddWalletRequest(search: string): AddWalletRequest | null {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const userId = params.get("user_id");
   const requestId = params.get("request_id");
   const message = params.get("message");
   if (!isUuid(userId) || !isUuid(requestId) || !message) return null;
-
-  const lines = message.split("\n");
-  if (lines.at(-2) !== `idOS profile: ${userId}`) return null;
-  if (lines.at(-1) !== `Request: ${requestId}`) return null;
+  if (message !== canonicalAddWalletMessage(userId, requestId)) return null;
   return { userId, requestId, message };
 }
 
