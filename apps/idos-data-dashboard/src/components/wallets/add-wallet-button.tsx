@@ -52,7 +52,11 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const [walletPayload, setWalletPayload] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
-  const pendingRequestRef = useRef<{ requestId: string; popup: Window } | null>(null);
+  const pendingRequestRef = useRef<{
+    requestId: string;
+    popup: Window;
+    userId: string;
+  } | null>(null);
   const idOSClient = useIDOSClient();
   const userIdRef = useRef(idOSClient.user.id);
   userIdRef.current = idOSClient.user.id;
@@ -60,10 +64,18 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const queryClient = useQueryClient();
 
   const addWallet = async (walletPayload: WalletSignature) => {
+    const requestUserId = pendingRequestRef.current?.userId;
     const isValid = await verifySignature(walletPayload);
     if (!isValid) {
       toast.error("Invalid signature", {
         description: "The signature does not match the wallet address",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (requestUserId !== userIdRef.current) {
+      toast.error("Invalid wallet data", {
+        description: "The signature does not match this profile",
       });
       setIsLoading(false);
       return;
@@ -115,7 +127,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       const payload = event.data.data;
       if (
         !payload?.message ||
-        !walletSignatureMatchesRequest(payload.message, userIdRef.current, pending.requestId)
+        !walletSignatureMatchesRequest(payload.message, pending.userId, pending.requestId)
       ) {
         toast.error("Invalid wallet data", {
           description: "The signature does not match this profile",
@@ -186,7 +198,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     );
 
     if (popup) {
-      pendingRequestRef.current = { requestId, popup };
+      pendingRequestRef.current = { requestId, popup, userId: idOSClient.user.id };
       setPopupWindow(popup);
 
       if (popup.closed || typeof popup.closed === "undefined") {
