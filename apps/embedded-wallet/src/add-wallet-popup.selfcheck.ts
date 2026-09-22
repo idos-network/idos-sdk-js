@@ -1,3 +1,4 @@
+// cspell:ignore selfcheck
 /**
  * Runnable check for add-wallet popup request binding and connector storage reset.
  *
