@@ -57,9 +57,9 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
     await idOSClient.logOut();
   }
 
+  queryClient.clear();
+
   if (sessionError) {
     throw sessionError;
   }
-
-  queryClient.clear();
 });
