@@ -468,10 +468,24 @@ export const dashboardMachine = setup({
           target: "disconnected",
           actions: ["resetWalletState", "clearPersistedWallet"],
         },
-        onError: {
-          target: "disconnected",
-          actions: ["resetWalletState", "clearPersistedWallet"],
-        },
+        onError: [
+          {
+            guard: ({ event }) =>
+              event.error instanceof Error &&
+              event.error.message === "Failed to clear FaceSign keys",
+            target: "error",
+            actions: assign({
+              error: ({ event }) =>
+                event.error instanceof Error
+                  ? event.error.message
+                  : "Failed to clear FaceSign keys",
+            }),
+          },
+          {
+            target: "disconnected",
+            actions: ["resetWalletState", "clearPersistedWallet"],
+          },
+        ],
       },
     },
   },
