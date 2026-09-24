@@ -53,11 +53,13 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
     console.error(`Error during ${walletType} disconnect:`, error);
   }
 
-  if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
-    await idOSClient.logOut();
+  try {
+    if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
+      await idOSClient.logOut();
+    }
+  } finally {
+    queryClient.clear();
   }
-
-  queryClient.clear();
 
   if (sessionError) {
     throw sessionError;
