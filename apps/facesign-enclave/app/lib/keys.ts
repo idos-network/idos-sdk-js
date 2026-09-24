@@ -8,9 +8,17 @@ export const DB_KEY_MNEMONIC = "idOS:facesign:mnemonic";
 const LOCAL_KEY_USER_ID = "faceSignUserId";
 
 export async function clearKeyMaterial(): Promise<void> {
-  await storeDelete(DB_KEY_MNEMONIC);
-  await storeDelete(DB_KEY_KEK);
-  localStorage.removeItem(LOCAL_KEY_USER_ID);
+  const removals = await Promise.allSettled([
+    storeDelete(DB_KEY_MNEMONIC),
+    storeDelete(DB_KEY_KEK),
+    Promise.resolve().then(() => {
+      localStorage.removeItem(LOCAL_KEY_USER_ID);
+    }),
+  ]);
+
+  if (removals.some((removal) => removal.status === "rejected")) {
+    throw new Error("Failed to clear FaceSign key material");
+  }
 }
 
 export async function storeMnemonic(mnemonic: string) {
