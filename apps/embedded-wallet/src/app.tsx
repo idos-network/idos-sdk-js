@@ -2,6 +2,7 @@ import type { WalletType } from "@idos-network/kwil-infra/actions";
 
 import { useEffect } from "react";
 
+import { readAddWalletRequest } from "./add-wallet-request";
 import { COMMON_ENV } from "./components/envFlags.common";
 import { EVMConnector } from "./components/evm";
 import { FaceSignConnector } from "./components/facesign";
@@ -45,6 +46,7 @@ function WalletConnector() {
 }
 
 export function App() {
+  const request = readAddWalletRequest(window.location.search);
   const { walletPayload, connectedWalletType } = useWalletState();
 
   useEffect(() => {
@@ -85,12 +87,26 @@ export function App() {
     }
   }, [walletPayload, connectedWalletType]);
 
+  if (!request) {
+    return (
+      <div className="grid h-full place-content-center p-5">
+        <p className="text-center text-sm text-neutral-400">
+          Open Add wallet from the idOS dashboard.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid h-full place-content-center p-5">
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <img alt="idOS" src="/logo.svg" width={136} height={44} />
           <span className="text-lg font-bold text-neutral-50">Wallet Connector</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <p className="text-center text-sm text-neutral-400">Adding a wallet to idOS profile</p>
+          <p className="text-center text-sm break-all text-neutral-200">{request.userId}</p>
         </div>
         <div className="flex min-w-80 flex-col items-stretch justify-center gap-4">
           <WalletConnector />
