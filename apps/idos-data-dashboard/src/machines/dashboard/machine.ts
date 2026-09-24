@@ -482,8 +482,11 @@ export const dashboardMachine = setup({
             }),
           },
           {
-            target: "disconnected",
-            actions: ["resetWalletState", "clearPersistedWallet"],
+            target: "error",
+            actions: assign({
+              error: ({ event }) =>
+                event.error instanceof Error ? event.error.message : "Failed to disconnect",
+            }),
           },
         ],
       },

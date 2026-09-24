@@ -8,10 +8,14 @@ import type { DisconnectInput } from "../dashboard/machine";
 export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) => {
   const { walletType, nearSelector, idOSClient } = input;
 
-  // Clear the session (we are fine to ignore errors in here)
-  await fetch("/api/session", {
-    method: "DELETE",
-  });
+  // Session deletion must not skip the enclave reset below.
+  try {
+    await fetch("/api/session", {
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error("Error during session delete:", error);
+  }
 
   try {
     if (walletType === "Stellar") {
