@@ -23,6 +23,7 @@ function iframeWindow(): Window {
 
 describe("FaceSignSignerProvider.reset", () => {
   afterEach(() => {
+    vi.useRealTimers();
     document.body.replaceChildren();
   });
 
@@ -59,6 +60,18 @@ describe("FaceSignSignerProvider.reset", () => {
     );
 
     await reset;
+    expect(document.querySelector("iframe")).toBeNull();
+  });
+
+  it("rejects within the reset deadline when the enclave never becomes ready", async () => {
+    vi.useFakeTimers();
+    const signer = provider();
+    const reset = signer.reset();
+    const rejected = expect(reset).rejects.toThrow("FaceSign enclave failed to load");
+
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    await rejected;
     expect(document.querySelector("iframe")).toBeNull();
   });
 });

@@ -2,6 +2,7 @@
 const POST_MESSAGE_DELAY_MS = 300;
 // Safety net: reject proposals if the enclave doesn't respond within this window.
 const PROPOSAL_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+const RESET_TIMEOUT_MS = 15_000;
 
 export interface FaceSignMetadata {
   name: string;
@@ -232,13 +233,14 @@ export class FaceSignSignerProvider {
 
   async reset(): Promise<void> {
     this.#setupMessageListener();
+    const deadline = Date.now() + RESET_TIMEOUT_MS;
 
     try {
-      await this.#ensureEnclave();
+      await this.#ensureEnclave(deadline - Date.now());
       await new Promise<void>((resolve, reject) => {
         const timer = setTimeout(() => {
           reject(new Error("FaceSign reset timed out"));
-        }, 15_000);
+        }, Math.max(deadline - Date.now(), 0));
 
         this.#resolveReset = () => {
           clearTimeout(timer);
@@ -312,7 +314,7 @@ export class FaceSignSignerProvider {
     return container;
   }
 
-  #ensureEnclave(): Promise<void> {
+  #ensureEnclave(timeoutMs = PROPOSAL_TIMEOUT_MS): Promise<void> {
     if (this.#iframe?.contentWindow) {
       return Promise.resolve();
     }
@@ -320,7 +322,7 @@ export class FaceSignSignerProvider {
     return new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error("FaceSign enclave failed to load"));
-      }, PROPOSAL_TIMEOUT_MS);
+      }, timeoutMs);
 
       if (!this.#container) {
         this.#container = this.#createContainer();
