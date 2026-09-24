@@ -9,12 +9,17 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
   const { walletType, nearSelector, idOSClient } = input;
 
   // Session deletion must not skip the enclave reset below.
+  let sessionError: unknown;
   try {
-    await fetch("/api/session", {
+    const response = await fetch("/api/session", {
       method: "DELETE",
     });
+    if (!response.ok) {
+      throw new Error(`Failed to delete session (${response.status})`);
+    }
   } catch (error) {
     console.error("Error during session delete:", error);
+    sessionError = error;
   }
 
   try {
@@ -50,6 +55,10 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
 
   if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
     await idOSClient.logOut();
+  }
+
+  if (sessionError) {
+    throw sessionError;
   }
 
   queryClient.clear();
