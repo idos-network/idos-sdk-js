@@ -4,10 +4,12 @@ import { createAppKit, useAppKit, useAppKitAccount, useDisconnect } from "@reown
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSignMessage, WagmiProvider } from "wagmi";
 
-import { message, useWalletState } from "../state";
+import { currentSignMessage } from "../add-wallet-request";
+import { shouldAdvanceAfterConnect } from "../fresh-connection";
+import { useWalletState } from "../state";
 import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
@@ -33,6 +35,7 @@ createAppKit({
   metadata,
   projectId,
   enableCoinbase: false,
+  enableReconnect: false,
 });
 
 const { useStepper } = defineStepper(
@@ -53,7 +56,7 @@ const queryClient = new QueryClient();
 export function EVMConnector() {
   return (
     <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <WagmiProvider config={wagmiAdapter.wagmiConfig} reconnectOnMount={false}>
         <Ethereum />
       </WagmiProvider>
     </QueryClientProvider>
@@ -67,13 +70,21 @@ function Ethereum() {
   const { signMessage } = useSignMessage();
   const { disconnect: disconnectEvm } = useDisconnect();
   const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
+  const userAskedToConnect = useRef(false);
+  const wasConnected = useRef(isConnected);
 
   useEffect(() => {
-    if (isConnected && stepper.isFirst) {
+    const advance = shouldAdvanceAfterConnect({
+      armed: userAskedToConnect.current,
+      wasConnected: wasConnected.current,
+      connected: isConnected,
+    });
+    wasConnected.current = isConnected;
+    if (advance && stepper.isFirst) {
       setConnectedWalletType("EVM");
       stepper.next();
     }
-  }, [isConnected, stepper]);
+  }, [isConnected, stepper, setConnectedWalletType]);
 
   // Handle external disconnections
   useEffect(() => {
@@ -83,10 +94,18 @@ function Ethereum() {
     }
   }, [isConnected, stepper]);
 
+  const handleConnect = async () => {
+    if (isConnected) {
+      await disconnectEvm();
+    }
+    userAskedToConnect.current = true;
+    open();
+  };
+
   const handleSignMessage = () => {
     signMessage(
       {
-        message,
+        message: currentSignMessage(),
       },
       {
         onSuccess: (signature) => {
@@ -98,7 +117,7 @@ function Ethereum() {
             address,
             signature,
             public_key: [],
-            message,
+            message: currentSignMessage(),
             disconnect: disconnectEvm,
           });
         },
@@ -116,7 +135,7 @@ function Ethereum() {
     <div className="flex flex-col gap-2">
       {stepper.when("connect", () => (
         <div className="flex flex-col gap-4">
-          <Button onClick={() => open()}>
+          <Button onClick={handleConnect}>
             Connect with EVM
             <TokenETH variant="mono" size={24} className="ml-auto" />
           </Button>

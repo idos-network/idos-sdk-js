@@ -10,8 +10,6 @@ export type WalletPayload = {
   disconnect: () => Promise<void>;
 };
 
-export const message = "Sign this message to prove you own this wallet";
-
 type WalletContextValue = {
   walletPayload: WalletPayload | null;
   connectedWalletType: WalletType | null;
