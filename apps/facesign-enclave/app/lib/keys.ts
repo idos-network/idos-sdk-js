@@ -1,10 +1,25 @@
 import { utf8Encode } from "@idos-network/utils/codecs";
 import { mnemonicToKeyPair } from "@idos-network/utils/facesign";
 
-import { storeGet, storeSet } from "./storage";
+import { storeDelete, storeGet, storeSet } from "./storage";
 
 export const DB_KEY_KEK = "idOS:facesign:kek";
 export const DB_KEY_MNEMONIC = "idOS:facesign:mnemonic";
+const LOCAL_KEY_USER_ID = "faceSignUserId";
+
+export async function clearKeyMaterial(): Promise<void> {
+  const removals = await Promise.allSettled([
+    storeDelete(DB_KEY_MNEMONIC),
+    storeDelete(DB_KEY_KEK),
+    Promise.resolve().then(() => {
+      localStorage.removeItem(LOCAL_KEY_USER_ID);
+    }),
+  ]);
+
+  if (removals.some((removal) => removal.status === "rejected")) {
+    throw new Error("Failed to clear FaceSign key material");
+  }
+}
 
 export async function storeMnemonic(mnemonic: string) {
   await encryptAndStore(DB_KEY_MNEMONIC, utf8Encode(mnemonic));

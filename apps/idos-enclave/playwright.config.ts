@@ -1,6 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
-const baseURL = "https://127.0.0.1:4173";
+// CI skips mkcert, so the preview server is plain HTTP there.
+const baseURL = process.env.CI ? "http://127.0.0.1:4173" : "https://127.0.0.1:4173";
 
 export default defineConfig({
   testDir: "./e2e",
