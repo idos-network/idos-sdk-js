@@ -123,6 +123,36 @@ describe("LocalEnclave", () => {
     );
   });
 
+  it("requires origin authorization after deriving a key and keeps the profile if denied", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    let allowed = false;
+    const guard = vi.spyOn(enclave, "guardKeys").mockImplementation(async () => allowed);
+    const passwordContextSpy = vi.spyOn(enclave, "getPasswordContext");
+
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "Origin is not authorized to use the keys",
+    );
+    expect(passwordContextSpy).toHaveBeenCalledTimes(1);
+    expect(guard).toHaveBeenCalledTimes(1);
+
+    allowed = true;
+    const profile = await enclave.getPrivateEncryptionProfile();
+
+    expect(profile.userId).toBe(userId);
+    expect(passwordContextSpy).toHaveBeenCalledTimes(1);
+    expect(guard).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not check origin authorization when the guard is skipped", async () => {
+    const enclave = new TestEnclave({ userId, store: new MemoryStore() } as LocalEnclaveOptions);
+    const guard = vi.spyOn(enclave, "guardKeys");
+
+    await enclave.getPrivateEncryptionProfile(true);
+
+    expect(guard).not.toHaveBeenCalled();
+  });
+
   it("does not request a password context for an MM profile without a stored key", async () => {
     const enclave = new TestEnclave({
       userId,
