@@ -37,15 +37,15 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
         throw new Error("Failed to clear FaceSign keys", { cause: error });
       }
     }
-
-    if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
-      await idOSClient.logOut();
-    }
   } catch (error) {
     if (error instanceof Error && error.message === "Failed to clear FaceSign keys") {
       throw error;
     }
     console.error(`Error during ${walletType} disconnect:`, error);
+  }
+
+  if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
+    await idOSClient.logOut();
   }
 
   queryClient.clear();
