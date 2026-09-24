@@ -58,6 +58,11 @@
       "limit": "20 KB"
     },
     {
+      "name": "@idos-network/kwil-js",
+      "path": "packages/kwil-js/dist/index.mjs",
+      "limit": "20 KB"
+    },
+    {
       "name": "@idos-network/kwil-infra",
       "path": "packages/kwil-infra/dist/**/*.mjs",
       "limit": "20 KB"

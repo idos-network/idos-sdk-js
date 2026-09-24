@@ -1,0 +1,63 @@
+{
+  "name": "@idos-network/kwil-js",
+  "version": "0.1.9",
+  "description": "Kwil database client for the idOS JavaScript SDK",
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": "github:idos-network/idos-sdk-js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./config": {
+      "types": "./dist/api_client/config.d.mts",
+      "import": "./dist/api_client/config.mjs"
+    },
+    "./action": {
+      "types": "./dist/core/action.d.mts",
+      "import": "./dist/core/action.mjs"
+    },
+    "./database": {
+      "types": "./dist/core/database.d.mts",
+      "import": "./dist/core/database.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.3.0",
+    "axios": "^1.19.0",
+    "lru-cache": "11.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:build",
+    "@vitest/coverage-v8": "catalog:testing",
+    "ethers": "catalog:ethereum",
+    "tsdown": "catalog:build",
+    "tweetnacl": "catalog:core",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}

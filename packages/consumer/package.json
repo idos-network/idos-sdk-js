@@ -32,7 +32,7 @@
   "dependencies": {
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
-    "@idos-network/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "tiny-invariant": "catalog:core"
   },

@@ -29,6 +29,9 @@ jobs:
           - name: kwil-infra
             filter: "@idos-network/kwil-infra"
             directory: packages/kwil-infra
+          - name: kwil-js
+            filter: "@idos-network/kwil-js"
+            directory: packages/kwil-js
           - name: utils
             filter: "@idos-network/utils"
             directory: packages/utils
