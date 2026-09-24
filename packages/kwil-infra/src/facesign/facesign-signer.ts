@@ -238,9 +238,12 @@ export class FaceSignSignerProvider {
     try {
       await this.#ensureEnclave(deadline - Date.now());
       await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(() => {
-          reject(new Error("FaceSign reset timed out"));
-        }, Math.max(deadline - Date.now(), 0));
+        const timer = setTimeout(
+          () => {
+            reject(new Error("FaceSign reset timed out"));
+          },
+          Math.max(deadline - Date.now(), 0),
+        );
 
         this.#resolveReset = () => {
           clearTimeout(timer);
