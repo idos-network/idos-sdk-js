@@ -18,10 +18,10 @@ export class MemoryStore implements Store {
 
   // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
   async get<K = any>(key: string): Promise<K | undefined> {
-    if (this.hasRememberDurationElapsed()) {
+    if (await this.hasRememberDurationElapsed()) {
       // Duration is expired, reset the store
       // There is nothing else to do here, because the store is in-memory
-      this.reset();
+      await this.reset();
       return undefined;
     }
 
@@ -56,7 +56,7 @@ export class MemoryStore implements Store {
     return Promise.resolve();
   }
 
-  hasRememberDurationElapsed(): boolean {
+  async hasRememberDurationElapsed(): Promise<boolean> {
     const value = this.storage.get(this.REMEMBER_DURATION_KEY);
 
     try {

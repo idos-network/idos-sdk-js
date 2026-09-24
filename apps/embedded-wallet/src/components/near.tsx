@@ -5,9 +5,11 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { message, useWalletState } from "../state";
+import { currentSignMessage } from "../add-wallet-request";
+import { shouldAdvanceAfterConnect } from "../fresh-connection";
+import { useWalletState } from "../state";
 import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
@@ -41,13 +43,21 @@ export function NearConnector() {
   const [isSignedIn, setSignedIn] = useState(false);
   const [accountId, setAccountId] = useState("");
   const { connectedWalletType, setWalletPayload, setConnectedWalletType } = useWalletState();
+  const userAskedToConnect = useRef(false);
+  const wasConnected = useRef(isSignedIn);
 
   useEffect(() => {
-    if (isSignedIn && stepper.isFirst) {
+    const advance = shouldAdvanceAfterConnect({
+      armed: userAskedToConnect.current,
+      wasConnected: wasConnected.current,
+      connected: isSignedIn,
+    });
+    wasConnected.current = isSignedIn;
+    if (advance && stepper.isFirst) {
       setConnectedWalletType("NEAR");
       stepper.next();
     }
-  }, [isSignedIn, stepper]);
+  }, [isSignedIn, stepper, setConnectedWalletType]);
 
   useEffect(() => {
     const subscription = selector.store.observable.subscribe(() => {
@@ -68,14 +78,14 @@ export function NearConnector() {
   const handleSignMessage = async () => {
     const wallet = await selector.wallet();
     // oxlint-disable-next-line typescript/no-explicit-any -- false positive
-    const signature = await signNearMessage(wallet as any, message);
+    const signature = await signNearMessage(wallet as any, currentSignMessage());
 
     if (signature) {
       setWalletPayload({
         address: accountId,
         signature,
         public_key: (await getNearFullAccessPublicKeys(accountId)) || [],
-        message,
+        message: currentSignMessage(),
         disconnect: disconnectNear,
       });
     }
@@ -84,6 +94,15 @@ export function NearConnector() {
   const disconnectNear = async () => {
     const wallet = await selector.wallet();
     await wallet.signOut();
+  };
+
+  const handleConnect = async () => {
+    if (selector.isSignedIn()) {
+      const wallet = await selector.wallet();
+      await wallet.signOut();
+    }
+    userAskedToConnect.current = true;
+    modal.show();
   };
 
   const handleDisconnect = async () => {
@@ -97,7 +116,7 @@ export function NearConnector() {
     <div className="flex max-w-xl flex-col gap-2">
       {stepper.when("connect", () => (
         <div className="flex flex-col gap-4">
-          <Button onClick={() => modal.show()}>
+          <Button onClick={handleConnect}>
             Connect with NEAR
             <TokenNEAR variant="mono" size={24} className="ml-auto" />
           </Button>
