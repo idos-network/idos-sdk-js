@@ -1,10 +1,17 @@
 import { utf8Encode } from "@idos-network/utils/codecs";
 import { mnemonicToKeyPair } from "@idos-network/utils/facesign";
 
-import { storeGet, storeSet } from "./storage";
+import { storeDelete, storeGet, storeSet } from "./storage";
 
 export const DB_KEY_KEK = "idOS:facesign:kek";
 export const DB_KEY_MNEMONIC = "idOS:facesign:mnemonic";
+const LOCAL_KEY_USER_ID = "faceSignUserId";
+
+export async function clearKeyMaterial(): Promise<void> {
+  await storeDelete(DB_KEY_MNEMONIC);
+  await storeDelete(DB_KEY_KEK);
+  localStorage.removeItem(LOCAL_KEY_USER_ID);
+}
 
 export async function storeMnemonic(mnemonic: string) {
   await encryptAndStore(DB_KEY_MNEMONIC, utf8Encode(mnemonic));

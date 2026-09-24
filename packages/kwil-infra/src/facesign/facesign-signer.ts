@@ -27,6 +27,8 @@ export class FaceSignSignerProvider {
   #resolveSessionProposal: ((response: SessionResponse) => void) | null = null;
   #rejectSessionProposal: ((error: Error) => void) | null = null;
   #resolveAddressRequest: ((address: string | null) => void) | null = null;
+  #resolveReset: (() => void) | null = null;
+  #rejectReset: ((error: Error) => void) | null = null;
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
   #messageListenerInitialized = false;
@@ -85,6 +87,14 @@ export class FaceSignSignerProvider {
       if (event.data?.type === "address_response") {
         const payload = event.data.data;
         this.#resolveAddressRequest?.(payload?.address ?? null);
+      }
+
+      if (event.data?.type === "reset_complete") {
+        if (event.data.data?.ok) {
+          this.#resolveReset?.();
+        } else {
+          this.#rejectReset?.(new Error("FaceSign enclave failed to delete its key"));
+        }
       }
     };
 
@@ -217,6 +227,39 @@ export class FaceSignSignerProvider {
       this.#resolveSessionProposal = null;
       this.#rejectSessionProposal = null;
       this.#hideEnclave();
+    }
+  }
+
+  async reset(): Promise<void> {
+    this.#setupMessageListener();
+
+    try {
+      await this.#ensureEnclave();
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          reject(new Error("FaceSign reset timed out"));
+        }, 15_000);
+
+        this.#resolveReset = () => {
+          clearTimeout(timer);
+          this.#resolveReset = null;
+          this.#rejectReset = null;
+          resolve();
+        };
+        this.#rejectReset = (error) => {
+          clearTimeout(timer);
+          this.#resolveReset = null;
+          this.#rejectReset = null;
+          reject(error);
+        };
+
+        this.#iframe?.contentWindow?.postMessage(
+          { type: "reset", data: { id: ++this.#proposalId } },
+          this.#enclaveOrigin,
+        );
+      });
+    } finally {
+      this.destroy();
     }
   }
 

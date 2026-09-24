@@ -56,7 +56,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
   /** @override parent method to call iframe */
   async reset(): Promise<void> {
-    this.requestToEnclave("reset");
+    await this.requestToEnclave("reset");
   }
 
   /** @override parent method to call iframe */

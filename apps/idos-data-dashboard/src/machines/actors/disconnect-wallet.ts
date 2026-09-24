@@ -29,8 +29,12 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
     }
 
     if (walletType === "FaceSign") {
-      const { clearFaceSignProvider } = await import("@/core/signers");
-      clearFaceSignProvider();
+      try {
+        const { clearFaceSignProvider } = await import("@/core/signers");
+        await clearFaceSignProvider();
+      } catch (error) {
+        console.error("Error during FaceSign reset:", error);
+      }
     }
 
     if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {

@@ -34,7 +34,10 @@ function idleClient(): idOSClientIdle {
     setSigner: () => {},
     client: { auth: { logoutKGW: async () => {} } },
   } as unknown as KwilActionClient;
-  const enclaveProvider = { setSigner: () => {} } as unknown as BaseProvider;
+  const enclaveProvider = {
+    setSigner: () => {},
+    reset: async () => {},
+  } as unknown as BaseProvider;
 
   return new idOSClientIdle(
     new MemoryStore(),
@@ -71,7 +74,7 @@ function nodeIdleClient(): idOSClientIdle {
   return new idOSClientIdle(
     new MemoryStore(),
     new KwilActionClient(nodeKwil),
-    { setSigner: () => {} } as unknown as BaseProvider,
+    { setSigner: () => {}, reset: async () => {} } as unknown as BaseProvider,
     new BlobGateway({ url: "https://blob.example" }),
   );
 }
@@ -90,6 +93,17 @@ describe("UKYC blob authorization is scoped to the signed session", () => {
     const withSigner = await idleClient().withUserSigner(createMmTokenAuth(mmToken));
 
     expect((await withSigner.logOut()).blobGateway.hasAccessToken).toBe(false);
+  });
+
+  it("resets the enclave on logout", async () => {
+    const idle = idleClient();
+    const reset = vi.fn(async () => {});
+    idle.enclaveProvider.reset = reset;
+    const withSigner = await idle.withUserSigner(createMmTokenAuth(mmToken));
+
+    await withSigner.logOut();
+
+    expect(reset).toHaveBeenCalledOnce();
   });
 
   it("leaves a non-MM session without UKYC authorization", async () => {

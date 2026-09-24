@@ -1,6 +1,7 @@
 import type { SessionProposal, SignProposal } from "@/providers/requests.provider";
 
 import { env } from "@/env";
+import { clearKeyMaterial } from "@/lib/keys";
 
 export class BaseHandler {
   addSignProposal: (proposal: SignProposal) => void;
@@ -125,6 +126,21 @@ export class WindowMessageHandler extends BaseHandler {
           );
         },
       });
+    } else if (type === "reset") {
+      clearKeyMaterial()
+        .then(() => {
+          this.#isKeyAvailable = false;
+          this.#sendToParent(
+            { type: "reset_complete", data: { id: data?.id, ok: true } },
+            event.origin,
+          );
+        })
+        .catch(() => {
+          this.#sendToParent(
+            { type: "reset_complete", data: { id: data?.id, ok: false } },
+            event.origin,
+          );
+        });
     } else if (type === "address_request") {
       if (this.#isKeyAvailable && this.#getStoredAddress) {
         this.#getStoredAddress()
