@@ -1,5 +1,13 @@
 # @idos-network/kwil-infra
 
+## 2.1.1
+
+### Patch Changes
+
+- 74180e3: Delete the FaceSign mnemonic when the signer resets, and clear the idOS enclave on logout.
+- Updated dependencies [56b18ea]
+  - @idos-network/utils@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
