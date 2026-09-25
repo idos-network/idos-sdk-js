@@ -10,7 +10,7 @@ describe("IframeEnclave.reset", () => {
     document.body.replaceChildren();
   });
 
-  it("resolves without asking the iframe to wipe storage", async () => {
+  it("rejects without asking the iframe to wipe storage", async () => {
     document.body.innerHTML = '<div id="enclave"></div>';
     const enclave = new IframeEnclave({
       container: "#enclave",
@@ -20,7 +20,7 @@ describe("IframeEnclave.reset", () => {
     const postMessage = vi.fn();
     Object.defineProperty(iframe, "contentWindow", { value: { postMessage } });
 
-    await expect(enclave.reset()).resolves.toBeUndefined();
+    await expect(enclave.reset()).rejects.toThrow("Embedding pages cannot reset enclave storage");
     expect(postMessage).not.toHaveBeenCalled();
   });
 });
