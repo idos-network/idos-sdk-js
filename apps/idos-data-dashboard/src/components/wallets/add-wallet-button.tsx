@@ -61,8 +61,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
 
-  const addWallet = async (walletPayload: WalletSignature) => {
-    const requestUserId = pendingRequestRef.current?.userId;
+  const addWallet = async (walletPayload: WalletSignature, requestUserId: string) => {
     const isValid = await verifySignature(walletPayload);
     if (!isValid) {
       toast.error("Invalid signature", {
@@ -141,7 +140,8 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         return;
       }
 
-      void addWalletRef.current(payload);
+      pendingRequestRef.current = null;
+      void addWalletRef.current(payload, pending.userId);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
