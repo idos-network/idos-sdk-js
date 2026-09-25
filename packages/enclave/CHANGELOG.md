@@ -1,5 +1,17 @@
 # @idos-network/enclave
 
+## 2.1.1
+
+### Patch Changes
+
+- fba1c60: Require origin authorization after a key is derived, and keep the cached profile when that authorization is denied.
+- 56b18ea: Forget a cached encryption profile once its remember duration has elapsed, including while the enclave stays open.
+- Updated dependencies [74180e3]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.1.1
+  - @idos-network/utils@2.1.1
+  - @idos-network/credentials@2.1.1
+
 ## 2.1.0
 
 ### Patch Changes

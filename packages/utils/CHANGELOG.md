@@ -1,5 +1,11 @@
 # @idos-network/utils
 
+## 2.1.1
+
+### Patch Changes
+
+- 56b18ea: Forget a cached encryption profile once its remember duration has elapsed, including while the enclave stays open.
+
 ## 2.1.0
 
 ## 2.0.1

@@ -1,5 +1,12 @@
 # @idos-network/credentials
 
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [56b18ea]
+  - @idos-network/utils@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
