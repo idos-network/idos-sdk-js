@@ -95,10 +95,6 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
         try {
           if (this.options.encryptionPasswordStore === "mpc") {
-            // We are skipping the dialog for MPC
-            // so the line below is skipped, and the user will be asked
-            // to asked during encryption again... so we should accept origin.
-            await this.acceptParentOrigin();
             return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
           }
 
@@ -117,16 +113,12 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           ));
 
           if (encryptionPasswordStore === "mpc") {
-            await this.acceptParentOrigin();
             return resolve({ encryptionPasswordStore });
           }
 
           if (!encryptionPasswordStore || encryptionPasswordStore === "mm") {
             throw new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`);
           }
-
-          // User providing the password also means that they want to authorize the origin
-          await this.acceptParentOrigin();
 
           // oxlint-disable-next-line typescript/no-non-null-assertion -- This needs to be properly typed.
           return resolve({ encryptionPasswordStore, password: password!, duration });

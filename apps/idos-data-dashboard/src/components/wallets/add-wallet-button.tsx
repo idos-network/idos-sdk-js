@@ -4,13 +4,16 @@ import {
 } from "@idos-network/kwil-infra/signature-verification";
 import { useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
 
 import { Button } from "@/components/ui/button";
 import { COMMON_ENV } from "@/core/envFlags.common";
+import { useIDOSClient } from "@/hooks/idOS";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+
+import { addWalletMessage, walletSignatureMatchesRequest } from "./add-wallet-message";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
   const entries = COMMON_ENV.EMBEDDED_WALLET_APP_URLS.split(",")
@@ -46,17 +49,31 @@ interface AddWalletButtonProps {
 }
 
 export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
-  const [walletPayload, setWalletPayload] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const pendingRequestRef = useRef<{
+    requestId: string;
+    popup: Window;
+    userId: string;
+  } | null>(null);
+  const idOSClient = useIDOSClient();
+  const userIdRef = useRef(idOSClient.user.id);
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
 
   const addWallet = async (walletPayload: WalletSignature) => {
+    const requestUserId = pendingRequestRef.current?.userId;
     const isValid = await verifySignature(walletPayload);
     if (!isValid) {
       toast.error("Invalid signature", {
         description: "The signature does not match the wallet address",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (requestUserId !== userIdRef.current) {
+      toast.error("Invalid wallet data", {
+        description: "The signature does not match this profile",
       });
       setIsLoading(false);
       return;
@@ -66,7 +83,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         address: walletPayload.address || "unknown",
         publicKeys: walletPayload.public_key ?? [],
         signature: walletPayload.signature,
-        message: walletPayload.message || "Sign this message to prove you own this wallet",
+        message: walletPayload.message,
         walletType: walletPayload.wallet_type,
       },
       {
@@ -89,11 +106,21 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     );
   };
 
+  const addWalletRef = useRef(addWallet);
+
+  useEffect(() => {
+    userIdRef.current = idOSClient.user.id;
+    addWalletRef.current = addWallet;
+  });
+
   useEffect(() => {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type !== "WALLET_SIGNATURE") return;
+
+      const pending = pendingRequestRef.current;
+      if (!pending || event.source !== pending.popup) return;
 
       if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
@@ -103,15 +130,18 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       }
 
       const payload = event.data.data;
-      if (!payload) {
+      if (
+        !payload?.message ||
+        !walletSignatureMatchesRequest(payload.message, pending.userId, pending.requestId)
+      ) {
         toast.error("Invalid wallet data", {
-          description: "No wallet data was received from the popup",
+          description: "The signature does not match this profile",
         });
         setIsLoading(false);
         return;
       }
 
-      setWalletPayload(payload);
+      void addWalletRef.current(payload);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
@@ -128,6 +158,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
 
     const checkPopupClosed = setInterval(() => {
       if (popupWindow.closed) {
+        if (pendingRequestRef.current?.popup === popupWindow) {
+          pendingRequestRef.current = null;
+        }
         setIsLoading(false);
         setPopupWindow(null);
         clearInterval(checkPopupClosed);
@@ -139,13 +172,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     };
   }, [popupWindow]);
 
-  useEffect(() => {
-    if (!walletPayload) {
-      return;
-    }
-    addWallet(walletPayload);
-  }, [walletPayload]);
-
   const handleOpenWalletPopup = () => {
     setIsLoading(true);
 
@@ -155,13 +181,22 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;
 
+    const requestId = crypto.randomUUID();
+    const url = new URL(EMBEDDED_WALLET_CONFIG.popupUrl);
+    url.searchParams.set("user_id", idOSClient.user.id);
+    url.searchParams.set("request_id", requestId);
+    url.searchParams.set("message", addWalletMessage(idOSClient.user.id, requestId));
+
+    pendingRequestRef.current?.popup.close();
+
     const popup = window.open(
-      EMBEDDED_WALLET_CONFIG.popupUrl,
-      "wallet-connection",
+      url.href,
+      `wallet-${requestId}`,
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );
 
     if (popup) {
+      pendingRequestRef.current = { requestId, popup, userId: idOSClient.user.id };
       setPopupWindow(popup);
 
       if (popup.closed || typeof popup.closed === "undefined") {

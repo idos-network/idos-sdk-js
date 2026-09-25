@@ -6,6 +6,7 @@ import { MemoryStore } from "@idos-network/utils/store";
 import tweetnacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
 
+import { STORAGE_KEYS } from "./keys.js";
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 
 // ponytail: real scrypt (N=16384) runs on every obfuscated store read/write, which is
@@ -43,7 +44,11 @@ vi.mock("scrypt-js", () => ({
 }));
 
 class TestEnclave extends LocalEnclave {
+  userIdPresentOnPrompt: boolean[] = [];
+
   async getPasswordContext() {
+    this.userIdPresentOnPrompt.push((await this.store.get(STORAGE_KEYS.USER_ID)) !== undefined);
+
     return {
       encryptionPasswordStore: "user",
       password: "super-secret",
@@ -116,6 +121,36 @@ describe("LocalEnclave", () => {
     await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
       "Derived encryption public key does not match expectedUserEncryptionPublicKey",
     );
+  });
+
+  it("requires origin authorization after deriving a key and keeps the profile if denied", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    let allowed = false;
+    const guard = vi.spyOn(enclave, "guardKeys").mockImplementation(async () => allowed);
+    const passwordContextSpy = vi.spyOn(enclave, "getPasswordContext");
+
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "Origin is not authorized to use the keys",
+    );
+    expect(passwordContextSpy).toHaveBeenCalledTimes(1);
+    expect(guard).toHaveBeenCalledTimes(1);
+
+    allowed = true;
+    const profile = await enclave.getPrivateEncryptionProfile();
+
+    expect(profile.userId).toBe(userId);
+    expect(passwordContextSpy).toHaveBeenCalledTimes(1);
+    expect(guard).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not check origin authorization when the guard is skipped", async () => {
+    const enclave = new TestEnclave({ userId, store: new MemoryStore() } as LocalEnclaveOptions);
+    const guard = vi.spyOn(enclave, "guardKeys");
+
+    await enclave.getPrivateEncryptionProfile(true);
+
+    expect(guard).not.toHaveBeenCalled();
   });
 
   it("does not request a password context for an MM profile without a stored key", async () => {
@@ -220,5 +255,29 @@ describe("LocalEnclave", () => {
     expect(filtered[0]?.id).toBe("cred-1");
     expect(filtered[0]?.content).toBe("");
     expect(passwordContextSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("forgets a cached profile after the remember duration elapses", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      const first = await enclave.getPrivateEncryptionProfile();
+
+      expect(await enclave.getPrivateEncryptionProfile()).toBe(first);
+
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+      const after = await enclave.getPrivateEncryptionProfile();
+
+      expect(after).not.toBe(first);
+      expect(after.userId).toBe(userId);
+      // First prompt finds an empty store. The second must too: expiry resets before re-entry.
+      expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

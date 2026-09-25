@@ -32,7 +32,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    mkcert(),
+    process.env.CI ? null : mkcert(),
     preact(),
     tailwindcss(),
     nodePolyfills({

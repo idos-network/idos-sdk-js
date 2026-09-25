@@ -96,7 +96,7 @@ export class LocalEnclave<
   async reset(): Promise<void> {
     await super.reset();
     this.storedEncryptionProfile = undefined;
-    this.store.reset();
+    await this.store.reset();
   }
 
   /** @override parent method to reconfigure the enclave */
@@ -266,26 +266,26 @@ export class LocalEnclave<
    * @see BaseProvider#getPrivateEncryptionProfile
    */
   async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
-    // In case there is a no key pair, which matches we don't need a new one.
-    if (this.storedEncryptionProfile) {
-      let canBeUsed = this.storedEncryptionProfile.userId === this.userId;
-
-      if (canBeUsed && !skipGuard) {
-        // When users matches, we also need to check
-        // if origin is authorized to use the keys.
-        canBeUsed = await this.guardKeys();
-      }
-
-      if (canBeUsed) {
-        return this.storedEncryptionProfile;
-      }
-
-      // Something did not match, we need to create a new key pair
-      // and reset the enclave.
+    // Remember duration is a key-use check. A long-lived iframe keeps this profile
+    // in memory, so construction-time store expiry is not enough.
+    if (this.storedEncryptionProfile && (await this.store.hasRememberDurationElapsed())) {
       await this.reset();
     }
 
-    // The stored profile can't be used, or we have to create a new one.
+    if (this.storedEncryptionProfile?.userId === this.userId) {
+      // A matching cached profile still needs origin authorization before key use.
+      // Denying it must keep the profile and the allowlist; only a different user resets.
+      if (!skipGuard && !(await this.guardKeys())) {
+        throw new Error("Origin is not authorized to use the keys");
+      }
+
+      return this.storedEncryptionProfile;
+    }
+
+    if (this.storedEncryptionProfile) {
+      await this.reset();
+    }
+
     if (this.options.encryptionPasswordStore === "mm") {
       throw new Error(
         "MM encryption profiles require an externally supplied encryption private key",
@@ -316,7 +316,18 @@ export class LocalEnclave<
       throw new Error("Password or encryption password store is not found");
     }
 
-    return this.createEncryptionProfileFromPassword(password, this.userId, encryptionPasswordStore);
+    const profile = await this.createEncryptionProfileFromPassword(
+      password,
+      this.userId,
+      encryptionPasswordStore,
+    );
+
+    // Same origin check as the cached path. Password or MPC success is not authorization.
+    if (!skipGuard && !(await this.guardKeys())) {
+      throw new Error("Origin is not authorized to use the keys");
+    }
+
+    return profile;
   }
 
   /** @see BaseProvider#ensureUserEncryptionProfile */
