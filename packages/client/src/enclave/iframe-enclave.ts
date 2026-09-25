@@ -54,9 +54,12 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     await this.bindMessageListener();
   }
 
-  /** @override parent method to call iframe */
+  /**
+   * Embedding pages cannot reset enclave storage. The iframe rejects `reset`
+   * because it deletes every idOS-* key with no origin check.
+   */
   async reset(): Promise<void> {
-    await this.requestToEnclave("reset");
+    throw new Error("Embedding pages cannot reset enclave storage");
   }
 
   /** @override parent method to call iframe */
@@ -239,29 +242,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   ): Promise<BaseProviderMethodReturn[TMethod]> {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
-      let settled = false;
-      let timer: ReturnType<typeof setTimeout> | undefined;
-
-      const finish = (settle: () => void) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        port1.close();
-        settle();
-      };
-
-      // Reset runs during logout and only clears storage. A missing reply must not hang that.
-      if (method === "reset") {
-        timer = setTimeout(() => {
-          finish(() => reject(new Error("Enclave reset timed out")));
-        }, 15_000);
-      }
 
       port1.onmessage = ({ data }) => {
-        finish(() => {
-          // oxlint-disable-next-line no-unused-expressions
-          data.error ? reject(data.error) : resolve(data.result);
-        });
+        port1.close();
+        // oxlint-disable-next-line no-unused-expressions
+        data.error ? reject(data.error) : resolve(data.result);
       };
 
       // oxlint-disable-next-line typescript/no-non-null-assertion -- Make the explosion visible.

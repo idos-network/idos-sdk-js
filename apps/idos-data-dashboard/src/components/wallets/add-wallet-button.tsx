@@ -49,7 +49,6 @@ interface AddWalletButtonProps {
 }
 
 export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
-  const [walletPayload, setWalletPayload] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const pendingRequestRef = useRef<{
@@ -59,12 +58,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   } | null>(null);
   const idOSClient = useIDOSClient();
   const userIdRef = useRef(idOSClient.user.id);
-  userIdRef.current = idOSClient.user.id;
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
 
-  const addWallet = async (walletPayload: WalletSignature) => {
-    const requestUserId = pendingRequestRef.current?.userId;
+  const addWallet = async (walletPayload: WalletSignature, requestUserId: string) => {
     const isValid = await verifySignature(walletPayload);
     if (!isValid) {
       toast.error("Invalid signature", {
@@ -108,6 +105,13 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     );
   };
 
+  const addWalletRef = useRef(addWallet);
+
+  useEffect(() => {
+    userIdRef.current = idOSClient.user.id;
+    addWalletRef.current = addWallet;
+  });
+
   useEffect(() => {
     const abortController = new AbortController();
 
@@ -136,7 +140,8 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         return;
       }
 
-      setWalletPayload(payload);
+      pendingRequestRef.current = null;
+      void addWalletRef.current(payload, pending.userId);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
@@ -166,13 +171,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       clearInterval(checkPopupClosed);
     };
   }, [popupWindow]);
-
-  useEffect(() => {
-    if (!walletPayload) {
-      return;
-    }
-    addWallet(walletPayload);
-  }, [walletPayload]);
 
   const handleOpenWalletPopup = () => {
     setIsLoading(true);
