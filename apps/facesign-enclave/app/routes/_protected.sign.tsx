@@ -92,16 +92,22 @@ export default function Sign() {
         <div className="flex flex-col gap-4">
           <div className="bg-muted flex flex-col gap-2 rounded-lg p-4">
             <p className="text-sm font-medium">Request from</p>
-            <p className="text-muted-foreground text-sm">{firstProposal.metadata.name}</p>
+            <p className="text-muted-foreground text-sm break-all">{firstProposal.origin}</p>
           </div>
 
           <div className="bg-muted flex flex-col gap-2 rounded-lg p-4">
             <p className="text-sm font-medium">Message</p>
-            <p className="text-muted-foreground text-sm">{firstProposal.metadata.description}</p>
-            <p className="text-muted-foreground mt-2 font-mono text-xs break-all">
+            <p className="text-muted-foreground font-mono text-xs break-all">
               {utf8Decode(firstProposal.data as Uint8Array)}
             </p>
           </div>
+
+          {firstProposal.metadata?.description ? (
+            <div className="bg-muted flex flex-col gap-2 rounded-lg p-4">
+              <p className="text-sm font-medium">App says</p>
+              <p className="text-muted-foreground text-sm">{firstProposal.metadata.description}</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="flex justify-between gap-4">

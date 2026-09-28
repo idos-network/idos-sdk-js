@@ -96,6 +96,8 @@ export class WindowMessageHandler extends BaseHandler {
     if (type === "session_proposal") {
       this.addSessionProposal({
         ...data,
+        // Assigned after the spread so a payload origin cannot replace the verified one.
+        origin: event.origin,
         callback: (approved: boolean, address?: string) => {
           this.#sendToParent(
             {
@@ -113,6 +115,8 @@ export class WindowMessageHandler extends BaseHandler {
     } else if (type === "sign_proposal") {
       this.addSignProposal({
         ...data,
+        // Assigned after the spread so a payload origin cannot replace the verified one.
+        origin: event.origin,
         callback: (signature: string | null) => {
           this.#sendToParent(
             {
