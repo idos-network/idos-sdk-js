@@ -6,7 +6,12 @@ import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "rea
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
-import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
+import {
+  consumeAttestationToken,
+  createSession,
+  getSession,
+  type HandoffSession,
+} from "@/lib/handoff-store";
 import { sessionStorage } from "@/lib/sessions.server";
 import { useKeyStorageContext } from "@/providers/key.provider";
 
@@ -19,6 +24,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   const sessionId = sessionData.get("sessionId");
   if (sessionId) {
     session = await getSession(sessionId);
+  }
+
+  if (session) {
+    const attestationToken = await consumeAttestationToken(session.id);
+    if (attestationToken) {
+      session = { ...session, status: "completed", attestationToken };
+    }
   }
 
   if (!session) {

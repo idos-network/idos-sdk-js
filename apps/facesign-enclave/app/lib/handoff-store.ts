@@ -41,21 +41,24 @@ export async function getSession(id: string): Promise<HandoffSession | null> {
   return session;
 }
 
+function tokenKey(id: string): string {
+  return `${sessionKey(id)}:token`;
+}
+
+// Only the first completion wins: the token is written with NX, so it can't be overwritten.
 export async function completeSession(id: string, attestationToken: string): Promise<boolean> {
-  const raw = await redis.get<string>(sessionKey(id));
-  if (!raw) return false;
-
-  const session: HandoffSession = typeof raw === "string" ? JSON.parse(raw) : raw;
-
-  session.status = "completed";
-  session.attestationToken = attestationToken;
-
   const ttl = await redis.ttl(sessionKey(id));
-  await redis.set(sessionKey(id), JSON.stringify(session), {
-    ex: ttl > 0 ? ttl : SESSION_TTL_SECONDS,
-  });
+  if (ttl <= 0) return false;
 
-  return true;
+  const result = await redis.set(tokenKey(id), attestationToken, { nx: true, ex: ttl });
+  return result === "OK";
+}
+
+// Returns the token at most once and drops the session, so it can't be read or completed again.
+export async function consumeAttestationToken(id: string): Promise<string | null> {
+  const token = await redis.getdel<string>(tokenKey(id));
+  if (token) await deleteSession(id);
+  return token;
 }
 
 export async function sessionExists(id: string): Promise<boolean> {

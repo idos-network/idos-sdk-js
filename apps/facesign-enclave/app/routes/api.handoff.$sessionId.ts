@@ -13,7 +13,7 @@ export async function action({ params, request }: Route.ActionArgs) {
   const success = await completeSession(sessionId, attestationToken);
 
   if (!success) {
-    return Response.json({ error: "Session not found" });
+    return Response.json({ error: "Session not found or already completed" }, { status: 409 });
   }
 
   return Response.json({ ok: true });

@@ -10,7 +10,8 @@
     "build": "react-router build",
     "typecheck": "react-router typegen && tsc --noEmit",
     "dev": "react-router dev",
-    "preview": "react-router-serve ./build/server/index.js"
+    "preview": "react-router-serve ./build/server/index.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -46,6 +47,7 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-mkcert": "^1.17.12"
+    "vite-plugin-mkcert": "^1.17.12",
+    "vitest": "catalog:testing"
   }
 }
