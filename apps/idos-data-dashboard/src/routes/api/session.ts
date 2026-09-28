@@ -1,18 +1,20 @@
 import { getDb } from "@/core/db.server";
-import { sessionStorage } from "@/core/sessions.server";
+import { getUserId, sessionStorage } from "@/core/sessions.server";
 
 import type { Route } from "./+types/session";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
-  if (!session.get("userId")) {
+  const userId = getUserId(session);
+
+  if (!userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const user = await getDb().user.findUnique({
     where: {
-      id: session.get("userId"),
+      id: userId,
     },
     select: {
       acceptedTermsAndConditions: true,
@@ -30,7 +32,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   return Response.json(
     {
-      userId: session.get("userId"),
+      userId,
       acceptedTermsAndConditions: user.acceptedTermsAndConditions,
       hasKeys:
         user.relayPrivateKey !== null &&
