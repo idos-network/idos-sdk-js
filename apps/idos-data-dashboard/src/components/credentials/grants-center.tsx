@@ -1,5 +1,7 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +27,8 @@ function generateGrantId(grant: idOSGrant): string {
 }
 
 function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) {
+  // Evaluated once per mount; render must stay pure.
+  const [now] = useState(Date.now);
   const revokeGrant = useRevokeGrant();
 
   if (grants.length === 0) {
@@ -76,7 +80,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
                     variant="destructive-outline"
-                    disabled={timelockToMs(Number(grant.locked_until)) >= Date.now()}
+                    disabled={timelockToMs(Number(grant.locked_until)) >= now}
                     isLoading={revokeGrant.isPending && revokeGrant.variables?.id === grant.id}
                     onClick={() => onRevoke(grant)}
                   >

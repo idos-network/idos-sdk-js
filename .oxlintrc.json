@@ -22,6 +22,14 @@
     "typescript/no-inferrable-types": "allow",
     "jsx-a11y/prefer-tag-over-role": "warn"
   },
+  "overrides": [
+    {
+      "files": ["apps/idos-enclave/**"],
+      "rules": {
+        "react/immutability": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "**/*.gen.ts",
     "**/*/ui/**/*.tsx",

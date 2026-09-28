@@ -1,6 +1,7 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 
 import { EyeIcon, Share2Icon } from "lucide-react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,11 +35,13 @@ interface ReceivedGrantCardProps {
 }
 
 export function ReceivedGrantCard({ grant, onViewDetails }: ReceivedGrantCardProps) {
+  // Evaluated once per mount; render must stay pure.
+  const [now] = useState(Date.now);
   const { data: rawPublicNotes, isLoading } = useFetchSharedCredentialPublicNotes({
     credentialId: grant.data_id,
   });
 
-  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= Date.now();
+  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= now;
 
   const publicNotes = safeParse(rawPublicNotes);
   const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Credential";

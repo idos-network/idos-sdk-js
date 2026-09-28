@@ -3,7 +3,7 @@ import { createCookieSessionStorage } from "react-router";
 import { SERVER_ENV } from "./envFlags.server";
 
 export interface Session {
-  // Profile creation & developer console
+  // Profile creation & developer console
   proofMessage: string;
 
   // Developer console

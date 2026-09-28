@@ -47,6 +47,7 @@ export default function Login() {
     // Let's redirect on mobile devices directly to scan page
     const browser = Bowser.getParser(window.navigator.userAgent);
     const isMobile = browser.getPlatformType(true) === "mobile";
+    // oxlint-disable-next-line react/set-state-in-effect -- userAgent is only readable after mount (SSR)
     setIsMobile(isMobile);
 
     if (isMobile) {

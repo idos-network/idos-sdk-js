@@ -1,4 +1,5 @@
 import { EyeIcon, Share2Icon, XCircleIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +34,12 @@ interface SharedGrantCardProps {
 }
 
 export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardProps) {
+  // Evaluated once per mount; render must stay pure.
+  const [now] = useState(Date.now);
   const { grant, credential } = sharedGrant;
   const revokeGrant = useRevokeGrant();
 
-  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= Date.now();
+  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= now;
 
   const publicNotes = credential?.publicNotes ?? {};
   const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Grant";

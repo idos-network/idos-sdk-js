@@ -2,6 +2,7 @@ import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 
 import { useMutationState } from "@tanstack/react-query";
 import { TriangleAlertIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,6 +30,8 @@ interface DeleteCredentialProps {
 }
 
 export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredentialProps) {
+  // Evaluated once per mount; render must stay pure.
+  const [now] = useState(Date.now);
   const deleteCredential = useDeleteCredentialMutation();
   const grants = useFetchGrants({
     credentialId: credential?.id ?? "",
@@ -49,7 +52,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
 
   const hasTimeLock =
     grants.data?.length &&
-    grants.data?.find((grant) => timelockToMs(Number(grant.locked_until)) >= Date.now());
+    grants.data?.find((grant) => timelockToMs(Number(grant.locked_until)) >= now);
 
   const handleClose = () => {
     revokeGrants.reset();
