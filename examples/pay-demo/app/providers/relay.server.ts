@@ -44,7 +44,7 @@ export const fetchSharedToken = async (
 
 export const fetchCredentialStatus = async (credentialId: string): Promise<SharedTokenResponse> => {
   const response = await fetch(
-    `${COMMON_ENV.RELAY_API_URL}/providers/sumsub/sharedToken/${credentialId}`,
+    `${COMMON_ENV.RELAY_API_URL}/providers/sumsub/sharedToken/${encodeURIComponent(credentialId)}`,
     {
       method: "GET",
       headers: {
