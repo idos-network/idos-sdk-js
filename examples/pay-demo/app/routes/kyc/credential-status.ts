@@ -14,7 +14,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     return Response.json({ error: "credentialId or user is required" }, { status: 400 });
   }
 
-  if (!z.guid().safeParse(credentialId).success) {
+  if (!z.uuid().safeParse(credentialId).success) {
     return Response.json({ error: "credentialId must be a UUID" }, { status: 400 });
   }
 

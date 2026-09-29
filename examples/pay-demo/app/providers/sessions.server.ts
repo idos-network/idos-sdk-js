@@ -5,7 +5,7 @@ import type { SessionUser } from "../interfaces";
 import { SERVER_ENV } from "./envFlags.server";
 
 export interface Session {
-  user: SessionUser;
+  user?: SessionUser;
   // SIWE challenge issued by GET /auth, awaiting a signature
   pendingSiwe?: { address: string; message: string };
   returnTo?: string;
