@@ -66,6 +66,11 @@
       "name": "@idos-network/utils",
       "path": "packages/utils/dist/**/*.mjs",
       "limit": "20 KB"
+    },
+    {
+      "name": "@idos-network/instrumentation",
+      "path": "packages/instrumentation/dist/**/*.mjs",
+      "limit": "20 KB"
     }
   ],
   "packageManager": "pnpm@11.26.0"

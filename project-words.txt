@@ -166,6 +166,7 @@ ukyc
 unminified
 unpadded
 unparseable
+unpatch
 unstub
 Upserts
 usehooks
