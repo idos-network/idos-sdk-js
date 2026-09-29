@@ -417,6 +417,9 @@ importers:
       '@vercel/react-router':
         specifier: catalog:react-router
         version: 1.3.2(@react-router/dev@8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3)(vite@8.2.0(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)))(@react-router/node@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(typescript@5.9.3))(isbot@5.2.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@vitest/coverage-v8':
+        specifier: catalog:testing
+        version: 4.1.11(vitest@4.1.11)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -435,6 +438,9 @@ importers:
       vite-plugin-mkcert:
         specifier: ^1.17.12
         version: 1.17.12(supports-color@7.2.0)(vite@8.2.0(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1))
+      vitest:
+        specifier: catalog:testing
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@25.9.5)(@vitest/coverage-v8@4.1.11)(jsdom@22.1.0(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6))(msw@2.15.0(@types/node@25.9.5)(typescript@5.9.3))(vite@8.2.0(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1))
 
   apps/idos-data-dashboard:
     dependencies:

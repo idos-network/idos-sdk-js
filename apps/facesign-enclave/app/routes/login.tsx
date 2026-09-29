@@ -6,7 +6,12 @@ import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "rea
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
-import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
+import {
+  createSession,
+  getAttestationToken,
+  getSession,
+  type HandoffSession,
+} from "@/lib/handoff-store";
 import { sessionStorage } from "@/lib/sessions.server";
 import { useKeyStorageContext } from "@/providers/key.provider";
 
@@ -21,6 +26,15 @@ export async function loader({ request }: Route.LoaderArgs) {
     session = await getSession(sessionId);
   }
 
+  // Not redeemed here: if this response is lost, the next poll gets the token again.
+  // The client redeems it once it has exchanged the token (DELETE /api/handoff/:id).
+  if (session) {
+    const attestationToken = await getAttestationToken(session.id);
+    if (attestationToken) {
+      session = { ...session, status: "completed", attestationToken };
+    }
+  }
+
   if (!session) {
     session = await createSession();
   }
@@ -32,6 +46,19 @@ export async function loader({ request }: Route.LoaderArgs) {
       "Set-Cookie": await sessionStorage.commitSession(sessionData),
     },
   });
+}
+
+// Tells the server the token was received so it can be redeemed. Retried because until then the
+// token stays readable (to this session's cookie holder) until the session expires.
+async function redeemHandoff(id: string): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ok = await fetch(`/api/handoff/${id}`, { method: "DELETE" }).then(
+      (response) => response.ok,
+      () => false,
+    );
+    if (ok) return;
+  }
+  console.warn("Could not redeem the handoff token; it expires with the session");
 }
 
 export default function Login() {
@@ -74,11 +101,13 @@ export default function Login() {
 
   useEffect(() => {
     if (session?.status === "completed" && session.attestationToken) {
-      getEntropy(session.attestationToken).then((data) => {
+      const { id, attestationToken } = session;
+      getEntropy(attestationToken).then((data) => {
         setMnemonic(data.entropy);
+        redeemHandoff(id);
       });
     }
-  }, [session]);
+  }, [session?.status, session?.attestationToken]);
 
   if (isMobile === null || isMobile === true) {
     return (
