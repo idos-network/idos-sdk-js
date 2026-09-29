@@ -38,7 +38,7 @@ const buildNamespaces = () => {
     }
 
     async waitForTx(txHash: string): Promise<void> {
-      if (txHash === "0xtimeout") {
+      if (txHash === "tx-that-times-out") {
         const error = new Error("timed out waiting for tx");
         error.name = "KwilTxPollTimeoutError";
         throw error;
@@ -123,7 +123,7 @@ describe("IdosInstrumentation", () => {
   it("distinguishes a tx poll timeout from other failures via error.type", async () => {
     instrumentation.patchModuleExports("@idos-network/kwil-infra", namespaces.kwilInfra);
 
-    await expect(namespaces.kwil.waitForTx("0xtimeout")).rejects.toThrow(
+    await expect(namespaces.kwil.waitForTx("tx-that-times-out")).rejects.toThrow(
       "timed out waiting for tx",
     );
 

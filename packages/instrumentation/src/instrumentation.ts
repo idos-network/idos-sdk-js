@@ -1,6 +1,6 @@
 import type { Attributes, Span } from "@opentelemetry/api";
 
-import { context, SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
+import { SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   InstrumentationBase,
   InstrumentationNodeModuleDefinition,
@@ -152,7 +152,7 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
 
     return function patched(this: unknown, ...args: unknown[]): unknown {
       const config = instrumentation.getConfig();
-      if (config.requireParentSpan && trace.getSpan(context.active()) === undefined) {
+      if (config.requireParentSpan && trace.getActiveSpan() === undefined) {
         return original.apply(this, args);
       }
 
@@ -163,19 +163,17 @@ export class IdosInstrumentation extends InstrumentationBase<IdosInstrumentation
         ...target.attributes?.(args),
       };
 
-      const span = instrumentation.tracer.startSpan(target.spanName?.(args) ?? defaultSpanName, {
-        kind: target.kind ?? SpanKind.INTERNAL,
-        attributes,
-      });
+      const spanName = target.spanName?.(args) ?? defaultSpanName;
+      const spanOptions = { kind: target.kind ?? SpanKind.INTERNAL, attributes };
 
-      instrumentation._runSpanCustomizationHook(config.requestHook, "requestHook", span, {
-        moduleName,
-        className,
-        methodName: target.name,
-        args,
-      });
+      return instrumentation.tracer.startActiveSpan(spanName, spanOptions, (span) => {
+        instrumentation._runSpanCustomizationHook(config.requestHook, "requestHook", span, {
+          moduleName,
+          className,
+          methodName: target.name,
+          args,
+        });
 
-      return context.with(trace.setSpan(context.active(), span), () => {
         let result: unknown;
         try {
           result = original.apply(this, args);
