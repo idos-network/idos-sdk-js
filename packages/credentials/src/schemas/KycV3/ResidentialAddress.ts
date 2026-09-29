@@ -81,4 +81,7 @@ export type ResidentialAddressFields = ResidentialAddress &
         Pick<ResidentialAddress, "proofCategory" | "proofFile" | "proofFileType" | "proofFileName">
       >)
     | { verified: false }
+    | ({ verified: boolean } & Required<
+        Pick<ResidentialAddress, "proofCategory" | "proofFile" | "proofFileType" | "proofFileName">
+      >)
   );
