@@ -63,15 +63,14 @@ export function CookieProvider({ children }: CookieProviderProps) {
   };
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect
     loadConsent();
   }, []);
 
   useEffect(() => {
-    if (walletType && walletAddress && sentryInitialized.current) {
-      Sentry.setUser({
-        type: walletType,
-        address: walletAddress,
-      });
+    if (sentryInitialized.current) {
+      // Clear the user on disconnect so the previous address is not attached to later events
+      Sentry.setUser(walletAddress ? { type: walletType, address: walletAddress } : null);
     }
   }, [walletType, walletAddress, consent]);
 
@@ -83,7 +82,7 @@ export function CookieProvider({ children }: CookieProviderProps) {
 
       Sentry.init({
         dsn: COMMON_ENV.SENTRY_DSN,
-        sendDefaultPii: true,
+        sendDefaultPii: false,
         tracesSampleRate: 1.0,
         release: COMMON_ENV.SENTRY_RELEASE ?? "unknown",
         environment: COMMON_ENV.SENTRY_ENVIRONMENT ?? "unknown",
@@ -134,10 +133,7 @@ export function CookieProvider({ children }: CookieProviderProps) {
       });
 
       // Set user immediately after initialization
-      Sentry.setUser({
-        type: walletType,
-        address: walletAddress,
-      });
+      Sentry.setUser(walletAddress ? { type: walletType, address: walletAddress } : null);
     }
   }, [consent]);
 

@@ -18,7 +18,7 @@ import {
 import { formatType, safeParse } from "@/lib/credential-utils";
 import { useDeleteCredentialMutation, useRevokeGrants } from "@/lib/mutations/credentials";
 import { useFetchGrants } from "@/lib/queries/credentials";
-import { timelockToMs } from "@/lib/time";
+import { timelockToMs, useNow } from "@/lib/time";
 
 import type { idOSCredentialWithShares } from "./types";
 
@@ -34,6 +34,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
     credentialId: credential?.id ?? "",
   });
   const revokeGrants = useRevokeGrants();
+  const now = useNow();
 
   const state = useMutationState({
     filters: {
@@ -49,7 +50,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
 
   const hasTimeLock =
     grants.data?.length &&
-    grants.data?.find((grant) => timelockToMs(Number(grant.locked_until)) >= Date.now());
+    grants.data?.find((grant) => timelockToMs(Number(grant.locked_until)) >= now);
 
   const handleClose = () => {
     revokeGrants.reset();

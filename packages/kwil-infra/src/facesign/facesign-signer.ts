@@ -2,6 +2,7 @@
 const POST_MESSAGE_DELAY_MS = 300;
 // Safety net: reject proposals if the enclave doesn't respond within this window.
 const PROPOSAL_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+const RESET_TIMEOUT_MS = 15_000;
 
 export interface FaceSignMetadata {
   name: string;
@@ -27,6 +28,8 @@ export class FaceSignSignerProvider {
   #resolveSessionProposal: ((response: SessionResponse) => void) | null = null;
   #rejectSessionProposal: ((error: Error) => void) | null = null;
   #resolveAddressRequest: ((address: string | null) => void) | null = null;
+  #resolveReset: (() => void) | null = null;
+  #rejectReset: ((error: Error) => void) | null = null;
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
   #messageListenerInitialized = false;
@@ -85,6 +88,14 @@ export class FaceSignSignerProvider {
       if (event.data?.type === "address_response") {
         const payload = event.data.data;
         this.#resolveAddressRequest?.(payload?.address ?? null);
+      }
+
+      if (event.data?.type === "reset_complete") {
+        if (event.data.data?.ok) {
+          this.#resolveReset?.();
+        } else {
+          this.#rejectReset?.(new Error("FaceSign enclave failed to delete its key"));
+        }
       }
     };
 
@@ -220,6 +231,43 @@ export class FaceSignSignerProvider {
     }
   }
 
+  async reset(): Promise<void> {
+    this.#setupMessageListener();
+    const deadline = Date.now() + RESET_TIMEOUT_MS;
+
+    try {
+      await this.#ensureEnclave(deadline - Date.now());
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(
+          () => {
+            reject(new Error("FaceSign reset timed out"));
+          },
+          Math.max(deadline - Date.now(), 0),
+        );
+
+        this.#resolveReset = () => {
+          clearTimeout(timer);
+          this.#resolveReset = null;
+          this.#rejectReset = null;
+          resolve();
+        };
+        this.#rejectReset = (error) => {
+          clearTimeout(timer);
+          this.#resolveReset = null;
+          this.#rejectReset = null;
+          reject(error);
+        };
+
+        this.#iframe?.contentWindow?.postMessage(
+          { type: "reset", data: { id: ++this.#proposalId } },
+          this.#enclaveOrigin,
+        );
+      });
+    } finally {
+      this.destroy();
+    }
+  }
+
   hide(): void {
     this.#cancelPendingProposals();
     this.#hideEnclave();
@@ -269,7 +317,7 @@ export class FaceSignSignerProvider {
     return container;
   }
 
-  #ensureEnclave(): Promise<void> {
+  #ensureEnclave(timeoutMs = PROPOSAL_TIMEOUT_MS): Promise<void> {
     if (this.#iframe?.contentWindow) {
       return Promise.resolve();
     }
@@ -277,7 +325,7 @@ export class FaceSignSignerProvider {
     return new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error("FaceSign enclave failed to load"));
-      }, PROPOSAL_TIMEOUT_MS);
+      }, timeoutMs);
 
       if (!this.#container) {
         this.#container = this.#createContainer();

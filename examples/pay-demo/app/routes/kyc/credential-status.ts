@@ -1,3 +1,5 @@
+import * as z from "zod";
+
 import { userContext } from "~/middlewares/auth.server";
 import { fetchCredentialStatus } from "~/providers/relay.server";
 
@@ -10,6 +12,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   if (!credentialId || !user) {
     return Response.json({ error: "credentialId or user is required" }, { status: 400 });
+  }
+
+  if (!z.uuid().safeParse(credentialId).success) {
+    return Response.json({ error: "credentialId must be a UUID" }, { status: 400 });
   }
 
   try {

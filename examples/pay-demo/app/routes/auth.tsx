@@ -38,8 +38,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     isAuthenticated: false,
   };
 
-  // @ts-expect-error - this is fine, since user is not yet authenticated
-  session.set("user", user);
+  // Keep the challenge apart from `user` so a cross-site GET can't log out an authenticated session.
+  session.set("pendingSiwe", { address, message: user.message });
 
   return new Response(JSON.stringify({ user }), {
     headers: {
@@ -52,10 +52,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 // Validate signature and authenticate user
 export async function action({ request }: Route.ActionArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
+  const user = session.get("pendingSiwe");
 
   if (request.method === "DELETE") {
     session.unset("user");
+    session.unset("pendingSiwe");
     return redirect("/", {
       headers: {
         "Set-Cookie": await sessionStorage.commitSession(session),
@@ -98,6 +99,8 @@ export async function action({ request }: Route.ActionArgs) {
     });
 
     // Update session with authenticated status
+    session.unset("pendingSiwe");
+    // @ts-expect-error - only address and message are kept, the rest is loaded by the auth middleware
     session.set("user", {
       ...user,
       isAuthenticated: true,

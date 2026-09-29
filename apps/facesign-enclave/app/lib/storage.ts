@@ -37,6 +37,19 @@ export async function storeGet<T>(id: string): Promise<T | undefined> {
   });
 }
 
+export async function storeDelete(id: string): Promise<void> {
+  const db = await openDatabase();
+  const tx = db.transaction(DB_STORE_NAME, "readwrite");
+  const store = tx.objectStore(DB_STORE_NAME);
+  store.delete(id);
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error ?? new Error("Transaction aborted in storeDelete"));
+  });
+}
+
 export async function storeSet<T>(id: string, value: T): Promise<void> {
   const db = await openDatabase();
   const tx = db.transaction(DB_STORE_NAME, "readwrite");

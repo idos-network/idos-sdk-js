@@ -300,6 +300,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
+    await this.enclaveProvider.reset();
     return new idOSClientIdle(
       this.store,
       this.kwilClient,
@@ -379,6 +380,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
+    await this.enclaveProvider.reset();
     return new idOSClientIdle(
       this.store,
       this.kwilClient,

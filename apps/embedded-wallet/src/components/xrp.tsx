@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenXRP } from "@web3icons/react";
 import { useEffect, useState } from "react";
 
-import { message, useWalletState } from "../state";
+import { currentSignMessage } from "../add-wallet-request";
+import { useWalletState } from "../state";
 import { Button } from "./ui/button";
 
 const { useStepper } = defineStepper(
@@ -46,7 +47,7 @@ function XRPL() {
 
   const handleSignMessage = async () => {
     // @ts-expect-error - ResponseType are now typed as Enum
-    const signature = await signGemWalletTx(GemWallet, message);
+    const signature = await signGemWalletTx(GemWallet, currentSignMessage());
 
     if (!address || !signature || !publicKey) return;
 
@@ -54,7 +55,7 @@ function XRPL() {
       address,
       signature,
       public_key: [publicKey ?? ""],
-      message,
+      message: currentSignMessage(),
       // No need to disconnect xrpl wallet (it does not possess a persistent connection)
       disconnect: () => Promise.resolve(),
     });

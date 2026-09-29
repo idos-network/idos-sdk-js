@@ -35,6 +35,9 @@ jobs:
           - name: data-dashboard
             filter: "data-dashboard"
             directory: apps/idos-data-dashboard
+          - name: facesign-enclave
+            filter: "facesign-enclave"
+            directory: apps/facesign-enclave
     steps:
       - uses: actions/checkout@v6
         with:

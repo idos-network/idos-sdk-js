@@ -13,5 +13,5 @@ export default defineConfig({
       "Access-Control-Allow-Origin": "*",
     },
   },
-  plugins: [reactRouter(), mkcert(), tailwindcss()],
+  plugins: [reactRouter(), process.env.CI ? null : mkcert(), tailwindcss()],
 });

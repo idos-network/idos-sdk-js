@@ -7,6 +7,8 @@ import { useKeyStorageContext } from "./key.provider";
 
 export interface SessionProposal {
   id: number;
+  /** Verified postMessage origin of the requester. Not taken from the message body. */
+  origin: string;
   metadata: {
     name: string;
     description: string;
@@ -16,6 +18,8 @@ export interface SessionProposal {
 
 export interface SignProposal {
   id: number;
+  /** Verified postMessage origin of the requester. Not taken from the message body. */
+  origin: string;
   data: Uint8Array;
   metadata: {
     name: string;

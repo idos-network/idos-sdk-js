@@ -13,7 +13,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenXLM } from "@web3icons/react";
 import { useEffect, useState } from "react";
 
-import { message, useWalletState } from "../state";
+import { currentSignMessage } from "../add-wallet-request";
+import { useWalletState } from "../state";
 import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
@@ -67,6 +68,7 @@ function Stellar() {
   const handleSignMessage = async () => {
     if (!address || !publicKey) return;
     // Encode the message as base64 (stellarKit expects this)
+    const message = currentSignMessage();
     const messageBase64 = Buffer.from(message).toString("base64");
 
     const result = await stellarKit.signMessage(messageBase64);

@@ -54,9 +54,12 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     await this.bindMessageListener();
   }
 
-  /** @override parent method to call iframe */
+  /**
+   * Embedding pages cannot reset enclave storage. The iframe rejects `reset`
+   * because it deletes every idOS-* key with no origin check.
+   */
   async reset(): Promise<void> {
-    this.requestToEnclave("reset");
+    throw new Error("Embedding pages cannot reset enclave storage");
   }
 
   /** @override parent method to call iframe */

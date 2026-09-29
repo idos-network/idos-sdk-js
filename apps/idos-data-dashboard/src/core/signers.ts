@@ -4,6 +4,8 @@ import type { WalletSelector } from "@near-wallet-selector/core";
 
 import { getWalletClient } from "@wagmi/core";
 
+import { createFaceSignProvider } from "@/lib/facesign";
+
 import { wagmiConfig } from "./wagmi";
 
 let faceSignProvider: FaceSignSignerProvider | null = null;
@@ -15,9 +17,10 @@ export function setFaceSignProvider(provider: FaceSignSignerProvider) {
   faceSignProvider = provider;
 }
 
-export function clearFaceSignProvider() {
-  faceSignProvider?.destroy();
+export async function clearFaceSignProvider() {
+  const provider = faceSignProvider ?? (await createFaceSignProvider());
   faceSignProvider = null;
+  await provider.reset();
 }
 
 export async function createEvmSigner(): Promise<Wallet> {

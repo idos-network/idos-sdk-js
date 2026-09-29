@@ -3,11 +3,10 @@ import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import { hexEncode } from "@idos-network/utils/codecs";
 import { useRef, useState } from "react";
 
+import { currentSignMessage } from "../add-wallet-request";
 import { useWalletState } from "../state";
 import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
-
-const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profile";
 
 const PRIVACY_POLICY_URL = "https://www.idos.network/legal/privacy-policy";
 const TRANSPARENCY_DOCUMENT_URL =
@@ -90,14 +89,14 @@ export function FaceSignConnector() {
     setStep("running");
 
     const publicKey = await provider.init();
-    const signatureBytes = await provider.signMessage(ADD_WALLET_MESSAGE);
+    const signatureBytes = await provider.signMessage(currentSignMessage());
     const signature = hexEncode(signatureBytes, true);
 
     setWalletPayload({
       address: publicKey,
       signature,
       public_key: [publicKey],
-      message: ADD_WALLET_MESSAGE,
+      message: currentSignMessage(),
       disconnect: async () => {
         provider.destroy();
       },
