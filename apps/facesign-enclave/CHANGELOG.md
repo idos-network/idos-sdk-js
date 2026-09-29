@@ -1,5 +1,15 @@
 # facesign-enclave
 
+## 0.4.4
+
+### Patch Changes
+
+- 110c0ce: Make the FaceSign mobile handoff single-use so a completed session can't be overwritten and its token is handed to the desktop only once.
+- a74cbd8: Show the verified postMessage origin on FaceSign session and sign approval dialogs.
+- 1ca665d: Fix new oxlint
+- Updated dependencies [56b18ea]
+  - @idos-network/utils@2.1.1
+
 ## 0.4.3
 
 ### Patch Changes

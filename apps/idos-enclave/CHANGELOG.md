@@ -1,5 +1,15 @@
 # idos-enclave
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [fba1c60]
+- Updated dependencies [56b18ea]
+  - @idos-network/enclave@2.1.1
+  - @idos-network/utils@2.1.1
+  - @idos-network/credentials@2.1.1
+
 ## 0.4.0
 
 ### Minor Changes
