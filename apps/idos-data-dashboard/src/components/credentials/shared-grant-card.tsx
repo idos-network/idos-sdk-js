@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRevokeGrant } from "@/lib/mutations/credentials";
-import { timelockToMs, timelockToDate } from "@/lib/time";
+import { timelockToMs, timelockToDate, useNow } from "@/lib/time";
 
 import type { SharedGrant } from "./types";
 
@@ -36,7 +36,8 @@ export function SharedGrantCard({ sharedGrant, onViewDetails }: SharedGrantCardP
   const { grant, credential } = sharedGrant;
   const revokeGrant = useRevokeGrant();
 
-  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= Date.now();
+  const now = useNow();
+  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= now;
 
   const publicNotes = credential?.publicNotes ?? {};
   const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Grant";

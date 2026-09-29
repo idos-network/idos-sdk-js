@@ -11,7 +11,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useRevokeGrant } from "@/lib/mutations/credentials";
 import { useFetchGrants } from "@/lib/queries/credentials";
-import { timelockToMs, timelockToDate } from "@/lib/time";
+import { timelockToMs, timelockToDate, useNow } from "@/lib/time";
 
 interface GrantsCenterProps {
   credentialId: string;
@@ -26,6 +26,7 @@ function generateGrantId(grant: idOSGrant): string {
 
 function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) {
   const revokeGrant = useRevokeGrant();
+  const now = useNow();
 
   if (grants.length === 0) {
     return <span>You have not shared this credential with anyone.</span>;
@@ -76,7 +77,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
                     variant="destructive-outline"
-                    disabled={timelockToMs(Number(grant.locked_until)) >= Date.now()}
+                    disabled={timelockToMs(Number(grant.locked_until)) >= now}
                     isLoading={revokeGrant.isPending && revokeGrant.variables?.id === grant.id}
                     onClick={() => onRevoke(grant)}
                   >
