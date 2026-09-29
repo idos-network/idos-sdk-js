@@ -102,7 +102,6 @@ describe("KycV3 validity", () => {
 
   it("requires one of firstName or familyName", () => {
     expect(() =>
-      // @ts-expect-error a person needs a name
       new KycV3().addSection("person", { nationality: "US", dateOfBirth: new Date("1990-01-01") }),
     ).toThrow(/firstName/);
 
@@ -117,7 +116,6 @@ describe("KycV3 validity", () => {
 
   it("requires a nationality unless stateless or holding a second one", () => {
     expect(() =>
-      // @ts-expect-error a person needs a nationality
       new KycV3().addSection("person", { firstName: "John", dateOfBirth: new Date("1990-01-01") }),
     ).toThrow(/nationality/);
 
@@ -140,7 +138,6 @@ describe("KycV3 validity", () => {
 
   it("requires proof fields on a verified address, but still checks their types when unverified", () => {
     expect(() =>
-      // @ts-expect-error a verified address needs its proof
       new KycV3().addSection("residentialAddress", {
         verified: true,
         street: "Main St",
@@ -173,7 +170,6 @@ describe("KycV3 validity", () => {
 
   it("requires a currency alongside each source-of-wealth amount", () => {
     expect(() =>
-      // @ts-expect-error an income band needs its currency
       new KycV3().addSection("sourceOfWealth", {
         type: "SALARY",
         yearlyGrossIncome: "LESS_THAN_20000",
@@ -181,7 +177,6 @@ describe("KycV3 validity", () => {
     ).toThrow(/yearlyGrossIncomeCurrency/);
 
     expect(() =>
-      // @ts-expect-error a net worth band needs its currency
       new KycV3().addSection("sourceOfWealth", {
         type: "SALARY",
         approximateNetWorth: "UP_TO_25000",

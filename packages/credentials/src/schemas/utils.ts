@@ -220,13 +220,6 @@ export function RequiredWith(property: string): PropertyDecorator {
   return RequiredWhen((object: Record<string, unknown>) => object[property] !== undefined);
 }
 
-/**
- * The type-level `RequiredWith`: `T`, where setting `Key` makes `Deps` required too. The
- * decorators check this at runtime; this lets the compiler catch it at the call site.
- */
-export type RequiredWithFields<T, Key extends keyof T, Deps extends keyof T> = T &
-  (Required<Pick<T, Key | Deps>> | { [K in Key]?: undefined });
-
 /*
  * Codecs: the encoded side is what a serialized credential carries, the decoded side is
  * what a subject holds. A field declares its representation once, and neither direction
