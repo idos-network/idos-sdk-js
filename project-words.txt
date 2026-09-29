@@ -47,6 +47,7 @@ facetec
 frontmost
 GABC
 gemwallet
+getdel
 GHSA
 headlessui
 heroicons
