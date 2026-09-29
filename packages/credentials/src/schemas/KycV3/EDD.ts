@@ -1,7 +1,7 @@
 import { IsIn, IsMimeType, IsOptional, IsString } from "class-validator";
 
 import { Occupations, type Occupation } from "../enums";
-import { Base85FileField, RequiredWhen, type RequiredWithFields } from "../utils";
+import { Base85FileField, RequiredWhen } from "../utils";
 
 export class EDD {
   /* The person's occupation or job title. */
@@ -30,10 +30,3 @@ export class EDD {
   @IsString()
   sourceOfFundsProofFileName?: string;
 }
-
-/** `EDD`, with a proof file requiring its type and name. */
-export type EDDFields = RequiredWithFields<
-  EDD,
-  "sourceOfFundsProofFile",
-  "sourceOfFundsProofFileType" | "sourceOfFundsProofFileName"
->;
