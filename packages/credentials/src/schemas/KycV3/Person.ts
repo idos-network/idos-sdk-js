@@ -103,3 +103,8 @@ export class Person {
   @IsString()
   ssn?: string;
 }
+
+/** `Person`, with a name, and a nationality unless stateless or holding a second one. */
+export type PersonFields = Person &
+  ({ firstName: string } | { familyName: string }) &
+  ({ nationality: string } | { stateless: true } | { secondNationality: string });
