@@ -73,15 +73,3 @@ export class ResidentialAddress {
   @IsISO31661Alpha2()
   ipCountry?: string;
 }
-
-/** `ResidentialAddress`, with a verified address requiring its full proof. */
-export type ResidentialAddressFields = ResidentialAddress &
-  (
-    | ({ verified: true } & Required<
-        Pick<ResidentialAddress, "proofCategory" | "proofFile" | "proofFileType" | "proofFileName">
-      >)
-    | { verified: false }
-    | ({ verified: boolean } & Required<
-        Pick<ResidentialAddress, "proofCategory" | "proofFile" | "proofFileType" | "proofFileName">
-      >)
-  );
