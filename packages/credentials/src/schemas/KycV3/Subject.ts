@@ -3,13 +3,13 @@ import { IsDefined, IsOptional, IsString } from "class-validator";
 import { Section } from "../utils";
 import { Biometric } from "./Biometric";
 import { Contact } from "./Contact";
-import { EDD } from "./EDD";
-import { IdDocument } from "./IdDocument";
+import { EDD, type EDDFields } from "./EDD";
+import { IdDocument, type IdDocumentFields } from "./IdDocument";
 import { Onboarding } from "./Onboarding";
-import { Person } from "./Person";
-import { ResidentialAddress } from "./ResidentialAddress";
+import { Person, type PersonFields } from "./Person";
+import { ResidentialAddress, type ResidentialAddressFields } from "./ResidentialAddress";
 import { Screening } from "./Screening";
-import { SourceOfWealth } from "./SourceOfWealth";
+import { SourceOfWealth, type SourceOfWealthFields } from "./SourceOfWealth";
 
 /** The credential subject: the sections that get flattened onto the wire. */
 export class Subject {
@@ -18,11 +18,11 @@ export class Subject {
 
   @Section(() => Person)
   @IsDefined()
-  person: Person;
+  person: PersonFields;
 
   @Section(() => IdDocument)
   @IsOptional()
-  idDocument?: IdDocument;
+  idDocument?: IdDocumentFields;
 
   @Section(() => Contact)
   @IsOptional()
@@ -34,7 +34,7 @@ export class Subject {
 
   @Section(() => ResidentialAddress)
   @IsOptional()
-  residentialAddress?: ResidentialAddress;
+  residentialAddress?: ResidentialAddressFields;
 
   @Section(() => Screening)
   @IsOptional()
@@ -42,11 +42,11 @@ export class Subject {
 
   @Section(() => EDD)
   @IsOptional()
-  edd?: EDD;
+  edd?: EDDFields;
 
   @Section(() => SourceOfWealth)
   @IsOptional()
-  sourceOfWealth?: SourceOfWealth;
+  sourceOfWealth?: SourceOfWealthFields;
 
   @Section(() => Onboarding)
   @IsOptional()

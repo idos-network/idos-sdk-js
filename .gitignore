@@ -67,4 +67,4 @@ test-results
 # ORT
 ort-results/
 
-.claude/worktrees/
+.claude/
