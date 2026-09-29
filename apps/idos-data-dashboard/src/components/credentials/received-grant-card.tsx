@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { safeParse } from "@/lib/credential-utils";
 import { useFetchSharedCredentialPublicNotes } from "@/lib/queries/credentials";
-import { timelockToMs, timelockToDate } from "@/lib/time";
+import { timelockToMs, timelockToDate, useNow } from "@/lib/time";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -38,7 +38,8 @@ export function ReceivedGrantCard({ grant, onViewDetails }: ReceivedGrantCardPro
     credentialId: grant.data_id,
   });
 
-  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= Date.now();
+  const now = useNow();
+  const isTimelocked = timelockToMs(Number(grant.locked_until)) >= now;
 
   const publicNotes = safeParse(rawPublicNotes);
   const type = typeof publicNotes.type === "string" ? formatType(publicNotes.type) : "Credential";

@@ -63,6 +63,7 @@ export function CookieProvider({ children }: CookieProviderProps) {
   };
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect
     loadConsent();
   }, []);
 
