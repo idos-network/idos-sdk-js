@@ -10,7 +10,7 @@ import {
   type SourceOfWealthType,
   type YearlyGrossIncome,
 } from "../enums";
-import { Base85FileField, RequiredWith, type RequiredWithFields } from "../utils";
+import { Base85FileField, RequiredWith } from "../utils";
 
 export class SourceOfWealth {
   /* The category of wealth source declared by the person (e.g. SALARY, INVESTMENTS). */
@@ -42,10 +42,3 @@ export class SourceOfWealth {
   @Base85FileField()
   sourceOfWealthProofFile?: Buffer;
 }
-
-/** `SourceOfWealth`, with each band requiring its currency. */
-export type SourceOfWealthFields = RequiredWithFields<
-  RequiredWithFields<SourceOfWealth, "yearlyGrossIncome", "yearlyGrossIncomeCurrency">,
-  "approximateNetWorth",
-  "approximateNetWorthCurrency"
->;
