@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
 import {
-  consumeAttestationToken,
   createSession,
+  getAttestationToken,
   getSession,
   type HandoffSession,
 } from "@/lib/handoff-store";
@@ -26,8 +26,10 @@ export async function loader({ request }: Route.LoaderArgs) {
     session = await getSession(sessionId);
   }
 
+  // Not redeemed here: if this response is lost, the next poll gets the token again.
+  // The client redeems it once it has exchanged the token (DELETE /api/handoff/:id).
   if (session) {
-    const attestationToken = await consumeAttestationToken(session.id);
+    const attestationToken = await getAttestationToken(session.id);
     if (attestationToken) {
       session = { ...session, status: "completed", attestationToken };
     }
@@ -86,11 +88,13 @@ export default function Login() {
 
   useEffect(() => {
     if (session?.status === "completed" && session.attestationToken) {
-      getEntropy(session.attestationToken).then((data) => {
+      const { id, attestationToken } = session;
+      getEntropy(attestationToken).then((data) => {
         setMnemonic(data.entropy);
+        fetch(`/api/handoff/${id}`, { method: "DELETE" }).catch(() => {});
       });
     }
-  }, [session]);
+  }, [session?.status, session?.attestationToken]);
 
   if (isMobile === null || isMobile === true) {
     return (

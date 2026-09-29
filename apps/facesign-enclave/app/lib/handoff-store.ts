@@ -45,7 +45,12 @@ function tokenKey(id: string): string {
   return `${sessionKey(id)}:token`;
 }
 
-// Only the first completion wins: the token is written with NX, so it can't be overwritten.
+// Stored in place of the token once it has been redeemed. The token key itself stays until it
+// expires, so it keeps marking the session as completed and every later NX write fails.
+const CONSUMED = "consumed";
+
+// Only the first completion wins: the token is written with NX and the key is never deleted
+// before it expires, so it can't be overwritten or re-created.
 export async function completeSession(id: string, attestationToken: string): Promise<boolean> {
   const ttl = await redis.ttl(sessionKey(id));
   if (ttl <= 0) return false;
@@ -54,11 +59,23 @@ export async function completeSession(id: string, attestationToken: string): Pro
   return result === "OK";
 }
 
-// Returns the token at most once and drops the session, so it can't be read or completed again.
+// Returns the token while it hasn't been redeemed yet, without redeeming it.
+export async function getAttestationToken(id: string): Promise<string | null> {
+  const token = await redis.get<string>(tokenKey(id));
+  return token && token !== CONSUMED ? token : null;
+}
+
+// Redeems the token at most once (atomic SET XX GET) and drops the session.
 export async function consumeAttestationToken(id: string): Promise<string | null> {
-  const token = await redis.getdel<string>(tokenKey(id));
-  if (token) await deleteSession(id);
-  return token;
+  const previous = await redis.set<string>(tokenKey(id), CONSUMED, {
+    xx: true,
+    keepTtl: true,
+    get: true,
+  });
+  if (!previous || previous === CONSUMED) return null;
+
+  await deleteSession(id);
+  return previous;
 }
 
 export async function sessionExists(id: string): Promise<boolean> {

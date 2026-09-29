@@ -1,21 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const store = new Map<string, { value: string; expiresAt: number }>();
+// Runs right before a DEL, to force an operation to interleave with consumeAttestationToken.
+let beforeDel: (() => Promise<void>) | null = null;
 
 vi.mock("@upstash/redis", () => ({
   Redis: class {
     async get(key: string) {
       return store.get(key)?.value ?? null;
     }
-    async getdel(key: string) {
-      const value = store.get(key)?.value ?? null;
-      store.delete(key);
-      return value;
-    }
-    async set(key: string, value: string, opts: { ex: number; nx?: boolean }) {
-      if (opts.nx && store.has(key)) return null;
-      store.set(key, { value, expiresAt: Date.now() + opts.ex * 1000 });
-      return "OK";
+    async set(
+      key: string,
+      value: string,
+      opts: { ex?: number; nx?: boolean; xx?: boolean; keepTtl?: boolean; get?: boolean },
+    ) {
+      const existing = store.get(key);
+      if ((opts.nx && existing) || (opts.xx && !existing)) return null;
+      const expiresAt =
+        opts.keepTtl && existing ? existing.expiresAt : Date.now() + opts.ex! * 1000;
+      store.set(key, { value, expiresAt });
+      return opts.get ? (existing?.value ?? null) : "OK";
     }
     async ttl(key: string) {
       const entry = store.get(key);
@@ -25,16 +29,20 @@ vi.mock("@upstash/redis", () => ({
       return store.has(key) ? 1 : 0;
     }
     async del(key: string) {
+      await beforeDel?.();
       return store.delete(key) ? 1 : 0;
     }
   },
 }));
 
-const { completeSession, consumeAttestationToken, createSession, getSession } =
+const { completeSession, consumeAttestationToken, createSession, getAttestationToken, getSession } =
   await import("./handoff-store");
 
 describe("handoff-store", () => {
-  beforeEach(() => store.clear());
+  beforeEach(() => {
+    store.clear();
+    beforeDel = null;
+  });
 
   it("completes a session only once and keeps the first token", async () => {
     const { id } = await createSession();
@@ -45,14 +53,39 @@ describe("handoff-store", () => {
     expect(await consumeAttestationToken(id)).toBe("victim-token");
   });
 
-  it("hands out the token once and then drops the session", async () => {
+  it("keeps the token readable until it is redeemed, so a lost response can be retried", async () => {
+    const { id } = await createSession();
+    await completeSession(id, "token");
+
+    expect(await getAttestationToken(id)).toBe("token");
+    expect(await getAttestationToken(id)).toBe("token");
+  });
+
+  it("redeems the token once and then drops the session", async () => {
     const { id } = await createSession();
     await completeSession(id, "token");
 
     expect(await consumeAttestationToken(id)).toBe("token");
     expect(await consumeAttestationToken(id)).toBeNull();
+    expect(await getAttestationToken(id)).toBeNull();
     expect(await getSession(id)).toBeNull();
     expect(await completeSession(id, "late-token")).toBe(false);
+  });
+
+  it("rejects a completion that runs while the token is being redeemed", async () => {
+    const { id } = await createSession();
+    await completeSession(id, "token");
+
+    let interleaved: boolean | undefined;
+    beforeDel = async () => {
+      beforeDel = null;
+      // The token has been redeemed, but the session still exists.
+      interleaved = await completeSession(id, "attacker-token");
+    };
+
+    expect(await consumeAttestationToken(id)).toBe("token");
+    expect(interleaved).toBe(false);
+    expect(await getAttestationToken(id)).toBeNull();
   });
 
   it("rejects completing an unknown session", async () => {
