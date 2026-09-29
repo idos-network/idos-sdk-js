@@ -65,17 +65,18 @@ export async function getAttestationToken(id: string): Promise<string | null> {
   return token && token !== CONSUMED ? token : null;
 }
 
-// Redeems the token at most once (atomic SET XX GET) and drops the session.
+// Redeems the token at most once (atomic SET XX GET) and drops the session. A repeated call
+// retries the session delete in case the first one failed, but never returns the token again.
 export async function consumeAttestationToken(id: string): Promise<string | null> {
   const previous = await redis.set<string>(tokenKey(id), CONSUMED, {
     xx: true,
     keepTtl: true,
     get: true,
   });
-  if (!previous || previous === CONSUMED) return null;
+  if (!previous) return null;
 
   await deleteSession(id);
-  return previous;
+  return previous === CONSUMED ? null : previous;
 }
 
 export async function sessionExists(id: string): Promise<boolean> {

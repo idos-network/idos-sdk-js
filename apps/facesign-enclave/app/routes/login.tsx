@@ -48,6 +48,19 @@ export async function loader({ request }: Route.LoaderArgs) {
   });
 }
 
+// Tells the server the token was received so it can be redeemed. Retried because until then the
+// token stays readable (to this session's cookie holder) until the session expires.
+async function redeemHandoff(id: string): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const ok = await fetch(`/api/handoff/${id}`, { method: "DELETE" }).then(
+      (response) => response.ok,
+      () => false,
+    );
+    if (ok) return;
+  }
+  console.warn("Could not redeem the handoff token; it expires with the session");
+}
+
 export default function Login() {
   const session = useLoaderData<typeof loader>() as HandoffSession;
   const navigate = useNavigate();
@@ -91,7 +104,7 @@ export default function Login() {
       const { id, attestationToken } = session;
       getEntropy(attestationToken).then((data) => {
         setMnemonic(data.entropy);
-        fetch(`/api/handoff/${id}`, { method: "DELETE" }).catch(() => {});
+        redeemHandoff(id);
       });
     }
   }, [session?.status, session?.attestationToken]);

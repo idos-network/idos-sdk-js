@@ -72,6 +72,31 @@ describe("handoff-store", () => {
     expect(await completeSession(id, "late-token")).toBe(false);
   });
 
+  it("redeems the token for only one of two concurrent calls", async () => {
+    const { id } = await createSession();
+    await completeSession(id, "token");
+
+    const results = await Promise.all([consumeAttestationToken(id), consumeAttestationToken(id)]);
+
+    expect(results.filter((token) => token === "token")).toHaveLength(1);
+    expect(results.filter((token) => token === null)).toHaveLength(1);
+  });
+
+  it("retries the session delete on a repeated redemption", async () => {
+    const { id } = await createSession();
+    await completeSession(id, "token");
+
+    beforeDel = async () => {
+      beforeDel = null;
+      throw new Error("network");
+    };
+    await expect(consumeAttestationToken(id)).rejects.toThrow("network");
+    expect(await getSession(id)).not.toBeNull();
+
+    expect(await consumeAttestationToken(id)).toBeNull();
+    expect(await getSession(id)).toBeNull();
+  });
+
   it("rejects a completion that runs while the token is being redeemed", async () => {
     const { id } = await createSession();
     await completeSession(id, "token");
