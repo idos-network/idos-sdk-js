@@ -8,6 +8,7 @@ import { base85ToFile, fileToBase85 } from "./index.js";
 
 const fixture = (name: string) => readFileSync(path.join(__dirname, "test", name));
 
+// cspell:disable -- ascii85 test vectors
 const cases: [Buffer, string][] = [
   [Buffer.from("Man "), "<~9jqo^~>"],
   [Buffer.from("Man a"), "<~9jqo^@/~>"],
@@ -45,6 +46,7 @@ const cases: [Buffer, string][] = [
   ],
   [Buffer.from([6, 27, 178, 0, 0]), '<~"rjiJ!!~>'],
 ];
+// cspell:enable
 
 describe("base85 (ascii85)", () => {
   it.each(cases)("encodes #%#", (raw, encoded) => {
@@ -66,12 +68,13 @@ describe("base85 (ascii85)", () => {
     "<~@ps7tD.3        \n    ~>",
     "<~       @ps7tD.3     \n     ~>",
   ])("ignores whitespace #%#", (encoded) => {
+    // cspell:disable-next-line
     expect(base85ToFile(encoded)).toStrictEqual(Buffer.from("canumb"));
   });
 
-  it("encodes/decodes loremipsum", () => {
-    const raw = fixture("loremipsum.raw");
-    const encoded = fixture("loremipsum.base85").toString("ascii");
+  it("encodes/decodes lorem ipsum", () => {
+    const raw = fixture("lorem.raw");
+    const encoded = fixture("lorem.base85").toString("ascii");
 
     expect(fileToBase85(raw)).toBe(encoded);
     expect(base85ToFile(encoded)).toStrictEqual(raw);
