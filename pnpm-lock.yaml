@@ -149,9 +149,6 @@ catalogs:
     '@stablelib/utf8':
       specifier: ^2.1.0
       version: 2.1.0
-    base85:
-      specifier: ^3.2.0
-      version: 3.2.0
     borsh:
       specifier: ^2.0.0
       version: 2.0.0
@@ -1194,9 +1191,6 @@ importers:
       '@stablelib/utf8':
         specifier: catalog:utils
         version: 2.1.0
-      base85:
-        specifier: catalog:utils
-        version: 3.2.0
       borsh:
         specifier: catalog:utils
         version: 2.0.0
@@ -5592,10 +5586,6 @@ packages:
   base64url@3.0.1:
     resolution: {integrity: sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==}
     engines: {node: '>=6.0.0'}
-
-  base85@3.2.0:
-    resolution: {integrity: sha512-RvIzDQR2HtIf0t2uspIRrrhH7DpfhogquxYIdoH40XACixnGsRknP1JeLiCeKh/y30Hc2sTbd9p6/rzjQvj91A==}
-    engines: {node: '>=10.24.1'}
 
   baseline-browser-mapping@2.11.4:
     resolution: {integrity: sha512-s4+sLr9mZ/CyqeRritFeYV/Zx73OAtmaHn6kkBS1XRoJn1hrg3xIDUcpicAEX68tkcIN0iBCgti31C8zxtkhsQ==}
@@ -16155,11 +16145,6 @@ snapshots:
       base64url: 3.0.1
 
   base64url@3.0.1: {}
-
-  base85@3.2.0:
-    dependencies:
-      buffer: 6.0.3
-      ip-address: 10.3.1
 
   baseline-browser-mapping@2.11.4: {}
 

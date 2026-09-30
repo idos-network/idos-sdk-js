@@ -88,4 +88,14 @@ describe("codecs", () => {
     expect(deserialized).not.toBeFalsy();
     expect(deserialized).toStrictEqual(image);
   });
+
+  it("round-trips a trailing zero partial block through base85", () => {
+    const file = Buffer.from([1, 2, 3, 4, 0]);
+    expect(fileToBase85(file)).toBe("<~!<N?+!!~>");
+    expect(base85ToFile(fileToBase85(file))).toStrictEqual(file);
+  });
+
+  it("rejects invalid base85 characters", () => {
+    expect(base85ToFile("<~ab{de~>")).toBe(false);
+  });
 });

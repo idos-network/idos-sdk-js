@@ -7,7 +7,6 @@ import {
 import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
 import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
-import * as base85 from "base85";
 import bs58 from "bs58";
 
 import type { PipeCodecArgs } from "../store/interface";
@@ -24,19 +23,85 @@ export function hexEncodeSha256Hash(data: Uint8Array): string {
   return hexEncode(sha256Hash(data), true);
 }
 
+// Adobe ascii85 (`<~...~>`, `z` for zero groups).
 export function fileToBase85(file: Buffer): string {
-  return base85.encode(file, "ascii85");
+  const n = file.length;
+  const out = new Uint8Array(4 + Math.ceil(n / 4) * 5);
+  out.set([0x3c, 0x7e]); // <~
+  let o = 2;
+
+  for (let i = 0; i < n; i += 4) {
+    const left = n - i;
+    let num =
+      ((file[i] << 24) |
+        ((left > 1 ? file[i + 1] : 0) << 16) |
+        ((left > 2 ? file[i + 2] : 0) << 8) |
+        (left > 3 ? file[i + 3] : 0)) >>>
+      0;
+
+    if (num === 0 && left >= 4) {
+      out[o++] = 0x7a; // z
+      continue;
+    }
+
+    for (let j = 4; j >= 0; j--) {
+      out[o + j] = (num % 85) + 33;
+      num = Math.floor(num / 85);
+    }
+    o += left >= 4 ? 5 : left + 1;
+  }
+
+  out[o++] = 0x7e;
+  out[o++] = 0x3e; // ~>
+  return new TextDecoder("latin1").decode(out.subarray(0, o));
 }
 
 export function base85ToFile(data: string): Buffer | false {
-  // TODO: Remove this when https://github.com/noseglid/base85/pull/25/changes
-  // is merged.
-  const ibuffer = Buffer.from(data, "utf8");
-  const buffer = ibuffer.includes(0x7a /* z */)
-    ? Buffer.from(ibuffer.toString("latin1").replaceAll("z", "!!!!!"), "latin1")
-    : ibuffer;
+  let start = 0;
+  let end = data.length;
+  if (data.startsWith("<~")) start = 2;
+  if (data.endsWith("~>")) end -= 2;
 
-  return base85.decode(buffer, "ascii85");
+  let zeros = 0;
+  for (let i = data.indexOf("z", start); i !== -1 && i < end; i = data.indexOf("z", i + 1)) zeros++;
+
+  const out = new Uint8Array(Math.ceil((end - start) / 5) * 4 + zeros * 4);
+  let o = 0;
+  let num = 0;
+  let count = 0;
+
+  for (let i = start; i < end; i++) {
+    const c = data.charCodeAt(i);
+    if (c === 0x20 || (c >= 0x09 && c <= 0x0d)) continue; // whitespace
+
+    if (c === 0x7a /* z */) {
+      if (count !== 0) return false;
+      o += 4; // already zeroed
+      continue;
+    }
+
+    if (c < 33 || c > 117) return false;
+    num = num * 85 + (c - 33);
+
+    if (++count === 5) {
+      if (num > 0xffffffff) return false;
+      out[o++] = num >>> 24;
+      out[o++] = num >>> 16;
+      out[o++] = num >>> 8;
+      out[o++] = num;
+      num = 0;
+      count = 0;
+    }
+  }
+
+  if (count === 1) return false;
+  if (count > 1) {
+    for (let j = count; j < 5; j++) num = num * 85 + 84; // pad with `u`
+    if (num > 0xffffffff) return false;
+    for (let j = 0; j < count - 1; j++) out[o++] = num >>> (24 - j * 8);
+  }
+
+  return Buffer.from(out.buffer, 0, o);
 }
 
 export function bs58Encode(data: Uint8Array): string {
