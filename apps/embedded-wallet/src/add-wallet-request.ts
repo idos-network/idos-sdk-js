@@ -9,6 +9,17 @@ function isUuid(value: string | null): value is string {
   return value !== null && UUID_PATTERN.test(value);
 }
 
+export function isSignAddWalletForAttempt(
+  data: { type?: unknown; requestId?: unknown; attemptId?: unknown } | null | undefined,
+  expected: { requestId: string; attemptId: string },
+): boolean {
+  return (
+    data?.type === "SIGN_ADD_WALLET" &&
+    data.requestId === expected.requestId &&
+    data.attemptId === expected.attemptId
+  );
+}
+
 export function readAddWalletRequest(search: string): AddWalletRequest | null {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const userId = params.get("user_id");
