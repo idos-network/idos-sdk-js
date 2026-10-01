@@ -212,7 +212,7 @@ overrides:
   undici@7: 7.29.1
   nanoid: '>= 3.3.18'
   toml: '>= 4.1.2'
-  basic-ftp: '>= 6.0.1'
+  basic-ftp: '>=6.2.1'
   mysql2: '>= 3.22.0'
   chevrotain: 10.5.0
   web-streams-polyfill: 3.3.3
@@ -5729,8 +5729,8 @@ packages:
     resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
     engines: {node: '>= 0.8'}
 
-  basic-ftp@6.0.1:
-    resolution: {integrity: sha512-3ilxa3n4276wGQp/ImRAuz4ALdsj/2Wd3FqoZBZlajDYnByCZ0JMb4+26Rde0wGXIbM0G2HWSfr/Fi8b21KX8g==}
+  basic-ftp@6.2.1:
+    resolution: {integrity: sha512-bK67isD+lKq46AU8vNtjvMaT2ZqAOAmNCbxUHlFBRD4k15NWxyEjmaKtZPlgce58So4BNTjITGQOVTjL9y0ECA==}
     engines: {node: '>=10.0.0'}
 
   bchaddrjs@0.5.2:
@@ -16303,7 +16303,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
-  basic-ftp@6.0.1: {}
+  basic-ftp@6.2.1: {}
 
   bchaddrjs@0.5.2:
     dependencies:
@@ -17749,7 +17749,7 @@ snapshots:
 
   get-uri@6.0.5(supports-color@7.2.0):
     dependencies:
-      basic-ftp: 6.0.1
+      basic-ftp: 6.2.1
       data-uri-to-buffer: 6.0.2
       debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
