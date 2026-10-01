@@ -137,6 +137,7 @@ secp
 secretbox
 secretsharing
 sepa
+selfcheck
 Shadcn
 shamir
 shardnet
