@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  addWalletMessage,
   CreatePreliminaryCredentialsByDwgInputSchema,
   getUser,
   SharePreliminaryCredentialInputSchema,
@@ -148,6 +149,34 @@ describe("MM wallet type schemas", () => {
         signature: "",
       }),
     ).not.toThrow();
+  });
+});
+
+const addWalletMessageInput = {
+  address: "mm-signing-public-key",
+  wallet_type: "MM" as const,
+  user_id: "00000000-0000-4000-8000-000000000001",
+  not_before: "2025-02-13T11:22:06Z",
+  not_after: "2025-02-13T11:37:06Z",
+};
+
+describe("addWalletMessage", () => {
+  it("returns the validated first row", async () => {
+    await expect(
+      addWalletMessage(
+        { call: async () => [{ message: "sign this" }] } as never,
+        addWalletMessageInput,
+      ),
+    ).resolves.toEqual({ message: "sign this" });
+  });
+
+  it("rejects an empty or missing result", async () => {
+    await expect(
+      addWalletMessage({ call: async () => [] } as never, addWalletMessageInput),
+    ).rejects.toThrow();
+    await expect(
+      addWalletMessage({ call: async () => undefined } as never, addWalletMessageInput),
+    ).rejects.toThrow();
   });
 });
 

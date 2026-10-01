@@ -789,7 +789,7 @@ export async function addWalletMessage(
       name: "add_wallet_message",
       inputs,
     })
-    .then((result) => result[0]);
+    .then((result) => AddWalletMessageOutputSchema.parse(result?.[0]));
 }
 
 export const AddWalletInputSchema: z.ZodObject<{
