@@ -143,7 +143,8 @@ describe("MM wallet type schemas", () => {
         address: "mm-signing-public-key",
         public_key: "mm-signing-public-key",
         wallet_type: "MM",
-        message: "",
+        not_before: "2025-02-13T11:22:06Z",
+        not_after: "2025-02-13T11:37:06Z",
         signature: "",
       }),
     ).not.toThrow();

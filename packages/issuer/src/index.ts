@@ -4,6 +4,7 @@ import type {
   idOSCredentialRecord,
 } from "@idos-network/credentials/types";
 import type {
+  AddWalletMessageInput,
   EditPublicNotesAsIssuerInput,
   idOSDelegatedWriteGrant,
   idOSGrant,
@@ -80,6 +81,10 @@ export class idOSIssuer {
 
   async upsertWalletAsInserter(params: UpsertWalletReqParams): Promise<idOSWallet> {
     return this.#userService.upsertWalletAsInserter(params);
+  }
+
+  async addWalletMessage(params: AddWalletMessageInput): Promise<string> {
+    return this.#userService.addWalletMessage(params);
   }
 
   async createUser(
