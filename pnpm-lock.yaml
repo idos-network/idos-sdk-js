@@ -181,7 +181,7 @@ catalogs:
 overrides:
   '@idos-network/kwil-js>lru-cache': 11.5.2
   path-scurry>lru-cache: 11.5.2
-  axios: '>=1.19.0'
+  axios: '>=1.20.0'
   base-x: '>=3.0.11'
   protobufjs: '>=7.5.5'
   secp256k1: '>=5.0.1'
@@ -195,7 +195,9 @@ overrides:
   '@react-router/serve': '>=8.3.0'
   fast-uri: '>= 4.1.3'
   ip-address: '>= 10.3.1'
-  brace-expansion: '>= 5.0.9'
+  brace-expansion: '>=5.0.11'
+  undici@6: 6.28.1
+  undici@7: 7.29.1
   nanoid: '>= 3.3.18'
   toml: '>= 4.1.2'
   basic-ftp: '>= 6.0.1'
@@ -351,8 +353,8 @@ importers:
         specifier: ^1.38.2
         version: 1.38.2
       axios:
-        specifier: '>=1.19.0'
-        version: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: '>=1.20.0'
+        version: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       bowser:
         specifier: ^2.14.1
         version: 2.14.1
@@ -5550,8 +5552,8 @@ packages:
     resolution: {integrity: sha512-NZKeq9AfyQvEeNlN0zSYAaWrmBffJh3IELMZfRpJVWgrpEbtEpnjvzqBPf+mxoI287JohRDoa+/nsfqqiZmF6g==}
     engines: {node: '>= 6.0.0'}
 
-  axios@1.19.0:
-    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
+  axios@1.20.0:
+    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
   b4a@1.8.1:
     resolution: {integrity: sha512-aiqre1Nr0B/6DgE2N5vwTc+2/oQZ4Wh1t4NznYY4E00y8LCt6NqdRv81so00oo27D8MVKTpUa/MwUUtBLXCoDw==}
@@ -5745,8 +5747,8 @@ packages:
   bowser@2.14.1:
     resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
-  brace-expansion@5.0.9:
-    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
     engines: {node: 20 || >=22}
 
   braces@3.0.3:
@@ -9900,12 +9902,12 @@ packages:
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
-  undici@6.28.0:
-    resolution: {integrity: sha512-LIY910g9TI13YS95lrMFrs8Rm/u/irgHeTWoKCoteeJ04CUJ92eEfj0rVn+7VKMPBpUPiUoBKfhNyLI23EE/KA==}
+  undici@6.28.1:
+    resolution: {integrity: sha512-zWpdTVD54H48CIybL0rWQ3ukpb9d23wM7eH5RtfdmeP70cWHNjtfo7P4vZX+5CoDcO53J4Pu5uXp7lNfjc6DRA==}
     engines: {node: '>=18.17'}
 
-  undici@7.29.0:
-    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+  undici@7.29.1:
+    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
     engines: {node: '>=20.18.1'}
 
   unfetch@4.2.0:
@@ -11070,7 +11072,7 @@ snapshots:
   '@digitalbazaar/http-client@4.3.0':
     dependencies:
       ky: 1.14.3
-      undici: 6.28.0
+      undici: 6.28.1
 
   '@digitalbazaar/security-context@1.0.1': {}
 
@@ -11095,7 +11097,7 @@ snapshots:
       open: 8.4.2
       picomatch: 4.0.7
       systeminformation: 5.33.1
-      undici: 7.29.0
+      undici: 7.29.1
       which: 4.0.0
       yocto-spinner: 1.2.2
 
@@ -11296,7 +11298,7 @@ snapshots:
 
   '@idos-network/kwil-js@0.1.9(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)':
     dependencies:
-      axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       ethers: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       jssha: 3.3.2
       long: 5.3.2
@@ -14428,7 +14430,7 @@ snapshots:
   '@stellar/stellar-sdk@13.3.0(bare-url@2.4.6)(supports-color@7.2.0)':
     dependencies:
       '@stellar/stellar-base': 13.1.0(bare-url@2.4.6)
-      axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       bignumber.js: 9.3.1
       eventsource: 2.0.2
       feaxios: 0.0.23
@@ -16126,7 +16128,7 @@ snapshots:
 
   aws-ssl-profiles@1.1.2: {}
 
-  axios@1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
+  axios@1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3(supports-color@7.2.0))
       form-data: 4.0.6
@@ -16308,7 +16310,7 @@ snapshots:
 
   bowser@2.14.1: {}
 
-  brace-expansion@5.0.9:
+  brace-expansion@5.0.12:
     dependencies:
       balanced-match: 4.0.4
 
@@ -18720,15 +18722,15 @@ snapshots:
 
   minimatch@10.2.5:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimatch@5.1.9:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimist-options@4.1.0:
     dependencies:
@@ -20841,9 +20843,9 @@ snapshots:
 
   undici-types@8.3.0: {}
 
-  undici@6.28.0: {}
+  undici@6.28.1: {}
 
-  undici@7.29.0: {}
+  undici@7.29.1: {}
 
   unfetch@4.2.0: {}
 
