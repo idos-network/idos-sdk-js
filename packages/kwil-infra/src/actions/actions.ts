@@ -90,11 +90,37 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
     {
-      name: "message",
+      name: "not_before",
+      type: DataType.Text,
+    },
+    {
+      name: "not_after",
       type: DataType.Text,
     },
     {
       name: "signature",
+      type: DataType.Text,
+    },
+  ],
+  add_wallet_message: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+    {
+      name: "wallet_type",
+      type: DataType.Text,
+    },
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "not_before",
+      type: DataType.Text,
+    },
+    {
+      name: "not_after",
       type: DataType.Text,
     },
   ],
@@ -116,7 +142,11 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
     {
-      name: "message",
+      name: "not_before",
+      type: DataType.Text,
+    },
+    {
+      name: "not_after",
       type: DataType.Text,
     },
     {
@@ -696,7 +726,8 @@ export const UpsertWalletAsInserterInputSchema: z.ZodObject<{
   address: z.ZodString;
   public_key: z.ZodNullable<z.ZodString>;
   wallet_type: z.ZodType<WalletType>;
-  message: z.ZodString;
+  not_before: z.ZodString;
+  not_after: z.ZodString;
   signature: z.ZodString;
 }> = z.object({
   id: z.uuid(),
@@ -704,7 +735,8 @@ export const UpsertWalletAsInserterInputSchema: z.ZodObject<{
   address: z.string(),
   public_key: z.string().nullable(),
   wallet_type: walletTypeSchema,
-  message: z.string(),
+  not_before: z.string(),
+  not_after: z.string(),
   signature: z.string(),
 });
 
@@ -723,19 +755,58 @@ export async function upsertWalletAsInserter(
   });
 }
 
+export const AddWalletMessageInputSchema: z.ZodObject<{
+  address: z.ZodString;
+  wallet_type: z.ZodType<WalletType>;
+  user_id: z.ZodUUID;
+  not_before: z.ZodString;
+  not_after: z.ZodString;
+}> = z.object({
+  address: z.string(),
+  wallet_type: walletTypeSchema,
+  user_id: z.uuid(),
+  not_before: z.string(),
+  not_after: z.string(),
+});
+
+export type AddWalletMessageInput = z.infer<typeof AddWalletMessageInputSchema>;
+
+export const AddWalletMessageOutputSchema: z.ZodObject<{
+  message: z.ZodString;
+}> = z.object({
+  message: z.string(),
+});
+
+export type AddWalletMessageOutput = z.infer<typeof AddWalletMessageOutputSchema>;
+
+export async function addWalletMessage(
+  kwilClient: KwilActionClient,
+  params: AddWalletMessageInput,
+): Promise<AddWalletMessageOutput> {
+  const inputs = AddWalletMessageInputSchema.parse(params);
+  return await kwilClient
+    .call<AddWalletMessageOutput[]>({
+      name: "add_wallet_message",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
 export const AddWalletInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   address: z.ZodString;
   public_key: z.ZodNullable<z.ZodString>;
   wallet_type: z.ZodType<WalletType>;
-  message: z.ZodString;
+  not_before: z.ZodString;
+  not_after: z.ZodString;
   signature: z.ZodString;
 }> = z.object({
   id: z.uuid(),
   address: z.string(),
   public_key: z.string().nullable(),
   wallet_type: walletTypeSchema,
-  message: z.string(),
+  not_before: z.string(),
+  not_after: z.string(),
   signature: z.string(),
 });
 
