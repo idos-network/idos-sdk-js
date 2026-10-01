@@ -14,12 +14,36 @@ import type { Route } from "./+types/profile";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+  const url = new URL(request.url);
+  const address = url.searchParams.get("address");
+  const walletType = z.enum(WalletType).safeParse(url.searchParams.get("walletType"));
 
-  // Generate a message to sign to validate ownership of the wallet address
+  if (!address || !walletType.success) {
+    return Response.json({ error: "Wallet address and type are required" }, { status: 400 });
+  }
+
   const userId = crypto.randomUUID();
-  const proofMessage = `Please sign this message to confirm you own this wallet address. Nonce ${crypto.randomUUID()}`;
+  const notBefore = new Date();
+  const notAfter = new Date(notBefore.getTime() + 15 * 60 * 1000);
+  const walletNotBefore = notBefore.toISOString();
+  const walletNotAfter = notAfter.toISOString();
+
+  const issuer = await idOSIssuer.init({
+    nodeUrl: COMMON_ENV.IDOS_NODE_URL,
+    signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
+  });
+  const proofMessage = await issuer.addWalletMessage({
+    address,
+    wallet_type: walletType.data,
+    user_id: userId,
+    not_before: walletNotBefore,
+    not_after: walletNotAfter,
+  });
+
   session.set("proofMessage", proofMessage);
   session.set("profileUserId", userId);
+  session.set("walletNotBefore", walletNotBefore);
+  session.set("walletNotAfter", walletNotAfter);
 
   return Response.json(
     {
@@ -62,7 +86,15 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
-  if (!session.get("profileUserId") || !session.get("proofMessage")) {
+  const walletNotBefore = session.get("walletNotBefore");
+  const walletNotAfter = session.get("walletNotAfter");
+
+  if (
+    !session.get("profileUserId") ||
+    !session.get("proofMessage") ||
+    !walletNotBefore ||
+    !walletNotAfter
+  ) {
     return Response.json({ error: "User ID or proof message not found" }, { status: 400 });
   }
 
@@ -92,7 +124,8 @@ export async function action({ request }: Route.ActionArgs) {
         public_key: walletPublicKey,
         wallet_type: walletType,
         signature: signature,
-        message: session.get("proofMessage") as string,
+        not_before: walletNotBefore,
+        not_after: walletNotAfter,
       },
     );
   } catch (error) {
@@ -103,6 +136,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   session.unset("proofMessage");
   session.unset("profileUserId");
+  session.unset("walletNotBefore");
+  session.unset("walletNotAfter");
 
   return Response.json(
     { profileCreated: true },

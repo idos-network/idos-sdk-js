@@ -77,12 +77,15 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       setIsLoading(false);
       return;
     }
+    const notBefore = new Date();
+    const notAfter = new Date(notBefore.getTime() + 15 * 60 * 1000);
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
         publicKeys: walletPayload.public_key ?? [],
         signature: walletPayload.signature,
-        message: walletPayload.message,
+        notBefore: notBefore.toISOString(),
+        notAfter: notAfter.toISOString(),
         walletType: walletPayload.wallet_type,
       },
       {
