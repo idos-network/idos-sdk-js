@@ -117,6 +117,7 @@ function Ethereum() {
               message: chain.message,
               not_before: chain.notBefore,
               not_after: chain.notAfter,
+              attemptId: chain.attemptId,
               disconnect: disconnectEvm,
             });
           },

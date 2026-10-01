@@ -61,6 +61,7 @@ function XRPL() {
         message: chain.message,
         not_before: chain.notBefore,
         not_after: chain.notAfter,
+        attemptId: chain.attemptId,
         // No need to disconnect xrpl wallet (it does not possess a persistent connection)
         disconnect: () => Promise.resolve(),
       });

@@ -6,7 +6,7 @@
  */
 import assert from "node:assert/strict";
 
-import { readAddWalletRequest } from "./add-wallet-request.ts";
+import { isSignAddWalletForAttempt, readAddWalletRequest } from "./add-wallet-request.ts";
 import { clearConnectorPersistence, isConnectorStorageKey } from "./connector-persistence.ts";
 import { shouldAdvanceAfterConnect } from "./fresh-connection.ts";
 
@@ -28,6 +28,33 @@ swapped.set("user_id", "33333333-3333-4333-8333-333333333333");
 assert.equal(readAddWalletRequest(`?${swapped.toString()}`).userId, swapped.get("user_id"));
 assert.equal(readAddWalletRequest("user_id=not-a-uuid&request_id=also-no"), null);
 assert.equal(readAddWalletRequest(`?user_id=${userId}`), null);
+
+const expected = { requestId, attemptId: "attempt-1" };
+assert.equal(
+  isSignAddWalletForAttempt(
+    { type: "SIGN_ADD_WALLET", requestId, attemptId: "attempt-1" },
+    expected,
+  ),
+  true,
+);
+assert.equal(
+  isSignAddWalletForAttempt(
+    { type: "SIGN_ADD_WALLET", requestId, attemptId: "attempt-2" },
+    expected,
+  ),
+  false,
+);
+assert.equal(
+  isSignAddWalletForAttempt(
+    { type: "SIGN_ADD_WALLET", requestId: "other", attemptId: "attempt-1" },
+    expected,
+  ),
+  false,
+);
+assert.equal(
+  isSignAddWalletForAttempt({ type: "WALLET_READY", requestId, attemptId: "attempt-1" }, expected),
+  false,
+);
 
 assert.equal(
   shouldAdvanceAfterConnect({ armed: true, wasConnected: false, connected: true }),

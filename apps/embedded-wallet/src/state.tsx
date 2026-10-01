@@ -9,6 +9,7 @@ export type WalletPayload = {
   message: string;
   not_before: string;
   not_after: string;
+  attemptId: string;
   disconnect: () => Promise<void>;
 };
 
