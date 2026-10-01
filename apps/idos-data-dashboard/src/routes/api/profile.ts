@@ -12,6 +12,21 @@ import { WalletType } from "@/generated/prisma/enums";
 
 import type { Route } from "./+types/profile";
 
+let issuerPromise: Promise<idOSIssuer> | undefined;
+
+function getIssuer(): Promise<idOSIssuer> {
+  issuerPromise ??= idOSIssuer
+    .init({
+      nodeUrl: COMMON_ENV.IDOS_NODE_URL,
+      signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
+    })
+    .catch((error: unknown) => {
+      issuerPromise = undefined;
+      throw error;
+    });
+  return issuerPromise;
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   const url = new URL(request.url);
@@ -28,10 +43,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const walletNotBefore = notBefore.toISOString();
   const walletNotAfter = notAfter.toISOString();
 
-  const issuer = await idOSIssuer.init({
-    nodeUrl: COMMON_ENV.IDOS_NODE_URL,
-    signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
-  });
+  const issuer = await getIssuer();
   const proofMessage = await issuer.addWalletMessage({
     address,
     wallet_type: walletType.data,
@@ -98,10 +110,7 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: "User ID or proof message not found" }, { status: 400 });
   }
 
-  const issuer = await idOSIssuer.init({
-    nodeUrl: COMMON_ENV.IDOS_NODE_URL,
-    signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
-  });
+  const issuer = await getIssuer();
 
   const {
     recipientEncryptionPublicKey,
