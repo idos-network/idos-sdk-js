@@ -1,3 +1,4 @@
+import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import {
   verifySignature,
   type WalletSignature,
@@ -13,7 +14,11 @@ import { COMMON_ENV } from "@/core/envFlags.common";
 import { useIDOSClient } from "@/hooks/idOS";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 
-import { addWalletMessage, walletSignatureMatchesRequest } from "./add-wallet-message";
+const WALLET_SIGNATURE_TTL_MS = 15 * 60 * 1000;
+
+function isWalletType(value: unknown): value is WalletType {
+  return typeof value === "string" && (WALLET_TYPES as readonly string[]).includes(value);
+}
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
   const entries = COMMON_ENV.EMBEDDED_WALLET_APP_URLS.split(",")
@@ -55,9 +60,17 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     requestId: string;
     popup: Window;
     userId: string;
+    chain: {
+      address: string;
+      walletType: WalletType;
+      message: string;
+      notBefore: string;
+      notAfter: string;
+    } | null;
   } | null>(null);
   const idOSClient = useIDOSClient();
   const userIdRef = useRef(idOSClient.user.id);
+  const idOSClientRef = useRef(idOSClient);
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
 
@@ -70,22 +83,29 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       setIsLoading(false);
       return;
     }
-    if (requestUserId !== userIdRef.current) {
+    const pending = pendingRequestRef.current;
+    if (
+      requestUserId !== userIdRef.current ||
+      !pending?.chain ||
+      walletPayload.message !== pending.chain.message ||
+      walletPayload.address !== pending.chain.address ||
+      walletPayload.wallet_type !== pending.chain.walletType
+    ) {
       toast.error("Invalid wallet data", {
         description: "The signature does not match this profile",
       });
       setIsLoading(false);
       return;
     }
-    const notBefore = new Date();
-    const notAfter = new Date(notBefore.getTime() + 15 * 60 * 1000);
+    const { notBefore, notAfter } = pending.chain;
+    pendingRequestRef.current = null;
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
         publicKeys: walletPayload.public_key ?? [],
         signature: walletPayload.signature,
-        notBefore: notBefore.toISOString(),
-        notAfter: notAfter.toISOString(),
+        notBefore,
+        notAfter,
         walletType: walletPayload.wallet_type,
       },
       {
@@ -112,6 +132,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
 
   useEffect(() => {
     userIdRef.current = idOSClient.user.id;
+    idOSClientRef.current = idOSClient;
     addWalletRef.current = addWallet;
   });
 
@@ -119,22 +140,50 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type !== "WALLET_SIGNATURE") return;
-
       const pending = pendingRequestRef.current;
       if (!pending || event.source !== pending.popup) return;
-
       if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected WALLET_SIGNATURE from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
+          `Rejected wallet message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
         return;
       }
 
+      if (event.data?.type === "WALLET_READY") {
+        void issueChainMessage(event, pending);
+        return;
+      }
+
+      if (event.data?.type !== "WALLET_SIGNATURE") return;
+
       const payload = event.data.data;
+      if (!payload?.message || !pending.chain || payload.message !== pending.chain.message) {
+        toast.error("Invalid wallet data", {
+          description: "The signature does not match this profile",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      void addWalletRef.current(payload, pending.userId);
+    };
+
+    const issueChainMessage = async (
+      event: MessageEvent,
+      pending: NonNullable<typeof pendingRequestRef.current>,
+    ) => {
+      const { requestId, userId, address, walletType } = event.data as {
+        requestId?: unknown;
+        userId?: unknown;
+        address?: unknown;
+        walletType?: unknown;
+      };
       if (
-        !payload?.message ||
-        !walletSignatureMatchesRequest(payload.message, pending.userId, pending.requestId)
+        requestId !== pending.requestId ||
+        userId !== pending.userId ||
+        typeof address !== "string" ||
+        address.length === 0 ||
+        !isWalletType(walletType)
       ) {
         toast.error("Invalid wallet data", {
           description: "The signature does not match this profile",
@@ -143,8 +192,31 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         return;
       }
 
-      pendingRequestRef.current = null;
-      void addWalletRef.current(payload, pending.userId);
+      const notBeforeDate = new Date();
+      const notBefore = notBeforeDate.toISOString();
+      const notAfter = new Date(notBeforeDate.getTime() + WALLET_SIGNATURE_TTL_MS).toISOString();
+      try {
+        const message = await idOSClientRef.current.addWalletMessage({
+          address,
+          wallet_type: walletType,
+          user_id: pending.userId,
+          not_before: notBefore,
+          not_after: notAfter,
+        });
+        if (pendingRequestRef.current !== pending) return;
+        pending.chain = { address, walletType, message, notBefore, notAfter };
+        pending.popup.postMessage(
+          { type: "SIGN_ADD_WALLET", requestId: pending.requestId, message, notBefore, notAfter },
+          event.origin,
+        );
+      } catch (error) {
+        console.error(error);
+        if (pendingRequestRef.current === pending) pendingRequestRef.current = null;
+        setIsLoading(false);
+        toast.error("Error adding wallet", {
+          description: "Failed to prepare the wallet signature",
+        });
+      }
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
@@ -188,7 +260,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const url = new URL(EMBEDDED_WALLET_CONFIG.popupUrl);
     url.searchParams.set("user_id", idOSClient.user.id);
     url.searchParams.set("request_id", requestId);
-    url.searchParams.set("message", addWalletMessage(idOSClient.user.id, requestId));
 
     pendingRequestRef.current?.popup.close();
 
@@ -199,7 +270,12 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     );
 
     if (popup) {
-      pendingRequestRef.current = { requestId, popup, userId: idOSClient.user.id };
+      pendingRequestRef.current = {
+        requestId,
+        popup,
+        userId: idOSClient.user.id,
+        chain: null,
+      };
       setPopupWindow(popup);
 
       if (popup.closed || typeof popup.closed === "undefined") {
