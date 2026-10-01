@@ -12,32 +12,22 @@ import { shouldAdvanceAfterConnect } from "./fresh-connection.ts";
 
 const userId = "11111111-1111-4111-8111-111111111111";
 const requestId = "22222222-2222-4222-8222-222222222222";
-const message = [
-  "Sign this message to prove you own this wallet.",
-  `idOS profile: ${userId}`,
-  `Request: ${requestId}`,
-].join("\n");
 
 const params = new URLSearchParams({
   user_id: userId,
   request_id: requestId,
-  message,
 });
 
 const request = readAddWalletRequest(`?${params.toString()}`);
 assert.ok(request);
 assert.equal(request.userId, userId);
 assert.equal(request.requestId, requestId);
-assert.equal(request.message, message);
 
 const swapped = new URLSearchParams(params);
 swapped.set("user_id", "33333333-3333-4333-8333-333333333333");
-assert.equal(readAddWalletRequest(swapped.toString()), null);
-assert.equal(readAddWalletRequest("user_id=not-a-uuid&request_id=also-no&message=hi"), null);
-
-const prefixed = new URLSearchParams(params);
-prefixed.set("message", `Extra line the signer should not accept.\n${message}`);
-assert.equal(readAddWalletRequest(prefixed.toString()), null);
+assert.equal(readAddWalletRequest(`?${swapped.toString()}`).userId, swapped.get("user_id"));
+assert.equal(readAddWalletRequest("user_id=not-a-uuid&request_id=also-no"), null);
+assert.equal(readAddWalletRequest(`?user_id=${userId}`), null);
 
 assert.equal(
   shouldAdvanceAfterConnect({ armed: true, wasConnected: false, connected: true }),

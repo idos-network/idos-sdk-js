@@ -7,8 +7,8 @@ import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
 import { useEffect, useRef, useState } from "react";
 
-import { currentSignMessage } from "../add-wallet-request";
 import { shouldAdvanceAfterConnect } from "../fresh-connection";
+import { requestChainSignMessage } from "../request-chain-message";
 import { useWalletState } from "../state";
 import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
@@ -76,18 +76,26 @@ export function NearConnector() {
   }, [stepper, accountId, isSignedIn]);
 
   const handleSignMessage = async () => {
-    const wallet = await selector.wallet();
-    // oxlint-disable-next-line typescript/no-explicit-any -- false positive
-    const signature = await signNearMessage(wallet as any, currentSignMessage());
+    if (!accountId) return;
+    try {
+      const chain = await requestChainSignMessage({ address: accountId, walletType: "NEAR" });
+      const wallet = await selector.wallet();
+      // oxlint-disable-next-line typescript/no-explicit-any -- false positive
+      const signature = await signNearMessage(wallet as any, chain.message);
 
-    if (signature) {
-      setWalletPayload({
-        address: accountId,
-        signature,
-        public_key: (await getNearFullAccessPublicKeys(accountId)) || [],
-        message: currentSignMessage(),
-        disconnect: disconnectNear,
-      });
+      if (signature) {
+        setWalletPayload({
+          address: accountId,
+          signature,
+          public_key: (await getNearFullAccessPublicKeys(accountId)) || [],
+          message: chain.message,
+          not_before: chain.notBefore,
+          not_after: chain.notAfter,
+          disconnect: disconnectNear,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load add-wallet message", error);
     }
   };
 

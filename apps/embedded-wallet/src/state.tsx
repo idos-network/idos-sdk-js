@@ -7,6 +7,8 @@ export type WalletPayload = {
   signature: string;
   public_key?: string[];
   message: string;
+  not_before: string;
+  not_after: string;
   disconnect: () => Promise<void>;
 };
 
