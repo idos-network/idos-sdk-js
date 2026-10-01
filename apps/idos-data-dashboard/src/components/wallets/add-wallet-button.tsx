@@ -14,6 +14,8 @@ import { COMMON_ENV } from "@/core/envFlags.common";
 import { useIDOSClient } from "@/hooks/idOS";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 
+import { beginAddWalletAttempt, type AddWalletAttempt } from "./add-wallet-attempt";
+
 const WALLET_SIGNATURE_TTL_MS = 15 * 60 * 1000;
 
 function isWalletType(value: unknown): value is WalletType {
@@ -60,6 +62,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     requestId: string;
     popup: Window;
     userId: string;
+    attempt: AddWalletAttempt | null;
     chain: {
       address: string;
       walletType: WalletType;
@@ -74,8 +77,14 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
 
-  const addWallet = async (walletPayload: WalletSignature, requestUserId: string) => {
+  const addWallet = async (
+    walletPayload: WalletSignature,
+    requestUserId: string,
+    attemptId: string,
+  ) => {
     const isValid = await verifySignature(walletPayload);
+    const pending = pendingRequestRef.current;
+    if (!pending?.attempt || pending.attempt.id !== attemptId) return;
     if (!isValid) {
       toast.error("Invalid signature", {
         description: "The signature does not match the wallet address",
@@ -83,10 +92,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       setIsLoading(false);
       return;
     }
-    const pending = pendingRequestRef.current;
     if (
       requestUserId !== userIdRef.current ||
-      !pending?.chain ||
+      !pending.chain ||
       walletPayload.message !== pending.chain.message ||
       walletPayload.address !== pending.chain.address ||
       walletPayload.wallet_type !== pending.chain.walletType
@@ -157,7 +165,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       if (event.data?.type !== "WALLET_SIGNATURE") return;
 
       const payload = event.data.data;
-      if (!payload?.message || !pending.chain || payload.message !== pending.chain.message) {
+      if (typeof payload?.attemptId !== "string" || payload.attemptId !== pending.attempt?.id) {
+        return;
+      }
+      if (!payload.message || !pending.chain || payload.message !== pending.chain.message) {
         toast.error("Invalid wallet data", {
           description: "The signature does not match this profile",
         });
@@ -165,22 +176,25 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         return;
       }
 
-      void addWalletRef.current(payload, pending.userId);
+      void addWalletRef.current(payload, pending.userId, payload.attemptId);
     };
 
     const issueChainMessage = async (
       event: MessageEvent,
       pending: NonNullable<typeof pendingRequestRef.current>,
     ) => {
-      const { requestId, userId, address, walletType } = event.data as {
+      const { requestId, userId, attemptId, address, walletType } = event.data as {
         requestId?: unknown;
         userId?: unknown;
+        attemptId?: unknown;
         address?: unknown;
         walletType?: unknown;
       };
       if (
         requestId !== pending.requestId ||
         userId !== pending.userId ||
+        typeof attemptId !== "string" ||
+        attemptId.length === 0 ||
         typeof address !== "string" ||
         address.length === 0 ||
         !isWalletType(walletType)
@@ -195,6 +209,13 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       const notBeforeDate = new Date();
       const notBefore = notBeforeDate.toISOString();
       const notAfter = new Date(notBeforeDate.getTime() + WALLET_SIGNATURE_TTL_MS).toISOString();
+      const started = beginAddWalletAttempt(pending.attempt, {
+        id: attemptId,
+        address,
+        walletType,
+      });
+      if (started.dropChain) pending.chain = null;
+      pending.attempt = started.attempt;
       try {
         const message = await idOSClientRef.current.addWalletMessage({
           address,
@@ -203,15 +224,26 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
           not_before: notBefore,
           not_after: notAfter,
         });
-        if (pendingRequestRef.current !== pending) return;
+        if (pendingRequestRef.current !== pending || pending.attempt?.id !== attemptId) return;
         pending.chain = { address, walletType, message, notBefore, notAfter };
         pending.popup.postMessage(
-          { type: "SIGN_ADD_WALLET", requestId: pending.requestId, message, notBefore, notAfter },
+          {
+            type: "SIGN_ADD_WALLET",
+            requestId: pending.requestId,
+            attemptId,
+            message,
+            notBefore,
+            notAfter,
+          },
           event.origin,
         );
       } catch (error) {
         console.error(error);
-        if (pendingRequestRef.current === pending) pendingRequestRef.current = null;
+        if (pendingRequestRef.current === pending && pending.attempt?.id === attemptId) {
+          pendingRequestRef.current = null;
+        } else {
+          return;
+        }
         setIsLoading(false);
         toast.error("Error adding wallet", {
           description: "Failed to prepare the wallet signature",
@@ -274,6 +306,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         requestId,
         popup,
         userId: idOSClient.user.id,
+        attempt: null,
         chain: null,
       };
       setPopupWindow(popup);

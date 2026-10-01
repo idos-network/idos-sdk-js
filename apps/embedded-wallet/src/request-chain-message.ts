@@ -1,18 +1,19 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 
-import { readAddWalletRequest } from "./add-wallet-request";
+import { isSignAddWalletForAttempt, readAddWalletRequest } from "./add-wallet-request";
 import { COMMON_ENV } from "./components/envFlags.common";
 
 export type ChainSignMessage = {
   message: string;
   notBefore: string;
   notAfter: string;
+  attemptId: string;
 };
 
 const SIGN_TIMEOUT_MS = 60_000;
 
 // The dashboard calls add_wallet_message after it learns the connected address.
-// Sign only that reply, and only when it comes from the opener on the dashboard origin.
+// Sign only the reply for this attempt, and only when it comes from the opener on the dashboard origin.
 export function requestChainSignMessage(params: {
   address: string;
   walletType: WalletType;
@@ -24,6 +25,7 @@ export function requestChainSignMessage(params: {
 
   const dashboardOrigin = new URL(COMMON_ENV.DATA_DASHBOARD_URL).origin;
   const opener = window.opener as Window;
+  const attemptId = crypto.randomUUID();
 
   return new Promise((resolve, reject) => {
     const timeout = window.setTimeout(() => {
@@ -33,7 +35,7 @@ export function requestChainSignMessage(params: {
 
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== dashboardOrigin || event.source !== opener) return;
-      if (event.data?.type !== "SIGN_ADD_WALLET" || event.data.requestId !== request.requestId) {
+      if (!isSignAddWalletForAttempt(event.data, { requestId: request.requestId, attemptId })) {
         return;
       }
       const { message, notBefore, notAfter } = event.data as {
@@ -51,7 +53,7 @@ export function requestChainSignMessage(params: {
       }
       window.clearTimeout(timeout);
       window.removeEventListener("message", onMessage);
-      resolve({ message, notBefore, notAfter });
+      resolve({ message, notBefore, notAfter, attemptId });
     };
 
     window.addEventListener("message", onMessage);
@@ -60,6 +62,7 @@ export function requestChainSignMessage(params: {
         type: "WALLET_READY",
         requestId: request.requestId,
         userId: request.userId,
+        attemptId,
         address: params.address,
         walletType: params.walletType,
       },
