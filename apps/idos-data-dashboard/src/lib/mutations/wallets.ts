@@ -1,5 +1,9 @@
-import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
+import type { idOSClientLoggedIn } from "@idos-network/client";
+import type {
+  AddWalletInput,
+  GetWalletsOutput,
+  WalletType,
+} from "@idos-network/kwil-infra/actions";
 
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
@@ -10,20 +14,23 @@ export const createWalletParamsFactory = ({
   address,
   publicKey,
   signature,
-  message,
+  notBefore,
+  notAfter,
   walletType,
 }: {
   address: string;
   publicKey?: string;
   signature: string;
-  message: string;
+  notBefore: string;
+  notAfter: string;
   walletType: WalletType;
 }): AddWalletInput => ({
   id: crypto.randomUUID() as string,
   address,
   wallet_type: walletType,
   public_key: publicKey ?? null,
-  message,
+  not_before: notBefore,
+  not_after: notAfter,
   signature,
 });
 
@@ -33,10 +40,11 @@ export const createWallet = async (
     address: string;
     publicKey?: string;
     signature: string;
-    message: string;
+    notBefore: string;
+    notAfter: string;
     walletType: WalletType;
   },
-): Promise<idOSWallet> => {
+): Promise<GetWalletsOutput> => {
   const walletParams = createWalletParamsFactory(params);
   await idOSClient.addWallet(walletParams);
 
@@ -55,17 +63,18 @@ export function useAddWalletMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    idOSWallet[],
+    GetWalletsOutput[],
     DefaultError,
     {
       address: string;
       publicKeys: string[];
       signature: string;
-      message: string;
+      notBefore: string;
+      notAfter: string;
       walletType: WalletType;
     }
   >({
-    mutationFn: async ({ address, publicKeys, signature, message, walletType }) => {
+    mutationFn: async ({ address, publicKeys, signature, notBefore, notAfter, walletType }) => {
       if (publicKeys.length > 0) {
         return Promise.all(
           publicKeys.map((publicKey) =>
@@ -73,13 +82,16 @@ export function useAddWalletMutation() {
               address,
               publicKey,
               signature,
-              message,
+              notBefore,
+              notAfter,
               walletType,
             }),
           ),
         );
       }
-      return [await createWallet(idOSClient, { address, signature, message, walletType })];
+      return [
+        await createWallet(idOSClient, { address, signature, notBefore, notAfter, walletType }),
+      ];
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["wallets"] }),
   });
@@ -89,7 +101,7 @@ export function useDeleteWalletMutation() {
   const idOSClient = useIDOSClient();
   const queryClient = useQueryClient();
 
-  return useMutation<void, DefaultError, idOSWallet[]>({
+  return useMutation<void, DefaultError, GetWalletsOutput[]>({
     mutationFn: async (wallets) => {
       await idOSClient.removeWallets(wallets.map((wallet) => wallet.id));
     },
