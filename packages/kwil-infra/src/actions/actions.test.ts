@@ -30,7 +30,7 @@ const validPreliminaryCredentialsByDwgInput = {
   dwg_grantee: "dwg-grantee",
   dwg_issuer_public_key: "dwg-issuer-public-key",
   dwg_id: "00000000-0000-4000-8000-000000000004",
-  dwg_access_grant_timelock: "0",
+  dwg_access_grant_timelock: "2026-01-01T00:00:00Z",
   dwg_not_before: "2026-01-01T00:00:00Z",
   dwg_not_after: "2026-12-31T23:59:59Z",
   dwg_signature: "dwg-signature",
