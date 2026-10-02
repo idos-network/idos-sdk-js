@@ -29,8 +29,8 @@ catalogs:
       specifier: ^7.3.0
       version: 7.3.0
     '@idos-network/kwil-js':
-      specifier: 0.1.7
-      version: 0.1.7
+      specifier: 0.1.11
+      version: 0.1.11
     jsonld-document-loader:
       specifier: ^2.3.0
       version: 2.3.0
@@ -181,7 +181,7 @@ catalogs:
 overrides:
   '@idos-network/kwil-js>lru-cache': 11.5.2
   path-scurry>lru-cache: 11.5.2
-  axios: '>=1.19.0'
+  axios: '>=1.20.0'
   base-x: '>=3.0.11'
   protobufjs: '>=7.5.5'
   secp256k1: '>=5.0.1'
@@ -195,10 +195,12 @@ overrides:
   '@react-router/serve': '>=8.3.0'
   fast-uri: '>= 4.1.3'
   ip-address: '>= 10.3.1'
-  brace-expansion: '>= 5.0.9'
+  brace-expansion: '>=5.0.11'
+  undici@6: 6.28.1
+  undici@7: 7.29.1
   nanoid: '>= 3.3.18'
   toml: '>= 4.1.2'
-  basic-ftp: '>= 6.0.1'
+  basic-ftp: '>=6.2.1'
   mysql2: '>= 3.22.0'
   chevrotain: 10.5.0
   web-streams-polyfill: 3.3.3
@@ -351,8 +353,8 @@ importers:
         specifier: ^1.38.2
         version: 1.38.2
       axios:
-        specifier: '>=1.19.0'
-        version: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: '>=1.20.0'
+        version: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       bowser:
         specifier: ^2.14.1
         version: 2.14.1
@@ -753,6 +755,64 @@ importers:
         specifier: catalog:build
         version: 0.28.0(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1))
 
+  examples/functional-test-app: {}
+
+  examples/idos-throughput-benchmark:
+    dependencies:
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../../packages/credentials
+      '@idos-network/kwil-infra':
+        specifier: workspace:*
+        version: link:../../packages/kwil-infra
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
+      ethers:
+        specifier: catalog:ethereum
+        version: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+      tweetnacl:
+        specifier: catalog:core
+        version: 1.0.3
+    devDependencies:
+      '@types/node':
+        specifier: catalog:build
+        version: 25.9.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.1
+      typescript:
+        specifier: catalog:build
+        version: 5.9.3
+
+  examples/mm-token-ukyc-credential:
+    dependencies:
+      '@idos-network/client':
+        specifier: workspace:*
+        version: link:../../packages/client
+      '@idos-network/enclave':
+        specifier: workspace:*
+        version: link:../../packages/enclave
+      '@idos-network/kwil-infra':
+        specifier: workspace:*
+        version: link:../../packages/kwil-infra
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+    devDependencies:
+      '@types/node':
+        specifier: catalog:build
+        version: 25.9.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.1
+      typescript:
+        specifier: catalog:build
+        version: 5.9.3
+
   examples/pay-demo:
     dependencies:
       '@base-ui/react':
@@ -911,7 +971,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.11(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -939,7 +999,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.11(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1083,7 +1143,7 @@ importers:
         version: link:../kwil-infra
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.11(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1108,7 +1168,7 @@ importers:
     dependencies:
       '@idos-network/kwil-js':
         specifier: catalog:core
-        version: 0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
+        version: 0.1.11(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1800,8 +1860,8 @@ packages:
   '@hot-wallet/sdk@1.0.11':
     resolution: {integrity: sha512-qRDH/4yqnRCnk7L/Qd0/LDOKDUKWcFgvf6eRELJkP0OgxIe65i/iXaG+u2lL0mLbTGkiWYk67uAvEerNUv2gzA==}
 
-  '@idos-network/kwil-js@0.1.7':
-    resolution: {integrity: sha512-KR4FB7kRBVTUm+2aR2f/ySLX3YDYqWPllHnpmVXvxdobCD5NBOVWeY6/DBdni4MbuHNNn/9c2KidR4/kjlxHeA==}
+  '@idos-network/kwil-js@0.1.11':
+    resolution: {integrity: sha512-hoFHCl9+lb+e5b5sg5oqxoph11LvWoBcpWuTR158GC60mbNmEcjq0oTj8nxq8dss1MaFlFpAbKE9STachH72Xg==}
     engines: {node: '>=18.0.0'}
 
   '@inquirer/ansi@2.0.7':
@@ -5492,8 +5552,8 @@ packages:
     resolution: {integrity: sha512-NZKeq9AfyQvEeNlN0zSYAaWrmBffJh3IELMZfRpJVWgrpEbtEpnjvzqBPf+mxoI287JohRDoa+/nsfqqiZmF6g==}
     engines: {node: '>= 6.0.0'}
 
-  axios@1.19.0:
-    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
+  axios@1.20.0:
+    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
   b4a@1.8.1:
     resolution: {integrity: sha512-aiqre1Nr0B/6DgE2N5vwTc+2/oQZ4Wh1t4NznYY4E00y8LCt6NqdRv81so00oo27D8MVKTpUa/MwUUtBLXCoDw==}
@@ -5606,8 +5666,8 @@ packages:
     resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
     engines: {node: '>= 0.8'}
 
-  basic-ftp@6.0.1:
-    resolution: {integrity: sha512-3ilxa3n4276wGQp/ImRAuz4ALdsj/2Wd3FqoZBZlajDYnByCZ0JMb4+26Rde0wGXIbM0G2HWSfr/Fi8b21KX8g==}
+  basic-ftp@6.2.1:
+    resolution: {integrity: sha512-bK67isD+lKq46AU8vNtjvMaT2ZqAOAmNCbxUHlFBRD4k15NWxyEjmaKtZPlgce58So4BNTjITGQOVTjL9y0ECA==}
     engines: {node: '>=10.0.0'}
 
   bchaddrjs@0.5.2:
@@ -5687,8 +5747,8 @@ packages:
   bowser@2.14.1:
     resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
-  brace-expansion@5.0.9:
-    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
     engines: {node: 20 || >=22}
 
   braces@3.0.3:
@@ -9842,12 +9902,12 @@ packages:
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
-  undici@6.28.0:
-    resolution: {integrity: sha512-LIY910g9TI13YS95lrMFrs8Rm/u/irgHeTWoKCoteeJ04CUJ92eEfj0rVn+7VKMPBpUPiUoBKfhNyLI23EE/KA==}
+  undici@6.28.1:
+    resolution: {integrity: sha512-zWpdTVD54H48CIybL0rWQ3ukpb9d23wM7eH5RtfdmeP70cWHNjtfo7P4vZX+5CoDcO53J4Pu5uXp7lNfjc6DRA==}
     engines: {node: '>=18.17'}
 
-  undici@7.29.0:
-    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+  undici@7.29.1:
+    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
     engines: {node: '>=20.18.1'}
 
   unfetch@4.2.0:
@@ -11012,7 +11072,7 @@ snapshots:
   '@digitalbazaar/http-client@4.3.0':
     dependencies:
       ky: 1.14.3
-      undici: 6.28.0
+      undici: 6.28.1
 
   '@digitalbazaar/security-context@1.0.1': {}
 
@@ -11037,7 +11097,7 @@ snapshots:
       open: 8.4.2
       picomatch: 4.0.7
       systeminformation: 5.33.1
-      undici: 7.29.0
+      undici: 7.29.1
       which: 4.0.0
       yocto-spinner: 1.2.2
 
@@ -11236,9 +11296,9 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@idos-network/kwil-js@0.1.7(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)':
+  '@idos-network/kwil-js@0.1.11(bufferutil@4.1.0)(supports-color@7.2.0)(utf-8-validate@6.0.6)':
     dependencies:
-      axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       ethers: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       jssha: 3.3.2
       long: 5.3.2
@@ -14370,7 +14430,7 @@ snapshots:
   '@stellar/stellar-sdk@13.3.0(bare-url@2.4.6)(supports-color@7.2.0)':
     dependencies:
       '@stellar/stellar-base': 13.1.0(bare-url@2.4.6)
-      axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       bignumber.js: 9.3.1
       eventsource: 2.0.2
       feaxios: 0.0.23
@@ -16068,7 +16128,7 @@ snapshots:
 
   aws-ssl-profiles@1.1.2: {}
 
-  axios@1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
+  axios@1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3(supports-color@7.2.0))
       form-data: 4.0.6
@@ -16167,7 +16227,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
-  basic-ftp@6.0.1: {}
+  basic-ftp@6.2.1: {}
 
   bchaddrjs@0.5.2:
     dependencies:
@@ -16250,7 +16310,7 @@ snapshots:
 
   bowser@2.14.1: {}
 
-  brace-expansion@5.0.9:
+  brace-expansion@5.0.12:
     dependencies:
       balanced-match: 4.0.4
 
@@ -17148,7 +17208,6 @@ snapshots:
       '@esbuild/win32-arm64': 0.28.1
       '@esbuild/win32-ia32': 0.28.1
       '@esbuild/win32-x64': 0.28.1
-    optional: true
 
   escalade@3.2.0: {}
 
@@ -17613,7 +17672,7 @@ snapshots:
 
   get-uri@6.0.5(supports-color@7.2.0):
     dependencies:
-      basic-ftp: 6.0.1
+      basic-ftp: 6.2.1
       data-uri-to-buffer: 6.0.2
       debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
@@ -18663,15 +18722,15 @@ snapshots:
 
   minimatch@10.2.5:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimatch@5.1.9:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimist-options@4.1.0:
     dependencies:
@@ -20693,7 +20752,6 @@ snapshots:
       esbuild: 0.28.1
     optionalDependencies:
       fsevents: 2.3.3
-    optional: true
 
   tty-browserify@0.0.1: {}
 
@@ -20785,9 +20843,9 @@ snapshots:
 
   undici-types@8.3.0: {}
 
-  undici@6.28.0: {}
+  undici@6.28.1: {}
 
-  undici@7.29.0: {}
+  undici@7.29.1: {}
 
   unfetch@4.2.0: {}
 

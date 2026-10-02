@@ -6,6 +6,7 @@ import { idOSIssuer, toDelegatedWriteGrantBaseParams } from "./index.js";
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn(), uploadCredentialBlobs: vi.fn() },
   createPreliminaryCredentialsByDwg: vi.fn(),
+  addWalletMessage: vi.fn(async () => ({ message: "add-wallet-message" })),
   dwgMessage: vi.fn(async () => ({ message: "dwg-message-string" })),
   kwilClient: {
     setSigner: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock("@idos-network/kwil-infra", () => ({
 
 vi.mock("@idos-network/kwil-infra/actions", async (importOriginal) => ({
   ...((await importOriginal()) as object),
+  addWalletMessage: mocks.addWalletMessage,
   createPreliminaryCredentialsByDwg: mocks.createPreliminaryCredentialsByDwg,
   dwgMessage: mocks.dwgMessage,
 }));
@@ -169,6 +171,16 @@ describe("idOSIssuer", () => {
       not_usable_before: "2026-01-01T00:00:00Z",
       not_usable_after: "2026-01-02T00:00:00Z",
     };
+
+    const walletMessage = await issuer.addWalletMessage({
+      address: "0x311CEe6648df431EbbeA38dfB680C28661c893Ea",
+      wallet_type: "EVM",
+      user_id: crypto.randomUUID(),
+      not_before: "2026-01-01T00:00:00Z",
+      not_after: "2026-01-01T00:15:00Z",
+    });
+    expect(walletMessage).toBe("add-wallet-message");
+    expect(mocks.addWalletMessage).toHaveBeenCalledOnce();
 
     const message = await issuer.requestDelegatedWriteGrantMessage(dwgInput);
     const params = toDelegatedWriteGrantBaseParams(dwgInput);
