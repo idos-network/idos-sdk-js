@@ -18,13 +18,7 @@ export const encryptionPasswordStoreSchema: z.ZodType<EncryptionPasswordStore> =
   ENCRYPTION_PASSWORD_STORES,
 );
 const IPFS_URI_PREFIX = "ipfs://";
-const UKYC_URI_PREFIX = "ukyc://";
-const blobContentUriSchema = z
-  .string()
-  .refine(
-    (value) => value.startsWith(IPFS_URI_PREFIX) || value.startsWith(UKYC_URI_PREFIX),
-    `content_uri must start with ${IPFS_URI_PREFIX} or ${UKYC_URI_PREFIX}`,
-  );
+const ipfsContentUriSchema = z.string().startsWith(IPFS_URI_PREFIX);
 const contentSizeSchema = z.number().int().positive();
 
 export type ActionSchemaElement = {
@@ -558,6 +552,30 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  is_evm_address: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+  ],
+  set_caller_payer: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+  ],
+  check_caller_payer: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+  ],
+  unset_caller_payer: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+  ],
   check_balance: [
     {
       name: "address",
@@ -572,6 +590,10 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     {
       name: "token",
       type: DataType.Text,
+    },
+    {
+      name: "minimum_balance",
+      type: DataType.Int,
     },
   ],
   request_withdrawal: [
@@ -674,15 +696,12 @@ export const GetUserOutputSchema: z.ZodObject<{
 export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
 
 export async function getUser(kwilClient: KwilActionClient): Promise<GetUserOutput> {
-  const result = await kwilClient.call<GetUserOutput[]>({
-    name: "get_user",
-    inputs: {},
-  });
-  const user = result[0];
-  if (!user) {
-    throw new Error("get_user returned no user");
-  }
-  return user;
+  return await kwilClient
+    .call<GetUserOutput[]>({
+      name: "get_user",
+      inputs: {},
+    })
+    .then((result) => result[0]);
 }
 
 export const GetUserAsInserterInputSchema: z.ZodObject<{
@@ -724,21 +743,30 @@ export const UpsertWalletAsInserterInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   user_id: z.ZodUUID;
   address: z.ZodString;
-  public_key: z.ZodNullable<z.ZodString>;
+  public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
   wallet_type: z.ZodType<WalletType>;
-  not_before: z.ZodString;
-  not_after: z.ZodString;
+  not_before: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+  not_after: z.ZodOptional<z.ZodNullable<z.ZodString>>;
   signature: z.ZodString;
-}> = z.object({
-  id: z.uuid(),
-  user_id: z.uuid(),
-  address: z.string(),
-  public_key: z.string().nullable(),
-  wallet_type: walletTypeSchema,
-  not_before: z.string(),
-  not_after: z.string(),
-  signature: z.string(),
-});
+}> = z
+  .object({
+    id: z.uuid(),
+    user_id: z.uuid(),
+    address: z.string(),
+    public_key: z.string().nullish(),
+    wallet_type: walletTypeSchema,
+    not_before: z.string().nullish(),
+    not_after: z.string().nullish(),
+    signature: z.string(),
+  })
+  .refine((v) => (v.wallet_type === "MM") === (v.not_before == null), {
+    path: ["not_before"],
+    message: "not_before must be null when wallet_type is MM, and set otherwise",
+  })
+  .refine((v) => (v.wallet_type === "MM") === (v.not_after == null), {
+    path: ["not_after"],
+    message: "not_after must be null when wallet_type is MM, and set otherwise",
+  });
 
 export type UpsertWalletAsInserterInput = z.infer<typeof UpsertWalletAsInserterInputSchema>;
 
@@ -789,13 +817,13 @@ export async function addWalletMessage(
       name: "add_wallet_message",
       inputs,
     })
-    .then((result) => AddWalletMessageOutputSchema.parse(result?.[0]));
+    .then((result) => result[0]);
 }
 
 export const AddWalletInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   address: z.ZodString;
-  public_key: z.ZodNullable<z.ZodString>;
+  public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
   wallet_type: z.ZodType<WalletType>;
   not_before: z.ZodString;
   not_after: z.ZodString;
@@ -803,7 +831,7 @@ export const AddWalletInputSchema: z.ZodObject<{
 }> = z.object({
   id: z.uuid(),
   address: z.string(),
-  public_key: z.string().nullable(),
+  public_key: z.string().nullish(),
   wallet_type: walletTypeSchema,
   not_before: z.string(),
   not_after: z.string(),
@@ -889,7 +917,7 @@ export const CreatePreliminaryCredentialInputSchema: z.ZodObject<{
   credential_id: z.uuid(),
   issuer_auth_public_key: z.string(),
   encryptor_public_key: z.string(),
-  content_uri: blobContentUriSchema,
+  content_uri: ipfsContentUriSchema,
   content_size: contentSizeSchema,
   content_hash: z.string(),
   public_notes: z.string(),
@@ -949,10 +977,10 @@ export async function getCredentials(
 
 export const GetCredentialsSharedByUserInputSchema: z.ZodObject<{
   user_id: z.ZodUUID;
-  original_issuer_auth_public_key: z.ZodNullable<z.ZodString>;
+  original_issuer_auth_public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }> = z.object({
   user_id: z.uuid(),
-  original_issuer_auth_public_key: z.string().nullable(),
+  original_issuer_auth_public_key: z.string().nullish(),
 });
 
 export type GetCredentialsSharedByUserInput = z.infer<typeof GetCredentialsSharedByUserInputSchema>;
@@ -1027,6 +1055,12 @@ export const RemoveCredentialInputSchema: z.ZodObject<{
 
 export type RemoveCredentialInput = z.infer<typeof RemoveCredentialInputSchema>;
 
+/**
+ *  Already requested: succeed so the client can retry the blob DELETE.
+ *  A second insert is impossible (credential_id is the primary key).
+ *  Legacy inline credentials (no blob): delete immediately.
+ *  Blob-backed: record intent; credential stays live until gateway finalizes.
+ */
 export async function removeCredential(
   kwilClient: KwilActionClient,
   params: RemoveCredentialInput,
@@ -1047,6 +1081,10 @@ export const RescindSharedCredentialInputSchema: z.ZodObject<{
 
 export type RescindSharedCredentialInput = z.infer<typeof RescindSharedCredentialInputSchema>;
 
+/**
+ *  Already requested: succeed so the client can retry the blob DELETE.
+ *  Legacy inline credentials (no blob): delete immediately.
+ */
 export async function rescindSharedCredential(
   kwilClient: KwilActionClient,
   params: RescindSharedCredentialInput,
@@ -1080,7 +1118,7 @@ export const SharePreliminaryCredentialInputSchema: z.ZodObject<{
   public_notes: z.string(),
   public_notes_signature: z.string(),
   broader_signature: z.string(),
-  content_uri: blobContentUriSchema,
+  content_uri: ipfsContentUriSchema,
   content_size: contentSizeSchema,
   content_hash: z.string(),
   encryptor_public_key: z.string(),
@@ -1133,14 +1171,14 @@ export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   issuer_auth_public_key: z.string(),
   original_encryptor_public_key: z.string(),
   original_id: z.uuid(),
-  original_content_uri: blobContentUriSchema,
+  original_content_uri: ipfsContentUriSchema,
   original_content_size: contentSizeSchema,
   original_public_notes: z.string(),
   original_public_notes_signature: z.string(),
   original_broader_signature: z.string(),
   copy_encryptor_public_key: z.string(),
   copy_id: z.uuid(),
-  copy_content_uri: blobContentUriSchema,
+  copy_content_uri: ipfsContentUriSchema,
   copy_content_size: contentSizeSchema,
   copy_public_notes_signature: z.string(),
   copy_broader_signature: z.string(),
@@ -1588,11 +1626,11 @@ export async function getAccessGrantsOwned(
 }
 
 export const GetAccessGrantsGrantedInputSchema: z.ZodObject<{
-  user_id: z.ZodNullable<z.ZodUUID>;
+  user_id: z.ZodOptional<z.ZodNullable<z.ZodUUID>>;
   page: z.ZodNumber;
   size: z.ZodNumber;
 }> = z.object({
-  user_id: z.uuid().nullable(),
+  user_id: z.uuid().nullish(),
   page: z.number(),
   size: z.number(),
 });
@@ -1638,9 +1676,9 @@ export async function getAccessGrantsGranted(
 }
 
 export const GetAccessGrantsGrantedCountInputSchema: z.ZodObject<{
-  user_id: z.ZodNullable<z.ZodUUID>;
+  user_id: z.ZodOptional<z.ZodNullable<z.ZodUUID>>;
 }> = z.object({
-  user_id: z.uuid().nullable(),
+  user_id: z.uuid().nullish(),
 });
 
 export type GetAccessGrantsGrantedCountInput = z.infer<
@@ -1780,6 +1818,105 @@ export async function hasProfile(
     .then((result) => result[0]);
 }
 
+export const IsEvmAddressInputSchema: z.ZodObject<{
+  address: z.ZodString;
+}> = z.object({
+  address: z.string(),
+});
+
+export type IsEvmAddressInput = z.infer<typeof IsEvmAddressInputSchema>;
+
+export const IsEvmAddressOutputSchema: z.ZodObject<{
+  is_evm_address: z.ZodBoolean;
+}> = z.object({
+  is_evm_address: z.boolean(),
+});
+
+export type IsEvmAddressOutput = z.infer<typeof IsEvmAddressOutputSchema>;
+
+/**  GAS AND FEES */
+export async function isEvmAddress(
+  kwilClient: KwilActionClient,
+  params: IsEvmAddressInput,
+): Promise<IsEvmAddressOutput> {
+  const inputs = IsEvmAddressInputSchema.parse(params);
+  return await kwilClient
+    .call<IsEvmAddressOutput[]>({
+      name: "is_evm_address",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const SetCallerPayerInputSchema: z.ZodObject<{
+  address: z.ZodString;
+}> = z.object({
+  address: z.string(),
+});
+
+export type SetCallerPayerInput = z.infer<typeof SetCallerPayerInputSchema>;
+
+export async function setCallerPayer(
+  kwilClient: KwilActionClient,
+  params: SetCallerPayerInput,
+): Promise<void> {
+  const inputs = SetCallerPayerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "set_caller_payer",
+    inputs,
+    description: "Set the caller as a payer for a specific EVM address",
+  });
+}
+
+export const CheckCallerPayerInputSchema: z.ZodObject<{
+  address: z.ZodString;
+}> = z.object({
+  address: z.string(),
+});
+
+export type CheckCallerPayerInput = z.infer<typeof CheckCallerPayerInputSchema>;
+
+export const CheckCallerPayerOutputSchema: z.ZodObject<{
+  is_payer: z.ZodBoolean;
+}> = z.object({
+  is_payer: z.boolean(),
+});
+
+export type CheckCallerPayerOutput = z.infer<typeof CheckCallerPayerOutputSchema>;
+
+export async function checkCallerPayer(
+  kwilClient: KwilActionClient,
+  params: CheckCallerPayerInput,
+): Promise<CheckCallerPayerOutput> {
+  const inputs = CheckCallerPayerInputSchema.parse(params);
+  return await kwilClient
+    .call<CheckCallerPayerOutput[]>({
+      name: "check_caller_payer",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const UnsetCallerPayerInputSchema: z.ZodObject<{
+  address: z.ZodString;
+}> = z.object({
+  address: z.string(),
+});
+
+export type UnsetCallerPayerInput = z.infer<typeof UnsetCallerPayerInputSchema>;
+
+export async function unsetCallerPayer(
+  kwilClient: KwilActionClient,
+  params: UnsetCallerPayerInput,
+): Promise<void> {
+  const inputs = UnsetCallerPayerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "unset_caller_payer",
+    inputs,
+    description: "Remove the caller as a payer for a specific EVM address",
+  });
+}
+
 export const CheckBalanceInputSchema: z.ZodObject<{
   address: z.ZodString;
   token: z.ZodString;
@@ -1798,7 +1935,6 @@ export const CheckBalanceOutputSchema: z.ZodObject<{
 
 export type CheckBalanceOutput = z.infer<typeof CheckBalanceOutputSchema>;
 
-/**  GAS AND FEES */
 export async function checkBalance(
   kwilClient: KwilActionClient,
   params: CheckBalanceInput,
@@ -1814,8 +1950,10 @@ export async function checkBalance(
 
 export const GetWalletWithBalanceInputSchema: z.ZodObject<{
   token: z.ZodString;
+  minimum_balance: z.ZodNumber;
 }> = z.object({
   token: z.string(),
+  minimum_balance: z.number(),
 });
 
 export type GetWalletWithBalanceInput = z.infer<typeof GetWalletWithBalanceInputSchema>;
@@ -1828,10 +1966,6 @@ export const GetWalletWithBalanceOutputSchema: z.ZodObject<{
 
 export type GetWalletWithBalanceOutput = z.infer<typeof GetWalletWithBalanceOutputSchema>;
 
-/**
- *  even if the @caller is not EVM address, there is no harm to try to get the balance, it will return nothing
- *  because bridge.balance can only have records with EVM addresses (it is filled from EVM-compatible contract events)
- */
 export async function getWalletWithBalance(
   kwilClient: KwilActionClient,
   params: GetWalletWithBalanceInput,
