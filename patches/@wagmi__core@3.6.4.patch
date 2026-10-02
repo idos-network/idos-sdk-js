@@ -1,12 +1,29 @@
 diff --git a/dist/esm/hydrate.js b/dist/esm/hydrate.js
 --- a/dist/esm/hydrate.js
 +++ b/dist/esm/hydrate.js
-@@ -47,6 +47,8 @@
+@@ -1,4 +1,5 @@
+ import { reconnect } from './actions/reconnect.js';
++const clearedOnMount = new WeakSet();
+ export function hydrate(config, parameters) {
+     const { initialState, reconnectOnMount } = parameters;
+     if (initialState && !config._internal.store.persist.hasHydrated())
+@@ -42,12 +43,17 @@
+             }
+             if (reconnectOnMount)
+                 reconnect(config);
+-            else if (config.storage)
+-                // Reset connections that may have been hydrated from storage.
++            else if (config.storage && !clearedOnMount.has(config)) {
++                clearedOnMount.add(config);
++                // Hydrate calls onMount on every non-SSR render. Clear a restored
++                // session once. A later call must leave the wallet the user just connected.
                  config.setState((x) => ({
                      ...x,
                      connections: new Map(),
 +                    current: null,
 +                    status: 'disconnected',
                  }));
++            }
          },
      };
+ }
