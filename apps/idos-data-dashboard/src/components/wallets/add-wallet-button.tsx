@@ -12,7 +12,9 @@ import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { useIDOSClient } from "@/hooks/idOS";
+import { evmPublicKeyFromSignature } from "@/lib/evm-public-key";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+import { toSecondPrecisionIso } from "@/lib/rfc3339";
 
 import { beginAddWalletAttempt, type AddWalletAttempt } from "./add-wallet-attempt";
 
@@ -107,10 +109,14 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     }
     const { notBefore, notAfter } = pending.chain;
     pendingRequestRef.current = null;
+    const publicKeys = walletPayload.public_key ?? [];
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
-        publicKeys: walletPayload.public_key ?? [],
+        publicKeys:
+          walletPayload.wallet_type === "EVM" && publicKeys.length === 0
+            ? [await evmPublicKeyFromSignature(walletPayload.message, walletPayload.signature)]
+            : publicKeys,
         signature: walletPayload.signature,
         notBefore,
         notAfter,
@@ -207,8 +213,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       }
 
       const notBeforeDate = new Date();
-      const notBefore = notBeforeDate.toISOString();
-      const notAfter = new Date(notBeforeDate.getTime() + WALLET_SIGNATURE_TTL_MS).toISOString();
+      const notBefore = toSecondPrecisionIso(notBeforeDate);
+      const notAfter = toSecondPrecisionIso(
+        new Date(notBeforeDate.getTime() + WALLET_SIGNATURE_TTL_MS),
+      );
       const started = beginAddWalletAttempt(pending.attempt, {
         id: attemptId,
         address,
