@@ -43,7 +43,12 @@ describe("/api/profile loader", () => {
     expect(firstBody.userId).not.toBe(secondBody.userId);
     expect(addWalletMessage).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ address: "0xabc", user_id: firstBody.userId }),
+      expect.objectContaining({
+        address: "0xabc",
+        user_id: firstBody.userId,
+        not_before: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/),
+        not_after: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/),
+      }),
     );
     expect(addWalletMessage).toHaveBeenNthCalledWith(
       2,
