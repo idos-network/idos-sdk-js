@@ -29,6 +29,7 @@ const blobContentUriSchema = z
   );
 
 const contentSizeSchema = z.number().int().positive();
+const rfc3339DateTimeSchema = z.iso.datetime({ precision: 0 });
 
 export type ActionSchemaElement = {
   name: string;
@@ -751,8 +752,8 @@ export const UpsertWalletAsInserterInputSchema: z.ZodObject<{
   address: z.ZodString;
   public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
   wallet_type: z.ZodType<WalletType>;
-  not_before: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-  not_after: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+  not_before: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;
+  not_after: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;
   signature: z.ZodString;
 }> = z
   .object({
@@ -761,8 +762,8 @@ export const UpsertWalletAsInserterInputSchema: z.ZodObject<{
     address: z.string(),
     public_key: z.string().nullish(),
     wallet_type: walletTypeSchema,
-    not_before: z.string().nullish(),
-    not_after: z.string().nullish(),
+    not_before: rfc3339DateTimeSchema.nullish(),
+    not_after: rfc3339DateTimeSchema.nullish(),
     signature: z.string(),
   })
   .refine((v) => (v.wallet_type === "MM") === (v.not_before == null), {
@@ -793,14 +794,14 @@ export const AddWalletMessageInputSchema: z.ZodObject<{
   address: z.ZodString;
   wallet_type: z.ZodType<WalletType>;
   user_id: z.ZodUUID;
-  not_before: z.ZodString;
-  not_after: z.ZodString;
+  not_before: z.ZodISODateTime;
+  not_after: z.ZodISODateTime;
 }> = z.object({
   address: z.string(),
   wallet_type: walletTypeSchema,
   user_id: z.uuid(),
-  not_before: z.string(),
-  not_after: z.string(),
+  not_before: rfc3339DateTimeSchema,
+  not_after: rfc3339DateTimeSchema,
 });
 
 export type AddWalletMessageInput = z.infer<typeof AddWalletMessageInputSchema>;
@@ -834,16 +835,16 @@ export const AddWalletInputSchema: z.ZodObject<{
   address: z.ZodString;
   public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
   wallet_type: z.ZodType<WalletType>;
-  not_before: z.ZodString;
-  not_after: z.ZodString;
+  not_before: z.ZodISODateTime;
+  not_after: z.ZodISODateTime;
   signature: z.ZodString;
 }> = z.object({
   id: z.uuid(),
   address: z.string(),
   public_key: z.string().nullish(),
   wallet_type: walletTypeSchema,
-  not_before: z.string(),
-  not_after: z.string(),
+  not_before: rfc3339DateTimeSchema,
+  not_after: rfc3339DateTimeSchema,
   signature: z.string(),
 });
 
@@ -1171,9 +1172,9 @@ export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   dwg_grantee: z.ZodString;
   dwg_issuer_public_key: z.ZodString;
   dwg_id: z.ZodUUID;
-  dwg_access_grant_timelock: z.ZodString;
-  dwg_not_before: z.ZodString;
-  dwg_not_after: z.ZodString;
+  dwg_access_grant_timelock: z.ZodISODateTime;
+  dwg_not_before: z.ZodISODateTime;
+  dwg_not_after: z.ZodISODateTime;
   dwg_signature: z.ZodString;
 }> = z.object({
   request_id: z.uuid(),
@@ -1196,9 +1197,9 @@ export const CreatePreliminaryCredentialsByDwgInputSchema: z.ZodObject<{
   dwg_grantee: z.string(),
   dwg_issuer_public_key: z.string(),
   dwg_id: z.uuid(),
-  dwg_access_grant_timelock: z.string(),
-  dwg_not_before: z.string(),
-  dwg_not_after: z.string(),
+  dwg_access_grant_timelock: rfc3339DateTimeSchema,
+  dwg_not_before: rfc3339DateTimeSchema,
+  dwg_not_after: rfc3339DateTimeSchema,
   dwg_signature: z.string(),
 });
 
@@ -1538,17 +1539,17 @@ export const DwgMessageInputSchema: z.ZodObject<{
   grantee_wallet_identifier: z.ZodString;
   issuer_public_key: z.ZodString;
   id: z.ZodUUID;
-  access_grant_timelock: z.ZodString;
-  not_usable_before: z.ZodString;
-  not_usable_after: z.ZodString;
+  access_grant_timelock: z.ZodISODateTime;
+  not_usable_before: z.ZodISODateTime;
+  not_usable_after: z.ZodISODateTime;
 }> = z.object({
   owner_wallet_identifier: z.string(),
   grantee_wallet_identifier: z.string(),
   issuer_public_key: z.string(),
   id: z.uuid(),
-  access_grant_timelock: z.string(),
-  not_usable_before: z.string(),
-  not_usable_after: z.string(),
+  access_grant_timelock: rfc3339DateTimeSchema,
+  not_usable_before: rfc3339DateTimeSchema,
+  not_usable_after: rfc3339DateTimeSchema,
 });
 
 export type DwgMessageInput = z.infer<typeof DwgMessageInputSchema>;
