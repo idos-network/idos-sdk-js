@@ -1,0 +1,12 @@
+diff --git a/dist/esm/hydrate.js b/dist/esm/hydrate.js
+--- a/dist/esm/hydrate.js
++++ b/dist/esm/hydrate.js
+@@ -47,6 +47,8 @@
+                 config.setState((x) => ({
+                     ...x,
+                     connections: new Map(),
++                    current: null,
++                    status: 'disconnected',
+                 }));
+         },
+     };

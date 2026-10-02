@@ -193,4 +193,7 @@ overrides:
   # Security: shell-quote DoS (GHSA-395f-4hp3-45gv)
   shell-quote: "1.10.0"
 
+patchedDependencies:
+  "@wagmi/core@3.6.4": patches/@wagmi__core@3.6.4.patch
+
 strictDepBuilds: true
