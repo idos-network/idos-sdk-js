@@ -9,6 +9,7 @@ import { COMMON_ENV } from "@/core/envFlags.common";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { sessionStorage } from "@/core/sessions.server";
 import { WalletType } from "@/generated/prisma/enums";
+import { toSecondPrecisionIso } from "@/lib/rfc3339";
 
 import type { Route } from "./+types/profile";
 
@@ -40,8 +41,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const userId = crypto.randomUUID();
   const notBefore = new Date();
   const notAfter = new Date(notBefore.getTime() + 15 * 60 * 1000);
-  const walletNotBefore = notBefore.toISOString();
-  const walletNotAfter = notAfter.toISOString();
+  const walletNotBefore = toSecondPrecisionIso(notBefore);
+  const walletNotAfter = toSecondPrecisionIso(notAfter);
 
   const issuer = await getIssuer();
   const proofMessage = await issuer.addWalletMessage({

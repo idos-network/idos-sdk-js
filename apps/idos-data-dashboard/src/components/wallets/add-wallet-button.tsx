@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { useIDOSClient } from "@/hooks/idOS";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+import { toSecondPrecisionIso } from "@/lib/rfc3339";
 
 import { beginAddWalletAttempt, type AddWalletAttempt } from "./add-wallet-attempt";
 
@@ -207,8 +208,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       }
 
       const notBeforeDate = new Date();
-      const notBefore = notBeforeDate.toISOString();
-      const notAfter = new Date(notBeforeDate.getTime() + WALLET_SIGNATURE_TTL_MS).toISOString();
+      const notBefore = toSecondPrecisionIso(notBeforeDate);
+      const notAfter = toSecondPrecisionIso(
+        new Date(notBeforeDate.getTime() + WALLET_SIGNATURE_TTL_MS),
+      );
       const started = beginAddWalletAttempt(pending.attempt, {
         id: attemptId,
         address,
