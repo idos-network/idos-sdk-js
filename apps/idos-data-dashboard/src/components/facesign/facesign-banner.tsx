@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useIDOSClient } from "@/hooks/idOS";
 import { createFaceSignProvider } from "@/lib/facesign";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+import { toSecondPrecisionIso } from "@/lib/rfc3339";
 
 import { FacesignDialog } from "./facesign-dialog";
 
@@ -74,8 +75,8 @@ export function FacesignBanner() {
       const publicKey = await provider.init();
       const notBefore = new Date();
       const notAfter = new Date(notBefore.getTime() + 15 * 60 * 1000);
-      const notBeforeIso = notBefore.toISOString();
-      const notAfterIso = notAfter.toISOString();
+      const notBeforeIso = toSecondPrecisionIso(notBefore);
+      const notAfterIso = toSecondPrecisionIso(notAfter);
       const message = await idOSClient.addWalletMessage({
         address: publicKey,
         wallet_type: "FaceSign",

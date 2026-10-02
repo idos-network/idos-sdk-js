@@ -20,6 +20,10 @@ export const networks = [mainnet, sepolia];
 const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
+  // Hydrate's reconnectOnMount:false path clears connections and leaves status
+  // "connected". AppKit then reads connector.id. This popup already refuses
+  // restored sessions, so it does not need wagmi storage.
+  storage: null,
 });
 
 const metadata = {
