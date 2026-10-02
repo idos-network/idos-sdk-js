@@ -144,8 +144,6 @@ describe("MM wallet type schemas", () => {
         address: "mm-signing-public-key",
         public_key: "mm-signing-public-key",
         wallet_type: "MM",
-        not_before: "2025-02-13T11:22:06Z",
-        not_after: "2025-02-13T11:37:06Z",
         signature: "",
       }),
     ).not.toThrow();
@@ -186,6 +184,6 @@ describe("getUser", () => {
       getUser({
         call: async () => [],
       } as never),
-    ).rejects.toThrow("get_user returned no user");
+    ).rejects.toThrow("get_user returned no rows");
   });
 });

@@ -704,7 +704,10 @@ export async function getUser(kwilClient: KwilActionClient): Promise<GetUserOutp
       name: "get_user",
       inputs: {},
     })
-    .then((result) => result[0]);
+    .then((result) => {
+      if (!result[0]) throw new Error("get_user returned no rows");
+      return result[0];
+    });
 }
 
 export const GetUserAsInserterInputSchema: z.ZodObject<{
@@ -820,7 +823,10 @@ export async function addWalletMessage(
       name: "add_wallet_message",
       inputs,
     })
-    .then((result) => result[0]);
+    .then((result) => {
+      if (!result[0]) throw new Error("add_wallet_message returned no rows");
+      return result[0];
+    });
 }
 
 export const AddWalletInputSchema: z.ZodObject<{
