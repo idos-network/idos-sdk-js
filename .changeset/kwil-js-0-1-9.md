@@ -5,4 +5,4 @@
 "@idos-network/kwil-infra": patch
 ---
 
-Use `@idos-network/kwil-js` 0.1.9.
+Use `@idos-network/kwil-js` 0.1.11.
