@@ -13,7 +13,7 @@ for automatic patching.
 
 `KwilActionClient` gains a `waitForTx` method: the tx-confirmation polling a
 synchronous `execute` already did, split out so it can be traced on its own.
-Behaviour is unchanged.
+Behavior is unchanged.
 
 Arguments and return values are never recorded — they carry credentials and keys.
 Use `requestHook` / `responseHook` to opt in per deployment.
