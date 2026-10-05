@@ -130,6 +130,8 @@ minimumReleaseAgeExclude:
   - vite@8.2.0
   - "@noble/hashes@2.3.0"
   - "@idos-network/kwil-js@0.1.7"
+  # Renovate security update: dompurify@3.4.16
+  - dompurify@3.4.16
 
 onlyBuiltDependencies:
   - "@swc/core"
