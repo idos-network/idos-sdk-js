@@ -1,5 +1,20 @@
 # @idos-network/client
 
+## 2.2.0
+
+### Patch Changes
+
+- 5ac11a5: Stop the iframe enclave client from requesting a remote storage reset. The enclave no longer accepts that message from the embedding page.
+- 74180e3: Delete the FaceSign mnemonic when the signer resets, and clear the idOS enclave on logout.
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [fba1c60]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/enclave@2.2.0
+  - @idos-network/utils@2.2.0
+  - @idos-network/credentials@2.2.0
+
 ## 2.1.0
 
 ### Minor Changes
