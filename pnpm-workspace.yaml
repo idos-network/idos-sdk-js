@@ -125,7 +125,7 @@ catalogs:
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Declared pins that may be newer than minimumReleaseAge
-  - axios@1.19.0
+  - axios@1.20.0
   - vite@8.2.0
   - "@noble/hashes@2.3.0"
 
@@ -153,7 +153,7 @@ overrides:
   "path-scurry>lru-cache": "11.5.2"
 
   # Overrides for security-updates (floors match top-level / catalog pins)
-  axios: ">=1.19.0"
+  axios: ">=1.20.0"
   base-x: ">=3.0.11"
   protobufjs: ">=7.5.5"
   secp256k1: ">=5.0.1"
@@ -167,10 +167,12 @@ overrides:
   "@react-router/serve": ">=8.3.0"
   "fast-uri": ">= 4.1.3"
   "ip-address": ">= 10.3.1"
-  "brace-expansion": ">= 5.0.9"
+  "brace-expansion": ">=5.0.11"
+  "undici@6": "6.28.1"
+  "undici@7": "7.29.1"
   nanoid: ">= 3.3.18"
   toml: ">= 4.1.2"
-  basic-ftp: ">= 6.0.1"
+  basic-ftp: ">=6.2.1"
   mysql2: ">= 3.22.0"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import

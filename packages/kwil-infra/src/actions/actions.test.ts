@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  addWalletMessage,
   CreatePreliminaryCredentialsByDwgInputSchema,
   getUser,
   SharePreliminaryCredentialInputSchema,
@@ -29,7 +30,7 @@ const validPreliminaryCredentialsByDwgInput = {
   dwg_grantee: "dwg-grantee",
   dwg_issuer_public_key: "dwg-issuer-public-key",
   dwg_id: "00000000-0000-4000-8000-000000000004",
-  dwg_access_grant_timelock: "0",
+  dwg_access_grant_timelock: "2026-01-01T00:00:00Z",
   dwg_not_before: "2026-01-01T00:00:00Z",
   dwg_not_after: "2026-12-31T23:59:59Z",
   dwg_signature: "dwg-signature",
@@ -143,10 +144,37 @@ describe("MM wallet type schemas", () => {
         address: "mm-signing-public-key",
         public_key: "mm-signing-public-key",
         wallet_type: "MM",
-        message: "",
         signature: "",
       }),
     ).not.toThrow();
+  });
+});
+
+const addWalletMessageInput = {
+  address: "mm-signing-public-key",
+  wallet_type: "MM" as const,
+  user_id: "00000000-0000-4000-8000-000000000001",
+  not_before: "2025-02-13T11:22:06Z",
+  not_after: "2025-02-13T11:37:06Z",
+};
+
+describe("addWalletMessage", () => {
+  it("returns the validated first row", async () => {
+    await expect(
+      addWalletMessage(
+        { call: async () => [{ message: "sign this" }] } as never,
+        addWalletMessageInput,
+      ),
+    ).resolves.toEqual({ message: "sign this" });
+  });
+
+  it("rejects an empty or missing result", async () => {
+    await expect(
+      addWalletMessage({ call: async () => [] } as never, addWalletMessageInput),
+    ).rejects.toThrow();
+    await expect(
+      addWalletMessage({ call: async () => undefined } as never, addWalletMessageInput),
+    ).rejects.toThrow();
   });
 });
 
@@ -156,6 +184,6 @@ describe("getUser", () => {
       getUser({
         call: async () => [],
       } as never),
-    ).rejects.toThrow("get_user returned no user");
+    ).rejects.toThrow("get_user returned no rows");
   });
 });

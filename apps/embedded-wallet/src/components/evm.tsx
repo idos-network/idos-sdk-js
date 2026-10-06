@@ -7,8 +7,8 @@ import { TokenETH } from "@web3icons/react";
 import { useEffect, useRef } from "react";
 import { useSignMessage, WagmiProvider } from "wagmi";
 
-import { currentSignMessage } from "../add-wallet-request";
 import { shouldAdvanceAfterConnect } from "../fresh-connection";
+import { requestChainSignMessage } from "../request-chain-message";
 import { useWalletState } from "../state";
 import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
@@ -20,6 +20,10 @@ export const networks = [mainnet, sepolia];
 const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
+  // Hydrate's reconnectOnMount:false path clears connections and leaves status
+  // "connected". AppKit then reads connector.id. This popup already refuses
+  // restored sessions, so it does not need wagmi storage.
+  storage: null,
 });
 
 const metadata = {
@@ -102,27 +106,30 @@ function Ethereum() {
     open();
   };
 
-  const handleSignMessage = () => {
-    signMessage(
-      {
-        message: currentSignMessage(),
-      },
-      {
-        onSuccess: (signature) => {
-          if (!address) {
-            return;
-          }
-
-          setWalletPayload({
-            address,
-            signature,
-            public_key: [],
-            message: currentSignMessage(),
-            disconnect: disconnectEvm,
-          });
+  const handleSignMessage = async () => {
+    if (!address) return;
+    try {
+      const chain = await requestChainSignMessage({ address, walletType: "EVM" });
+      signMessage(
+        { message: chain.message },
+        {
+          onSuccess: (signature) => {
+            setWalletPayload({
+              address,
+              signature,
+              public_key: [],
+              message: chain.message,
+              not_before: chain.notBefore,
+              not_after: chain.notAfter,
+              attemptId: chain.attemptId,
+              disconnect: disconnectEvm,
+            });
+          },
         },
-      },
-    );
+      );
+    } catch (error) {
+      console.error("Failed to load add-wallet message", error);
+    }
   };
 
   const handleDisconnect = async () => {

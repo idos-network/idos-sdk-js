@@ -28,7 +28,9 @@ import {
 import {
   type AddAttributeInput,
   type AddWalletInput,
+  type AddWalletMessageInput,
   addWallet,
+  addWalletMessage as requestAddWalletMessage,
   addWallets,
   addAttribute as createAttribute,
   createPreliminaryCredential,
@@ -545,6 +547,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   async revokeAccessGrant(id: string): Promise<{ id: string }> {
     await revokeAccessGrant(this.kwilClient, { id });
     return { id };
+  }
+
+  async addWalletMessage(params: AddWalletMessageInput): Promise<string> {
+    const result = await requestAddWalletMessage(this.kwilClient, params);
+    return result.message;
   }
 
   async addWallet(params: AddWalletInput): Promise<AddWalletInput> {
