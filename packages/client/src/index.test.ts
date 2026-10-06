@@ -31,7 +31,12 @@ const mmToken = base64UrlEncode(
 
 function idleClient(): idOSClientIdle {
   const kwilClient = {
-    setSigner: () => {},
+    signer: undefined,
+    setSigner(signer: unknown) {
+      kwilClient.signer = signer as never;
+    },
+    call: vi.fn(async () => [{ has_profile: true }]),
+    execute: vi.fn(async () => "tx-hash"),
     client: { auth: { logoutKGW: async () => {} } },
   } as unknown as KwilActionClient;
   const enclaveProvider = {
@@ -119,6 +124,61 @@ describe("UKYC blob authorization is scoped to the signed session", () => {
     const withSigner = await idle.withUserSigner(customSigner as never);
 
     expect(withSigner.blobGateway.hasAccessToken).toBe(false);
+  });
+});
+
+function ed25519Signer(fill: number) {
+  return {
+    publicAddress: `0x${String(fill).repeat(40)}`,
+    publicKey: base64UrlEncode(new Uint8Array(32).fill(fill)),
+    signatureType: "ed25519",
+    walletType: "EVM",
+    signMessage: async () => new Uint8Array(64),
+  } as never;
+}
+
+describe("signer switching on a shared idle client", () => {
+  const grantId = crypto.randomUUID();
+  const user = {
+    id: crypto.randomUUID(),
+    recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+    encryption_password_store: "user" as const,
+  };
+
+  it("stops an older wrapper from reading or writing as the newer caller", async () => {
+    const idle = idleClient();
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const loggedInA = new idOSClientLoggedIn(withA, user);
+    const withB = await idle.withUserSigner(ed25519Signer(2));
+    const loggedInB = new idOSClientLoggedIn(withB, user);
+
+    await expect(withA.hasProfile()).rejects.toThrow(/stale/);
+    await expect(loggedInA.getAllCredentials()).rejects.toThrow(/stale/);
+    await expect(loggedInA.revokeAccessGrant(grantId)).rejects.toThrow(/stale/);
+    await expect(withA.createUserEncryptionProfile("user-a")).rejects.toThrow(/stale/);
+    expect(idle.kwilClient.execute).not.toHaveBeenCalled();
+
+    await expect(withB.hasProfile()).resolves.toBe(true);
+    await expect(loggedInB.revokeAccessGrant(grantId)).resolves.toEqual({ id: grantId });
+    expect(idle.kwilClient.execute).toHaveBeenCalledOnce();
+  });
+
+  it("leaves the newer session alone when an older wrapper logs out", async () => {
+    const idle = idleClient();
+    const reset = vi.fn(async () => {});
+    idle.enclaveProvider.reset = reset;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const withB = await idle.withUserSigner(ed25519Signer(2));
+
+    await withA.logOut();
+
+    expect(reset).not.toHaveBeenCalled();
+    await expect(withB.hasProfile()).resolves.toBe(true);
+
+    await withB.logOut();
+
+    expect(reset).toHaveBeenCalledOnce();
+    await expect(withB.hasProfile()).rejects.toThrow(/stale/);
   });
 });
 
@@ -230,7 +290,9 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
 }> {
   let preliminaryInput: Record<string, unknown> | undefined;
   let uploadedBytes: Uint8Array | undefined;
+  const kwilSigner = walletType === "MM" ? createMmTokenAuth(mmToken) : {};
   const kwilClient = {
+    signer: kwilSigner,
     execute: async ({ inputs }: { inputs: Record<string, unknown> }) => {
       preliminaryInput = inputs;
     },
@@ -257,7 +319,7 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
     kwilClient,
     enclaveProvider: {},
     signer: {},
-    kwilSigner: walletType === "MM" ? createMmTokenAuth(mmToken) : {},
+    kwilSigner,
     walletIdentifier: "wallet",
     walletPublicKey: undefined,
     walletType,
