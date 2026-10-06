@@ -257,6 +257,43 @@ describe("LocalEnclave", () => {
     expect(passwordContextSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("wipes a live cached profile once the canonical public key rotates", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const { keyPair } = await enclave.getPrivateEncryptionProfile();
+
+    await enclave.reconfigure({ expectedUserEncryptionPublicKey: base64Encode(keyPair.publicKey) });
+    expect((await enclave.getPrivateEncryptionProfile()).keyPair).toBe(keyPair);
+
+    await enclave.reconfigure({
+      expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+    });
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+    );
+    // Rotation reset before re-entry: the second prompt found an empty store.
+    expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
+    expect(await store.get(STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY)).toBeUndefined();
+  });
+
+  it("wipes a reloaded cached profile whose key no longer matches the canonical key", async () => {
+    const store = new MemoryStore();
+    await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
+
+    const reloaded = new TestEnclave({
+      userId,
+      store,
+      expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+    } as LocalEnclaveOptions);
+    await reloaded.load();
+
+    await expect(reloaded.encrypt(new Uint8Array([1]), new Uint8Array(32))).rejects.toThrow(
+      "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+    );
+    expect(reloaded.userIdPresentOnPrompt).toEqual([false]);
+    expect(await store.get(STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY)).toBeUndefined();
+  });
+
   it("forgets a cached profile after the remember duration elapses", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
 
