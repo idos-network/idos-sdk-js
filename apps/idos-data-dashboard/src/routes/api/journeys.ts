@@ -5,7 +5,7 @@ import type { User } from "@/generated/prisma/client";
 
 import { getDb } from "@/core/db.server";
 import { createRelayClient } from "@/core/relay.server";
-import { sessionStorage } from "@/core/sessions.server";
+import { getUserId, sessionStorage } from "@/core/sessions.server";
 
 import type { Route } from "./+types/journeys";
 
@@ -35,13 +35,15 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
-  if (!session.get("userId")) {
+  const userId = getUserId(session);
+
+  if (!userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const user = await getDb().user.findUnique({
     where: {
-      id: session.get("userId"),
+      id: userId,
     },
   });
 

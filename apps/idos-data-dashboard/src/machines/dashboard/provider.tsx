@@ -5,6 +5,7 @@ import { createProfile } from "../actors/create-profile";
 import { disconnect } from "../actors/disconnect-wallet";
 import { initializeIdOS } from "../actors/initialize-idos";
 import { reconnectWallet } from "../actors/reconnect-wallet";
+import { watchEvmAccount } from "../actors/watch-evm-account";
 import { dashboardMachine } from "./machine";
 
 export const MachineContext = createActorContext(
@@ -15,6 +16,7 @@ export const MachineContext = createActorContext(
       disconnect,
       reconnectWallet,
       createProfile,
+      watchEvmAccount,
     },
   }),
 );
