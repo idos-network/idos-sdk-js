@@ -1,14 +1,12 @@
-import { IsBoolean, IsOptional, IsString, IsISO31661Alpha2, IsMimeType } from "class-validator";
+import { IsOptional, IsString, IsISO31661Alpha2, IsMimeType, IsEnum } from "class-validator";
 
+import { ResidentialAddressSources, type ResidentialAddressSource } from "../enums";
 import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
 
 export class ResidentialAddress {
-  /*
-   * Whether the address has been verified against the proof document.
-   * If false, the address has been manually entered by the user.
-   */
-  @IsBoolean()
-  verified: boolean;
+  /* How the address was obtained: entered by the user, matched against a database, or verified from a proof document. */
+  @IsEnum(ResidentialAddressSources)
+  source: ResidentialAddressSource;
 
   /* Street address. */
   @IsString()
@@ -43,7 +41,7 @@ export class ResidentialAddress {
   country: string;
 
   /* Type of document provided to verify the address (e.g. utility bill, bank statement). */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
   @IsString()
   proofCategory?: string;
 
@@ -53,18 +51,18 @@ export class ResidentialAddress {
   proofDateOfIssue?: Date;
 
   /* The document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
   @Base85FileField()
   proofFile?: Buffer;
 
   /* Type of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
   @IsString()
   @IsMimeType()
   proofFileType?: string;
 
   /* Name of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
   @IsString()
   proofFileName?: string;
 
