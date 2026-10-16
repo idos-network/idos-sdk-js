@@ -11,6 +11,8 @@ export interface Session {
 
   // Profile creation
   profileUserId: string;
+  walletNotBefore: string;
+  walletNotAfter: string;
 }
 
 export const sessionStorage = createCookieSessionStorage<Session>({
