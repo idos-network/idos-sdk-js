@@ -4,7 +4,7 @@ import { ResidentialAddressSources, type ResidentialAddressSource } from "../enu
 import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
 
 export class ResidentialAddress {
-  /* How the address was obtained: entered by the user, matched against a database, or verified from a proof document. */
+  /* How the address was obtained: typed in, autocompleted, from GPS, an external database, or read from an identity or proof-of-address document. */
   @IsEnum(ResidentialAddressSources)
   source: ResidentialAddressSource;
 
@@ -41,7 +41,7 @@ export class ResidentialAddress {
   country: string;
 
   /* Type of document provided to verify the address (e.g. utility bill, bank statement). */
-  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   proofCategory?: string;
 
@@ -51,18 +51,18 @@ export class ResidentialAddress {
   proofDateOfIssue?: Date;
 
   /* The document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @Base85FileField()
   proofFile?: Buffer;
 
   /* Type of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   @IsMimeType()
   proofFileType?: string;
 
   /* Name of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.source === "proof")
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   proofFileName?: string;
 

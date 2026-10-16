@@ -174,7 +174,7 @@ describe("all versions issue + verify + parse", () => {
       .addSection("contact", { email: "j@e.com", phoneNumber: "+1" })
       .addSection("biometric", { selfieFile: Buffer.from("S"), selfieMatch: 99 })
       .addSection("residentialAddress", {
-        source: "proof",
+        source: "PROOF_OF_ADDRESS",
         street: "S",
         houseNumber: "1",
         additionalAddressInfo: "x",
