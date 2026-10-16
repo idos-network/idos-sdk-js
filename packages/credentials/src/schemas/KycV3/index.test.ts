@@ -80,7 +80,7 @@ describe("KycV3 validity", () => {
       nationality: "US",
     });
     credential.addSection("residentialAddress", {
-      source: "manual",
+      source: "MANUAL",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -139,7 +139,7 @@ describe("KycV3 validity", () => {
   it("requires proof fields on a verified address, but still checks their types when unverified", () => {
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        source: "proof",
+        source: "PROOF_OF_ADDRESS",
         street: "Main St",
         city: "New York",
         country: "US",
@@ -148,7 +148,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        source: "manual",
+        source: "MANUAL",
         street: "Oak Ave",
         city: "Boston",
         country: "US",
@@ -157,7 +157,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        source: "manual",
+        source: "MANUAL",
         street: "Oak Ave",
         city: "Boston",
         country: "US",
@@ -168,10 +168,10 @@ describe("KycV3 validity", () => {
     ).toThrow(/proofFile/);
   });
 
-  it("accepts a database-checked address without proof, but does not count it as plus", () => {
+  it("accepts an external-database address without proof, but does not count it as plus", () => {
     const credential = basicCredential();
     credential.addSection("residentialAddress", {
-      source: "database",
+      source: "EXTERNAL_DB",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -337,7 +337,7 @@ describe("KycV3 derived fields", () => {
     const credential = basicCredential();
     credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
     credential.addSection("residentialAddress", {
-      source: "proof",
+      source: "PROOF_OF_ADDRESS",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -406,7 +406,7 @@ describe("KycV3 serialization", () => {
     credential.addSection("contact", { email: "john@example.com", phoneNumber: "+1234567890" });
     credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
     credential.addSection("residentialAddress", {
-      source: "proof",
+      source: "PROOF_OF_ADDRESS",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -496,7 +496,7 @@ describe("KycV3 serialization", () => {
       contactPhoneNumber: "+1234567890",
       biometricSelfieFile: fileToBase85(Buffer.from("Selfie")),
       biometricSelfieMatch: 99,
-      residentialAddressSource: "proof",
+      residentialAddressSource: "PROOF_OF_ADDRESS",
       residentialAddressStreet: "Main St",
       residentialAddressCity: "New York",
       residentialAddressCountry: "US",
@@ -589,7 +589,7 @@ describe("KycV3 deserialization", () => {
     const credential = basicCredential();
     credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
     credential.addSection("residentialAddress", {
-      source: "manual",
+      source: "MANUAL",
       street: "Oak Ave",
       houseNumber: "42",
       city: "Boston",
@@ -601,7 +601,7 @@ describe("KycV3 deserialization", () => {
     expect(credential.kycLevel()).toBe(1);
 
     const serialized = credential.serializeSubject();
-    expect(serialized.residentialAddressSource).toBe("manual");
+    expect(serialized.residentialAddressSource).toBe("MANUAL");
     expect("residentialAddressProofCategory" in serialized).toBe(false);
     expect("residentialAddressProofFile" in serialized).toBe(false);
 
@@ -609,7 +609,7 @@ describe("KycV3 deserialization", () => {
     await roundTrip.deserialize(serializedCredential(serialized));
 
     expect(roundTrip.subject.residentialAddress).toEqual({
-      source: "manual",
+      source: "MANUAL",
       street: "Oak Ave",
       houseNumber: "42",
       city: "Boston",

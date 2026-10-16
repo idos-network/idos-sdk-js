@@ -86,7 +86,7 @@ describe("parseCredential", () => {
         contactEmail: "john@example.com",
         contactPhoneNumber: "+1234567890",
         biometricSelfieFile: SELFIE_FILE,
-        residentialAddressSource: "proof",
+        residentialAddressSource: "PROOF_OF_ADDRESS",
         residentialAddressStreet: "Main St",
         residentialAddressCity: "New York",
         residentialAddressCountry: "US",
