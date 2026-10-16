@@ -1,5 +1,16 @@
 # embedded-wallet
 
+## 0.4.4
+
+### Patch Changes
+
+- 5c53b0f: Bind add-wallet requests to the current user and require the signed message to match that request.
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 0.4.3
 
 ### Patch Changes
