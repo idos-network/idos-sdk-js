@@ -1,5 +1,17 @@
 # @idos-network/consumer
 
+## 2.2.0
+
+### Patch Changes
+
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [f2dc464]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/credentials@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
