@@ -61,6 +61,12 @@ export const verifyNearSignature = async (
 
     const deserializedPayload = borshDeserialize(payloadSchema, payloadBytes) as NEP413Payload;
 
+    // NEP-413 binds the signature to a relying party; reject ones addressed elsewhere.
+    if (deserializedPayload.recipient !== "idos.network") {
+      console.warn("Invalid NEP-413 recipient:", deserializedPayload.recipient);
+      return false;
+    }
+
     // Reconstruct the payload with tag and message (matching Go implementation)
     const reconstructedPayload: NEP413Payload = {
       tag: 2147484061, // 2**31 + 413
