@@ -2,7 +2,7 @@ import type { idOSClient, idOSClientWithUserSigner } from "@idos-network/client"
 import type { WalletSelector } from "@near-wallet-selector/core";
 
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
-import { assign, fromPromise, setup } from "xstate";
+import { assign, fromCallback, fromPromise, setup } from "xstate";
 
 export interface DashboardContext {
   walletType: WalletType | null;
@@ -74,6 +74,11 @@ export type ReconnectWalletInput = {
   walletType: WalletType;
   walletAddress: string;
   walletPublicKey: string;
+};
+
+export type WatchEvmAccountInput = {
+  walletType: WalletType | null;
+  walletAddress: string | null;
 };
 
 export type ReconnectWalletOutput = {
@@ -149,6 +154,8 @@ const noopCreateProfile = fromPromise<CreateProfileOutput, CreateProfileInput>(a
   throw new Error("createProfile actor not provided");
 });
 
+const noopWatchEvmAccount = fromCallback<DashboardEvent, WatchEvmAccountInput>(() => {});
+
 export const dashboardMachine = setup({
   types: {
     context: {} as DashboardContext,
@@ -160,6 +167,7 @@ export const dashboardMachine = setup({
     disconnect: noopDisconnect,
     reconnectWallet: noopReconnectWallet,
     createProfile: noopCreateProfile,
+    watchEvmAccount: noopWatchEvmAccount,
   },
   guards: {
     hasPersistedWallet: () => getPersistedWallet() !== null,
@@ -171,6 +179,12 @@ export const dashboardMachine = setup({
     },
     clearPersistedWallet: () => {
       persistWallet(null, null, null);
+    },
+    // The developer console session is not bound to a wallet, so it must not outlive it
+    clearServerSession: () => {
+      fetch("/api/session", { method: "DELETE" }).catch((error) => {
+        console.error("Error during session delete:", error);
+      });
     },
     resetWalletState: assign({
       walletType: () => null,
@@ -203,7 +217,7 @@ export const dashboardMachine = setup({
     },
 
     disconnected: {
-      entry: assign({ error: () => null }),
+      entry: [assign({ error: () => null }), "clearServerSession"],
       on: {
         CONNECT_EVM: {
           target: "connecting",
@@ -393,6 +407,13 @@ export const dashboardMachine = setup({
     },
 
     noProfile: {
+      invoke: {
+        src: "watchEvmAccount",
+        input: ({ context }): WatchEvmAccountInput => ({
+          walletType: context.walletType,
+          walletAddress: context.walletAddress,
+        }),
+      },
       on: {
         DISCONNECT: "disconnecting",
         CREATE_PROFILE: "creatingProfile",
@@ -441,12 +462,26 @@ export const dashboardMachine = setup({
     },
 
     loggedIn: {
+      invoke: {
+        src: "watchEvmAccount",
+        input: ({ context }): WatchEvmAccountInput => ({
+          walletType: context.walletType,
+          walletAddress: context.walletAddress,
+        }),
+      },
       on: {
         DISCONNECT: "disconnecting",
       },
     },
 
     error: {
+      invoke: {
+        src: "watchEvmAccount",
+        input: ({ context }): WatchEvmAccountInput => ({
+          walletType: context.walletType,
+          walletAddress: context.walletAddress,
+        }),
+      },
       on: {
         RETRY: {
           target: "connecting",
