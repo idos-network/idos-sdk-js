@@ -132,6 +132,29 @@ function contentUriForWallet(
   return mmTokenCredentialContentUri(kwilSigner, credentialId);
 }
 
+// Every wrapper made from one idle client shares its Kwil client, KGW session and enclave.
+// Only the wrapper whose signer is currently active may use them, so a stale one can't act
+// as whoever called `withUserSigner()` after it.
+function activeKwilClient(kwilClient: KwilActionClient, kwilSigner: KwilSigner): KwilActionClient {
+  if (kwilClient.signer !== kwilSigner) {
+    throw new Error(
+      "This idOS client is stale: another signer was set or it was logged out. Use the client returned by the latest `withUserSigner()`.",
+    );
+  }
+  return kwilClient;
+}
+
+async function logOutShared(
+  kwilClient: KwilActionClient,
+  kwilSigner: KwilSigner,
+  enclaveProvider: BaseProvider,
+): Promise<void> {
+  // A stale wrapper must not log out the session that replaced it.
+  if (kwilClient.signer !== kwilSigner) return;
+  kwilClient.setSigner(undefined);
+  await enclaveProvider.reset();
+}
+
 export type idOSClient =
   | idOSClientConfiguration
   | idOSClientIdle
@@ -266,7 +289,7 @@ export class idOSClientIdle {
 export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>, "state"> {
   readonly state: "with-user-signer";
   readonly store: Store;
-  readonly kwilClient: KwilActionClient;
+  readonly #kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
@@ -286,7 +309,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
-    this.kwilClient = idOSClientIdle.kwilClient;
+    this.#kwilClient = idOSClientIdle.kwilClient;
     this.enclaveProvider = idOSClientIdle.enclaveProvider;
     this.signer = signer;
     this.kwilSigner = kwilSigner;
@@ -298,12 +321,15 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.enclaveProvider.setSigner(this.signer);
   }
 
+  get kwilClient(): KwilActionClient {
+    return activeKwilClient(this.#kwilClient, this.kwilSigner);
+  }
+
   async logOut(): Promise<idOSClientIdle> {
-    this.kwilClient.setSigner(undefined);
-    await this.enclaveProvider.reset();
+    await logOutShared(this.#kwilClient, this.kwilSigner, this.enclaveProvider);
     return new idOSClientIdle(
       this.store,
-      this.kwilClient,
+      this.#kwilClient,
       this.enclaveProvider,
       idleBlobGateway(this.blobGateway.url),
     );
@@ -319,6 +345,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     userId: string,
     forceEncryptionPasswordStore?: EncryptionPasswordStore,
   ): Promise<PublicEncryptionProfile> {
+    activeKwilClient(this.#kwilClient, this.kwilSigner);
     await this.enclaveProvider.reconfigure({
       mode: "new",
       userId,
@@ -354,7 +381,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
   readonly state: "logged-in";
   readonly store: Store;
-  readonly kwilClient: KwilActionClient;
+  readonly #kwilClient: KwilActionClient;
   readonly enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
@@ -367,7 +394,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
     this.state = "logged-in";
     this.store = idOSClientWithUserSigner.store;
-    this.kwilClient = idOSClientWithUserSigner.kwilClient;
+    this.#kwilClient = idOSClientWithUserSigner.kwilClient;
     this.enclaveProvider = idOSClientWithUserSigner.enclaveProvider;
     this.signer = idOSClientWithUserSigner.signer;
     this.kwilSigner = idOSClientWithUserSigner.kwilSigner;
@@ -378,12 +405,15 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.blobGateway = idOSClientWithUserSigner.blobGateway;
   }
 
+  get kwilClient(): KwilActionClient {
+    return activeKwilClient(this.#kwilClient, this.kwilSigner);
+  }
+
   async logOut(): Promise<idOSClientIdle> {
-    this.kwilClient.setSigner(undefined);
-    await this.enclaveProvider.reset();
+    await logOutShared(this.#kwilClient, this.kwilSigner, this.enclaveProvider);
     return new idOSClientIdle(
       this.store,
-      this.kwilClient,
+      this.#kwilClient,
       this.enclaveProvider,
       idleBlobGateway(this.blobGateway.url),
     );
