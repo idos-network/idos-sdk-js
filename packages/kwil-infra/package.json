@@ -57,7 +57,7 @@
     "@gemwallet/api": "catalog:xrp",
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
-    "jsdom": "^22.1.0",
+    "jsdom": "^30.0.0",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing",
