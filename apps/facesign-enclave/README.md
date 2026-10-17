@@ -56,9 +56,8 @@ VITE_ENTROPY_SERVICE_URL=https://entropy.staging.sandbox.fractal.id/
 VITE_FACETEC_DEVICE_KEY_IDENTIFIER="your-device-key"
 VITE_FACETEC_IFRAME_FEATURE_FLAG="your-iframe-feature-flag-uuid"
 
-# Allowed parent origins for iframe embedding (comma-separated)
-# Use "*" for development, specific origins for production
-VITE_ALLOWED_ORIGINS="*"
+# Allowed parent origins for iframe embedding (comma-separated). "*" is not supported.
+VITE_ALLOWED_ORIGINS="https://localhost:5173,https://localhost:5174"
 
 # Upstash Redis (for mobile handoff sessions) — provided by the Vercel KV integration
 KV_REST_API_URL="https://your-instance.upstash.io"
@@ -69,17 +68,17 @@ KV_PREFIX="your keys prefix"
 SECRET_KEY_BASE="abcd1234"
 ```
 
-| Variable                             | Required | Description                                                                           |
-| ------------------------------------ | -------- | ------------------------------------------------------------------------------------- |
-| `VITE_FACESIGN_SERVICE_URL`          | Yes      | FaceSign backend service endpoint.                                                    |
-| `VITE_ENTROPY_SERVICE_URL`           | Yes      | Entropy service endpoint for key derivation.                                          |
-| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Yes      | FaceTec device key identifier.                                                        |
-| `VITE_FACETEC_IFRAME_FEATURE_FLAG`   | Yes      | FaceTec iframe feature flag UUID.                                                     |
-| `VITE_ALLOWED_ORIGINS`               | Yes      | Comma-separated origins allowed to embed the enclave. Use `"*"` for development only. |
-| `KV_REST_API_URL`                    | Yes      | Upstash Redis REST URL for mobile handoff sessions.                                   |
-| `KV_REST_API_TOKEN`                  | Yes      | Upstash Redis REST token.                                                             |
-| `KV_PREFIX`                          | Yes      | Redis keys prefix.                                                                    |
-| `SECRET_KEY_BASE`                    | Yes      | Session secret key.                                                                   |
+| Variable                             | Required | Description                                                                   |
+| ------------------------------------ | -------- | ----------------------------------------------------------------------------- |
+| `VITE_FACESIGN_SERVICE_URL`          | Yes      | FaceSign backend service endpoint.                                            |
+| `VITE_ENTROPY_SERVICE_URL`           | Yes      | Entropy service endpoint for key derivation.                                  |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Yes      | FaceTec device key identifier.                                                |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG`   | Yes      | FaceTec iframe feature flag UUID.                                             |
+| `VITE_ALLOWED_ORIGINS`               | Yes      | Comma-separated origins allowed to embed the enclave. `"*"` is not supported. |
+| `KV_REST_API_URL`                    | Yes      | Upstash Redis REST URL for mobile handoff sessions.                           |
+| `KV_REST_API_TOKEN`                  | Yes      | Upstash Redis REST token.                                                     |
+| `KV_PREFIX`                          | Yes      | Redis keys prefix.                                                            |
+| `SECRET_KEY_BASE`                    | Yes      | Session secret key.                                                           |
 
 ### Running with the dashboard
 
@@ -99,7 +98,7 @@ To test the full FaceSign flow locally, both apps must be running simultaneously
 
 3. Ensure the dashboard's `VITE_FACESIGN_ENCLAVE_URL` (in `apps/idos-data-dashboard/.env.local`) matches the enclave's URL (e.g., `https://localhost:5174`).
 
-4. Ensure the enclave's `VITE_ALLOWED_ORIGINS` includes the dashboard's origin (`https://localhost:5173` or `"*"` for development).
+4. Ensure the enclave's `VITE_ALLOWED_ORIGINS` includes the dashboard's origin (`https://localhost:5173`).
 
 ### Testing the iframe embedding
 
@@ -232,8 +231,8 @@ curl -s -I -X OPTIONS "https://<enclave-url>/api/handoff" \
 
 The enclave validates incoming postMessage origins based on `VITE_ALLOWED_ORIGINS`:
 
-- **Development**: Set to `"*"` to allow any origin
-- **Production**: Set to comma-separated list of allowed origins: `"https://app1.com,https://app2.com"`
+- Set it to a comma-separated list of allowed origins: `"https://app1.com,https://app2.com"`. A `"*"` wildcard is ignored; list every origin, including `https://localhost:5174` to use `iframe-test.html`.
+- An allowed origin only learns the wallet address after the user approves a session for it in the enclave. `address_request` returns `null` for any other origin. Approvals are cleared on `reset` and when a new key is stored.
 
 ### Storage
 
