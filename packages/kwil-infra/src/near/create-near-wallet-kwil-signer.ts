@@ -169,12 +169,20 @@ export async function createNearWalletKwilSigner(
   if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
   if (wallet.id === "my-near-wallet") {
-    const { accountId, signature, publicKey, error } = Object.fromEntries(
+    const fragment = Object.fromEntries(
       new URLSearchParams(window.location.hash.slice(1)).entries(),
     );
+    const { publicKey, error } = fragment;
+
+    // The fragment is attacker-controllable: only trust a key that is a full-access key of the connected account.
+    const fragmentTrusted =
+      !!fragment.signature &&
+      fragment.accountId === currentAddress &&
+      !!(await getNearFullAccessPublicKeys(currentAddress))?.includes(publicKey);
+    const signature = fragmentTrusted ? fragment.signature : undefined;
 
     if (signature) {
-      await store.set("signer-address", accountId);
+      await store.set("signer-address", currentAddress);
       await store.set("signer-public-key", publicKey);
     }
 
