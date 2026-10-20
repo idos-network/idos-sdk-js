@@ -278,8 +278,18 @@ export class Action<T extends EnvironmentType> {
     // namedParams look like { $param1: 'value1', $param2: 'value2' }
     // positionalParams look like ['value1', 'value2']
     if (isNamedParams(actionInputs)) {
-      // retrieve the schema for the database
-      const namespaceRequest = await this.kwil.getActions(this.namespace);
+      // A cached list can omit an action created after the fetch. Refetch once before failing.
+      let namespaceRequest = await this.kwil.getActions(this.namespace);
+      let selectedAction = this.findNamespaceAction(namespaceRequest);
+
+      if (!selectedAction && namespaceRequest.status === 200) {
+        this.kwil.clearActionsCache(this.namespace);
+        namespaceRequest = await this.kwil.getActions(this.namespace);
+        selectedAction = this.findNamespaceAction(namespaceRequest);
+        if (!selectedAction) {
+          this.kwil.clearActionsCache(this.namespace);
+        }
+      }
 
       // Check if the request was successful
       if (namespaceRequest.status !== 200) {
@@ -295,10 +305,6 @@ export class Action<T extends EnvironmentType> {
         );
       }
 
-      const namespaceActions = namespaceRequest.data as NamespaceAction[];
-
-      // Find the action matching the requested name
-      const selectedAction = namespaceActions.find((a) => a.name === this.actionName);
       if (!selectedAction) {
         throw new Error(`Action '${this.actionName}' not found in namespace '${this.namespace}'.`);
       }
@@ -392,6 +398,16 @@ export class Action<T extends EnvironmentType> {
     // If we reach here, all provided parameters are valid (even if some expected
     // parameters are omitted due to defaults).
     return true;
+  }
+
+  private findNamespaceAction(namespaceRequest: {
+    status: number;
+    data?: object[] | null;
+  }): NamespaceAction | undefined {
+    if (namespaceRequest.status !== 200 || !namespaceRequest.data?.length) {
+      return undefined;
+    }
+    return (namespaceRequest.data as NamespaceAction[]).find((a) => a.name === this.actionName);
   }
 
   private assertNotBuilding(): void {
