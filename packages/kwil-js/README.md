@@ -43,14 +43,14 @@ const kwil = new WebKwil({
 ### NodeJS
 
 ```javascript
-const { Wallet } = require("ethers");
-const kwiljs = require("@idos-network/kwil-js");
+import { Wallet } from "ethers";
+import { NodeKwil } from "@idos-network/kwil-js";
 
 // to be used for signing transactions
 // instead of a provider, nodeJS requires a wallet
 const wallet = new Wallet("my_ethereum_private_key");
 
-const kwil = new kwiljs.NodeKwil({
+const kwil = new NodeKwil({
   kwilProvider: "kwil_provider_endpoint",
   chainId: "your_kwil_chain_id",
 });
