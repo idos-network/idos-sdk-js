@@ -415,12 +415,16 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
       if (cookieHandlerCallback) {
         cookieHandlerCallback.setCookie();
       }
-      const message = await this.buildMessage(callBody, kwilSigner);
-      const response = await this.callClient(message);
-
-      // if nodeJS user passes a cookie, reset it after the call
-      if (cookieHandlerCallback) {
-        cookieHandlerCallback.resetCookie();
+      let message;
+      let response;
+      try {
+        message = await this.buildMessage(callBody, kwilSigner);
+        response = await this.callClient(message);
+      } finally {
+        // Reset before any later request, including when build or call throws.
+        if (cookieHandlerCallback) {
+          cookieHandlerCallback.resetCookie();
+        }
       }
 
       // if the user is not authenticated, prompt the user to authenticate
