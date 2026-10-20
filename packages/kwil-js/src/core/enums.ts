@@ -1,8 +1,9 @@
 /**
  * VarType is the type of the data in the database.
  *
- * Although Kwil supports text, int, bool, blob, uuid, uint256, decimal, and null types, kwil-js only supports text, int, bool, decimal, and null. If you need to send blob, uuid, or uint256 types, you should send them as a javascript string.
- *
+ * kwil-js supports text, int8, bool, numeric, null, uuid, and bytea.
+ * Send bytea values as a Uint8Array. A string is encoded as text, not bytes.
+ * Send uuid values as a canonical UUID string.
  */
 export enum VarType {
   UUID = "uuid",

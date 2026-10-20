@@ -93,6 +93,20 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
   }
 
   /**
+   * Drops cached action definitions. `execSql` already clears every namespace,
+   * because a statement can create or drop actions and the SQL is not parsed.
+   *
+   * @param namespace - The namespace to drop. Drops every namespace when omitted.
+   */
+  public clearActionsCache(namespace?: string): void {
+    if (namespace !== undefined) {
+      this.actionsCache.delete(namespace);
+      return;
+    }
+    this.actionsCache.clear();
+  }
+
+  /**
    * Retrieves the actions in a database given its namespace.
    *
    * @param namespace - The namespace of the actions to retrieve.
@@ -257,14 +271,14 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    * Executes a mutative SQL query (INSERT, UPDATE, DELETE) on a database.
    *
    * @param query - The SQL query to execute, including the database identifier in curly braces.
-   *               Use parameterized queries with @paramName placeholders for better security (recommended):
-   *               '{dbname}INSERT INTO users (name) VALUES (@name)'
+   *               Use parameterized queries with $paramName placeholders for better security (recommended):
+   *               '{dbname}INSERT INTO users (name) VALUES ($name)'
    *
    *               Raw queries are possible but discouraged:
    *               '{dbname}INSERT INTO users (name) VALUES ('john')'
    *
    * @param params - Object containing named parameters to bind to the query. Parameters are referenced
-   *                using @paramName syntax in the query.
+   *                using $paramName syntax in the query.
    * @param kwilSigner - Required signer for executing mutative queries
    * @param synchronous - (optional) If true, waits for transaction to be mined
    *
@@ -316,10 +330,12 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
       signatureType: signer.signatureType,
     }).buildTx();
 
-    return await this.broadcastClient(
+    const receipt = await this.broadcastClient(
       transaction,
       synchronous ? BroadcastSyncType.COMMIT : BroadcastSyncType.SYNC,
     );
+    this.actionsCache.clear();
+    return receipt;
   }
 
   /**
@@ -383,29 +399,20 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    *
    * @param {CallBody} callBody - The message to send. The message can be built using the buildMsg() method in the Action class.
    * @param {KwilSigner} kwilSigner (optional) - KwilSigner should be passed if the action requires authentication OR if the action uses a `@caller` contextual variable. If `@caller` is used and authentication is not required, the user will not be prompted to authenticate; however, the user's identifier will be passed as the sender.
-   * @param {(...args: any) => void} cookieHandlerCallback (optional) - the callback to handle the cookie if in the NODE environment
+   * @param cookie - Sent only with the first call. The KGW retry uses the session cookie instead.
    * @returns A promise that resolves to the receipt of the message.
    */
   protected async baseCall<T extends object>(
     callBody: CallBody,
     kwilSigner?: KwilSigner,
-    cookieHandlerCallback?: { setCookie: () => void; resetCookie: () => void },
+    cookie?: string,
   ): Promise<GenericResponse<MsgReceipt<T>>> {
     // Ensure auth mode is set
     await this.ensureAuthenticationMode();
 
     if (this.authMode === AuthenticationMode.OPEN) {
-      // if nodeJS user passes a cookie, use it for the call
-      if (cookieHandlerCallback) {
-        cookieHandlerCallback.setCookie();
-      }
       const message = await this.buildMessage(callBody, kwilSigner);
-      const response = await this.callClient(message);
-
-      // if nodeJS user passes a cookie, reset it after the call
-      if (cookieHandlerCallback) {
-        cookieHandlerCallback.resetCookie();
-      }
+      const response = await this.callClient(message, cookie);
 
       // if the user is not authenticated, prompt the user to authenticate
       if (response.authCode === AuthErrorCodes.KGW_MODE && this.autoAuthenticate) {

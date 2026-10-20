@@ -47,6 +47,14 @@ describe("Kwil actions caching", () => {
     expect(mockSelectQuery).toHaveBeenCalledWith(expect.any(String), { $namespace: "appposts" });
   });
 
+  it("should refetch a namespace after its cache entry is cleared", async () => {
+    await kwil.getActions("myappusers");
+    kwil.clearActionsCache("myappusers");
+    await kwil.getActions("myappusers");
+
+    expect(mockSelectQuery).toHaveBeenCalledTimes(2);
+  });
+
   it("should handle errors without caching", async () => {
     mockSelectQuery.mockRejectedValueOnce(new Error("DB error"));
 

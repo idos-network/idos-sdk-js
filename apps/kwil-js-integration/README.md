@@ -17,7 +17,7 @@ pnpm --filter kwil-js-integration test:integration
 `PRIVATE_KEY` must be an Ethereum/secp256k1 key that is funded on the target chain when
 `GAS_ON=TRUE`. The `GATEWAY_ON`, `GAS_ON` and `PRIVATE_MODE` switches select which suites run —
 with all of them `FALSE` you get the plain node suites (database, arrays, variables, edge cases,
-nonce, latin characters).
+and signers). The nonce suite is skipped.
 
 ## Getting a node
 
