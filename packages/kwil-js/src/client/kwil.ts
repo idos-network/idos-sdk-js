@@ -257,14 +257,14 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    * Executes a mutative SQL query (INSERT, UPDATE, DELETE) on a database.
    *
    * @param query - The SQL query to execute, including the database identifier in curly braces.
-   *               Use parameterized queries with @paramName placeholders for better security (recommended):
-   *               '{dbname}INSERT INTO users (name) VALUES (@name)'
+   *               Use parameterized queries with $paramName placeholders for better security (recommended):
+   *               '{dbname}INSERT INTO users (name) VALUES ($name)'
    *
    *               Raw queries are possible but discouraged:
    *               '{dbname}INSERT INTO users (name) VALUES ('john')'
    *
    * @param params - Object containing named parameters to bind to the query. Parameters are referenced
-   *                using @paramName syntax in the query.
+   *                using $paramName syntax in the query.
    * @param kwilSigner - Required signer for executing mutative queries
    * @param synchronous - (optional) If true, waits for transaction to be mined
    *
