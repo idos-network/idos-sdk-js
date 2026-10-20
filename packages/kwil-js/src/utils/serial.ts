@@ -83,12 +83,10 @@ export function bytesToHex(bytes: Uint8Array): HexString {
 
 export function hexToBytes(hex: string): Uint8Array {
   strings.requireNonNil(hex);
-  if (hex.length % 2 !== 0) {
+  const digits = hex.startsWith("0x") || hex.startsWith("0X") ? hex.slice(2) : hex;
+  if (digits.length % 2 !== 0 || !/^[0-9a-fA-F]*$/.test(digits)) {
     throw new Error(`invalid hex string: ${hex}`);
   }
-
-  // strip 0x prefix
-  const digits = hex.startsWith("0x") ? hex.slice(2) : hex;
 
   const bytes = new Uint8Array(digits.length / 2);
   for (let i = 0; i < digits.length; i += 2) {

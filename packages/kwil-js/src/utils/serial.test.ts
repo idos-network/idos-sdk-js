@@ -25,6 +25,16 @@ describe("serial tx_hash encoding", () => {
   });
 });
 
+describe("hexToBytes", () => {
+  it("decodes a 0x-prefixed string", () => {
+    expect([...hexToBytes("0x0aff")]).toEqual([10, 255]);
+  });
+
+  it("rejects non-hex digits", () => {
+    expect(() => hexToBytes("zzzz")).toThrow("invalid hex string: zzzz");
+  });
+});
+
 describe("int64ToBytes", () => {
   it.each([
     [0, [0, 0, 0, 0, 0, 0, 0, 0]],
