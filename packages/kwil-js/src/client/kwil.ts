@@ -399,33 +399,20 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
    *
    * @param {CallBody} callBody - The message to send. The message can be built using the buildMsg() method in the Action class.
    * @param {KwilSigner} kwilSigner (optional) - KwilSigner should be passed if the action requires authentication OR if the action uses a `@caller` contextual variable. If `@caller` is used and authentication is not required, the user will not be prompted to authenticate; however, the user's identifier will be passed as the sender.
-   * @param {(...args: any) => void} cookieHandlerCallback (optional) - the callback to handle the cookie if in the NODE environment
+   * @param cookie - Sent only with the first call. The KGW retry uses the session cookie instead.
    * @returns A promise that resolves to the receipt of the message.
    */
   protected async baseCall<T extends object>(
     callBody: CallBody,
     kwilSigner?: KwilSigner,
-    cookieHandlerCallback?: { setCookie: () => void; resetCookie: () => void },
+    cookie?: string,
   ): Promise<GenericResponse<MsgReceipt<T>>> {
     // Ensure auth mode is set
     await this.ensureAuthenticationMode();
 
     if (this.authMode === AuthenticationMode.OPEN) {
-      // if nodeJS user passes a cookie, use it for the call
-      if (cookieHandlerCallback) {
-        cookieHandlerCallback.setCookie();
-      }
-      let message;
-      let response;
-      try {
-        message = await this.buildMessage(callBody, kwilSigner);
-        response = await this.callClient(message);
-      } finally {
-        // Reset before any later request, including when build or call throws.
-        if (cookieHandlerCallback) {
-          cookieHandlerCallback.resetCookie();
-        }
-      }
+      const message = await this.buildMessage(callBody, kwilSigner);
+      const response = await this.callClient(message, cookie);
 
       // if the user is not authenticated, prompt the user to authenticate
       if (response.authCode === AuthErrorCodes.KGW_MODE && this.autoAuthenticate) {

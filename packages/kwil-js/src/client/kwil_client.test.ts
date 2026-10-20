@@ -130,5 +130,91 @@ describe("Kwil", () => {
 
       expect(latestHeaders?.Cookie).toBe(cookie);
     });
+
+    it("sends a call cookie only on that request", async () => {
+      const override = "kgw_session=override";
+      postMock
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { jsonrpc: "2.0", id: 1, result: { mode: "open" } },
+        })
+        .mockRejectedValueOnce(new Error("network down"));
+
+      await expect(
+        kwil.call({ namespace: "main", name: "read", cookie: override }),
+      ).rejects.toThrow("network down");
+
+      expect(kwil.getKgwCookie()).toBeUndefined();
+      expect(postConfigCookie(postMock.mock.calls[1])).toBe(override);
+      expect(instanceCookies()).not.toContain(override);
+    });
+
+    it("retries KGW auth with the session cookie, not the call cookie", async () => {
+      const override = "kgw_session=override";
+      const session = "kgw_session=fresh; Path=/";
+      const signer = new KwilSigner(
+        async () => new Uint8Array([1, 2, 3]),
+        new Uint8Array([4, 5, 6]),
+        "ed25519",
+      );
+      const queryResult = { column_names: [], column_types: [], values: [] };
+
+      postMock
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { jsonrpc: "2.0", id: 1, result: { mode: "open" } },
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { jsonrpc: "2.0", id: 2, error: { code: -901, message: "kgw" } },
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          data: {
+            jsonrpc: "2.0",
+            id: 3,
+            result: {
+              nonce: "123456",
+              statement: "",
+              issue_at: "2026-05-15T14:30:00Z",
+              expiration_time: "2026-05-15T14:35:00Z",
+              chain_id: "does not matter",
+              domain: "does not matter",
+              version: "1",
+              uri: "does not matter/auth",
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          headers: { "set-cookie": [session] },
+          data: { jsonrpc: "2.0", id: 4, result: { result: "authenticated" } },
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { jsonrpc: "2.0", id: 5, result: { query_result: queryResult } },
+        });
+
+      await kwil.call({ namespace: "main", name: "read", cookie: override }, signer);
+
+      const calls = postMock.mock.calls.filter((call) => call[1]?.method === "user.call");
+      expect(calls).toHaveLength(2);
+      expect(postConfigCookie(calls[0])).toBe(override);
+      expect(postConfigCookie(calls[1])).toBeUndefined();
+      expect(kwil.getKgwCookie()).toBe(session);
+      expect(instanceCookies().at(-1)).toBe(session);
+    });
   });
 });
+
+function postConfigCookie(call: unknown[]): string | undefined {
+  const config = call[2] as { headers?: { Cookie?: string } } | undefined;
+  return config?.headers?.Cookie;
+}
+
+function instanceCookies(): (string | undefined)[] {
+  return mockedAxios.create.mock.calls.map((call) => {
+    const headers = (call[0] as { headers?: { Cookie?: string } } | undefined)?.headers;
+    return headers?.Cookie;
+  });
+}
