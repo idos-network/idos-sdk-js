@@ -14,7 +14,11 @@ const isKwildPrivateOn = process.env.PRIVATE_MODE === "TRUE";
 const isGasOn = process.env.GAS_ON === "TRUE";
 
 const provider = new JsonRpcProvider(process.env.ETH_PROVIDER);
-const wallet = new Wallet(process.env.PRIVATE_KEY as string, provider);
+const privateKey = process.env.PRIVATE_KEY;
+if (!privateKey) {
+  throw new Error("PRIVATE_KEY is required. Copy .env.example to .env and fill it in.");
+}
+const wallet = new Wallet(privateKey, provider);
 
 const kwil = new NodeKwil({
   kwilProvider: process.env.KWIL_PROVIDER || "SHOULD FAIL",
