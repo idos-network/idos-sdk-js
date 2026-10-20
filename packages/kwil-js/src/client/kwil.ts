@@ -93,6 +93,20 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
   }
 
   /**
+   * Drops cached action definitions. `execSql` already clears every namespace,
+   * because a statement can create or drop actions and the SQL is not parsed.
+   *
+   * @param namespace - The namespace to drop. Drops every namespace when omitted.
+   */
+  public clearActionsCache(namespace?: string): void {
+    if (namespace !== undefined) {
+      this.actionsCache.delete(namespace);
+      return;
+    }
+    this.actionsCache.clear();
+  }
+
+  /**
    * Retrieves the actions in a database given its namespace.
    *
    * @param namespace - The namespace of the actions to retrieve.
@@ -316,10 +330,12 @@ export abstract class Kwil<T extends EnvironmentType> extends Client {
       signatureType: signer.signatureType,
     }).buildTx();
 
-    return await this.broadcastClient(
+    const receipt = await this.broadcastClient(
       transaction,
       synchronous ? BroadcastSyncType.COMMIT : BroadcastSyncType.SYNC,
     );
+    this.actionsCache.clear();
+    return receipt;
   }
 
   /**
