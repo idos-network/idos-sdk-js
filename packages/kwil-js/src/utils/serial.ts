@@ -142,12 +142,16 @@ export function int64ToBytes(num: number): Uint8Array {
 
 export function bytesToInt64(bytes: Uint8Array): number {
   objects.requireNonNil(bytes);
-  const buffer = new ArrayBuffer(8);
-  const view = new DataView(buffer);
-  for (let i = 0; i < bytes.length; i++) {
-    view.setInt8(i, bytes[i]);
+  if (bytes.length !== 8) {
+    throw new Error("int64 must be 8 bytes");
   }
-  return view.getInt32(0, true);
+  const buffer = new ArrayBuffer(8);
+  new Uint8Array(buffer).set(bytes);
+  const value = new DataView(buffer).getBigInt64(0, true);
+  if (value > BigInt(Number.MAX_SAFE_INTEGER) || value < BigInt(Number.MIN_SAFE_INTEGER)) {
+    throw new Error(`int64 ${value} is outside the safe integer range`);
+  }
+  return Number(value);
 }
 
 export function booleanToBytes(bool: boolean): Uint8Array {

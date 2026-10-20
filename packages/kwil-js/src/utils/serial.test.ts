@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { bytesToBase64 } from "../utils/base64";
-import { base64ToHex, hexToBytes, int64ToBytes, isHexTxHash } from "../utils/serial";
+import { base64ToHex, bytesToInt64, hexToBytes, int64ToBytes, isHexTxHash } from "../utils/serial";
 
 const HEX_TX_HASH = "e3d2bc9e38cc02af7e6babe4094a8a8afcf0074cb93151ca8339770ae554f45d";
 const CORRUPTED_96_HEX =
@@ -32,6 +32,17 @@ describe("hexToBytes", () => {
 
   it("rejects non-hex digits", () => {
     expect(() => hexToBytes("zzzz")).toThrow("invalid hex string: zzzz");
+  });
+});
+
+describe("bytesToInt64", () => {
+  it("reads the full little-endian value", () => {
+    expect(bytesToInt64(int64ToBytes(1099511627776))).toBe(1099511627776);
+    expect(bytesToInt64(int64ToBytes(-1))).toBe(-1);
+  });
+
+  it("rejects a short buffer", () => {
+    expect(() => bytesToInt64(new Uint8Array(4))).toThrow("int64 must be 8 bytes");
   });
 });
 
