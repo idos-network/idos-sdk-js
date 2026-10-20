@@ -138,7 +138,7 @@ To execute an action once, pass only one tuple to the inputs array.
 ```javascript
 const res = await kwil.execute(
     {
-        namespace: 'db_namespace' // e.g., 'main',
+        namespace: 'db_namespace', // e.g., 'main',
         name: 'action_name', // e.g., 'create_user',
         // execute the same action two times:
         inputs: [
@@ -252,7 +252,7 @@ const body = {
     name: 'action_name',
     inputs: [
         { $name: 'input_name', $id: 'some_uuid_value'}
-    ]
+    ],
     // optional: override input types
     types: { $name: DataType.Text, $value: DataType.Uuid }
 }
@@ -269,7 +269,7 @@ const { DataType } = Utils;
 const body = {
     namespace: 'db_namespace',
     name: 'action_name',
-    inputs: ['some_text_value', 'some_uuid_value']
+    inputs: ['some_text_value', 'some_uuid_value'],
     // optional: override input types
     types: [DataType.Text, DataType.Uuid]
 }
