@@ -176,7 +176,12 @@ overrides:
   toml: ">= 4.1.2"
   tinypool: ">= 2.1.1"
   shell-quote: ">= 1.11.0"
-  unidici: ">= 7.29.1"
+  # Security: undici DoS and TLS bypass (GHSA-rfgv-xxqx-mfg5, GHSA-w293-vg96-wgc3)
+  # Pin the major. An open range lets pnpm reuse a vulnerable 7.x already in the lockfile.
+  "undici@6": "6.29.1"
+  "undici@7": "7.30.1"
+  # Security: MCP SDK sends OAuth credentials to a server-chosen endpoint (GHSA-6qxp-vccf-f47h)
+  "@modelcontextprotocol/sdk": ">=1.31.0"
   vite: ">= 8.2.0"
   ws: ">= 8.21.0"
 
