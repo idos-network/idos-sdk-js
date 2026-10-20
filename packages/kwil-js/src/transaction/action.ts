@@ -110,31 +110,33 @@ export class Action<T extends EnvironmentType> {
     // set the actions to a special value to indicate that the transaction is being built
     this.actionInputs = TXN_BUILD_IN_PROGRESS;
 
-    const payload = await this.buildTxPayload(privateMode, cachedActionInputs);
+    try {
+      const payload = await this.buildTxPayload(privateMode, cachedActionInputs);
 
-    // throw runtime error if signer is null or undefined
-    const { signer, identifier, signatureType } = objects.validateFields(
-      {
-        signer: this.signer,
-        identifier: this.identifier,
-        signatureType: this.signatureType,
-      },
-      (fieldName: string) => `${fieldName} is required to build a transaction.`,
-    );
+      // throw runtime error if signer is null or undefined
+      const { signer, identifier, signatureType } = objects.validateFields(
+        {
+          signer: this.signer,
+          identifier: this.identifier,
+          signatureType: this.signatureType,
+        },
+        (fieldName: string) => `${fieldName} is required to build a transaction.`,
+      );
 
-    // build the transaction
-    return await PayloadTx.createTx(this.kwil, {
-      payloadType: PayloadType.EXECUTE_ACTION,
-      payload: payload,
-      signer: signer,
-      signatureType: signatureType,
-      description: this.description,
-      chainId: this.chainId,
-      identifier: identifier,
-      nonce: this.nonce,
-    })
-      .buildTx()
-      .finally(() => (this.actionInputs = cachedActionInputs));
+      // build the transaction
+      return await PayloadTx.createTx(this.kwil, {
+        payloadType: PayloadType.EXECUTE_ACTION,
+        payload: payload,
+        signer: signer,
+        signatureType: signatureType,
+        description: this.description,
+        chainId: this.chainId,
+        identifier: identifier,
+        nonce: this.nonce,
+      }).buildTx();
+    } finally {
+      this.actionInputs = cachedActionInputs;
+    }
   }
 
   /**
@@ -149,25 +151,29 @@ export class Action<T extends EnvironmentType> {
     // set the actions to a special value to indicate that the message is being built
     this.actionInputs = TXN_BUILD_IN_PROGRESS;
 
-    const payload = await this.buildMsgPayload(privateMode, cachedActionInputs);
+    try {
+      const payload = await this.buildMsgPayload(privateMode, cachedActionInputs);
 
-    // build message
-    let msg = PayloadMsg.createMsg(payload, {
-      challenge: this.challenge,
-      signature: this.signature,
-    });
+      // build message
+      const msg = PayloadMsg.createMsg(payload, {
+        challenge: this.challenge,
+        signature: this.signature,
+      });
 
-    /**
-     * if a signer is specified, add the signer, signature type, identifier, and description to the message
-     * ex => if the @caller contextual variable is present in a kuneiform block for kwil.call()
-     */
-    if (this.signer) {
-      msg.signer = this.signer;
-      msg.signatureType = this.signatureType!;
-      msg.identifier = this.identifier!;
+      /**
+       * if a signer is specified, add the signer, signature type, identifier, and description to the message
+       * ex => if the @caller contextual variable is present in a kuneiform block for kwil.call()
+       */
+      if (this.signer) {
+        msg.signer = this.signer;
+        msg.signatureType = this.signatureType!;
+        msg.identifier = this.identifier!;
+      }
+
+      return await msg.buildMsg();
+    } finally {
+      this.actionInputs = cachedActionInputs;
     }
-
-    return await msg.buildMsg().finally(() => (this.actionInputs = cachedActionInputs));
   }
 
   /**
