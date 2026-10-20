@@ -35,13 +35,15 @@ import { kwil, isGasOn, kwilSigner, deriveKeyPair64 } from "./setup";
   });
 
   describe("Error Cases", () => {
-    it("should fail when using a custom key type without specification", async () => {
+    it("should fail when the recipient identifier is not hex", async () => {
       const transferBody: TransferBody = {
         to: "zzzzz",
         amount: BigInt(1),
       };
 
-      await expect(kwil.funder.transfer(transferBody, kwilSigner, true)).rejects.toThrow();
+      await expect(kwil.funder.transfer(transferBody, kwilSigner, true)).rejects.toThrow(
+        "invalid hex string: zzzzz",
+      );
     });
   });
 });
