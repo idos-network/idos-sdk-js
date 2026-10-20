@@ -35,7 +35,7 @@ export const strings = {
     }
 
     if (typeof defaultValue === "function") {
-      (defaultValue as Func<Nillable<string>, string>)(value);
+      return (defaultValue as Func<Nillable<string>, string>)(value);
     }
 
     if (strings.is(defaultValue)) {
