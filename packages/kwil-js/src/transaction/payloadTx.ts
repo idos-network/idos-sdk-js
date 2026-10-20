@@ -120,8 +120,8 @@ export class PayloadTx<T extends EnvironmentType> {
     // retrieve the account for the nonce, if one is provided
     let nonce = this.nonce;
 
-    // if no nonce is provided, retrieve the nonce from the account
-    if (!this.nonce) {
+    // 0 is a valid nonce. Only a missing nonce is fetched from the account.
+    if (objects.isNil(nonce)) {
       const acct = await this.kwil.getAccount(identifier);
 
       nonce =
