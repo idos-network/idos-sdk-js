@@ -1,7 +1,7 @@
 import { TxReceipt } from "kwil-js-src/core/tx";
 import { base64ToBytes } from "kwil-js-src/utils/base64";
 
-import { isKwildPrivateOn, kwilSigner, uuidV4 } from "./setup";
+import { DataType, isKwildPrivateOn, kwilSigner, uuidV4 } from "./setup";
 import { kwil } from "./setup";
 
 (!isKwildPrivateOn ? describe : describe.skip)("Kwil DB types", () => {
@@ -101,16 +101,14 @@ import { kwil } from "./setup";
   });
 
   describe("Test variables insertion", () => {
-    // TODO: Skipped this test because it is not working as expected.
-    // Big decimals may have changed since the last release.
-    // Getting error: expected argument 6 to be numeric(20,10), got numeric(17,7)
-    it.skip("should be able to insert all variables", async () => {
+    it("should be able to insert all variables", async () => {
       const uuid = uuidV4();
       const text = "This is a test text";
       const int = 123;
       const bool = true;
       const dec = 123.45;
-      // const bigDec = 1234567890.123456789;
+      // A JS number cannot keep numeric(20,10) digits, so the value is a string with an explicit type.
+      const bigDec = "1234567890.1234567890";
       const blob = new Uint8Array([1, 2, 3, 4, 5]);
 
       const res = await kwil.execute(
@@ -124,10 +122,11 @@ import { kwil } from "./setup";
               $int: int,
               $bool: bool,
               $dec: dec,
-              // $big_dec: bigDec,
+              $big_dec: bigDec,
               $blob: blob,
             },
           ],
+          types: { $big_dec: DataType.Numeric(20, 10) },
         },
         kwilSigner,
         true,
