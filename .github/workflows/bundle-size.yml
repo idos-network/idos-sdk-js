@@ -8,6 +8,7 @@ on:
     paths:
       - "packages/**"
       - "pnpm-lock.yaml"
+      - ".size-limit.mjs"
 
 permissions:
   contents: read
