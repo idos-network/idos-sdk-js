@@ -40,7 +40,7 @@
     "dev": "tsdown --watch",
     "publint": "pnpx publint --strict",
     "test": "vitest",
-    "test:integration": "vitest run --config integration/vitest.config.ts",
+    "test:integration": "pnpm run build && vitest run --config integration/vitest.config.ts",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit && tsc -p integration/tsconfig.json"
   },

@@ -25,7 +25,7 @@ catalogs:
     "@types/node": "25.9.5"
     "tsdown": "^0.23.0"
     "typescript": "^5.9.3"
-    "vite": "8.2.2"
+    "vite": "8.2.4"
     "vite-plugin-node-polyfills": "0.28.0"
 
   core:
@@ -126,7 +126,6 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Declared pins that may be newer than minimumReleaseAge
   - axios@1.20.0
-  - vite@8.2.0
   - "@noble/hashes@2.3.0"
 
 onlyBuiltDependencies:
@@ -166,6 +165,8 @@ overrides:
   "undici@6": "6.29.1"
   "undici@7": "7.30.1"
   axios: ">=1.20.0"
+  # Security: header stripping bypass (GHSA-8r9p-f939-6h3c, GHSA-q3jh-wrc6-jgq8)
+  "follow-redirects": "1.16.1"
   base-x: ">=3.0.11"
   basic-ftp: ">= 6.2.1"
   compression: ">= 1.8.2"
@@ -182,7 +183,10 @@ overrides:
   source-map-js: ">= 1.2.2"
   tinypool: ">= 2.1.1"
   toml: ">= 4.1.2"
-  vite: ">= 8.2.0"
+  # Security: launch-editor Windows path check bypass (GHSA-587h-7wmj-h5pm).
+  # Pin the patch. An open range lets pnpm reuse a vulnerable release already in the lockfile.
+  vite: "8.2.4"
+  "launch-editor": "2.14.2"
   ws: ">= 8.21.0"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
