@@ -1,11 +1,11 @@
 import { KwilSigner, Types, Utils } from "@idos-network/kwil-js";
 import { ActionBody } from "@idos-network/kwil-js/action";
-import { Account } from "kwil-js-src/core/network";
-import { GenericResponse } from "kwil-js-src/core/resreq";
-import { TxReceipt } from "kwil-js-src/core/tx";
-import { bytesToHex } from "kwil-js-src/utils/serial";
 import nacl from "tweetnacl";
 
+import { Account } from "../../src/core/network";
+import { GenericResponse } from "../../src/core/resreq";
+import { TxReceipt } from "../../src/core/tx";
+import { bytesToHex } from "../../src/utils/serial";
 import { deriveKeyPair64, grantAdminAccess, kwil } from "./setup";
 import { createTestSchema, dropTestSchema } from "./setup";
 

@@ -1,7 +1,7 @@
 import { Utils } from "@idos-network/kwil-js";
 import { ActionBody, CallBody, CallBodyNode } from "@idos-network/kwil-js/action";
-import { TxReceipt } from "kwil-js-src/core/tx";
 
+import { TxReceipt } from "../../src/core/tx";
 import { kwil, kwilSigner, differentKwilSigner, isKwildPrivateOn, isKgwOn } from "./setup";
 import { uuidV4 } from "./setup";
 

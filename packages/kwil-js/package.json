@@ -40,8 +40,9 @@
     "dev": "tsdown --watch",
     "publint": "pnpx publint --strict",
     "test": "vitest",
+    "test:integration": "vitest run --config integration/vitest.config.ts",
     "coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p integration/tsconfig.json"
   },
   "dependencies": {
     "@noble/hashes": "^2.3.0",
@@ -51,10 +52,13 @@
   "devDependencies": {
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
+    "dotenv": "^16.4.5",
     "ethers": "catalog:ethereum",
+    "scrypt-js": "^3.0.1",
     "tsdown": "catalog:build",
     "tweetnacl": "catalog:core",
     "typescript": "catalog:build",
+    "uuid": "^11.1.0",
     "vitest": "catalog:testing"
   },
   "engines": {

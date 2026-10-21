@@ -1,6 +1,6 @@
 import { ActionBody, CallBody } from "@idos-network/kwil-js/action";
-import { TxReceipt } from "kwil-js-src/core/tx";
 
+import { TxReceipt } from "../../src/core/tx";
 import { createTestSchema, isKwildPrivateOn, kwil, kwilSigner, uuidV4, DataType } from "./setup";
 
 describe("Edge cases", () => {

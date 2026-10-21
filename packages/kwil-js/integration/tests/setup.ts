@@ -1,13 +1,15 @@
 import { KwilSigner, NodeKwil, Utils } from "@idos-network/kwil-js";
 import dotenv from "dotenv";
 import { JsonRpcProvider, Wallet } from "ethers";
-import { TxReceipt } from "kwil-js-src/core/tx";
-import { HexString } from "kwil-js-src/utils/types";
+import { fileURLToPath } from "node:url";
 import scrypt from "scrypt-js";
 import nacl from "tweetnacl";
 import { v4 as uuidV4 } from "uuid";
 
-dotenv.config();
+import { TxReceipt } from "../../src/core/tx";
+import { HexString } from "../../src/utils/types";
+
+dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
 const isKgwOn = process.env.GATEWAY_ON === "TRUE";
 const isKwildPrivateOn = process.env.PRIVATE_MODE === "TRUE";
