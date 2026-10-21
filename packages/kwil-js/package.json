@@ -1,10 +1,14 @@
 {
   "name": "@idos-network/kwil-js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Kwil database client for the idOS JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/kwil-js"
+  },
   "files": [
     "dist/**/*",
     "src/**/*"

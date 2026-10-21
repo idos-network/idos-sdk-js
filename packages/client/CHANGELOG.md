@@ -1,5 +1,29 @@
 # @idos-network/client
 
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/enclave@2.2.2
+  - @idos-network/kwil-js@0.2.1
+  - @idos-network/utils@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- 7f5a44b: A client returned by `withUserSigner()` (and the logged-in client made from it) now throws once another `withUserSigner()` call or a logout replaces its signer, including through a `kwilClient` or `enclaveProvider` saved before that change. Logging out a stale client no longer clears the newer session or returns a client that can act as it. A logout whose enclave reset fails keeps failing until that reset finishes.
+- Updated dependencies [ad3a607]
+- Updated dependencies [ed9a1ad]
+  - @idos-network/enclave@2.2.1
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
 ## 2.2.0
 
 ### Patch Changes
