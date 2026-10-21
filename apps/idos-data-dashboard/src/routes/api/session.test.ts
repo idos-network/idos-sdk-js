@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getDb } from "@/core/db.server";
 import { getUserId, SESSION_MAX_AGE_SECONDS, sessionStorage } from "@/core/sessions.server";
@@ -8,6 +8,16 @@ import { loader } from "./session";
 vi.mock("@/core/db.server");
 
 const mockGetDb = vi.mocked(getDb);
+const NOW = new Date("2026-01-15T00:00:00.000Z");
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOW);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 async function requestWithSession(issuedAt?: number) {
   const session = await sessionStorage.getSession();

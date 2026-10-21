@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createActor, fromCallback, fromPromise, waitFor } from "xstate";
 
 import {
+  type ConnectWalletInput,
+  type ConnectWalletOutput,
   type DashboardEvent,
   type DisconnectInput,
   dashboardMachine,
@@ -19,10 +21,10 @@ const walletA = {
 };
 
 describe("dashboard machine session lifecycle", () => {
-  const clearServerSession = vi.fn();
+  let disconnectCalls = 0;
 
   beforeEach(() => {
-    clearServerSession.mockReset();
+    disconnectCalls = 0;
     const store = new Map([["dashboard-wallet", JSON.stringify(walletA)]]);
     vi.stubGlobal("window", {});
     vi.stubGlobal("localStorage", {
@@ -43,7 +45,6 @@ describe("dashboard machine session lifecycle", () => {
   ) {
     const actor = createActor(
       dashboardMachine.provide({
-        actions: { clearServerSession },
         actors: {
           reconnectWallet: fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(reconnect),
           initializeIdOS: fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(async () => ({
@@ -53,7 +54,10 @@ describe("dashboard machine session lifecycle", () => {
           watchEvmAccount: fromCallback<DashboardEvent, WatchEvmAccountInput>(({ sendBack }) => {
             if (watchSendsDisconnect) sendBack({ type: "DISCONNECT" });
           }),
-          disconnect: fromPromise<void, DisconnectInput>(disconnect),
+          disconnect: fromPromise<void, DisconnectInput>(async () => {
+            disconnectCalls += 1;
+            await disconnect();
+          }),
         },
       }),
     );
@@ -67,7 +71,7 @@ describe("dashboard machine session lifecycle", () => {
     });
 
     await waitFor(actor, (s) => s.matches("disconnected"));
-    expect(clearServerSession).toHaveBeenCalled();
+    expect(disconnectCalls).toBe(1);
     actor.stop();
   });
 
@@ -75,7 +79,7 @@ describe("dashboard machine session lifecycle", () => {
     const actor = start(async () => ({ nearSelector: null }));
 
     await waitFor(actor, (s) => s.matches("loggedIn"));
-    expect(clearServerSession).not.toHaveBeenCalled();
+    expect(disconnectCalls).toBe(0);
     actor.stop();
   });
 
@@ -83,7 +87,7 @@ describe("dashboard machine session lifecycle", () => {
     const actor = start(async () => ({ nearSelector: null }), true);
 
     await waitFor(actor, (s) => s.matches("disconnected"));
-    expect(clearServerSession).toHaveBeenCalled();
+    expect(disconnectCalls).toBe(1);
     actor.stop();
   });
 
@@ -111,12 +115,11 @@ describe("dashboard machine session lifecycle", () => {
     let connectAttempts = 0;
     const actor = createActor(
       dashboardMachine.provide({
-        actions: { clearServerSession },
         actors: {
           reconnectWallet: fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(async () => ({
             nearSelector: null,
           })),
-          connectWallet: fromPromise(async () => {
+          connectWallet: fromPromise<ConnectWalletOutput, ConnectWalletInput>(async () => {
             connectAttempts += 1;
             return {
               walletAddress: walletA.walletAddress,

@@ -180,12 +180,6 @@ export const dashboardMachine = setup({
     clearPersistedWallet: () => {
       persistWallet(null, null, null);
     },
-    // The developer console session is not bound to a wallet, so it must not outlive it
-    clearServerSession: () => {
-      fetch("/api/session", { method: "DELETE" }).catch((error) => {
-        console.error("Error during session delete:", error);
-      });
-    },
     resetWalletState: assign({
       walletType: () => null,
       walletAddress: () => null,
@@ -211,13 +205,14 @@ export const dashboardMachine = setup({
       after: {
         0: [
           { target: "reconnecting", guard: "hasPersistedWallet" },
-          { target: "disconnected", guard: "isClient" },
+          // The developer session is not bound to a wallet, so logout awaits its deletion.
+          { target: "disconnecting", guard: "isClient" },
         ],
       },
     },
 
     disconnected: {
-      entry: [assign({ error: () => null }), "clearServerSession"],
+      entry: assign({ error: () => null }),
       on: {
         CONNECT_EVM: {
           target: "connecting",
@@ -268,7 +263,7 @@ export const dashboardMachine = setup({
         },
         onError: [
           {
-            target: "disconnected",
+            target: "disconnecting",
             guard: ({ event }) =>
               event.error instanceof Error && event.error.message === "Connection cancelled",
           },
@@ -298,7 +293,7 @@ export const dashboardMachine = setup({
           ],
         },
         WALLET_CONNECT_ERROR: {
-          target: "disconnected",
+          target: "disconnecting",
           actions: assign({
             error: ({ event }) => event.error,
           }),
@@ -357,7 +352,7 @@ export const dashboardMachine = setup({
           }),
         },
         onError: {
-          target: "disconnected",
+          target: "disconnecting",
           actions: ["resetWalletState", "clearPersistedWallet"],
         },
       },
