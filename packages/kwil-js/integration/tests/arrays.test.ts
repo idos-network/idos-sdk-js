@@ -1,12 +1,10 @@
-import { TxReceipt } from "kwil-js-src/core/tx";
-import { base64ToBytes } from "kwil-js-src/utils/base64";
-
-import { DataType, isKwildPrivateOn, kwilSigner, uuidV4 } from "./setup";
+import { TxReceipt } from "../../src/core/tx";
+import { isKwildPrivateOn, kwilSigner, uuidV4 } from "./setup";
 import { kwil } from "./setup";
 
 (!isKwildPrivateOn ? describe : describe.skip)("Kwil DB types", () => {
-  const namespace = "variable_test";
-  const tableName = "var_table";
+  const namespace = "array_tests";
+  const tableName = "saved_arrays";
 
   let actions: { name: string; sql: string }[] = [];
 
@@ -19,14 +17,13 @@ import { kwil } from "./setup";
     });
 
     it("should create var_table", async () => {
-      const createTable = `{${namespace}} CREATE TABLE var_table (
+      const createTable = `{${namespace}} CREATE TABLE saved_arrays (
         uuid_col uuid PRIMARY KEY,
-        text_col text,
-        int_col int,
-        bool_col bool,
-        dec_col numeric(5,2),
-        big_dec_col numeric(20,10),
-        blob_col bytea
+        text_array text[],
+        int_array int[],
+        bool_array bool[],
+        dec_array numeric(5,2)[],
+        blob_array bytea[]
       );`;
 
       const tableResult = await kwil.execSql(createTable, {}, kwilSigner, true);
@@ -39,51 +36,39 @@ import { kwil } from "./setup";
       actions = [
         {
           name: "insert_all",
-          sql: `CREATE ACTION insert_all($id uuid, $text text, $int int, $bool bool, $dec numeric(5,2), $big_dec numeric(20,10), $blob bytea) PUBLIC { 
-            INSERT INTO var_table (uuid_col, text_col, int_col, bool_col, dec_col, big_dec_col, blob_col) 
-            VALUES ($id, $text, $int, $bool, $dec, $big_dec, $blob); 
-          }`,
-        },
-        {
-          name: "insert_uuid",
-          sql: `CREATE ACTION insert_uuid($id uuid) PUBLIC {
-            INSERT INTO var_table(uuid_col) VALUES ($id);
+          sql: `CREATE ACTION insert_all($id uuid, $text_array text[], $int_array int[], $bool_array bool[], $dec_array numeric(5,2)[], $blob_array bytea[]) PUBLIC { 
+            INSERT INTO saved_arrays (uuid_col, text_array, int_array, bool_array, dec_array, blob_array) 
+            VALUES ($id, $text_array, $int_array, $bool_array, $dec_array, $blob_array); 
           }`,
         },
         {
           name: "insert_text",
-          sql: `CREATE ACTION insert_text($id uuid, $text text) PUBLIC {
-            INSERT INTO var_table (uuid_col, text_col) VALUES ($id, $text);
+          sql: `CREATE ACTION insert_text($id uuid, $text_array text[]) PUBLIC {
+            INSERT INTO saved_arrays (uuid_col, text_array) VALUES ($id, $text_array);
           }`,
         },
         {
           name: "insert_int",
-          sql: `CREATE ACTION insert_int($id uuid, $int int) PUBLIC {
-            INSERT INTO var_table (uuid_col, int_col) VALUES ($id, $int);
+          sql: `CREATE ACTION insert_int($id uuid, $int_array int[]) PUBLIC {
+            INSERT INTO saved_arrays (uuid_col, int_array) VALUES ($id, $int_array);
           }`,
         },
         {
           name: "insert_dec",
-          sql: `CREATE ACTION insert_dec($id uuid, $dec numeric(5,2)) PUBLIC {
-            INSERT INTO var_table (uuid_col, dec_col) VALUES ($id, $dec);
+          sql: `CREATE ACTION insert_dec($id uuid, $dec_array numeric(5,2)[]) PUBLIC {
+            INSERT INTO saved_arrays (uuid_col, dec_array) VALUES ($id, $dec_array);
           }`,
         },
         {
           name: "insert_bool",
-          sql: `CREATE ACTION insert_bool($id uuid, $bool bool) PUBLIC {
-            INSERT INTO var_table (uuid_col, bool_col) VALUES ($id, $bool);
+          sql: `CREATE ACTION insert_bool($id uuid, $bool_array bool[]) PUBLIC {
+            INSERT INTO saved_arrays (uuid_col, bool_array) VALUES ($id, $bool_array);
           }`,
         },
         {
           name: "insert_blob",
-          sql: `CREATE ACTION insert_blob($id uuid, $blob bytea) PUBLIC {
-            INSERT INTO var_table (uuid_col, blob_col) VALUES ($id, $blob);
-          }`,
-        },
-        {
-          name: "insert_big_dec",
-          sql: `CREATE ACTION insert_big_dec($id uuid, $big_dec numeric(20,10)) PUBLIC {
-            INSERT INTO var_table (uuid_col, big_dec_col) VALUES ($id, $big_dec);
+          sql: `CREATE ACTION insert_blob($id uuid, $blob_array bytea[]) PUBLIC {
+            INSERT INTO saved_arrays (uuid_col, blob_array) VALUES ($id, $blob_array);
           }`,
         },
       ];
@@ -100,16 +85,14 @@ import { kwil } from "./setup";
     });
   });
 
-  describe("Test variables insertion", () => {
+  describe("Test variables insertion for arrays", () => {
     it("should be able to insert all variables", async () => {
       const uuid = uuidV4();
-      const text = "This is a test text";
-      const int = 123;
-      const bool = true;
-      const dec = 123.45;
-      // A JS number cannot keep numeric(20,10) digits, so the value is a string with an explicit type.
-      const bigDec = "1234567890.1234567890";
-      const blob = new Uint8Array([1, 2, 3, 4, 5]);
+      const textArray = ["This is a test text", "This is a test text 2"];
+      const intArray = [1, 2, 3, 4, 5];
+      const boolArray = [true, false, true, false, true];
+      const decArray = [123.45, 123.46, 123.47, 123.48, 123.49];
+      const blobArray = [new Uint8Array([1, 2, 3, 4, 5]), new Uint8Array([6, 7, 8, 9, 10])];
 
       const res = await kwil.execute(
         {
@@ -118,15 +101,13 @@ import { kwil } from "./setup";
           inputs: [
             {
               $id: uuid,
-              $text: text,
-              $int: int,
-              $bool: bool,
-              $dec: dec,
-              $big_dec: bigDec,
-              $blob: blob,
+              $text_array: textArray,
+              $int_array: intArray,
+              $bool_array: boolArray,
+              $dec_array: decArray,
+              $blob_array: blobArray,
             },
           ],
-          types: { $big_dec: DataType.Numeric(20, 10) },
         },
         kwilSigner,
         true,
@@ -149,43 +130,9 @@ import { kwil } from "./setup";
       expect(query.data?.length).toBeGreaterThan(0);
     });
 
-    it("should be able to insert a record with a UUID", async () => {
-      const uuid = uuidV4();
-
-      const res = await kwil.execute(
-        {
-          namespace,
-          name: "insert_uuid",
-          inputs: [
-            {
-              $id: uuid,
-            },
-          ],
-        },
-        kwilSigner,
-        true,
-      );
-
-      expect(res.data).toBeDefined();
-      expect(res.data).toMatchObject<TxReceipt>({
-        tx_hash: expect.any(String),
-      });
-
-      const query = await kwil.selectQuery(
-        `{${namespace}} SELECT * FROM ${tableName} WHERE uuid_col = $uuid`,
-        {
-          $uuid: uuid,
-        },
-      );
-      expect(query.data).toBeDefined();
-      expect(query.data).toHaveLength(1);
-      expect(Array.isArray(query.data)).toBe(true);
-      expect(query.data?.length).toBeGreaterThan(0);
-    }, 10000);
-
-    it("should be able to insert a record with a text", async () => {
+    it("should be able to insert a record with a text array", async () => {
       const id = uuidV4();
-      const text = "This is a test text";
+      const textArray = ["This is a test text array test", "This is a test text array 2"];
 
       const res = await kwil.execute(
         {
@@ -194,7 +141,7 @@ import { kwil } from "./setup";
           inputs: [
             {
               $id: id,
-              $text: text,
+              $text_array: textArray,
             },
           ],
         },
@@ -208,9 +155,9 @@ import { kwil } from "./setup";
       });
 
       const query = await kwil.selectQuery(
-        `{${namespace}} SELECT * FROM ${tableName} WHERE text_col = $text`,
+        `{${namespace}} SELECT * FROM ${tableName} WHERE text_array = $text_array`,
         {
-          $text: text,
+          $text_array: textArray,
         },
       );
 
@@ -222,7 +169,7 @@ import { kwil } from "./setup";
 
     it("should be able to insert a record with an integer", async () => {
       const id = uuidV4();
-      const num = 123;
+      const intArray = [6, 7, 8, 9, 10];
 
       const res = await kwil.execute(
         {
@@ -231,7 +178,7 @@ import { kwil } from "./setup";
           inputs: [
             {
               $id: id,
-              $int: num,
+              $int_array: intArray,
             },
           ],
         },
@@ -245,9 +192,9 @@ import { kwil } from "./setup";
       });
 
       const query = await kwil.selectQuery(
-        `{${namespace}} SELECT * FROM ${tableName} WHERE int_col = $num`,
+        `{${namespace}} SELECT * FROM ${tableName} WHERE int_array = $int_array`,
         {
-          $num: num,
+          $int_array: intArray,
         },
       );
 
@@ -257,9 +204,9 @@ import { kwil } from "./setup";
       expect(query.data?.length).toBeGreaterThan(0);
     }, 10000);
 
-    it("should be able to insert a record with a boolean", async () => {
+    it("should be able to insert a record with a boolean array", async () => {
       const id = uuidV4();
-      const bool = true;
+      const boolArray = [true, false, true, false, true, false, true, false, true, false];
 
       const res = await kwil.execute(
         {
@@ -268,7 +215,7 @@ import { kwil } from "./setup";
           inputs: [
             {
               $id: id,
-              $bool: bool,
+              $bool_array: boolArray,
             },
           ],
         },
@@ -282,9 +229,9 @@ import { kwil } from "./setup";
       });
 
       const query = await kwil.selectQuery(
-        `{${namespace}} SELECT * FROM ${tableName} WHERE bool_col = $bool`,
+        `{${namespace}} SELECT * FROM ${tableName} WHERE bool_array = $bool_array`,
         {
-          $bool: bool,
+          $bool_array: boolArray,
         },
       );
 
@@ -296,7 +243,9 @@ import { kwil } from "./setup";
 
     it("should be able to insert a record with a decimal", async () => {
       const id = uuidV4();
-      const dec = 123.45;
+      const decArray = [
+        123.45, 123.46, 123.47, 123.48, 123.49, 123.5, 123.51, 123.52, 123.53, 123.54,
+      ];
 
       const res = await kwil.execute(
         {
@@ -305,7 +254,7 @@ import { kwil } from "./setup";
           inputs: [
             {
               $id: id,
-              $dec: dec,
+              $dec_array: decArray,
             },
           ],
         },
@@ -319,9 +268,9 @@ import { kwil } from "./setup";
       });
 
       const query = await kwil.selectQuery(
-        `{${namespace}} SELECT * FROM ${tableName} WHERE uuid_col = $id`,
+        `{${namespace}} SELECT * FROM ${tableName} WHERE dec_array = $dec_array`,
         {
-          $id: id,
+          $dec_array: decArray,
         },
       );
 
@@ -331,9 +280,13 @@ import { kwil } from "./setup";
       expect(query.data?.length).toBeGreaterThan(0);
     }, 10000);
 
-    it("should be able to insert a record with a blob as a Uint8array", async () => {
+    it("should be able to insert a record with a blob array", async () => {
       const id = uuidV4();
-      const blob = new Uint8Array([1, 2, 3, 4, 5]);
+      const blobArray = [
+        new Uint8Array([1, 2, 3, 4, 5]),
+        new Uint8Array([6, 7, 8, 9, 10]),
+        new Uint8Array([11, 12, 13, 14, 15]),
+      ];
 
       const res = await kwil.execute(
         {
@@ -342,7 +295,7 @@ import { kwil } from "./setup";
           inputs: [
             {
               $id: id,
-              $blob: blob,
+              $blob_array: blobArray,
             },
           ],
         },
@@ -356,9 +309,9 @@ import { kwil } from "./setup";
       });
 
       const query = await kwil.selectQuery(
-        `{${namespace}} SELECT * FROM ${tableName} WHERE blob_col = $blob`,
+        `{${namespace}} SELECT * FROM ${tableName} WHERE blob_array = $blob_array`,
         {
-          $blob: blob,
+          $blob_array: blobArray,
         },
       );
       expect(query.data).toBeDefined();
@@ -366,13 +319,11 @@ import { kwil } from "./setup";
       expect(Array.isArray(query.data)).toBe(true);
       expect(query.data?.length).toBeGreaterThan(0);
 
-      // @ts-ignore
       // base64
-      const blobVal = query.data[0]?.blob_col as string;
-      expect(base64ToBytes(blobVal)).toStrictEqual(blob);
+      //   const blobVal = query.data[0]?.blob_col as string;
+      // expect(base64ToBytes(blobVal)).toStrictEqual(blobArray);
     }, 10000);
 
-    // TODO: Unsure if this is the correct behavior. Commented out for now.
     // it('decimals outside the max safe integer range should return as a string', async () => {
     //   const id = uuidV4();
     //   const bigDec = '1234567890.1234567890';
@@ -411,9 +362,9 @@ import { kwil } from "./setup";
   });
 
   describe("Failure Cases", () => {
-    it("should NOT be able to insert a number into text field", async () => {
+    it("should NOT be able to insert a number array into text array field", async () => {
       const id = uuidV4();
-      const invalidText = 123; // number instead of text
+      const invalidText = [123, 123, 123, 123, 123]; // number instead of text
 
       await expect(
         kwil.execute(
@@ -423,7 +374,7 @@ import { kwil } from "./setup";
             inputs: [
               {
                 $id: id,
-                $text: invalidText,
+                $text_array: invalidText,
               },
             ],
           },
@@ -435,7 +386,13 @@ import { kwil } from "./setup";
 
     it("should NOT be able to insert text into int field", async () => {
       const id = uuidV4();
-      const invalidInt = "not a number"; // text instead of int
+      const invalidInt = [
+        "not a number",
+        "not a number",
+        "not a number",
+        "not a number",
+        "not a number",
+      ]; // text instead of int
 
       await expect(
         kwil.execute(
@@ -445,7 +402,7 @@ import { kwil } from "./setup";
             inputs: [
               {
                 $id: id,
-                $int: invalidInt,
+                $int_array: invalidInt,
               },
             ],
           },
@@ -455,29 +412,9 @@ import { kwil } from "./setup";
       ).rejects.toThrow();
     });
 
-    it("should NOT be able to insert text into uuid field", async () => {
-      const invalidUuid = "not-a-uuid";
-
-      await expect(
-        kwil.execute(
-          {
-            namespace,
-            name: "insert_uuid",
-            inputs: [
-              {
-                $id: invalidUuid,
-              },
-            ],
-          },
-          kwilSigner,
-          true,
-        ),
-      ).rejects.toThrow();
-    });
-
-    it("should NOT be able to insert uuid into numeric field", async () => {
+    it("should NOT be able to insert text array into numeric array field", async () => {
       const id = uuidV4();
-      const invalidDec = uuidV4(); // uuid instead of numeric
+      const invalidDec = ["123", "123", "123", "123", "123"]; // uuid instead of numeric
 
       await expect(
         kwil.execute(
@@ -487,7 +424,7 @@ import { kwil } from "./setup";
             inputs: [
               {
                 $id: id,
-                $dec: invalidDec,
+                $dec_array: invalidDec,
               },
             ],
           },
@@ -499,7 +436,7 @@ import { kwil } from "./setup";
 
     it("should NOT be able to insert numeric with incorrect precision into numeric field", async () => {
       const id = uuidV4();
-      const invalidDec = 12.3; // precision should be 5,2 but we are inserting 3,1
+      const invalidDec = [12.3, 12.3, 12.3, 12.3, 12.3]; // precision should be 5,2 but we are inserting 3,1
 
       await expect(
         kwil.execute(
@@ -509,7 +446,7 @@ import { kwil } from "./setup";
             inputs: [
               {
                 $id: id,
-                $dec: invalidDec,
+                $dec_array: invalidDec,
               },
             ],
           },

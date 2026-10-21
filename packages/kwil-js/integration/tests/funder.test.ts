@@ -1,6 +1,5 @@
-import { TransferBody } from "kwil-js-src/funder/funding_types";
-import { bytesToHex } from "kwil-js-src/utils/serial";
-
+import { TransferBody } from "../../src/funder/funding_types";
+import { bytesToHex } from "../../src/utils/serial";
 import { kwil, isGasOn, kwilSigner, deriveKeyPair64 } from "./setup";
 
 // testing balance transfer / management

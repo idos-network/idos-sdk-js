@@ -22,7 +22,10 @@
       "persistent": true
     },
     "typecheck": {
-      "dependsOn": ["build:packages"]
+      "dependsOn": ["^build"]
+    },
+    "@idos-network/kwil-js#typecheck": {
+      "dependsOn": ["build"]
     },
     "test": {
       "dependsOn": ["^build"]

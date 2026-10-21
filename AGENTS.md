@@ -24,3 +24,7 @@ pnpm dlx cspell --no-progress --no-must-find-files $(git diff --name-only origin
 - **No personal data**: attributes may carry fixed identifiers (action names, tx hashes), never user input, addresses, credential contents, or keys.
 
 When you change `targets.ts`, update `packages/instrumentation/src/instrumentation.test.ts` and the package README if it documents the span list. If nothing needs to change, say so in one line in your summary.
+
+## 3. Other pull-request checks
+
+Run the checks in `.cursor/rules/ci-checks.mdc` for this diff. That file lists which command matches which workflow, and which jobs to skip.

@@ -2,10 +2,10 @@ import { KwilSigner } from "@idos-network/kwil-js";
 import { NodeKwil } from "@idos-network/kwil-js";
 import { CallBody, CallBodyNode } from "@idos-network/kwil-js/action";
 import { Wallet } from "ethers";
-import { AuthSuccess, LogoutResponse } from "kwil-js-src/core/auth";
-import { EnvironmentType } from "kwil-js-src/core/enums";
-import { MsgReceipt } from "kwil-js-src/core/message";
 
+import { AuthSuccess, LogoutResponse } from "../../src/core/auth";
+import { EnvironmentType } from "../../src/core/enums";
+import { MsgReceipt } from "../../src/core/message";
 import {
   createGatewayActions,
   createTestSchema,

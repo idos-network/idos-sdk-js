@@ -12,9 +12,6 @@
     "noEmit": true,
 
     "types": ["vitest/globals", "node"],
-    "paths": {
-      "kwil-js-src/*": ["../../packages/kwil-js/src/*"]
-    },
 
     // Linting
     "strict": true,
