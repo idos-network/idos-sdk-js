@@ -272,7 +272,14 @@ export class LocalEnclave<
       await this.reset();
     }
 
-    if (this.storedEncryptionProfile?.userId === this.userId) {
+    // A cached key is only reusable while it still matches the canonical public key;
+    // after a rotation it falls through to the reset below and gets wiped.
+    const expectedPublicKey = this.options.expectedUserEncryptionPublicKey;
+    if (
+      this.storedEncryptionProfile?.userId === this.userId &&
+      (!expectedPublicKey ||
+        base64Encode(this.storedEncryptionProfile.keyPair.publicKey) === expectedPublicKey)
+    ) {
       // A matching cached profile still needs origin authorization before key use.
       // Denying it must keep the profile and the allowlist; only a different user resets.
       if (!skipGuard && !(await this.guardKeys())) {
