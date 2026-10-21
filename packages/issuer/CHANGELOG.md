@@ -1,5 +1,16 @@
 # @idos-network/issuer
 
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/kwil-js@0.2.1
+  - @idos-network/utils@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes

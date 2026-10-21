@@ -1,5 +1,11 @@
 # @idos-network/kwil-js
 
+## 0.2.1
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+
 ## 0.2.0
 
 ### Minor Changes
