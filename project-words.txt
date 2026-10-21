@@ -42,6 +42,7 @@ davelosert
 dawidd
 dbid
 dbname
+deployers
 devnet
 digitalbazaar
 dijkstrajs
