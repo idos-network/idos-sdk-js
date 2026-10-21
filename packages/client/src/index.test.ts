@@ -183,16 +183,21 @@ describe("signer switching on a shared idle client", () => {
 
   it("stops a kwil client saved before the signer changed", async () => {
     const idle = idleClient();
+    const signTypedData = vi.fn();
+    idle.enclaveProvider.signTypedData = signTypedData;
     const withA = await idle.withUserSigner(ed25519Signer(1));
     const loggedInA = new idOSClientLoggedIn(withA, user);
     const savedWith = withA.kwilClient;
     const savedLoggedIn = loggedInA.kwilClient;
+    const savedEnclave = withA.enclaveProvider;
 
     await idle.withUserSigner(ed25519Signer(2));
 
     await expect(savedWith.execute({} as never)).rejects.toThrow(/stale/);
     await expect(savedLoggedIn.call({} as never)).rejects.toThrow(/stale/);
+    expect(() => savedEnclave.signTypedData({}, {}, {})).toThrow(/stale/);
     expect(idle.kwilClient.execute).not.toHaveBeenCalled();
+    expect(signTypedData).not.toHaveBeenCalled();
   });
 
   it("does not return a client that can act as the newer signer", async () => {
@@ -206,7 +211,38 @@ describe("signer switching on a shared idle client", () => {
 
     await expect(fromWith.kwilClient.execute({} as never)).rejects.toThrow(/stale/);
     await expect(fromLoggedIn.kwilClient.execute({} as never)).rejects.toThrow(/stale/);
+    expect(() => fromWith.kwilClient.setSigner(undefined)).toThrow(/stale/);
+    expect(() => fromWith.enclaveProvider.setSigner({} as never)).toThrow(/stale/);
+    await expect(fromWith.withUserSigner(ed25519Signer(3))).rejects.toThrow(/stale/);
     await expect(withB.hasProfile()).resolves.toBe(true);
+  });
+
+  it("does not install a new signer while logout is still resetting the enclave", async () => {
+    const idle = idleClient();
+    let releaseReset = (): void => {};
+    const resetGate = new Promise<void>((resolve) => {
+      releaseReset = resolve;
+    });
+    let markResetStarted = (): void => {};
+    const resetStarted = new Promise<void>((resolve) => {
+      markResetStarted = resolve;
+    });
+    idle.enclaveProvider.reset = vi.fn(async () => {
+      markResetStarted();
+      await resetGate;
+    });
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+
+    const loggingOut = withA.logOut();
+    await resetStarted;
+    const switching = idle.withUserSigner(ed25519Signer(2));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(idle.kwilClient.signer).toBeUndefined();
+
+    releaseReset();
+    await loggingOut;
+    await switching;
+    expect(idle.kwilClient.signer).not.toBeUndefined();
   });
 
   it("retries enclave reset until it finishes, unless a newer signer owns the session", async () => {

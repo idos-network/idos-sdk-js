@@ -141,6 +141,8 @@ const STALE_CLIENT =
 // guard below; `turns` keeps signer replacement and enclave reconfiguration from interleaving.
 const rawOf = new WeakMap<KwilActionClient, KwilActionClient>();
 const boundOf = new WeakMap<KwilActionClient, WeakMap<KwilSigner, KwilActionClient>>();
+const rawEnclaveOf = new WeakMap<BaseProvider, BaseProvider>();
+const boundEnclaveOf = new WeakMap<BaseProvider, WeakMap<KwilSigner, BaseProvider>>();
 const turns = new WeakMap<KwilActionClient, Promise<void>>();
 const resetPending = new WeakSet<KwilActionClient>();
 
@@ -195,6 +197,43 @@ function boundKwilClient(kwilClient: KwilActionClient, kwilSigner: KwilSigner): 
   return bound;
 }
 
+function sharedEnclave(enclave: BaseProvider): BaseProvider {
+  return (enclave && rawEnclaveOf.get(enclave)) || enclave;
+}
+
+function boundEnclave(
+  enclave: BaseProvider,
+  kwilClient: KwilActionClient,
+  kwilSigner: KwilSigner,
+): BaseProvider {
+  const raw = sharedEnclave(enclave);
+  const cached = kwilSigner ? boundEnclaveOf.get(raw)?.get(kwilSigner) : undefined;
+  if (cached) return cached;
+
+  const bound = new Proxy(raw, {
+    get(target, prop) {
+      if (prop === "then" || typeof prop === "symbol") return undefined;
+      const value = Reflect.get(target, prop, target);
+      if (typeof value !== "function") {
+        assertSigner(kwilClient, kwilSigner);
+        return value;
+      }
+      return (...args: unknown[]) => {
+        assertSigner(kwilClient, kwilSigner);
+        return value.apply(target, args);
+      };
+    },
+  }) as BaseProvider;
+
+  rawEnclaveOf.set(bound, raw);
+  if (kwilSigner) {
+    const bySigner = boundEnclaveOf.get(raw) ?? new WeakMap<KwilSigner, BaseProvider>();
+    bySigner.set(kwilSigner, bound);
+    boundEnclaveOf.set(raw, bySigner);
+  }
+  return bound;
+}
+
 function exclusive<T>(kwilClient: KwilActionClient, run: () => Promise<T>): Promise<T> {
   const raw = sharedKwilClient(kwilClient);
   const previous = turns.get(raw) ?? Promise.resolve();
@@ -209,11 +248,19 @@ function exclusive<T>(kwilClient: KwilActionClient, run: () => Promise<T>): Prom
   return result;
 }
 
-function detachedKwilClient(): KwilActionClient {
-  return new Proxy({} as KwilActionClient, {
+// `setSigner` is synchronous on the real clients. A rejected promise here is not awaited
+// by `withUserSigner` or the enclave constructor, and Node can terminate on it.
+function detachedSurface<T extends object>(): T {
+  return new Proxy({} as T, {
     get(_target, prop) {
       if (prop === "signer") return undefined;
       if (prop === "then" || typeof prop === "symbol") return undefined;
+      if (prop === "client") throw new Error(STALE_CLIENT);
+      if (prop === "setSigner") {
+        return () => {
+          throw new Error(STALE_CLIENT);
+        };
+      }
       return async () => {
         throw new Error(STALE_CLIENT);
       };
@@ -221,15 +268,13 @@ function detachedKwilClient(): KwilActionClient {
   });
 }
 
-function detachedEnclave(): BaseProvider {
-  return new Proxy({} as BaseProvider, {
-    get(_target, prop) {
-      if (prop === "then" || typeof prop === "symbol") return undefined;
-      return async () => {
-        throw new Error(STALE_CLIENT);
-      };
-    },
-  });
+function staleIdle(store: Store, blobUrl: string): idOSClientIdle {
+  return new idOSClientIdle(
+    store,
+    detachedSurface<KwilActionClient>(),
+    detachedSurface<BaseProvider>(),
+    idleBlobGateway(blobUrl),
+  );
 }
 
 // A replaced signer keeps the session. The signer that actually logged out must finish
@@ -244,14 +289,7 @@ function finishLogOut(
   const raw = sharedKwilClient(kwilClient);
   return exclusive(raw, async () => {
     const current = raw.signer;
-    if (current !== undefined && current !== kwilSigner) {
-      return new idOSClientIdle(
-        store,
-        detachedKwilClient(),
-        detachedEnclave(),
-        idleBlobGateway(blobUrl),
-      );
-    }
+    if (current !== undefined && current !== kwilSigner) return staleIdle(store, blobUrl);
 
     if (current === kwilSigner) {
       raw.setSigner(undefined);
@@ -262,6 +300,9 @@ function finishLogOut(
       await enclaveProvider.reset();
       resetPending.delete(raw);
     }
+
+    // A signer installed while `reset` was in progress must not ride back on this idle client.
+    if (raw.signer !== undefined && raw.signer !== kwilSigner) return staleIdle(store, blobUrl);
 
     return new idOSClientIdle(store, raw, enclaveProvider, idleBlobGateway(blobUrl));
   });
@@ -367,8 +408,6 @@ export class idOSClientIdle {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
-    this.kwilClient.setSigner(kwilSigner);
-
     if (walletType === "NEAR") {
       const originalSigner = signer;
       signer = {
@@ -405,7 +444,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly state: "with-user-signer";
   readonly store: Store;
   readonly #kwilClient: KwilActionClient;
-  readonly enclaveProvider: BaseProvider;
+  readonly #enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -425,7 +464,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
     this.#kwilClient = idOSClientIdle.kwilClient;
-    this.enclaveProvider = idOSClientIdle.enclaveProvider;
+    this.#enclaveProvider = idOSClientIdle.enclaveProvider;
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
@@ -433,11 +472,15 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletType = walletType;
     this.blobGateway = blobGateway;
     // @ts-expect-error - TODO: Fix this
-    this.enclaveProvider.setSigner(this.signer);
+    this.#enclaveProvider.setSigner(this.signer);
   }
 
   get kwilClient(): KwilActionClient {
     return boundKwilClient(this.#kwilClient, this.kwilSigner);
+  }
+
+  get enclaveProvider(): BaseProvider {
+    return boundEnclave(this.#enclaveProvider, this.#kwilClient, this.kwilSigner);
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -445,7 +488,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       this.store,
       this.#kwilClient,
       this.kwilSigner,
-      this.enclaveProvider,
+      this.#enclaveProvider,
       this.blobGateway.url,
     );
   }
@@ -503,7 +546,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly state: "logged-in";
   readonly store: Store;
   readonly #kwilClient: KwilActionClient;
-  readonly enclaveProvider: BaseProvider;
+  readonly #enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -516,7 +559,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.state = "logged-in";
     this.store = idOSClientWithUserSigner.store;
     this.#kwilClient = sharedKwilClient(idOSClientWithUserSigner.kwilClient);
-    this.enclaveProvider = idOSClientWithUserSigner.enclaveProvider;
+    this.#enclaveProvider = sharedEnclave(idOSClientWithUserSigner.enclaveProvider);
     this.signer = idOSClientWithUserSigner.signer;
     this.kwilSigner = idOSClientWithUserSigner.kwilSigner;
     this.walletIdentifier = idOSClientWithUserSigner.walletIdentifier;
@@ -530,12 +573,16 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return boundKwilClient(this.#kwilClient, this.kwilSigner);
   }
 
+  get enclaveProvider(): BaseProvider {
+    return boundEnclave(this.#enclaveProvider, this.#kwilClient, this.kwilSigner);
+  }
+
   async logOut(): Promise<idOSClientIdle> {
     return finishLogOut(
       this.store,
       this.#kwilClient,
       this.kwilSigner,
-      this.enclaveProvider,
+      this.#enclaveProvider,
       this.blobGateway.url,
     );
   }
