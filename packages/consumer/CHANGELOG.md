@@ -1,5 +1,29 @@
 # @idos-network/consumer
 
+## 2.2.0
+
+### Patch Changes
+
+- c27ea68: Use `@idos-network/kwil-js` 0.1.11.
+- 3484957: Move `@idos-network/kwil-js` into the monorepo and align it with the other packages.
+
+  - ESM-only build via `tsdown`, tests on `vitest` (was `tsc` + a custom esbuild script and `jest`)
+  - Public subpath exports renamed: `@idos-network/kwil-js/dist/api_client/config` -> `/config`, `/dist/core/action` -> `/action`, `/dist/core/database` -> `/database`
+  - Removed the deprecated `getSchema`, `deploy`, `drop` and `listDatabases` methods, which only threw
+  - Dropped the `jssha`, `long` and `uuid` dependencies in favour of `@noble/hashes` and platform built-ins
+  - Integration tests moved to the private `kwil-js-integration` app, which runs them against a live Kwil node outside CI
+
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [c27ea68]
+- Updated dependencies [3484957]
+- Updated dependencies [f2dc464]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/kwil-js@0.2.0
+  - @idos-network/credentials@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
