@@ -4,7 +4,11 @@
   "description": "idOS Utils for JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/utils"
+  },
   "files": [
     "dist/**/*",
     "src/**/*"
