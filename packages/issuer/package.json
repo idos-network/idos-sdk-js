@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/issuer",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "idOS Issuer JavaScript SDK for server environments",
   "homepage": "https://idos.network",
   "license": "MIT",

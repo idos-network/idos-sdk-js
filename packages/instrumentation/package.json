@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/instrumentation",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "OpenTelemetry instrumentation for the idOS JavaScript SDK",
   "keywords": [
     "idos",

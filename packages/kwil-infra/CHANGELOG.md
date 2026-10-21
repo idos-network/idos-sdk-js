@@ -1,5 +1,11 @@
 # @idos-network/kwil-infra
 
+## 2.3.0
+
+### Patch Changes
+
+- @idos-network/utils@2.3.0
+
 ## 2.2.2
 
 ### Patch Changes
