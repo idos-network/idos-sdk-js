@@ -1,5 +1,15 @@
 # @idos-network/enclave
 
+## 2.2.1
+
+### Patch Changes
+
+- ad3a607: Discard and wipe a cached encryption key when it no longer matches the expected user encryption public key.
+- Updated dependencies [ed9a1ad]
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
 ## 2.2.0
 
 ### Patch Changes

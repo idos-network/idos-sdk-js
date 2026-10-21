@@ -1,5 +1,12 @@
 # @idos-network/kwil-infra
 
+## 2.2.1
+
+### Patch Changes
+
+- ed9a1ad: Fail fast with a clear error when signing Kwil messages with Xaman (Xumm), which can't produce the raw message signature KGW verifies, and reject non-hex XRP signatures.
+  - @idos-network/utils@2.2.1
+
 ## 2.2.0
 
 ### Patch Changes
