@@ -1,5 +1,15 @@
 # pay-demo
 
+## 0.8.5
+
+### Patch Changes
+
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/consumer@2.2.2
+  - @idos-network/client@2.2.2
+  - @idos-network/utils@2.2.2
+
 ## 0.8.4
 
 ### Patch Changes
