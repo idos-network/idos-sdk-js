@@ -1,4 +1,4 @@
-import type { idOSWallet } from "@idos-network/kwil-infra/actions";
+import type { GetWalletsOutput } from "@idos-network/kwil-infra/actions";
 
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ function truncateAddress(addr: string): string {
 
 interface DeleteWalletProps {
   isOpen: boolean;
-  wallets: idOSWallet[] | undefined;
+  wallets: GetWalletsOutput[] | undefined;
   onClose: () => void;
 }
 
@@ -40,7 +40,7 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
     onClose();
   };
 
-  const handleDeleteWallet = (wallets: idOSWallet[]) => {
+  const handleDeleteWallet = (wallets: GetWalletsOutput[]) => {
     deleteWallet.mutate(wallets, {
       onSuccess() {
         handleClose();

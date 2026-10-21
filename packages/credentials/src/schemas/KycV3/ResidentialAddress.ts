@@ -1,14 +1,12 @@
-import { IsBoolean, IsOptional, IsString, IsISO31661Alpha2, IsMimeType } from "class-validator";
+import { IsOptional, IsString, IsISO31661Alpha2, IsMimeType, IsEnum } from "class-validator";
 
+import { ResidentialAddressSources, type ResidentialAddressSource } from "../enums";
 import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
 
 export class ResidentialAddress {
-  /*
-   * Whether the address has been verified against the proof document.
-   * If false, the address has been manually entered by the user.
-   */
-  @IsBoolean()
-  verified: boolean;
+  /* How the address was obtained: typed in, autocompleted, from GPS, an external database, or read from an identity or proof-of-address document. */
+  @IsEnum(ResidentialAddressSources)
+  source: ResidentialAddressSource;
 
   /* Street address. */
   @IsString()
@@ -43,7 +41,7 @@ export class ResidentialAddress {
   country: string;
 
   /* Type of document provided to verify the address (e.g. utility bill, bank statement). */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   proofCategory?: string;
 
@@ -53,18 +51,18 @@ export class ResidentialAddress {
   proofDateOfIssue?: Date;
 
   /* The document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @Base85FileField()
   proofFile?: Buffer;
 
   /* Type of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   @IsMimeType()
   proofFileType?: string;
 
   /* Name of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   proofFileName?: string;
 

@@ -23,6 +23,16 @@ export const IDDocumentTypes = [
 ] as const;
 export type IDDocumentType = (typeof IDDocumentTypes)[number];
 
+export const ResidentialAddressSources = [
+  "MANUAL",
+  "GPS",
+  "EXTERNAL_DB",
+  "PROOF_OF_ADDRESS",
+  "PROOF_OF_IDENTITY",
+  "AUTO_COMPLETE",
+] as const;
+export type ResidentialAddressSource = (typeof ResidentialAddressSources)[number];
+
 export const ScreeningResults = ["CLEAR", "NOT_CHECKED"] as const;
 export type ScreeningResult = (typeof ScreeningResults)[number];
 
