@@ -125,7 +125,6 @@ catalogs:
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Declared pins that may be newer than minimumReleaseAge
-  - axios@1.20.0
   - "@noble/hashes@2.3.0"
 
 onlyBuiltDependencies:

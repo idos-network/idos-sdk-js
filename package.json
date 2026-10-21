@@ -20,8 +20,8 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
+    "@size-limit/esbuild": "^11.2.0",
     "@size-limit/file": "^11.2.0",
-    "@size-limit/time": "^11.2.0",
     "audit-ci": "^7.1.0",
     "lefthook": "1.13.6",
     "oxfmt": "^0.66.0",
@@ -30,53 +30,5 @@
     "turbo": "^2.10.8",
     "vite-plugin-node-polyfills": "catalog:build"
   },
-  "size-limit": [
-    {
-      "name": "@idos-network/client",
-      "path": "packages/client/dist/index.js",
-      "limit": "2.0 MB"
-    },
-    {
-      "name": "@idos-network/consumer",
-      "path": "packages/consumer/dist/index.mjs",
-      "limit": "500 KB"
-    },
-    {
-      "name": "@idos-network/issuer",
-      "path": "packages/issuer/dist/index.mjs",
-      "limit": "550 KB",
-      "running": false
-    },
-    {
-      "name": "@idos-network/credentials",
-      "path": "packages/credentials/dist/**/*.mjs",
-      "limit": "20 KB"
-    },
-    {
-      "name": "@idos-network/enclave",
-      "path": "packages/enclave/dist/**/*.mjs",
-      "limit": "20 KB"
-    },
-    {
-      "name": "@idos-network/kwil-js",
-      "path": "packages/kwil-js/dist/index.mjs",
-      "limit": "20 KB"
-    },
-    {
-      "name": "@idos-network/kwil-infra",
-      "path": "packages/kwil-infra/dist/**/*.mjs",
-      "limit": "20 KB"
-    },
-    {
-      "name": "@idos-network/utils",
-      "path": "packages/utils/dist/**/*.mjs",
-      "limit": "20 KB"
-    },
-    {
-      "name": "@idos-network/instrumentation",
-      "path": "packages/instrumentation/dist/**/*.mjs",
-      "limit": "20 KB"
-    }
-  ],
   "packageManager": "pnpm@11.26.0"
 }

@@ -1,7 +1,3 @@
 {
-  // extract-zip has no published patched release yet. Both advisories are only
-  // reachable via @size-limit/time → puppeteer (dev/CI bundle-size tooling).
-  // braces has no published patched release (latest is 3.0.3). micromatch pulls
-  // it in for changesets, vite, ts-morph, vite-plugin-html, and shadcn.
-  "allowlist": ["GHSA-jmr9-qjv8-65gv", "GHSA-7pqw-9j4j-h8q3", "GHSA-vfj7-8cjw-p6xm"],
+  "allowlist": ["GHSA-vfj7-8cjw-p6xm", "GHSA-vfj7-8cjw-p6xm"],
 }
