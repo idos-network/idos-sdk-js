@@ -11,6 +11,8 @@ import {
   validateSync,
 } from "class-validator";
 
+import { transliterateIcao, transliterateLatin } from "../utils/transliterate";
+
 /*
  * A credential subject travels the wire flat: every section is merged into one object with
  * its own name as a prefix (`person` + `firstName` -> `personFirstName`), while `root`
@@ -63,6 +65,42 @@ export function Section(type: () => Ctor<object>, prefix?: string): PropertyDeco
 
 export function sectionsOf(cls: Ctor<object>): SectionMeta[] {
   return (Reflect.getMetadata(SECTIONS, cls) as SectionMeta[] | undefined) ?? [];
+}
+
+/**
+ * Marks a string field kept in its original script (Cyrillic, umlauts, …) and adds two
+ * read-only siblings, derived from it on every read and never serialized:
+ *
+ * - `<field>Icao`: ICAO 9303, as a passport's MRZ prints it; `undefined` for a script the
+ *   ICAO tables do not cover.
+ * - `<field>Latin`: the conventional spelling, a promise because its tables load on first
+ *   use; the app supplies them through `registerTransliteration()`.
+ *
+ * TypeScript cannot see members a decorator adds, so declare both next to the field.
+ */
+export function Transliterate(): PropertyDecorator {
+  return (target, propertyKey) => {
+    const field = String(propertyKey);
+
+    // On the prototype rather than the instance, so serialization, which reads own keys, skips them.
+    Object.defineProperty(target, `${field}Icao`, {
+      configurable: true,
+      get(this: Record<string, unknown>) {
+        const value = this[field];
+
+        return typeof value === "string" ? transliterateIcao(value) : undefined;
+      },
+    });
+
+    Object.defineProperty(target, `${field}Latin`, {
+      configurable: true,
+      get(this: Record<string, unknown>) {
+        const value = this[field];
+
+        return typeof value === "string" ? transliterateLatin(value) : Promise.resolve(undefined);
+      },
+    });
+  };
 }
 
 /**
