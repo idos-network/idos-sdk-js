@@ -36,3 +36,4 @@ ignorePaths:
   - "apps/idos-data-dashboard/src/generated/**"
   - "apps/idos-data-dashboard/prisma/**"
   - "**/coverage/*.json"
+  - "packages/kwil-js/CHANGELOG.md"

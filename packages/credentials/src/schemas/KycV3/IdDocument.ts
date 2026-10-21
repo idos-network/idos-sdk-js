@@ -1,7 +1,7 @@
 import { IsIn, IsOptional, IsISO31661Alpha2, Length, IsString, IsMimeType } from "class-validator";
 
 import { IDDocumentTypes, type IDDocumentType } from "../enums";
-import { Base85FileField, IsoDateField, RequiredWhen, type RequiredWithFields } from "../utils";
+import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
 
 export class IdDocument {
   /* The type of identity document used for verification (e.g. PASSPORT, ID_CARD, DRIVERS). */
@@ -90,10 +90,3 @@ export class IdDocument {
   @Length(1, 255)
   issuingSubdivision?: string;
 }
-
-/** `IdDocument`, with a back file requiring its type and name. */
-export type IdDocumentFields = RequiredWithFields<
-  IdDocument,
-  "backFile",
-  "backFileType" | "backFileName"
->;

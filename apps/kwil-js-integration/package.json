@@ -1,0 +1,28 @@
+{
+  "name": "kwil-js-integration",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Integration tests for @idos-network/kwil-js against a live Kwil node",
+  "license": "MIT",
+  "repository": "github:idos-network/idos-sdk-js",
+  "type": "module",
+  "scripts": {
+    "test:integration": "vitest run",
+    "test:integration:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@idos-network/kwil-js": "workspace:*",
+    "@types/node": "catalog:build",
+    "dotenv": "^16.4.5",
+    "ethers": "catalog:ethereum",
+    "scrypt-js": "^3.0.1",
+    "tweetnacl": "catalog:core",
+    "typescript": "catalog:build",
+    "uuid": "^11.1.0",
+    "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}

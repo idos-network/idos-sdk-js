@@ -10,7 +10,8 @@
       "@idos-network/credentials",
       "@idos-network/enclave",
       "@idos-network/utils",
-      "@idos-network/kwil-infra"
+      "@idos-network/kwil-infra",
+      "@idos-network/instrumentation"
     ]
   ],
   "linked": [],

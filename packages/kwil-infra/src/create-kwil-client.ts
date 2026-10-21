@@ -1,10 +1,6 @@
-import type { Config } from "@idos-network/kwil-js/dist/api_client/config";
-import type {
-  ActionBody,
-  CallBody,
-  PositionalParams,
-} from "@idos-network/kwil-js/dist/core/action";
-import type { DataInfo } from "@idos-network/kwil-js/dist/core/database";
+import type { ActionBody, CallBody, PositionalParams } from "@idos-network/kwil-js/action";
+import type { Config } from "@idos-network/kwil-js/config";
+import type { DataInfo } from "@idos-network/kwil-js/database";
 
 import { type KwilSigner, NodeKwil, WebKwil } from "@idos-network/kwil-js";
 import invariant from "tiny-invariant";
@@ -115,10 +111,21 @@ export class KwilActionClient {
     }
 
     if (synchronous) {
-      await waitForKwilTx((hash) => this.client.txInfo(hash), txHash);
+      await this.waitForTx(txHash);
     }
 
     return txHash;
+  }
+
+  /**
+   * Polls the node until a broadcast transaction is mined, or throws
+   * `KwilTxFailedError` / `KwilTxPollTimeoutError`.
+   *
+   * Called through `this` rather than directly so that it is a seam an
+   * instrumentation can wrap — the wait dominates the latency of `execute`.
+   */
+  async waitForTx(txHash: string): Promise<void> {
+    await waitForKwilTx((hash) => this.client.txInfo(hash), txHash);
   }
 
   setSigner(signer: KwilSigner | undefined): void {

@@ -4,6 +4,8 @@ import {
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
   addUserAsInserter,
+  addWalletMessage as _addWalletMessage,
+  type AddWalletMessageInput,
   type GetUserAsInserterInput,
   getUserAsInserter,
   type idOSUser,
@@ -50,6 +52,11 @@ export class UserService {
     const payload = this.#ensureEntityId(params);
     await _upsertWalletAsInserter(this.#kwilClient, payload);
     return payload;
+  }
+
+  async addWalletMessage(params: AddWalletMessageInput): Promise<string> {
+    const result = await _addWalletMessage(this.#kwilClient, params);
+    return result.message;
   }
 
   /// Useful to understand if a user id already exists.
