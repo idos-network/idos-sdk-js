@@ -114,16 +114,18 @@ jobs:
           name: tarballs
           path: tarballs
 
-      # npm >= 11.5.1 is required for trusted publishing; Node 24 ships it.
+      # Needs an npm with `npm stage` (11.19.1 at the time of writing); Node 24 ships it.
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
 
-      - name: Publish tarballs
+      # The npm trust relationship only allows staging; a maintainer approves each
+      # staged version with 2FA (`npm stage approve`) to make it public.
+      - name: Stage tarballs
         run: |
           # "./" matters: npm reads "tarballs/x.tgz" as a GitHub "owner/repo" spec.
           for tgz in ./tarballs/*.tgz; do
-            npm publish "$tgz" --access public --provenance --ignore-scripts
+            npm stage publish "$tgz" --access public --provenance --ignore-scripts
           done
 
   # Tags and GitHub releases for the versions just published (`changeset tag` prints "New tag:" lines).
