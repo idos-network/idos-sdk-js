@@ -125,7 +125,6 @@ catalogs:
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Declared pins that may be newer than minimumReleaseAge
-  - axios@1.20.0
   - "@noble/hashes@2.3.0"
 
 onlyBuiltDependencies:
@@ -181,13 +180,10 @@ overrides:
   source-map-js: ">= 1.2.2"
   tinypool: ">= 2.1.1"
   toml: ">= 4.1.2"
-  # Security: launch-editor path check bypass (GHSA-587h-7wmj-h5pm).
-  # Exact pins: an open range keeps the vulnerable releases already in the lockfile.
-  vite: "8.2.4"
-  "launch-editor": "2.14.2"
-  # Security: follow-redirects credential header leak (GHSA-8r9p-f939-6h3c, GHSA-q3jh-wrc6-jgq8)
-  "follow-redirects": "1.16.1"
+  vite: ">= 8.2.4"
   ws: ">= 8.21.0"
+  launch-editor: ">= 2.14.2"
+  follow-redirects: ">= 1.16.1"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
