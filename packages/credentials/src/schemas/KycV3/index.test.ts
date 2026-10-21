@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { VerifiableCredential } from "../../types";
 
 import { KycV3 } from ".";
+import { registerTransliteration } from "../../utils/transliterate";
 
 /** A credential with the required sections filled in, ready to be extended per test. */
 function basicCredential(): KycV3 {
@@ -332,6 +333,68 @@ describe("KycV3 derived fields", () => {
 
     expect(credential.envelope.expirationDate).toEqual(new Date("2030-06-01"));
   });
+
+  // cspell:disable
+  it("transliterates names in their original script without serializing the Latin form", async () => {
+    registerTransliteration(() => import("transliteration"));
+
+    const credential = basicCredential();
+    credential.addSection("person", {
+      firstName: "Юлия",
+      familyName: "Müller",
+      fatherName: "Αλέξανδρος",
+      nationality: "DE",
+      dateOfBirth: new Date("1990-01-01"),
+    });
+
+    credential.addSection("residentialAddress", {
+      source: "MANUAL",
+      street: "вулиця Хрещатик",
+      houseNumber: "22",
+      additionalAddressInfo: "квартира 5",
+      city: "Київ",
+      country: "UA",
+    });
+
+    // Each marked field as [<field>Icao, await <field>Latin].
+    const siblings = async ({ person, residentialAddress: address }: KycV3["subject"]) => ({
+      firstName: [person?.firstNameIcao, await person?.firstNameLatin],
+      familyName: [person?.familyNameIcao, await person?.familyNameLatin],
+      fatherName: [person?.fatherNameIcao, await person?.fatherNameLatin],
+      middleName: [person?.middleNameIcao, await person?.middleNameLatin],
+      street: [address?.streetIcao, await address?.streetLatin],
+      additionalAddressInfo: [
+        address?.additionalAddressInfoIcao,
+        await address?.additionalAddressInfoLatin,
+      ],
+      city: [address?.cityIcao, await address?.cityLatin],
+    });
+    const expected = {
+      firstName: ["Iuliia", "Yuliya"],
+      familyName: ["Mueller", "Muller"],
+      // ICAO has no Greek table; an absent field has neither form.
+      fatherName: [undefined, "Alexandros"],
+      middleName: [undefined, undefined],
+      street: ["vulitsia Khreshchatik", "vulicya Hreshchatik"],
+      additionalAddressInfo: ["kvartira 5", "kvartira 5"],
+      city: ["Kiiv", "Kiyiv"],
+    };
+
+    expect(await siblings(credential.subject)).toEqual(expected);
+    expect(
+      Object.keys(credential.subject.person ?? {}).filter((key) => /latin|icao/i.test(key)),
+    ).toEqual([]);
+
+    const serialized = credential.serializeSubject();
+    expect(serialized.personFirstName).toBe("Юлия");
+    expect(Object.keys(serialized).filter((key) => /latin|icao/i.test(key))).toEqual([]);
+
+    const roundTrip = new KycV3();
+    await roundTrip.deserialize(serializedCredential(serialized));
+
+    expect(await siblings(roundTrip.subject)).toEqual(expected);
+  });
+  // cspell:enable
 
   it("reaches plus and kycLevel 3 with a verified address, SOW and onboarding", () => {
     const credential = basicCredential();

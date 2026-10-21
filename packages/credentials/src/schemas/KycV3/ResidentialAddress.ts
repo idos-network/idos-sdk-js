@@ -1,7 +1,7 @@
 import { IsOptional, IsString, IsISO31661Alpha2, IsMimeType, IsEnum } from "class-validator";
 
 import { ResidentialAddressSources, type ResidentialAddressSource } from "../enums";
-import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
+import { Base85FileField, IsoDateField, RequiredWhen, Transliterate } from "../utils";
 
 export class ResidentialAddress {
   /* How the address was obtained: typed in, autocompleted, from GPS, an external database, or read from an identity or proof-of-address document. */
@@ -9,8 +9,11 @@ export class ResidentialAddress {
   source: ResidentialAddressSource;
 
   /* Street address. */
+  @Transliterate()
   @IsString()
   street: string;
+  declare readonly streetIcao?: string;
+  declare readonly streetLatin?: Promise<string | undefined>;
 
   /* House number. */
   @IsOptional()
@@ -18,18 +21,27 @@ export class ResidentialAddress {
   houseNumber?: string;
 
   /* Additional address information (e.g. apartment number). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   additionalAddressInfo?: string;
+  declare readonly additionalAddressInfoIcao?: string;
+  declare readonly additionalAddressInfoLatin?: Promise<string | undefined>;
 
   /* Region (e.g. state, province). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   region?: string;
+  declare readonly regionIcao?: string;
+  declare readonly regionLatin?: Promise<string | undefined>;
 
   /* Locality (e.g. city, town). */
+  @Transliterate()
   @IsString()
   city: string;
+  declare readonly cityIcao?: string;
+  declare readonly cityLatin?: Promise<string | undefined>;
 
   /* Postal code. */
   @IsOptional()

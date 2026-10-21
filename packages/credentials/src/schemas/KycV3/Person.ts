@@ -1,38 +1,56 @@
 import { IsBoolean, IsIn, IsOptional, IsString, IsISO31661Alpha2 } from "class-validator";
 
 import { Genders, type Gender } from "../enums";
-import { IsoDateField, RequiredWhen } from "../utils";
+import { IsoDateField, RequiredWhen, Transliterate } from "../utils";
 
 export class Person {
   /* The person's first/given name(s) as on their identity document. */
+  @Transliterate()
   @RequiredWhen((person: Person) => !person.familyName)
   @IsString()
   firstName?: string;
+  declare readonly firstNameIcao?: string;
+  declare readonly firstNameLatin?: Promise<string | undefined>;
 
   /* The person's family/last name as on their identity document. */
+  @Transliterate()
   @IsOptional()
   @IsString()
   familyName?: string;
+  declare readonly familyNameIcao?: string;
+  declare readonly familyNameLatin?: Promise<string | undefined>;
 
   /* The person's middle name(s). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   middleName?: string;
+  declare readonly middleNameIcao?: string;
+  declare readonly middleNameLatin?: Promise<string | undefined>;
 
   /* The person's father's name / patronymic — required in some jurisdictions (e.g. Greece). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   fatherName?: string;
+  declare readonly fatherNameIcao?: string;
+  declare readonly fatherNameLatin?: Promise<string | undefined>;
 
   /* The person's maiden name (family name before marriage). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   maidenName?: string;
+  declare readonly maidenNameIcao?: string;
+  declare readonly maidenNameLatin?: Promise<string | undefined>;
 
   /* The person's mother's birth name — required in some jurisdictions (e.g. Hungary). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   motherName?: string;
+  declare readonly motherNameIcao?: string;
+  declare readonly motherNameLatin?: Promise<string | undefined>;
 
   /* The person's gender (M, F, or OTHER). */
   @IsOptional()
