@@ -96,8 +96,13 @@ export function Transliterate(): PropertyDecorator {
       configurable: true,
       get(this: Record<string, unknown>) {
         const value = this[field];
+        if (typeof value !== "string") return Promise.resolve(undefined);
 
-        return typeof value === "string" ? transliterateLatin(value) : Promise.resolve(undefined);
+        const latin = transliterateLatin(value);
+        // A read nobody awaits (a logger walking getters) must not crash Node with an unhandled rejection; awaiters still get the error.
+        latin.catch(() => {});
+
+        return latin;
       },
     });
   };

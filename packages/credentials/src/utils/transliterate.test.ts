@@ -42,6 +42,23 @@ describe("transliterateLatin", () => {
     );
   });
 
+  it("leaves an unawaited <field>Latin read without an unhandled rejection", async () => {
+    vi.resetModules();
+    const { Transliterate } = await import("../schemas/utils");
+    const proto = {};
+    Transliterate()(proto, "name");
+    const person = Object.assign(Object.create(proto), { name: "Юлия" });
+    const unhandled = vi.fn();
+    process.on("unhandledRejection", unhandled);
+
+    void person.nameLatin;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    process.off("unhandledRejection", unhandled);
+
+    expect(unhandled).not.toHaveBeenCalled();
+    await expect(person.nameLatin).rejects.toThrow(/registerTransliteration/);
+  });
+
   it("covers scripts the ICAO tables do not once registered", async () => {
     registerTransliteration(() => import("transliteration"));
 
