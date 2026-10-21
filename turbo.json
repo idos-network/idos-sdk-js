@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", "dist/**"]
+      "outputs": ["build/**", "dist/**", ".vercel/react-router-build-result.json"]
     },
     "data-dashboard#build": {
       "dependsOn": ["^build"],
