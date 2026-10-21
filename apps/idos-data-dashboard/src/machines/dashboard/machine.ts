@@ -483,10 +483,17 @@ export const dashboardMachine = setup({
         }),
       },
       on: {
-        RETRY: {
-          target: "connecting",
-          actions: assign({ error: () => null }),
-        },
+        RETRY: [
+          {
+            // A new wallet must not inherit a developer cookie the delete did not clear.
+            guard: ({ context }) => context.error === "Failed to delete session",
+            target: "disconnecting",
+          },
+          {
+            target: "connecting",
+            actions: assign({ error: () => null }),
+          },
+        ],
         DISCONNECT: "disconnecting",
       },
     },

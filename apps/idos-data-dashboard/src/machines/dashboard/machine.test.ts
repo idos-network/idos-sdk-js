@@ -36,7 +36,11 @@ describe("dashboard machine session lifecycle", () => {
     vi.unstubAllGlobals();
   });
 
-  function start(reconnect: () => Promise<ReconnectWalletOutput>, watchSendsDisconnect = false) {
+  function start(
+    reconnect: () => Promise<ReconnectWalletOutput>,
+    watchSendsDisconnect = false,
+    disconnect: () => Promise<void> = async () => {},
+  ) {
     const actor = createActor(
       dashboardMachine.provide({
         actions: { clearServerSession },
@@ -49,7 +53,7 @@ describe("dashboard machine session lifecycle", () => {
           watchEvmAccount: fromCallback<DashboardEvent, WatchEvmAccountInput>(({ sendBack }) => {
             if (watchSendsDisconnect) sendBack({ type: "DISCONNECT" });
           }),
-          disconnect: fromPromise<void, DisconnectInput>(async () => {}),
+          disconnect: fromPromise<void, DisconnectInput>(disconnect),
         },
       }),
     );
@@ -80,6 +84,59 @@ describe("dashboard machine session lifecycle", () => {
 
     await waitFor(actor, (s) => s.matches("disconnected"));
     expect(clearServerSession).toHaveBeenCalled();
+    actor.stop();
+  });
+
+  it("retries session deletion instead of connecting when the delete failed", async () => {
+    let attempts = 0;
+    const actor = start(
+      async () => ({ nearSelector: null }),
+      false,
+      async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error("Failed to delete session");
+      },
+    );
+
+    await waitFor(actor, (s) => s.matches("loggedIn"));
+    actor.send({ type: "DISCONNECT" });
+    await waitFor(actor, (s) => s.matches("error"));
+    actor.send({ type: "RETRY" });
+    await waitFor(actor, (s) => s.matches("disconnected"));
+    expect(attempts).toBe(2);
+    actor.stop();
+  });
+
+  it("reconnects on retry when the failure was not session deletion", async () => {
+    let connectAttempts = 0;
+    const actor = createActor(
+      dashboardMachine.provide({
+        actions: { clearServerSession },
+        actors: {
+          reconnectWallet: fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(async () => ({
+            nearSelector: null,
+          })),
+          connectWallet: fromPromise(async () => {
+            connectAttempts += 1;
+            return {
+              walletAddress: walletA.walletAddress,
+              walletPublicKey: walletA.walletPublicKey,
+              nearSelector: null,
+            };
+          }),
+          initializeIdOS: fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(async () => {
+            throw new Error("Failed to initialize idOS");
+          }),
+          watchEvmAccount: fromCallback<DashboardEvent, WatchEvmAccountInput>(() => {}),
+          disconnect: fromPromise<void, DisconnectInput>(async () => {}),
+        },
+      }),
+    );
+    actor.start();
+    await waitFor(actor, (s) => s.matches("error"));
+    actor.send({ type: "RETRY" });
+    await waitFor(actor, () => connectAttempts === 1);
+    expect(actor.getSnapshot().matches("disconnecting")).toBe(false);
     actor.stop();
   });
 });

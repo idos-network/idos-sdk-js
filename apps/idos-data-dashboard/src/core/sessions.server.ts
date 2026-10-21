@@ -35,7 +35,11 @@ export const sessionStorage = createCookieSessionStorage<Session>({
 // The cookie maxAge alone is not enough: every commitSession re-extends it.
 export function getUserId(session: RouterSession<Session>): string | undefined {
   const issuedAt = session.get("issuedAt");
-  if (!issuedAt || Date.now() - issuedAt > SESSION_MAX_AGE_SECONDS * 1000) {
+  if (typeof issuedAt !== "number" || !Number.isFinite(issuedAt)) {
+    return undefined;
+  }
+  const ageMs = Date.now() - issuedAt;
+  if (ageMs < 0 || ageMs > SESSION_MAX_AGE_SECONDS * 1000) {
     return undefined;
   }
   return session.get("userId");
