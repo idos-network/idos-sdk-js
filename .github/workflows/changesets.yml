@@ -121,7 +121,8 @@ jobs:
 
       - name: Publish tarballs
         run: |
-          for tgz in tarballs/*.tgz; do
+          # "./" matters: npm reads "tarballs/x.tgz" as a GitHub "owner/repo" spec.
+          for tgz in ./tarballs/*.tgz; do
             npm publish "$tgz" --access public --provenance --ignore-scripts
           done
 
