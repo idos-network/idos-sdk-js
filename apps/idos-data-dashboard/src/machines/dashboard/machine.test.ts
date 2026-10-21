@@ -4,6 +4,8 @@ import { createActor, fromCallback, fromPromise, waitFor } from "xstate";
 import {
   type ConnectWalletInput,
   type ConnectWalletOutput,
+  type CreateProfileInput,
+  type CreateProfileOutput,
   type DashboardEvent,
   type DisconnectInput,
   dashboardMachine,
@@ -80,6 +82,76 @@ describe("dashboard machine session lifecycle", () => {
 
     await waitFor(actor, (s) => s.matches("loggedIn"));
     expect(disconnectCalls).toBe(0);
+    actor.stop();
+  });
+
+  it("disconnects when the account changes during idOS initialization", async () => {
+    const seen = new Set<string>();
+    const actor = createActor(
+      dashboardMachine.provide({
+        actors: {
+          reconnectWallet: fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(async () => ({
+            nearSelector: null,
+          })),
+          initializeIdOS: fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(
+            () => new Promise(() => {}),
+          ),
+          watchEvmAccount: fromCallback<DashboardEvent, WatchEvmAccountInput>(({ sendBack }) => {
+            sendBack({ type: "DISCONNECT" });
+          }),
+          disconnect: fromPromise<void, DisconnectInput>(async () => {
+            disconnectCalls += 1;
+          }),
+        },
+      }),
+    );
+    actor.subscribe((snapshot) => {
+      if (typeof snapshot.value === "string") seen.add(snapshot.value);
+    });
+    actor.start();
+
+    await waitFor(actor, (s) => s.matches("disconnected"));
+    expect(seen.has("loggedIn")).toBe(false);
+    expect(disconnectCalls).toBe(1);
+    actor.stop();
+  });
+
+  it("disconnects when the account changes while creating a profile", async () => {
+    let watchProfile = false;
+    const seen = new Set<string>();
+    const actor = createActor(
+      dashboardMachine.provide({
+        actors: {
+          reconnectWallet: fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(async () => ({
+            nearSelector: null,
+          })),
+          initializeIdOS: fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(async () => ({
+            client: { state: "with-user-signer" } as InitializeIdOSOutput["client"],
+            hasProfile: false,
+          })),
+          createProfile: fromPromise<CreateProfileOutput, CreateProfileInput>(
+            () => new Promise(() => {}),
+          ),
+          watchEvmAccount: fromCallback<DashboardEvent, WatchEvmAccountInput>(({ sendBack }) => {
+            if (watchProfile) sendBack({ type: "DISCONNECT" });
+          }),
+          disconnect: fromPromise<void, DisconnectInput>(async () => {
+            disconnectCalls += 1;
+          }),
+        },
+      }),
+    );
+    actor.subscribe((snapshot) => {
+      if (typeof snapshot.value === "string") seen.add(snapshot.value);
+    });
+    actor.start();
+
+    await waitFor(actor, (s) => s.matches("noProfile"));
+    watchProfile = true;
+    actor.send({ type: "CREATE_PROFILE" });
+    await waitFor(actor, (s) => s.matches("disconnected"));
+    expect(seen.has("loggedIn")).toBe(false);
+    expect(disconnectCalls).toBe(1);
     actor.stop();
   });
 

@@ -359,45 +359,57 @@ export const dashboardMachine = setup({
     },
 
     initializingIdOS: {
-      invoke: {
-        src: "initializeIdOS",
-        input: ({ context }): InitializeIdOSInput => {
-          if (!context.walletType || !context.walletAddress || !context.walletPublicKey) {
-            throw new Error("Missing wallet data for idOS initialization");
-          }
-          return {
+      invoke: [
+        {
+          src: "initializeIdOS",
+          input: ({ context }): InitializeIdOSInput => {
+            if (!context.walletType || !context.walletAddress || !context.walletPublicKey) {
+              throw new Error("Missing wallet data for idOS initialization");
+            }
+            return {
+              walletType: context.walletType,
+              walletAddress: context.walletAddress,
+              walletPublicKey: context.walletPublicKey,
+              nearSelector: context.nearSelector,
+            };
+          },
+          onDone: [
+            {
+              target: "loggedIn",
+              guard: ({ event }) => event.output.hasProfile,
+              actions: assign({
+                idOSClient: ({ event }) => event.output.client,
+              }),
+            },
+            {
+              target: "noProfile",
+              actions: assign({
+                idOSClient: ({ event }) => event.output.client,
+              }),
+            },
+          ],
+          onError: {
+            target: "error",
+            actions: assign({
+              error: ({ event }) => {
+                console.error("Failed to initialize idOS", event.error);
+                return event.error instanceof Error
+                  ? event.error.message
+                  : "Failed to initialize idOS";
+              },
+            }),
+          },
+        },
+        {
+          src: "watchEvmAccount",
+          input: ({ context }): WatchEvmAccountInput => ({
             walletType: context.walletType,
             walletAddress: context.walletAddress,
-            walletPublicKey: context.walletPublicKey,
-            nearSelector: context.nearSelector,
-          };
-        },
-        onDone: [
-          {
-            target: "loggedIn",
-            guard: ({ event }) => event.output.hasProfile,
-            actions: assign({
-              idOSClient: ({ event }) => event.output.client,
-            }),
-          },
-          {
-            target: "noProfile",
-            actions: assign({
-              idOSClient: ({ event }) => event.output.client,
-            }),
-          },
-        ],
-        onError: {
-          target: "error",
-          actions: assign({
-            error: ({ event }) => {
-              console.error("Failed to initialize idOS", event.error);
-              return event.error instanceof Error
-                ? event.error.message
-                : "Failed to initialize idOS";
-            },
           }),
         },
+      ],
+      on: {
+        DISCONNECT: "disconnecting",
       },
     },
 
@@ -416,43 +428,55 @@ export const dashboardMachine = setup({
     },
 
     creatingProfile: {
-      invoke: {
-        src: "createProfile",
-        input: ({ context }): CreateProfileInput => {
-          if (!context.idOSClient) {
-            throw new Error("idOS client not available");
-          }
+      invoke: [
+        {
+          src: "createProfile",
+          input: ({ context }): CreateProfileInput => {
+            if (!context.idOSClient) {
+              throw new Error("idOS client not available");
+            }
 
-          if (context.idOSClient.state !== "with-user-signer") {
-            throw new Error("idOS client is not a user signer");
-          }
+            if (context.idOSClient.state !== "with-user-signer") {
+              throw new Error("idOS client is not a user signer");
+            }
 
-          return {
-            client: context.idOSClient,
-          };
-        },
-        onDone: {
-          target: "initializingIdOS",
-          actions: [
-            assign({
-              walletAddress: ({ event }) => event.output.walletAddress,
-              walletPublicKey: ({ event }) => event.output.walletPublicKey,
-              nearSelector: ({ event }) => event.output.nearSelector,
+            return {
+              client: context.idOSClient,
+            };
+          },
+          onDone: {
+            target: "initializingIdOS",
+            actions: [
+              assign({
+                walletAddress: ({ event }) => event.output.walletAddress,
+                walletPublicKey: ({ event }) => event.output.walletPublicKey,
+                nearSelector: ({ event }) => event.output.nearSelector,
+              }),
+              "persistWalletToStorage",
+            ],
+          },
+          onError: {
+            target: "error",
+            actions: assign({
+              error: ({ event }) => {
+                console.error("Failed to create Facesign profile", event.error);
+                return event.error instanceof Error
+                  ? event.error.message
+                  : "Failed to create Facesign profile";
+              },
             }),
-            "persistWalletToStorage",
-          ],
+          },
         },
-        onError: {
-          target: "error",
-          actions: assign({
-            error: ({ event }) => {
-              console.error("Failed to create Facesign profile", event.error);
-              return event.error instanceof Error
-                ? event.error.message
-                : "Failed to create Facesign profile";
-            },
+        {
+          src: "watchEvmAccount",
+          input: ({ context }): WatchEvmAccountInput => ({
+            walletType: context.walletType,
+            walletAddress: context.walletAddress,
           }),
         },
+      ],
+      on: {
+        DISCONNECT: "disconnecting",
       },
     },
 
