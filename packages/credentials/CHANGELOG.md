@@ -1,5 +1,16 @@
 # @idos-network/credentials
 
+## 2.2.0
+
+### Minor Changes
+
+- f2dc464: KYC v3: replace `residentialAddress.verified` (boolean) with `residentialAddress.source` (`"MANUAL" | "GPS" | "EXTERNAL_DB" | "PROOF_OF_ADDRESS" | "PROOF_OF_IDENTITY" | "AUTO_COMPLETE"`), serialized as `residentialAddressSource`.
+
+### Patch Changes
+
+- Updated dependencies [56b18ea]
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Minor Changes

@@ -10,7 +10,7 @@ import { LaunchChecklist } from "@/components/developer/launch";
 import { Badge } from "@/components/ui/badge";
 import { getDb } from "@/core/db.server";
 import { SERVER_ENV } from "@/core/envFlags.server";
-import { sessionStorage } from "@/core/sessions.server";
+import { getUserId, sessionStorage } from "@/core/sessions.server";
 import { cn } from "@/lib/utils";
 
 import type { Route } from "../+types";
@@ -114,7 +114,7 @@ function StepOverview() {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const userId = session.get("userId");
+  const userId = getUserId(session);
 
   if (!userId) {
     // TODO: Check if user is ready for developer console
