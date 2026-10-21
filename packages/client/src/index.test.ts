@@ -180,6 +180,91 @@ describe("signer switching on a shared idle client", () => {
     expect(reset).toHaveBeenCalledOnce();
     await expect(withB.hasProfile()).rejects.toThrow(/stale/);
   });
+
+  it("stops a kwil client saved before the signer changed", async () => {
+    const idle = idleClient();
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const loggedInA = new idOSClientLoggedIn(withA, user);
+    const savedWith = withA.kwilClient;
+    const savedLoggedIn = loggedInA.kwilClient;
+
+    await idle.withUserSigner(ed25519Signer(2));
+
+    await expect(savedWith.execute({} as never)).rejects.toThrow(/stale/);
+    await expect(savedLoggedIn.call({} as never)).rejects.toThrow(/stale/);
+    expect(idle.kwilClient.execute).not.toHaveBeenCalled();
+  });
+
+  it("does not return a client that can act as the newer signer", async () => {
+    const idle = idleClient();
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const loggedInA = new idOSClientLoggedIn(withA, user);
+    const withB = await idle.withUserSigner(ed25519Signer(2));
+
+    const fromWith = await withA.logOut();
+    const fromLoggedIn = await loggedInA.logOut();
+
+    await expect(fromWith.kwilClient.execute({} as never)).rejects.toThrow(/stale/);
+    await expect(fromLoggedIn.kwilClient.execute({} as never)).rejects.toThrow(/stale/);
+    await expect(withB.hasProfile()).resolves.toBe(true);
+  });
+
+  it("retries enclave reset until it finishes, unless a newer signer owns the session", async () => {
+    const idle = idleClient();
+    let failReset = true;
+    const reset = vi.fn(async () => {
+      if (failReset) throw new Error("reset failed");
+    });
+    idle.enclaveProvider.reset = reset;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+
+    await expect(withA.logOut()).rejects.toThrow(/reset failed/);
+    expect(idle.kwilClient.signer).toBeUndefined();
+
+    failReset = false;
+    await withA.logOut();
+    expect(reset).toHaveBeenCalledTimes(2);
+
+    const withC = await idle.withUserSigner(ed25519Signer(3));
+    failReset = true;
+    await expect(withC.logOut()).rejects.toThrow(/reset failed/);
+    const withD = await idle.withUserSigner(ed25519Signer(4));
+    await withC.logOut();
+
+    expect(reset).toHaveBeenCalledTimes(3);
+    await expect(withD.hasProfile()).resolves.toBe(true);
+  });
+
+  it("does not reconfigure the enclave after a newer signer takes over during login", async () => {
+    const idle = idleClient();
+    let releaseGetUser = (): void => {};
+    const getUserGate = new Promise<void>((resolve) => {
+      releaseGetUser = resolve;
+    });
+    let markGetUserStarted = (): void => {};
+    const getUserStarted = new Promise<void>((resolve) => {
+      markGetUserStarted = resolve;
+    });
+    vi.spyOn(idle.kwilClient, "call").mockImplementation(async (params) => {
+      if (params?.name === "get_user") {
+        markGetUserStarted();
+        await getUserGate;
+        return [user];
+      }
+      return [{ has_profile: true }];
+    });
+    const reconfigure = vi.fn(async () => {});
+    idle.enclaveProvider.reconfigure = reconfigure;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+
+    const loggingIn = withA.logIn();
+    await getUserStarted;
+    await idle.withUserSigner(ed25519Signer(2));
+    releaseGetUser();
+
+    await expect(loggingIn).rejects.toThrow(/stale/);
+    expect(reconfigure).not.toHaveBeenCalled();
+  });
 });
 
 describe("Node client defaults", () => {

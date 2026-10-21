@@ -2,4 +2,4 @@
 "@idos-network/client": patch
 ---
 
-A client returned by `withUserSigner()` (and the logged-in client made from it) now throws once another `withUserSigner()` call or a logout replaces its signer, instead of running reads and writes as the newer caller. Logging out a stale client no longer clears the newer session.
+A client returned by `withUserSigner()` (and the logged-in client made from it) now throws once another `withUserSigner()` call or a logout replaces its signer, including through a `kwilClient` saved before that change. Logging out a stale client no longer clears the newer session or returns a client that can act as it. A logout whose enclave reset fails keeps failing until that reset finishes.
