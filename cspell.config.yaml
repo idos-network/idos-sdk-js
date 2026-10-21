@@ -12,7 +12,7 @@ dictionaryDefinitions:
     path: ./project-words.txt
     addWords: true
 ignoreRegExpList:
-  - "/bafkrei[a-z0-9]+/"
+  - "/baf(?:krei|ybei)[a-z0-9]+/"
   - "/ipfs:\\/\\//"
 ignorePaths:
   - "ort-results/**"
