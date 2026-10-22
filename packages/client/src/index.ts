@@ -494,9 +494,13 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   }
 
   async hasProfile(): Promise<boolean> {
-    return hasProfile(this.kwilClient, { address: this.walletIdentifier }).then(
-      (x) => x.has_profile,
-    );
+    // NEAR profiles are keyed by the ed25519 public key. walletIdentifier is the account id.
+    let address = this.walletIdentifier;
+    if (this.walletType === "NEAR") {
+      if (!this.walletPublicKey) throw new Error("NEAR wallet public key is required");
+      address = this.walletPublicKey;
+    }
+    return hasProfile(this.kwilClient, { address }).then((x) => x.has_profile);
   }
 
   async createUserEncryptionProfile(
