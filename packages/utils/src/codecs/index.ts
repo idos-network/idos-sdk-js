@@ -7,10 +7,11 @@ import {
 import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
 import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
-import * as base85 from "base85";
 import bs58 from "bs58";
 
 import type { PipeCodecArgs } from "../store/interface";
+
+import * as base85 from "./base85/base85";
 
 export { base64Decode, base64Encode };
 export { writeUint16BE as binaryWriteUint16BE } from "@stablelib/binary";
@@ -29,14 +30,7 @@ export function fileToBase85(file: Buffer): string {
 }
 
 export function base85ToFile(data: string): Buffer | false {
-  // TODO: Remove this when https://github.com/noseglid/base85/pull/25/changes
-  // is merged.
-  const ibuffer = Buffer.from(data, "utf8");
-  const buffer = ibuffer.includes(0x7a /* z */)
-    ? Buffer.from(ibuffer.toString("latin1").replaceAll("z", "!!!!!"), "latin1")
-    : ibuffer;
-
-  return base85.decode(buffer, "ascii85");
+  return base85.decode(data, "ascii85");
 }
 
 export function bs58Encode(data: Uint8Array): string {

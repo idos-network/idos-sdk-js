@@ -37,3 +37,7 @@ ignorePaths:
   - "apps/idos-data-dashboard/prisma/**"
   - "**/coverage/*.json"
   - "packages/kwil-js/CHANGELOG.md"
+  # Vendored base85 test fixtures: encoded binary and lorem ipsum, not prose.
+  - "packages/utils/src/codecs/base85/tests/loremipsum.*"
+  - "packages/utils/src/codecs/base85/tests/fixtures/**"
+  - "packages/utils/src/codecs/base85/tests/data.js"

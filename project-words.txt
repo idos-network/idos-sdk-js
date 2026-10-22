@@ -8,16 +8,19 @@ APPKIT
 appposts
 appusers
 arweave
+asdfgh
 attestment
 banxa
 barebones
 betanet
+bignum
 Blockhash
 blockstore
 Borsh
 bowser
 Bundesdruckerei
 bytea
+canumb
 CCPA
 certutil
 chakra
@@ -43,6 +46,7 @@ davelosert
 dawidd
 dbid
 dbname
+dectable
 deployers
 devnet
 digitalbazaar
@@ -52,6 +56,7 @@ dotenvx
 DVLA
 Egor
 encryptor
+enctable
 facesign
 facetec
 frontmost
@@ -74,9 +79,11 @@ IDOS
 idOSDAG
 IDOSDAG
 idOSSDK
+iencoding
 incentivized
 informationally
 insertable
+inum
 ipfs
 Ipfs
 IPFS
@@ -98,7 +105,9 @@ KYCV
 LCVJ
 libc
 libnss
+loremipsum
 lucide
+MAXVALUE
 Metadatas
 Mindshare
 mkcert
@@ -117,8 +126,11 @@ neww
 nillable
 Nominatim
 nonced
+noseglid
 nums
+NUUO
 offchain
+Olsson
 onramp
 onramps
 OSAPI
@@ -169,6 +181,7 @@ siwe
 stablecoin
 stablecoins
 stablelib
+starti
 stepperize
 substates
 sumsub
@@ -176,6 +189,7 @@ synpress
 synthetixio
 tailwindcss
 tanstack
+Tebahpla
 telemedia
 thedutchcoder
 timelock

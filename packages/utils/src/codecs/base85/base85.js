@@ -1,0 +1,296 @@
+import { Address6 } from 'ip-address';
+import alphabets from './alphabets';
+
+const NUM_MAXVALUE = 2 ** 32 - 1;
+const QUAD85 = 85 * 85 * 85 * 85;
+const TRIO85 = 85 * 85 * 85;
+const DUO85 = 85 * 85;
+const SING85 = 85;
+
+const DEFAULT_ENCODING = 'z85';
+
+const LBigInt =
+  typeof window !== 'undefined'
+    ? window.BigInt
+    : typeof self !== 'undefined'
+      ? self.BigInt
+      : global.BigInt;
+
+/* Characters to allow (and ignore) in an encoded buffer */
+const IGNORE_CHARS = [
+  0x09 /* horizontal tab */, 0x0a /* line feed, new line */,
+  0x0b /* vertical tab */, 0x0c /* form feed, new page */,
+  0x0d /* carriage return */, 0x20 /* space */,
+];
+const IS_IGNORED = new Uint8Array(256);
+for (const c of IGNORE_CHARS) IS_IGNORED[c] = 1;
+
+/* Byte -> value decode table per alphabet. NaN marks an invalid character,
+ * the same as the `undefined` the plain `dec` object yields. */
+const DECODE_TABLES = {};
+for (const name of Object.keys(alphabets)) {
+  const { dec } = alphabets[name];
+  const table = new Float64Array(256).fill(Number.NaN);
+  for (const code of Object.keys(dec)) table[code] = dec[code];
+  DECODE_TABLES[name] = table;
+}
+
+const ASCII85_ENC_START = '<~';
+const ASCII85_ENC_END = '~>';
+
+function bufferToBigInt(buffer) {
+  return LBigInt(`0x${Buffer.from(buffer).toString('hex')}`);
+}
+
+/* Function borrowed from noseglid/canumb (github) */
+function pad(width, number) {
+  return new Array(1 + width - number.length).join('0') + number;
+}
+
+function encodeBignumIPv6(inum) {
+  let num = inum;
+  const enctable = alphabets.ipv6.enc;
+
+  const enc = [];
+  for (let i = 1; i < 20; ++i) {
+    enc.push(enctable[Number(num % 85n)]); /* Ranges between 0 - 84 */
+    num = num / 85n;
+  }
+  enc.push(enctable[Number(num)]); /* What's left is also in range 0 - 84 */
+  return enc.reverse().join('');
+}
+
+function encodeBufferIPv6(buffer) {
+  if (16 !== buffer.length) {
+    /* An IPv6 address must be exactly 16 bytes, 128 bits long */
+    return false;
+  }
+
+  return encodeBignumIPv6(bufferToBigInt(buffer));
+}
+
+function encodeStringIPv6(string) {
+  // ip-address >= 9: the constructor throws on bad input and isValid() is static.
+  if (!Address6.isValid(string)) {
+    return false;
+  }
+  const addr = new Address6(string);
+
+  const hex = addr.parsedAddress.map((el) => pad(4, el)).join('');
+  const num = LBigInt(`0x${hex}`);
+
+  return encodeBignumIPv6(num);
+}
+
+function decodeStringIPv6(string) {
+  if (20 !== string.length) {
+    /* An encoded IPv6 is always (5/4) * 16 = 20 bytes */
+    return false;
+  }
+
+  const dectable = alphabets.ipv6.dec;
+  let i = 0;
+
+  /* bignum throws an exception if invalid data is passed */
+  try {
+    const binary = string.split('').reduceRight((memo, el) => {
+      const num = LBigInt(dectable[el.charCodeAt(0)]);
+      const fact = LBigInt(85) ** LBigInt(i++);
+      const contrib = num * fact;
+      return memo + contrib;
+    }, LBigInt(0));
+
+    return Address6.fromBigInt(binary).correctForm();
+  } catch (e) {
+    return false;
+  }
+}
+
+function decodeBufferIPv6(buffer) {
+  return decodeStringIPv6(buffer.toString());
+}
+
+/* Char codes of each alphabet, written straight into the output buffer */
+const ENCODE_TABLES = {};
+for (const name of Object.keys(alphabets)) {
+  const { enc } = alphabets[name];
+  ENCODE_TABLES[name] = Uint8Array.from(enc, (c) => c.charCodeAt(0));
+}
+
+function encodeBuffer(buffer, encoding) {
+  if ('z85' === encoding && buffer.length % 4 !== 0) {
+    return false;
+  }
+  const encodeTable = ENCODE_TABLES[encoding];
+  const isAscii85 = 'ascii85' === encoding;
+  const length = buffer.length;
+  const padding = length % 4 === 0 ? 0 : 4 - (length % 4);
+
+  /* Characters are written straight into a byte buffer and turned into a
+   * string once at the end. */
+  const out = Buffer.allocUnsafe(Math.ceil(length / 4) * 5);
+  let o = 0;
+  for (let i = 0; i < length; i += 4) {
+    /* 32 bit number of the current 4 bytes (padded with 0 as necessary) */
+    let num =
+      ((buffer[i] << 24) |
+        ((i + 1 < length ? buffer[i + 1] : 0) << 16) |
+        ((i + 2 < length ? buffer[i + 2] : 0) << 8) |
+        (i + 3 < length ? buffer[i + 3] : 0)) >>>
+      0;
+
+    /* An all-zero group is '!!!!!', which ascii85 shortens to 'z' */
+    if (num === 0 && isAscii85 && (i + 4 < length || padding === 0)) {
+      out[o++] = 0x7a /* z */;
+      continue;
+    }
+
+    /* Create 5 characters from the alphabet, last one first */
+    for (let j = 4; j >= 0; --j) {
+      out[o + j] = encodeTable[num % 85];
+      num = (num - (num % 85)) / 85;
+    }
+    o += 5;
+  }
+
+  const result = out.toString('latin1', 0, o - padding);
+  return isAscii85 ? ASCII85_ENC_START + result + ASCII85_ENC_END : result;
+}
+
+function encodeString(string, encoding) {
+  const buffer = Buffer.from(string, 'utf8'); // utf8 at all times?
+  return encodeBuffer(buffer, encoding);
+}
+
+function decodeBuffer(ibuffer, encoding) {
+  const decodeTable = DECODE_TABLES[encoding];
+
+  /* Expand every 'z' zero-group shorthand. 'z' is not in the ascii85 alphabet,
+   * so latin1 round-tripping is byte-exact here. */
+  const buffer =
+    'ascii85' === encoding && ibuffer.includes(0x7a /* z */)
+      ? Buffer.from(ibuffer.toString('latin1').replace(/z/g, '!!!!!'), 'latin1')
+      : ibuffer;
+
+  let dataLength = buffer.length;
+  if ('ascii85' === encoding) {
+    dataLength -= ASCII85_ENC_START.length + ASCII85_ENC_END.length;
+  }
+
+  if ('z85' === encoding && dataLength % 5 !== 0) {
+    return false;
+  }
+
+  let padding = dataLength % 5 === 0 ? 0 : 5 - (dataLength % 5);
+
+  const bufferStart = 'ascii85' === encoding ? ASCII85_ENC_START.length : 0;
+  const bufferEnd = bufferStart + dataLength;
+
+  const result = Buffer.alloc(4 * Math.ceil((bufferEnd - bufferStart) / 5));
+
+  const nextValidByte = (index) => {
+    let ref = index;
+    if (ref < bufferEnd) {
+      while (IS_IGNORED[buffer[ref]] === 1) {
+        padding = (padding + 1) % 5;
+        ref++; // skip newline character
+      }
+    }
+    return ref;
+  };
+
+  let writeIndex = 0;
+  for (let i = bufferStart; i < bufferEnd; ) {
+    let num = 0;
+    const starti = i;
+
+    i = nextValidByte(i);
+    num = decodeTable[buffer[i]] * QUAD85;
+
+    i = nextValidByte(i + 1);
+    num += (i >= bufferEnd ? 84 : decodeTable[buffer[i]]) * TRIO85;
+
+    i = nextValidByte(i + 1);
+    num += (i >= bufferEnd ? 84 : decodeTable[buffer[i]]) * DUO85;
+
+    i = nextValidByte(i + 1);
+    num += (i >= bufferEnd ? 84 : decodeTable[buffer[i]]) * SING85;
+
+    i = nextValidByte(i + 1);
+    num += i >= bufferEnd ? 84 : decodeTable[buffer[i]];
+
+    i = nextValidByte(i + 1);
+
+    if ('z85' === encoding && starti + 5 !== i) {
+      return false;
+    }
+
+    if (num > NUM_MAXVALUE || num < 0) {
+      /* Bogus data */
+      return false;
+    }
+
+    /* NaN (invalid character) writes zeros, as writeUInt32BE did */
+    result[writeIndex++] = num >>> 24;
+    result[writeIndex++] = num >>> 16;
+    result[writeIndex++] = num >>> 8;
+    result[writeIndex++] = num;
+  }
+
+  return result.subarray(0, writeIndex - padding);
+}
+
+function decodeString(str, encoding) {
+  const buffer = Buffer.from(str, 'utf8'); // utf8 at all times?
+  return decodeBuffer(buffer, encoding);
+}
+
+function encode(data, iencoding) {
+  const encoding = iencoding || DEFAULT_ENCODING;
+  if (!Object.hasOwn(alphabets, encoding)) {
+    return false;
+  }
+
+  if (Buffer.isBuffer(data)) {
+    return 'ipv6' === encoding
+      ? encodeBufferIPv6(data)
+      : encodeBuffer(data, encoding);
+  }
+
+  if (typeof data === 'string') {
+    return 'ipv6' === encoding
+      ? encodeStringIPv6(data)
+      : encodeString(data, encoding);
+  }
+
+  return false;
+}
+
+function decode(data, iencoding) {
+  const encoding = iencoding || DEFAULT_ENCODING;
+  if (!Object.hasOwn(alphabets, encoding)) {
+    return false;
+  }
+
+  if (Buffer.isBuffer(data)) {
+    return 'ipv6' === encoding
+      ? decodeBufferIPv6(data)
+      : decodeBuffer(data, encoding);
+  }
+
+  if (typeof data === 'string') {
+    return 'ipv6' === encoding
+      ? decodeStringIPv6(data)
+      : decodeString(data, encoding);
+  }
+
+  return false;
+}
+
+export { encode, decode };
+
+export default {
+  alphabets,
+  encode,
+  decode,
+};
