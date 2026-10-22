@@ -1,5 +1,16 @@
 # @idos-network/client
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [add7f44]
+  - @idos-network/kwil-js@0.2.2
+  - @idos-network/kwil-infra@3.0.0
+  - @idos-network/enclave@3.0.0
+  - @idos-network/credentials@3.0.0
+  - @idos-network/utils@3.0.0
+
 ## 2.3.0
 
 ### Patch Changes

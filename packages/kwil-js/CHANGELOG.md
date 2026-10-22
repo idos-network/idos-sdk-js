@@ -1,5 +1,11 @@
 # @idos-network/kwil-js
 
+## 0.2.2
+
+### Patch Changes
+
+- add7f44: Reject a KGW auth challenge unless domain, version, chain id, URI, and origin are present and match the client, so the wallet does not sign a challenge it did not check.
+
 ## 0.2.1
 
 ### Patch Changes
