@@ -21,7 +21,6 @@ ignorePaths:
   - "**/assets/**"
   - "*.svg"
   - "patches/**"
-  - "examples/pay-demo/build/**"
   - "apps/idos-data-dashboard/build/**"
   - "apps/facesign-enclave/build/**"
   - "pnpm-lock.yaml"
