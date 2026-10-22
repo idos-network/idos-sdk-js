@@ -1,19 +1,7 @@
-import {
-  borshDeserialize,
-  borshSerialize,
-  bs58Decode,
-  hexDecode,
-  sha256Hash,
-} from "@idos-network/utils/codecs";
+import { bs58Decode, hexDecode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 
-interface NEP413Payload {
-  tag: number;
-  message: string;
-  nonce: number[];
-  recipient: string;
-  callbackUrl?: string;
-}
+import { deserializeKwilNep413, nep413SignHash } from "./nep413";
 
 export const verifyNearSignature = async (
   message: string,
@@ -48,33 +36,15 @@ export const verifyNearSignature = async (
       return false;
     }
 
-    // Deserialize the payload to extract nonce, recipient, callbackUrl
-    const payloadSchema = {
-      struct: {
-        tag: "u32",
-        message: "string",
-        nonce: { array: { type: "u8", len: 32 } },
-        recipient: "string",
-        callbackUrl: { option: "string" },
-      },
-    };
+    const deserializedPayload = deserializeKwilNep413(payloadBytes);
 
-    const deserializedPayload = borshDeserialize(payloadSchema, payloadBytes) as NEP413Payload;
-
-    // Reconstruct the payload with tag and message (matching Go implementation)
-    const reconstructedPayload: NEP413Payload = {
-      tag: 2147484061, // 2**31 + 413
-      message: message, // Use the provided message
+    // Hash the caller-supplied message with the nonce and recipient from the envelope.
+    const hash = nep413SignHash({
+      message,
       nonce: deserializedPayload.nonce,
       recipient: deserializedPayload.recipient,
       callbackUrl: deserializedPayload.callbackUrl,
-    };
-
-    // Serialize the entire payload (matching Go's borsch.Serialize(*payload))
-    const fullPayloadBytes = borshSerialize(payloadSchema, reconstructedPayload);
-    // Hash the payload (matching Go's sha256.Sum256(payloadBytes))
-    const hash = sha256Hash(fullPayloadBytes);
-    // Raw ed25519 verification using nacl (matching Go's ed25519.Verify)
+    });
     const isValid = nacl.sign.detached.verify(hash, actualSignature, publicKeyBytes);
 
     return isValid;
