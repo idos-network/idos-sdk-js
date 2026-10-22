@@ -1,10 +1,14 @@
 {
   "name": "@idos-network/client",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "idOS Client JavaScript SDK for browser environments",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/client"
+  },
   "files": [
     "dist/**/*",
     "src/**/*"

@@ -1,5 +1,44 @@
 # data-dashboard
 
+## 1.4.7
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/client@2.3.0
+  - @idos-network/consumer@2.3.0
+  - @idos-network/issuer@2.3.0
+  - @idos-network/utils@2.3.0
+  - @idos-network/kwil-infra@2.3.0
+
+## 1.4.6
+
+### Patch Changes
+
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/consumer@2.2.2
+  - @idos-network/client@2.2.2
+  - @idos-network/issuer@2.2.2
+  - @idos-network/utils@2.2.2
+
+## 1.4.5
+
+### Patch Changes
+
+- ecc9b1a: Clear the developer console session whenever the wallet disconnects or switches accounts, and expire it after 24 hours.
+- 82e7d3d: Recover the EVM public key from the profile signature so wallet creation no longer fails when the client omits it.
+- Updated dependencies [7f5a44b]
+- Updated dependencies [ed9a1ad]
+  - @idos-network/client@2.2.1
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/consumer@2.2.1
+  - @idos-network/issuer@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
 ## 1.4.4
 
 ### Patch Changes

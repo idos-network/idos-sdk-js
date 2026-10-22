@@ -1,9 +1,13 @@
 {
   "name": "@idos-network/kwil-infra",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Infrastructure and wallets for idOS",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/kwil-infra"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.mjs",

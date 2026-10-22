@@ -1,5 +1,15 @@
 # @idos-network/instrumentation
 
+## 2.3.0
+
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+
+## 2.2.1
+
 ## 2.2.0
 
 ### Minor Changes

@@ -15,7 +15,6 @@
     "size": "size-limit",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "ci:publish": "pnpm publish -r",
     "publint": "pnpm --filter './packages/**' run publint"
   },
   "devDependencies": {
