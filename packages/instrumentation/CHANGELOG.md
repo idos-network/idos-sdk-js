@@ -1,5 +1,11 @@
 # @idos-network/instrumentation
 
+## 3.0.0
+
+### Major Changes
+
+- 67e82a7: Upgrade to OpenTelemetry JS SDK 3.x: `@opentelemetry/instrumentation` 0.300.x, which requires `@opentelemetry/api` >=1.10.0 and Node.js >=22.15.0. Tests and docs now use `@opentelemetry/sdk-trace` instead of the removed `sdk-trace-base`.
+
 ## 2.3.0
 
 ## 2.2.2

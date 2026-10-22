@@ -1,5 +1,16 @@
 # data-dashboard
 
+## 1.4.8
+
+### Patch Changes
+
+- @idos-network/client@3.0.0
+- @idos-network/consumer@3.0.0
+- @idos-network/issuer@3.0.0
+- @idos-network/kwil-infra@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
 ## 1.4.7
 
 ### Patch Changes

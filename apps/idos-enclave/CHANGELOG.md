@@ -1,5 +1,13 @@
 # idos-enclave
 
+## 0.4.5
+
+### Patch Changes
+
+- @idos-network/enclave@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
 ## 0.4.4
 
 ### Patch Changes

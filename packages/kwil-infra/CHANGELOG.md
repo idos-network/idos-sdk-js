@@ -1,5 +1,13 @@
 # @idos-network/kwil-infra
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [add7f44]
+  - @idos-network/kwil-js@0.2.2
+  - @idos-network/utils@3.0.0
+
 ## 2.3.0
 
 ### Patch Changes
