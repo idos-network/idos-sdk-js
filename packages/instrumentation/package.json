@@ -53,7 +53,7 @@
     "@idos-network/kwil-infra": "workspace:*",
     "@opentelemetry/api": "catalog:otel",
     "@opentelemetry/context-async-hooks": "catalog:otel",
-    "@opentelemetry/sdk-trace-base": "catalog:otel",
+    "@opentelemetry/sdk-trace": "catalog:otel",
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
     "tsdown": "catalog:build",

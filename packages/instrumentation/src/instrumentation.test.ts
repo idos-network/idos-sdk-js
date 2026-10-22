@@ -1,12 +1,12 @@
-import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
+import type { ReadableSpan } from "@opentelemetry/sdk-trace";
 
 import { context, SpanKind, SpanStatusCode } from "@opentelemetry/api";
 import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
 import {
-  BasicTracerProvider,
+  TracerProvider,
   InMemorySpanExporter,
   SimpleSpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
+} from "@opentelemetry/sdk-trace";
 import {
   ATTR_DB_NAMESPACE,
   ATTR_DB_OPERATION_NAME,
@@ -73,7 +73,7 @@ describe("IdosInstrumentation", () => {
     exporter = new InMemorySpanExporter();
     instrumentation = new IdosInstrumentation();
     instrumentation.setTracerProvider(
-      new BasicTracerProvider({ spanProcessors: [new SimpleSpanProcessor(exporter)] }),
+      new TracerProvider({ spanProcessors: [new SimpleSpanProcessor({ exporter })] }),
     );
     namespaces = buildNamespaces();
   });
