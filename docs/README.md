@@ -204,17 +204,6 @@ These are other parties that bear influence in the system, even though they're n
     - _Production_: <https://enclave.idos.network/>
     - _Playground_: <https://enclave.playground.idos.network/>
 
-### Demos
-
-- **Consumer & Issuer Demo**:
-  This is branded generally as "Neobank". It's meant to demonstrate how a neobank that's using a credit card partner (ACME Card Provider) can share credentials using idOS.
-
-  Note that its KYC process accepts anything resembling an official document and doesn't force the face to match with what's on the document.
-  - **Relevant repo folder**:
-    - [examples/pay-demo](../examples/pay-demo/)
-  - **Deployments**:
-    - _Playground_: <https://demo.idos.network/>
-
 ## Typical usage
 
 See the [Long Tour](./long-tour.md) for a thorough end-to-end walkthrough.
