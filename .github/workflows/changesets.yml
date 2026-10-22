@@ -125,6 +125,13 @@ jobs:
         run: |
           # "./" matters: npm reads "tarballs/x.tgz" as a GitHub "owner/repo" spec.
           for tgz in ./tarballs/*.tgz; do
+            spec="$(tar -xOf "$tgz" package/package.json | jq -r '"\(.name)@\(.version)"')"
+            # Staged versions are invisible to `npm view`, so `version` lists them as unpublished;
+            # one approved while this job waited for its environment reviewers must be skipped.
+            if [ -n "$(npm view "$spec" version 2>/dev/null)" ]; then
+              echo "Already published: $spec"
+              continue
+            fi
             npm stage publish "$tgz" --access public --provenance --ignore-scripts
           done
 
