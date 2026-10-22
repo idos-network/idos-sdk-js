@@ -1,6 +1,7 @@
 import { BlackHoleBlockstore } from "blockstore-core/black-hole";
-import { importer } from "ipfs-unixfs-importer";
+import { importBytes } from "ipfs-unixfs-importer";
 import { fixedSize } from "ipfs-unixfs-importer/chunker";
+import { balanced } from "ipfs-unixfs-importer/layout";
 
 import { base64Decode } from "../codecs";
 
@@ -122,20 +123,22 @@ export function requireAccessTokenForUkycContent(
   }
 }
 
+// Kubo 0.41+ `ipfs add --cid-version=1`: raw leaves, sha2-256, 256KiB chunks,
+// balanced, 174 links, links before data. Not the unixfs-v1-2025 profile.
 // Changing any of these changes every CID, so stored blobs would stop verifying.
 const CID_IMPORT_POLICY = {
   cidVersion: 1,
   rawLeaves: true,
+  reduceSingleLeafToSelf: true,
   chunker: fixedSize({ chunkSize: 262144 }),
+  layout: balanced({ maxChildrenPerNode: 174 }),
+  fieldOrder: "links-first",
   wrapWithDirectory: false,
 } as const;
 
 async function ipfsOnlyHash(content: Uint8Array): Promise<string> {
-  let cid = "";
-  for await (const entry of importer([{ content }], new BlackHoleBlockstore(), CID_IMPORT_POLICY)) {
-    cid = entry.cid.toString();
-  }
-  return cid;
+  const { cid } = await importBytes(content, new BlackHoleBlockstore(), CID_IMPORT_POLICY);
+  return cid.toString();
 }
 
 export async function createBlobContentReference(

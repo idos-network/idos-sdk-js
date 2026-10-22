@@ -46,7 +46,7 @@ describe("createBlobContentReference", () => {
     });
   });
 
-  // Reference CIDs computed with ipfs-only-hash@4, which produced the CIDs of stored blobs.
+  // Kubo 0.41+ `ipfs add --cid-version=1` for these byte patterns. Same CIDs as ipfs-only-hash@4.
   const CHUNK = 262144;
   it.each([
     [0, "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku"],

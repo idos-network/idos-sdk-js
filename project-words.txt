@@ -89,6 +89,7 @@ keccak
 keypair
 keypairs
 klass
+kubo
 kuneiform
 kwil
 kwild
