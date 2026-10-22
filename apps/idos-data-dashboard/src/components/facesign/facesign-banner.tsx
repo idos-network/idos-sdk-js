@@ -9,17 +9,18 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useIDOSClient } from "@/hooks/idOS";
 import { createFaceSignProvider } from "@/lib/facesign";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+import { toSecondPrecisionIso } from "@/lib/rfc3339";
 
 import { FacesignDialog } from "./facesign-dialog";
-
-const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profile";
 
 export function FacesignBanner() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const providerRef = useRef<FaceSignSignerProvider | null>(null);
+  const idOSClient = useIDOSClient();
   const addWalletMutation = useAddWalletMutation();
 
   const handleCreateClick = async () => {
@@ -72,14 +73,25 @@ export function FacesignBanner() {
   const runAddWalletFlow = async (provider: FaceSignSignerProvider) => {
     try {
       const publicKey = await provider.init();
-      const signatureBytes = await provider.signMessage(ADD_WALLET_MESSAGE);
+      const notBefore = new Date();
+      const notAfter = new Date(notBefore.getTime() + 15 * 60 * 1000);
+      const notBeforeIso = toSecondPrecisionIso(notBefore);
+      const notAfterIso = toSecondPrecisionIso(notAfter);
+      const message = await idOSClient.addWalletMessage({
+        address: publicKey,
+        wallet_type: "FaceSign",
+        user_id: idOSClient.user.id,
+        not_before: notBeforeIso,
+        not_after: notAfterIso,
+      });
+      const signatureBytes = await provider.signMessage(message);
       const signature = hexEncode(signatureBytes, true);
 
       const walletPayload: WalletSignature = {
         address: publicKey,
         public_key: [publicKey],
         signature,
-        message: ADD_WALLET_MESSAGE,
+        message,
         wallet_type: "FaceSign",
       };
 
@@ -95,7 +107,8 @@ export function FacesignBanner() {
         address: publicKey,
         publicKeys: [publicKey],
         signature,
-        message: ADD_WALLET_MESSAGE,
+        notBefore: notBeforeIso,
+        notAfter: notAfterIso,
         walletType: "FaceSign",
       });
 

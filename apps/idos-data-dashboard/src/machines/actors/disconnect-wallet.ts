@@ -62,6 +62,6 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
   }
 
   if (sessionError) {
-    throw sessionError;
+    throw new Error("Failed to delete session", { cause: sessionError });
   }
 });

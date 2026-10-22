@@ -40,7 +40,7 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
       residentialAddress?.proofFile &&
       residentialAddress.city &&
       residentialAddress.proofCategory &&
-      residentialAddress.verified &&
+      residentialAddress.source === "PROOF_OF_ADDRESS" &&
       residentialAddress.country
     ) {
       base = "plus";
@@ -71,7 +71,11 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     }
 
     // plus+liveness are always at least kycLevel = 2
-    if (kycLevel >= 1 && residentialAddress?.proofFile && residentialAddress.verified) {
+    if (
+      kycLevel >= 1 &&
+      residentialAddress?.proofFile &&
+      residentialAddress.source === "PROOF_OF_ADDRESS"
+    ) {
       kycLevel = 2;
     }
 

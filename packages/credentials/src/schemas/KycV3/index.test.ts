@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { VerifiableCredential } from "../../types";
 
 import { KycV3 } from ".";
+import { registerTransliteration } from "../../utils/transliterate";
 
 /** A credential with the required sections filled in, ready to be extended per test. */
 function basicCredential(): KycV3 {
@@ -80,7 +81,7 @@ describe("KycV3 validity", () => {
       nationality: "US",
     });
     credential.addSection("residentialAddress", {
-      verified: false,
+      source: "MANUAL",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -139,7 +140,7 @@ describe("KycV3 validity", () => {
   it("requires proof fields on a verified address, but still checks their types when unverified", () => {
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        verified: true,
+        source: "PROOF_OF_ADDRESS",
         street: "Main St",
         city: "New York",
         country: "US",
@@ -148,7 +149,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        verified: false,
+        source: "MANUAL",
         street: "Oak Ave",
         city: "Boston",
         country: "US",
@@ -157,7 +158,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        verified: false,
+        source: "MANUAL",
         street: "Oak Ave",
         city: "Boston",
         country: "US",
@@ -166,6 +167,28 @@ describe("KycV3 validity", () => {
         proofFileName: "proof.jpg",
       }),
     ).toThrow(/proofFile/);
+  });
+
+  it("accepts an external-database address without proof, but does not count it as plus", () => {
+    const credential = basicCredential();
+    credential.addSection("residentialAddress", {
+      source: "EXTERNAL_DB",
+      street: "Main St",
+      city: "New York",
+      country: "US",
+    });
+
+    expect(() => credential.checkValidity()).not.toThrow();
+    expect(credential.level()).toBe("basic");
+
+    expect(() =>
+      new KycV3().addSection("residentialAddress", {
+        source: "bogus" as never,
+        street: "Main St",
+        city: "New York",
+        country: "US",
+      }),
+    ).toThrow(/source/);
   });
 
   it("requires a currency alongside each source-of-wealth amount", () => {
@@ -311,11 +334,73 @@ describe("KycV3 derived fields", () => {
     expect(credential.envelope.expirationDate).toEqual(new Date("2030-06-01"));
   });
 
+  // cspell:disable
+  it("transliterates names in their original script without serializing the Latin form", async () => {
+    registerTransliteration(() => import("transliteration"));
+
+    const credential = basicCredential();
+    credential.addSection("person", {
+      firstName: "Юлия",
+      familyName: "Müller",
+      fatherName: "Αλέξανδρος",
+      nationality: "DE",
+      dateOfBirth: new Date("1990-01-01"),
+    });
+
+    credential.addSection("residentialAddress", {
+      source: "MANUAL",
+      street: "вулиця Хрещатик",
+      houseNumber: "22",
+      additionalAddressInfo: "квартира 5",
+      city: "Київ",
+      country: "UA",
+    });
+
+    // Each marked field as [<field>Icao, await <field>Latin].
+    const siblings = async ({ person, residentialAddress: address }: KycV3["subject"]) => ({
+      firstName: [person?.firstNameIcao, await person?.firstNameLatin],
+      familyName: [person?.familyNameIcao, await person?.familyNameLatin],
+      fatherName: [person?.fatherNameIcao, await person?.fatherNameLatin],
+      middleName: [person?.middleNameIcao, await person?.middleNameLatin],
+      street: [address?.streetIcao, await address?.streetLatin],
+      additionalAddressInfo: [
+        address?.additionalAddressInfoIcao,
+        await address?.additionalAddressInfoLatin,
+      ],
+      city: [address?.cityIcao, await address?.cityLatin],
+    });
+    const expected = {
+      firstName: ["Iuliia", "Yuliya"],
+      familyName: ["Mueller", "Muller"],
+      // ICAO has no Greek table; an absent field has neither form.
+      fatherName: [undefined, "Alexandros"],
+      middleName: [undefined, undefined],
+      street: ["vulitsia Khreshchatik", "vulicya Hreshchatik"],
+      additionalAddressInfo: ["kvartira 5", "kvartira 5"],
+      city: ["Kiiv", "Kiyiv"],
+    };
+
+    expect(await siblings(credential.subject)).toEqual(expected);
+    expect(
+      Object.keys(credential.subject.person ?? {}).filter((key) => /latin|icao/i.test(key)),
+    ).toEqual([]);
+
+    const serialized = credential.serializeSubject();
+    expect(serialized.personFirstName).toBe("Юлия");
+    expect(Object.keys(serialized).filter((key) => /latin|icao/i.test(key))).toEqual([]);
+
+    const roundTrip = new KycV3();
+    await roundTrip.deserialize(serializedCredential(serialized));
+
+    expect(await siblings(roundTrip.subject)).toEqual(expected);
+  });
+  // cspell:enable
+
   it("reaches plus and kycLevel 3 with a verified address, SOW and onboarding", () => {
     const credential = basicCredential();
     credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
     credential.addSection("residentialAddress", {
-      verified: true,
+      source: "PROOF_OF_ADDRESS",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -384,7 +469,7 @@ describe("KycV3 serialization", () => {
     credential.addSection("contact", { email: "john@example.com", phoneNumber: "+1234567890" });
     credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
     credential.addSection("residentialAddress", {
-      verified: true,
+      source: "PROOF_OF_ADDRESS",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -474,7 +559,7 @@ describe("KycV3 serialization", () => {
       contactPhoneNumber: "+1234567890",
       biometricSelfieFile: fileToBase85(Buffer.from("Selfie")),
       biometricSelfieMatch: 99,
-      residentialAddressVerified: true,
+      residentialAddressSource: "PROOF_OF_ADDRESS",
       residentialAddressStreet: "Main St",
       residentialAddressCity: "New York",
       residentialAddressCountry: "US",
@@ -567,7 +652,7 @@ describe("KycV3 deserialization", () => {
     const credential = basicCredential();
     credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
     credential.addSection("residentialAddress", {
-      verified: false,
+      source: "MANUAL",
       street: "Oak Ave",
       houseNumber: "42",
       city: "Boston",
@@ -579,7 +664,7 @@ describe("KycV3 deserialization", () => {
     expect(credential.kycLevel()).toBe(1);
 
     const serialized = credential.serializeSubject();
-    expect(serialized.residentialAddressVerified).toBe(false);
+    expect(serialized.residentialAddressSource).toBe("MANUAL");
     expect("residentialAddressProofCategory" in serialized).toBe(false);
     expect("residentialAddressProofFile" in serialized).toBe(false);
 
@@ -587,7 +672,7 @@ describe("KycV3 deserialization", () => {
     await roundTrip.deserialize(serializedCredential(serialized));
 
     expect(roundTrip.subject.residentialAddress).toEqual({
-      verified: false,
+      source: "MANUAL",
       street: "Oak Ave",
       houseNumber: "42",
       city: "Boston",

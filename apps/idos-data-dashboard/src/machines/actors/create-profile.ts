@@ -10,8 +10,16 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
     try {
       const { client } = input;
 
-      // Fetch the user ID and a proof message from the server
-      const { userId, proofMessage } = await fetch("/api/profile").then((res) => res.json());
+      const walletType = client.walletType as ProfileData["walletType"];
+      const challengeParams = new URLSearchParams({
+        address: client.walletIdentifier,
+        walletType,
+      });
+      const challengeResponse = await fetch(`/api/profile?${challengeParams}`);
+      if (!challengeResponse.ok) {
+        throw new Error("Failed to create profile");
+      }
+      const { userId, proofMessage } = await challengeResponse.json();
 
       let signature = await client.signer?.signMessage?.(proofMessage);
       const encryptionProfile = await client.createUserEncryptionProfile(userId);
@@ -26,9 +34,6 @@ export const createProfile = fromPromise<CreateProfileOutput, CreateProfileInput
       } else if (typeof signature === "string" && !signature.startsWith("0x")) {
         signature = `0x${signature}`;
       }
-
-      // ProfileData uses the dashboard Prisma WalletType
-      const walletType = client.walletType as ProfileData["walletType"];
 
       const profileData: ProfileData = {
         recipientEncryptionPublicKey: encryptionProfile.userEncryptionPublicKey,

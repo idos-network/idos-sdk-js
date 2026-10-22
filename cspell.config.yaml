@@ -21,7 +21,6 @@ ignorePaths:
   - "**/assets/**"
   - "*.svg"
   - "patches/**"
-  - "examples/pay-demo/build/**"
   - "apps/idos-data-dashboard/build/**"
   - "apps/facesign-enclave/build/**"
   - "pnpm-lock.yaml"
@@ -36,3 +35,4 @@ ignorePaths:
   - "apps/idos-data-dashboard/src/generated/**"
   - "apps/idos-data-dashboard/prisma/**"
   - "**/coverage/*.json"
+  - "packages/kwil-js/CHANGELOG.md"

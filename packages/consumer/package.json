@@ -1,10 +1,14 @@
 {
   "name": "@idos-network/consumer",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "idOS Consumer JavaScript SDK for server environments",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/consumer"
+  },
   "files": [
     "dist/**/*",
     "src/**/*"
@@ -32,7 +36,7 @@
   "dependencies": {
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
-    "@idos-network/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "tiny-invariant": "catalog:core"
   },

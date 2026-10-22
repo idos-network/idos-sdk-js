@@ -1,5 +1,51 @@
 # idos-enclave
 
+## 0.4.5
+
+### Patch Changes
+
+- @idos-network/enclave@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
+## 0.4.4
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/enclave@2.3.0
+  - @idos-network/utils@2.3.0
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/enclave@2.2.2
+  - @idos-network/utils@2.2.2
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [ad3a607]
+  - @idos-network/enclave@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [f2dc464]
+- Updated dependencies [fba1c60]
+- Updated dependencies [56b18ea]
+  - @idos-network/credentials@2.2.0
+  - @idos-network/enclave@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 0.4.0
 
 ### Minor Changes

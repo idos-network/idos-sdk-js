@@ -1,4 +1,4 @@
-import type { idOSWallet } from "@idos-network/kwil-infra/actions";
+import type { GetWalletsOutput } from "@idos-network/kwil-infra/actions";
 
 import { Suspense, useState } from "react";
 
@@ -20,7 +20,7 @@ const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 function WalletsList() {
   const { data: wallets } = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [walletsToDelete, setWalletsToDelete] = useState<idOSWallet[]>([]);
+  const [walletsToDelete, setWalletsToDelete] = useState<GetWalletsOutput[]>([]);
   const address = useSelector(selectWalletAddress);
 
   const hasFacesignWallet = Object.values(wallets).some((group) =>

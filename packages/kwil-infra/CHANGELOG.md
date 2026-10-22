@@ -1,5 +1,69 @@
 # @idos-network/kwil-infra
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [add7f44]
+  - @idos-network/kwil-js@0.2.2
+  - @idos-network/utils@3.0.0
+
+## 2.3.0
+
+### Patch Changes
+
+- @idos-network/utils@2.3.0
+
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/kwil-js@0.2.1
+  - @idos-network/utils@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- ed9a1ad: Fail fast with a clear error when signing Kwil messages with Xaman (Xumm), which can't produce the raw message signature KGW verifies, and reject non-hex XRP signatures.
+  - @idos-network/utils@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- 74180e3: Delete the FaceSign mnemonic when the signer resets, and clear the idOS enclave on logout.
+- 3ae3d26: Add `@idos-network/instrumentation`: OpenTelemetry instrumentation for the idOS SDK.
+
+  Traces the public methods of `@idos-network/client`, `/consumer` and `/issuer`,
+  with the `KwilActionClient.call` / `.execute` round-trips they trigger nested
+  underneath as `db.*` spans. Every target is a class method, so patching works
+  through `patchModuleExports` with no ESM loader hook; `--import` stays supported
+  for automatic patching.
+
+  `KwilActionClient` gains a `waitForTx` method: the tx-confirmation polling a
+  synchronous `execute` already did, split out so it can be traced on its own.
+  Behavior is unchanged.
+
+  Arguments and return values are never recorded — they carry credentials and keys.
+  Use `requestHook` / `responseHook` to opt in per deployment.
+
+- c27ea68: Use `@idos-network/kwil-js` 0.1.11.
+- 3484957: Move `@idos-network/kwil-js` into the monorepo and align it with the other packages.
+
+  - ESM-only build via `tsdown`, tests on `vitest` (was `tsc` + a custom esbuild script and `jest`)
+  - Public subpath exports renamed: `@idos-network/kwil-js/dist/api_client/config` -> `/config`, `/dist/core/action` -> `/action`, `/dist/core/database` -> `/database`
+  - Removed the deprecated `getSchema`, `deploy`, `drop` and `listDatabases` methods, which only threw
+  - Dropped the `jssha`, `long` and `uuid` dependencies in favour of `@noble/hashes` and platform built-ins
+  - Integration tests moved to the private `kwil-js-integration` app, which runs them against a live Kwil node outside CI
+
+- Updated dependencies [3484957]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-js@0.2.0
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Minor Changes

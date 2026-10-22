@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import nacl from "tweetnacl";
 
 import { getDb } from "@/core/db.server";
-import { sessionStorage } from "@/core/sessions.server";
+import { getUserId, sessionStorage } from "@/core/sessions.server";
 
 import type { Route } from "./+types/keys";
 
@@ -13,7 +13,9 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
-  if (!session.get("userId")) {
+  const userId = getUserId(session);
+
+  if (!userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -30,7 +32,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   try {
     await db.user.update({
-      where: { id: session.get("userId"), relayPrivateKey: null },
+      where: { id: userId, relayPrivateKey: null },
       data: {
         relayPrivateKey: privateKey,
         relayPublicKey: publicKey,

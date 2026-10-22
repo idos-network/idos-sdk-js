@@ -33,7 +33,8 @@ export async function createXrpKwilSigner(
 
   const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
     const signature = await getXrpTxHash(message, wallet);
-    if (!signature) {
+    // Buffer.from(_, "hex") silently truncates at the first non-hex char, so reject it up front.
+    if (!signature || !/^(?:[0-9a-f]{2})+$/i.test(signature)) {
       throw new Error("Failed to sign transaction with XRP");
     }
     return Buffer.from(signature, "hex");
