@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/instrumentation",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "OpenTelemetry instrumentation for the idOS JavaScript SDK",
   "keywords": [
     "idos",
@@ -11,7 +11,11 @@
   ],
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/instrumentation"
+  },
   "files": [
     "dist/**/*",
     "src/**/*"
@@ -49,7 +53,7 @@
     "@idos-network/kwil-infra": "workspace:*",
     "@opentelemetry/api": "catalog:otel",
     "@opentelemetry/context-async-hooks": "catalog:otel",
-    "@opentelemetry/sdk-trace-base": "catalog:otel",
+    "@opentelemetry/sdk-trace": "catalog:otel",
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
     "tsdown": "catalog:build",

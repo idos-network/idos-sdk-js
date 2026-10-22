@@ -1,5 +1,78 @@
 # @idos-network/client
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [add7f44]
+  - @idos-network/kwil-js@0.2.2
+  - @idos-network/kwil-infra@3.0.0
+  - @idos-network/enclave@3.0.0
+  - @idos-network/credentials@3.0.0
+  - @idos-network/utils@3.0.0
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/enclave@2.3.0
+  - @idos-network/utils@2.3.0
+  - @idos-network/kwil-infra@2.3.0
+
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/enclave@2.2.2
+  - @idos-network/kwil-js@0.2.1
+  - @idos-network/utils@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- 7f5a44b: A client returned by `withUserSigner()` (and the logged-in client made from it) now throws once another `withUserSigner()` call or a logout replaces its signer, including through a `kwilClient` or `enclaveProvider` saved before that change. Logging out a stale client no longer clears the newer session or returns a client that can act as it. A logout whose enclave reset fails keeps failing until that reset finishes.
+- Updated dependencies [ad3a607]
+- Updated dependencies [ed9a1ad]
+  - @idos-network/enclave@2.2.1
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- 5ac11a5: Stop the iframe enclave client from requesting a remote storage reset. The enclave no longer accepts that message from the embedding page.
+- 74180e3: Delete the FaceSign mnemonic when the signer resets, and clear the idOS enclave on logout.
+- c27ea68: Use `@idos-network/kwil-js` 0.1.11.
+- 3484957: Move `@idos-network/kwil-js` into the monorepo and align it with the other packages.
+
+  - ESM-only build via `tsdown`, tests on `vitest` (was `tsc` + a custom esbuild script and `jest`)
+  - Public subpath exports renamed: `@idos-network/kwil-js/dist/api_client/config` -> `/config`, `/dist/core/action` -> `/action`, `/dist/core/database` -> `/database`
+  - Removed the deprecated `getSchema`, `deploy`, `drop` and `listDatabases` methods, which only threw
+  - Dropped the `jssha`, `long` and `uuid` dependencies in favour of `@noble/hashes` and platform built-ins
+  - Integration tests moved to the private `kwil-js-integration` app, which runs them against a live Kwil node outside CI
+
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [c27ea68]
+- Updated dependencies [3484957]
+- Updated dependencies [f2dc464]
+- Updated dependencies [fba1c60]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/kwil-js@0.2.0
+  - @idos-network/credentials@2.2.0
+  - @idos-network/enclave@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Minor Changes

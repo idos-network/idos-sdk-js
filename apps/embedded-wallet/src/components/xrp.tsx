@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenXRP } from "@web3icons/react";
 import { useEffect, useState } from "react";
 
-import { currentSignMessage } from "../add-wallet-request";
+import { requestChainSignMessage } from "../request-chain-message";
 import { useWalletState } from "../state";
 import { Button } from "./ui/button";
 
@@ -46,19 +46,28 @@ function XRPL() {
   }, [address, stepper]);
 
   const handleSignMessage = async () => {
-    // @ts-expect-error - ResponseType are now typed as Enum
-    const signature = await signGemWalletTx(GemWallet, currentSignMessage());
+    if (!address || !publicKey) return;
+    try {
+      const chain = await requestChainSignMessage({ address, walletType: "XRPL" });
+      // @ts-expect-error - ResponseType are now typed as Enum
+      const signature = await signGemWalletTx(GemWallet, chain.message);
 
-    if (!address || !signature || !publicKey) return;
+      if (!signature) return;
 
-    setWalletPayload({
-      address,
-      signature,
-      public_key: [publicKey ?? ""],
-      message: currentSignMessage(),
-      // No need to disconnect xrpl wallet (it does not possess a persistent connection)
-      disconnect: () => Promise.resolve(),
-    });
+      setWalletPayload({
+        address,
+        signature,
+        public_key: [publicKey],
+        message: chain.message,
+        not_before: chain.notBefore,
+        not_after: chain.notAfter,
+        attemptId: chain.attemptId,
+        // No need to disconnect xrpl wallet (it does not possess a persistent connection)
+        disconnect: () => Promise.resolve(),
+      });
+    } catch (error) {
+      console.error("Failed to load add-wallet message", error);
+    }
   };
 
   const handleConnect = async () => {

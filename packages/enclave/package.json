@@ -1,10 +1,14 @@
 {
   "name": "@idos-network/enclave",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "idOS Enclave JavaScript SDK",
   "homepage": "https://idos.network",
   "license": "MIT",
-  "repository": "github:idos-network/idos-sdk-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/enclave"
+  },
   "files": [
     "dist/**/*",
     "src/**/*"
