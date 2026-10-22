@@ -13,7 +13,7 @@ import {
   idOSClientConfiguration,
   idOSClientIdle,
   idOSClientLoggedIn,
-  type idOSClientWithUserSigner,
+  idOSClientWithUserSigner,
   toDelegatedWriteGrantBaseParams,
 } from "./index.js";
 
@@ -300,6 +300,70 @@ describe("signer switching on a shared idle client", () => {
 
     await expect(loggingIn).rejects.toThrow(/stale/);
     expect(reconfigure).not.toHaveBeenCalled();
+  });
+});
+
+describe("hasProfile", () => {
+  const nearPublicKey = "ed25519:9esz1ouR3vwBwjnUjjcFB8ETfQb6cnBPtXt8v6QPM2Nf";
+
+  function clientFor(wallet: {
+    walletIdentifier: string;
+    walletPublicKey: string | undefined;
+    walletType: "NEAR" | "EVM";
+  }) {
+    const idle = idleClient();
+    const kwilSigner = {} as never;
+    idle.kwilClient.setSigner(kwilSigner);
+    return {
+      client: new idOSClientWithUserSigner(
+        idle,
+        {} as never,
+        kwilSigner,
+        wallet.walletIdentifier,
+        wallet.walletPublicKey,
+        wallet.walletType,
+        idle.blobGateway,
+      ),
+      call: idle.kwilClient.call,
+    };
+  }
+
+  it("looks up a NEAR profile by public key and an EVM profile by wallet identifier", async () => {
+    const near = clientFor({
+      walletIdentifier: "alice.near",
+      walletPublicKey: nearPublicKey,
+      walletType: "NEAR",
+    });
+
+    await expect(near.client.hasProfile()).resolves.toBe(true);
+    expect(near.call).toHaveBeenCalledWith(
+      { name: "has_profile", inputs: { address: nearPublicKey } },
+      undefined,
+    );
+
+    const evmIdentifier = "0x1234567890123456789012345678901234567890";
+    const evm = clientFor({
+      walletIdentifier: evmIdentifier,
+      walletPublicKey: undefined,
+      walletType: "EVM",
+    });
+
+    await expect(evm.client.hasProfile()).resolves.toBe(true);
+    expect(evm.call).toHaveBeenCalledWith(
+      { name: "has_profile", inputs: { address: evmIdentifier } },
+      undefined,
+    );
+  });
+
+  it("throws when a NEAR signer has no public key", async () => {
+    const near = clientFor({
+      walletIdentifier: "alice.near",
+      walletPublicKey: undefined,
+      walletType: "NEAR",
+    });
+
+    await expect(near.client.hasProfile()).rejects.toThrow("NEAR wallet public key is required");
+    expect(near.call).not.toHaveBeenCalled();
   });
 });
 
