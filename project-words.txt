@@ -13,6 +13,7 @@ banxa
 barebones
 betanet
 Blockhash
+blockstore
 Borsh
 bowser
 Bundesdruckerei
@@ -188,6 +189,7 @@ txjson
 typesafety
 uidotdev
 ukyc
+unixfs
 unminified
 unpadded
 unparseable

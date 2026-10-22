@@ -69,9 +69,10 @@
     "@stablelib/sha256": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
     "base85": "catalog:utils",
+    "blockstore-core": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
-    "ipfs-only-hash": "^4.0.0",
+    "ipfs-unixfs-importer": "catalog:utils",
     "tiny-invariant": "catalog:core",
     "tweetnacl": "catalog:core"
   },
