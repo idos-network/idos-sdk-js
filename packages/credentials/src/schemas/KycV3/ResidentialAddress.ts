@@ -1,18 +1,19 @@
-import { IsBoolean, IsOptional, IsString, IsISO31661Alpha2, IsMimeType } from "class-validator";
+import { IsOptional, IsString, IsISO31661Alpha2, IsMimeType, IsEnum } from "class-validator";
 
-import { Base85FileField, IsoDateField, RequiredWhen } from "../utils";
+import { ResidentialAddressSources, type ResidentialAddressSource } from "../enums";
+import { Base85FileField, IsoDateField, RequiredWhen, Transliterate } from "../utils";
 
 export class ResidentialAddress {
-  /*
-   * Whether the address has been verified against the proof document.
-   * If false, the address has been manually entered by the user.
-   */
-  @IsBoolean()
-  verified: boolean;
+  /* How the address was obtained: typed in, autocompleted, from GPS, an external database, or read from an identity or proof-of-address document. */
+  @IsEnum(ResidentialAddressSources)
+  source: ResidentialAddressSource;
 
   /* Street address. */
+  @Transliterate()
   @IsString()
   street: string;
+  declare readonly streetIcao?: string;
+  declare readonly streetLatin?: Promise<string | undefined>;
 
   /* House number. */
   @IsOptional()
@@ -20,18 +21,27 @@ export class ResidentialAddress {
   houseNumber?: string;
 
   /* Additional address information (e.g. apartment number). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   additionalAddressInfo?: string;
+  declare readonly additionalAddressInfoIcao?: string;
+  declare readonly additionalAddressInfoLatin?: Promise<string | undefined>;
 
   /* Region (e.g. state, province). */
+  @Transliterate()
   @IsOptional()
   @IsString()
   region?: string;
+  declare readonly regionIcao?: string;
+  declare readonly regionLatin?: Promise<string | undefined>;
 
   /* Locality (e.g. city, town). */
+  @Transliterate()
   @IsString()
   city: string;
+  declare readonly cityIcao?: string;
+  declare readonly cityLatin?: Promise<string | undefined>;
 
   /* Postal code. */
   @IsOptional()
@@ -43,7 +53,7 @@ export class ResidentialAddress {
   country: string;
 
   /* Type of document provided to verify the address (e.g. utility bill, bank statement). */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   proofCategory?: string;
 
@@ -53,18 +63,18 @@ export class ResidentialAddress {
   proofDateOfIssue?: Date;
 
   /* The document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @Base85FileField()
   proofFile?: Buffer;
 
   /* Type of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   @IsMimeType()
   proofFileType?: string;
 
   /* Name of the document provided as address proof. */
-  @RequiredWhen((address: ResidentialAddress) => address.verified)
+  @RequiredWhen((address: ResidentialAddress) => address.source === "PROOF_OF_ADDRESS")
   @IsString()
   proofFileName?: string;
 

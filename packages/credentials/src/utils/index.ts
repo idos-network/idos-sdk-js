@@ -8,6 +8,7 @@ import type { idOSCredential, SignedCredentialContentReference } from "../types"
 
 // Proxying functions
 export * from "./issuer";
+export * from "./transliterate";
 
 export type BaseLevel = "unverified" | "basic" | "plus";
 export type Addon =

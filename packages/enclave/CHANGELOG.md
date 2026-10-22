@@ -1,5 +1,58 @@
 # @idos-network/enclave
 
+## 3.0.0
+
+### Patch Changes
+
+- @idos-network/kwil-infra@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/utils@2.3.0
+  - @idos-network/kwil-infra@2.3.0
+
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/utils@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- ad3a607: Discard and wipe a cached encryption key when it no longer matches the expected user encryption public key.
+- Updated dependencies [ed9a1ad]
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- fba1c60: Require origin authorization after a key is derived, and keep the cached profile when that authorization is denied.
+- 56b18ea: Forget a cached encryption profile once its remember duration has elapsed, including while the enclave stays open.
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [c27ea68]
+- Updated dependencies [3484957]
+- Updated dependencies [f2dc464]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/credentials@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes

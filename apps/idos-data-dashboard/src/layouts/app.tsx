@@ -10,6 +10,7 @@ import {
   selectIsConnectingFaceSign,
   selectIsCreatingProfile,
   selectIsDisconnected,
+  selectIsDisconnecting,
   selectIsError,
   selectIsLoading,
   selectIsNoProfile,
@@ -19,6 +20,7 @@ import {
 export default function AppLayout() {
   const { send } = useActorRef();
   const isLoading = useSelector(selectIsLoading);
+  const isDisconnecting = useSelector(selectIsDisconnecting);
   const isConnectingFaceSign = useSelector(selectIsConnectingFaceSign);
   const isCreatingProfile = useSelector(selectIsCreatingProfile);
   const isDisconnected = useSelector(selectIsDisconnected);
@@ -50,7 +52,7 @@ export default function AppLayout() {
     );
   }
 
-  if (isLoading || isConnectingFaceSign || isCreatingProfile) {
+  if (isLoading || isDisconnecting || isConnectingFaceSign || isCreatingProfile) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
