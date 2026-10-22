@@ -86,7 +86,7 @@ describe("Kwil", () => {
               chain_id: "does not matter",
               domain: "does not matter",
               version: "1",
-              uri: "does not matter/auth",
+              uri: "does not matter/rpc/v1",
             },
           },
         })
@@ -181,7 +181,7 @@ describe("Kwil", () => {
               chain_id: "does not matter",
               domain: "does not matter",
               version: "1",
-              uri: "does not matter/auth",
+              uri: "does not matter/rpc/v1",
             },
           },
         })
