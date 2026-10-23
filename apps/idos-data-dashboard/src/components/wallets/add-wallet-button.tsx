@@ -1,4 +1,8 @@
-import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
+import {
+  WALLET_TYPES,
+  type AddWalletType,
+  type WalletType,
+} from "@idos-network/kwil-infra/actions";
 import {
   verifySignature,
   type WalletSignature,
@@ -67,7 +71,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     attempt: AddWalletAttempt | null;
     chain: {
       address: string;
-      walletType: WalletType;
+      walletType: AddWalletType;
       message: string;
       notBefore: string;
       notAfter: string;
@@ -120,7 +124,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         signature: walletPayload.signature,
         notBefore,
         notAfter,
-        walletType: walletPayload.wallet_type,
+        walletType: pending.chain.walletType,
       },
       {
         onSuccess: async () => {
@@ -203,7 +207,8 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         attemptId.length === 0 ||
         typeof address !== "string" ||
         address.length === 0 ||
-        !isWalletType(walletType)
+        !isWalletType(walletType) ||
+        walletType === "MM"
       ) {
         toast.error("Invalid wallet data", {
           description: "The signature does not match this profile",

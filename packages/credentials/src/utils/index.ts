@@ -162,25 +162,29 @@ export function recordFilter(
   return true;
 }
 
-export function buildSignedCredentialContentReference(
+// Asks the node for the broader-signature text. The node owns the format.
+export type CredentialBroaderMessageFor = (
+  publicNotesSignature: string,
+  contentUri: string,
+) => Promise<string>;
+
+export async function buildSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
   issuerSigningSecretKey: Uint8Array,
-): SignedCredentialContentReference {
+  broaderMessageFor: CredentialBroaderMessageFor,
+): Promise<SignedCredentialContentReference> {
   const { publicKey, secretKey } = nacl.sign.keyPair.fromSecretKey(issuerSigningSecretKey);
 
   const publicNotesSignature = nacl.sign.detached(utf8Encode(publicNotes), secretKey);
+  const publicNotesSignatureB64 = base64Encode(publicNotesSignature);
+  const broaderMessage = await broaderMessageFor(publicNotesSignatureB64, contentUri);
 
   return {
     public_notes: publicNotes,
-    public_notes_signature: base64Encode(publicNotesSignature),
+    public_notes_signature: publicNotesSignatureB64,
 
-    broader_signature: base64Encode(
-      nacl.sign.detached(
-        Uint8Array.from([...publicNotesSignature, ...utf8Encode(contentUri)]),
-        secretKey,
-      ),
-    ),
+    broader_signature: base64Encode(nacl.sign.detached(utf8Encode(broaderMessage), secretKey)),
 
     issuer_auth_public_key: hexEncode(publicKey, true),
   };
@@ -190,11 +194,13 @@ export function buildSignedCredentialContentReference(
 export function buildEphemeralSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
-): SignedCredentialContentReference {
+  broaderMessageFor: CredentialBroaderMessageFor,
+): Promise<SignedCredentialContentReference> {
   return buildSignedCredentialContentReference(
     publicNotes,
     contentUri,
     nacl.sign.keyPair().secretKey,
+    broaderMessageFor,
   );
 }
 
@@ -227,6 +233,7 @@ export interface BuildPreliminaryIDOSCredentialArgs {
   publicNotes: string;
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
+  broaderMessageFor: CredentialBroaderMessageFor;
   issuerSigningSecretKey?: Uint8Array;
   /** When set (MM / `ukyc://`), skip IPFS CID hashing. */
   contentUri?: string;
@@ -236,6 +243,7 @@ export async function buildPreliminaryIDOSCredential({
   publicNotes,
   plaintextContent,
   recipientEncryptionPublicKey,
+  broaderMessageFor,
   // For user-issued credentials, use a fresh ephemeral key for the signed reference
   // For issuer-side, use the signing key pair
   issuerSigningSecretKey = nacl.sign.keyPair().secretKey,
@@ -251,10 +259,11 @@ export async function buildPreliminaryIDOSCredential({
   const contentReference = contentUri
     ? { uri: contentUri, size: encryptedContent.byteLength }
     : await createBlobContentReference(encryptedContent);
-  const signedReference = buildSignedCredentialContentReference(
+  const signedReference = await buildSignedCredentialContentReference(
     publicNotes,
     contentReference.uri,
     issuerSigningSecretKey,
+    broaderMessageFor,
   );
 
   return {

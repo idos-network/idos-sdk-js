@@ -34,6 +34,7 @@ import {
   addWallets,
   addAttribute as createAttribute,
   createPreliminaryCredential,
+  credentialBroaderMessage,
   type CreatePreliminaryCredentialInput,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
@@ -400,7 +401,10 @@ export class idOSClientIdle {
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
-    return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
+    return hasProfile(this.kwilClient, { address }).then((res) => {
+      if (!res) throw new Error("has_profile returned no rows");
+      return res.has_profile;
+    });
   }
 
   async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
@@ -500,7 +504,10 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       if (!this.walletPublicKey) throw new Error("NEAR wallet public key is required");
       address = this.walletPublicKey;
     }
-    return hasProfile(this.kwilClient, { address }).then((x) => x.has_profile);
+    return hasProfile(this.kwilClient, { address }).then((res) => {
+      if (!res) throw new Error("has_profile returned no rows");
+      return res.has_profile;
+    });
   }
 
   async createUserEncryptionProfile(
@@ -544,6 +551,19 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       return new idOSClientLoggedIn(this, kwilUser);
     });
   }
+}
+
+function credentialRecipientWallet(client: {
+  walletType: string;
+  walletIdentifier: string;
+  walletPublicKey?: string;
+}): string {
+  // NEAR @caller is the ed25519 public key. walletIdentifier is the account id.
+  if (client.walletType === "NEAR") {
+    if (!client.walletPublicKey) throw new Error("NEAR wallet public key is required");
+    return client.walletPublicKey;
+  }
+  return client.walletIdentifier;
 }
 
 export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
@@ -592,7 +612,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
-    return dwgMessage(this.kwilClient, params).then((res) => res.message);
+    return dwgMessage(this.kwilClient, params).then((res) => {
+      if (!res) throw new Error("dwg_message returned no rows");
+      return res.message;
+    });
   }
 
   async createCredential(
@@ -607,6 +630,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         publicNotes,
         plaintextContent,
         recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
+        broaderMessageFor: (publicNotesSignature, contentUri) =>
+          credentialBroaderMessage(this.kwilClient, {
+            public_notes_signature: publicNotesSignature,
+            content_uri: contentUri,
+            recipient_wallet: credentialRecipientWallet(this),
+          }).then((row) => row.message),
         issuerSigningSecretKey,
         contentUri: contentUriForWallet(this.walletType, this.kwilSigner, credentialId),
       })),
@@ -737,7 +766,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   async getGrantsCount(): Promise<number> {
     return getAccessGrantsGrantedCount(this.kwilClient, {
       user_id: null,
-    }).then((res) => res.count);
+    }).then((res) => {
+      if (!res) throw new Error("get_access_grants_granted_count returned no rows");
+      return res.count;
+    });
   }
 
   async getCredentialShared(id: string): Promise<idOSCredential | undefined> {
@@ -980,7 +1012,16 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const copyReference = ukycContentUri
       ? { uri: ukycContentUri, size: content.byteLength }
       : await createBlobContentReference(content);
-    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
+    const signedReference = await buildEphemeralSignedCredentialContentReference(
+      "",
+      copyReference.uri,
+      (publicNotesSignature, contentUri) =>
+        credentialBroaderMessage(this.kwilClient, {
+          public_notes_signature: publicNotesSignature,
+          content_uri: contentUri,
+          recipient_wallet: credentialRecipientWallet(this),
+        }).then((row) => row.message),
+    );
 
     // Integrator-supplied. ed25519 @caller is lowercase hex; after exact grantee
     // matching, uppercase hex would store a grant the consumer cannot read. Other

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   addWalletMessage,
   CreatePreliminaryCredentialsByDwgInputSchema,
+  credentialBroaderMessage,
   getUser,
   SharePreliminaryCredentialInputSchema,
   UpsertWalletAsInserterInputSchema,
@@ -151,8 +152,8 @@ describe("MM wallet type schemas", () => {
 });
 
 const addWalletMessageInput = {
-  address: "mm-signing-public-key",
-  wallet_type: "MM" as const,
+  address: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+  wallet_type: "EVM" as const,
   user_id: "00000000-0000-4000-8000-000000000001",
   not_before: "2025-02-13T11:22:06Z",
   not_after: "2025-02-13T11:37:06Z",
@@ -175,6 +176,21 @@ describe("addWalletMessage", () => {
     await expect(
       addWalletMessage({ call: async () => undefined } as never, addWalletMessageInput),
     ).rejects.toThrow();
+  });
+});
+
+describe("credentialBroaderMessage", () => {
+  it("returns the message from the node", async () => {
+    await expect(
+      credentialBroaderMessage(
+        { call: async () => [{ message: "operation: credential" }] } as never,
+        {
+          public_notes_signature: "sig",
+          content_uri: "ipfs://cid",
+          recipient_wallet: "0xabc",
+        },
+      ),
+    ).resolves.toEqual({ message: "operation: credential" });
   });
 });
 
