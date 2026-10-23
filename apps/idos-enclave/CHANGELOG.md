@@ -1,5 +1,12 @@
 # idos-enclave
 
+## 0.4.6
+
+### Patch Changes
+
+- dc34ffe: Update DOMPurify to a release that closes the template and in-place sanitizer bypasses.
+  - @idos-network/enclave@3.0.1
+
 ## 0.4.5
 
 ### Patch Changes

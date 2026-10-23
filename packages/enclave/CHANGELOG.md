@@ -1,5 +1,13 @@
 # @idos-network/enclave
 
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+  - @idos-network/kwil-infra@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes
