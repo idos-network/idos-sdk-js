@@ -478,6 +478,7 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
   const kwilSigner = walletType === "MM" ? createMmTokenAuth(mmToken) : {};
   const kwilClient = {
     signer: kwilSigner,
+    call: async () => [{ message: "credential-message" }],
     execute: async ({ inputs }: { inputs: Record<string, unknown> }) => {
       preliminaryInput = inputs;
     },
