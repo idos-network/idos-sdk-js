@@ -19,14 +19,16 @@ const fullAccess = vi.hoisted(() => ({
   keys: [] as string[],
   limitedKeys: [] as string[],
   queries: 0,
+  lastRequest: undefined as { request_type?: string; account_id?: string } | undefined,
 }));
 
 vi.mock("near-api-js", () => ({
   connect: async () => ({
     connection: {
       provider: {
-        query: async () => {
+        query: async (request: { request_type?: string; account_id?: string }) => {
           fullAccess.queries += 1;
+          fullAccess.lastRequest = request;
           return {
             keys: [
               ...fullAccess.keys.map((public_key) => ({
@@ -127,6 +129,7 @@ describe("createNearWalletKwilSigner my-near-wallet redirect", () => {
     fullAccess.keys = [];
     fullAccess.limitedKeys = [];
     fullAccess.queries = 0;
+    fullAccess.lastRequest = undefined;
   });
 
   it("accepts a fragment whose signature matches the saved request and a full-access key", async () => {
@@ -138,6 +141,10 @@ describe("createNearWalletKwilSigner my-near-wallet redirect", () => {
     ).toBe(fragmentKey);
     expect(window.location.hash).toBe("");
     expect(fullAccess.queries).toBe(1);
+    expect(fullAccess.lastRequest).toMatchObject({
+      request_type: "view_access_key_list",
+      account_id: ACCOUNT,
+    });
   });
 
   it("ignores a signature that does not match the saved request", async () => {
@@ -180,6 +187,10 @@ describe("createNearWalletKwilSigner my-near-wallet redirect", () => {
       await signerPublicKey({ accountId: ACCOUNT, signature, publicKey: fragmentKey, nonce }),
     ).toBe(realKey);
     expect(fullAccess.queries).toBe(1);
+    expect(fullAccess.lastRequest).toMatchObject({
+      request_type: "view_access_key_list",
+      account_id: ACCOUNT,
+    });
   });
 
   it("does not replay an untrusted fragment signature", async () => {
