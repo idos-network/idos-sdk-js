@@ -7,6 +7,9 @@ import {
 } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 
+// Must match the recipient the idOS node accepts for NEP-413 wallet signatures.
+const NEP413_RECIPIENT = "idos.network";
+
 interface NEP413Payload {
   tag: number;
   message: string;
@@ -62,8 +65,8 @@ export const verifyNearSignature = async (
     const deserializedPayload = borshDeserialize(payloadSchema, payloadBytes) as NEP413Payload;
 
     // NEP-413 binds the signature to a relying party; reject ones addressed elsewhere.
-    if (deserializedPayload.recipient !== "idos.network") {
-      console.warn("Invalid NEP-413 recipient:", deserializedPayload.recipient);
+    if (deserializedPayload.recipient !== NEP413_RECIPIENT) {
+      console.warn("Invalid NEP-413 recipient");
       return false;
     }
 

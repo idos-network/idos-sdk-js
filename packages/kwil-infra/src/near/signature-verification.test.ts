@@ -1,46 +1,35 @@
-import { borshSerialize, bs58Encode, hexEncode, sha256Hash } from "@idos-network/utils/codecs";
-import nacl from "tweetnacl";
+import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import { KeyPair } from "near-api-js";
 import { describe, expect, it } from "vitest";
 
+import { kwilNep413Signer } from "./nep413";
 import { verifyNearSignature } from "./signature-verification";
 
-const schema = {
-  struct: {
-    tag: "u32",
-    message: "string",
-    nonce: { array: { type: "u8", len: 32 } },
-    recipient: "string",
-    callbackUrl: { option: "string" },
-  },
-};
-
-function sign(message: string, recipient: string) {
-  const keyPair = nacl.sign.keyPair();
-  const payload = borshSerialize(schema, {
-    tag: 2147484061,
-    message,
-    nonce: Array(32).fill(1),
-    recipient,
-    callbackUrl: undefined,
-  });
-  const signature = nacl.sign.detached(sha256Hash(payload), keyPair.secretKey);
-  const length = new Uint8Array(2);
-  new DataView(length.buffer).setUint16(0, payload.length, false);
-
+async function sign(message: string, recipient: string) {
+  const keyPair = KeyPair.fromRandom("ed25519");
+  const signed = await kwilNep413Signer(recipient)(keyPair)(utf8Encode(message));
   return {
-    signature: hexEncode(new Uint8Array([...length, ...payload, ...signature])),
-    publicKey: `ed25519:${bs58Encode(keyPair.publicKey)}`,
+    signature: hexEncode(signed),
+    publicKey: keyPair.getPublicKey().toString(),
   };
 }
 
 describe("verifyNearSignature", () => {
   it("accepts a signature addressed to idos.network", async () => {
-    const { signature, publicKey } = sign("hello", "idos.network");
+    const { signature, publicKey } = await sign("hello", "idos.network");
     expect(await verifyNearSignature("hello", signature, publicKey)).toBe(true);
   });
 
-  it("rejects a valid signature addressed to another recipient", async () => {
-    const { signature, publicKey } = sign("hello", "evil.example");
-    expect(await verifyNearSignature("hello", signature, publicKey)).toBe(false);
+  it.each(["evil.example", "idos.network.evil", "idos-issuer"])(
+    "rejects a valid signature addressed to %s",
+    async (recipient) => {
+      const { signature, publicKey } = await sign("hello", recipient);
+      expect(await verifyNearSignature("hello", signature, publicKey)).toBe(false);
+    },
+  );
+
+  it("rejects an idos.network signature of a different message", async () => {
+    const { signature, publicKey } = await sign("hello", "idos.network");
+    expect(await verifyNearSignature("goodbye", signature, publicKey)).toBe(false);
   });
 });
