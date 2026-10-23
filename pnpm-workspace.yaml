@@ -168,7 +168,9 @@ overrides:
   shell-quote: ">= 1.11.0"
   source-map-js: ">= 1.2.2"
   tinypool: ">= 2.1.1"
-  toml: ">= 4.1.2"
+  # Security: toml parse DoS (GHSA-4qx8-w7c3-pj3p, GHSA-9j65-hcg3-gc64, GHSA-9qmh-m7c6-f92p).
+  # Pin the patch. An open range lets pnpm reuse a vulnerable release already in the lockfile.
+  toml: "5.0.1"
   # Security: launch-editor Windows path check bypass (GHSA-587h-7wmj-h5pm).
   # Pin the patch. An open range lets pnpm reuse a vulnerable release already in the lockfile.
   vite: "8.2.4"
