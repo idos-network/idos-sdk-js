@@ -15,7 +15,11 @@ import type { KwilActionClient } from "../create-kwil-client";
 
 import { createNearWalletKwilSigner } from "./create-near-wallet-kwil-signer";
 
-const fullAccess = vi.hoisted(() => ({ keys: [] as string[], queries: 0 }));
+const fullAccess = vi.hoisted(() => ({
+  keys: [] as string[],
+  limitedKeys: [] as string[],
+  queries: 0,
+}));
 
 vi.mock("near-api-js", () => ({
   connect: async () => ({
@@ -24,10 +28,24 @@ vi.mock("near-api-js", () => ({
         query: async () => {
           fullAccess.queries += 1;
           return {
-            keys: fullAccess.keys.map((public_key) => ({
-              public_key,
-              access_key: { permission: "FullAccess" },
-            })),
+            keys: [
+              ...fullAccess.keys.map((public_key) => ({
+                public_key,
+                access_key: { permission: "FullAccess" },
+              })),
+              ...fullAccess.limitedKeys.map((public_key) => ({
+                public_key,
+                access_key: {
+                  permission: {
+                    FunctionCall: {
+                      allowance: "0",
+                      receiver_id: "example.near",
+                      method_names: [],
+                    },
+                  },
+                },
+              })),
+            ],
           };
         },
       },
@@ -107,6 +125,7 @@ describe("createNearWalletKwilSigner my-near-wallet redirect", () => {
   afterEach(() => {
     window.location.hash = "";
     fullAccess.keys = [];
+    fullAccess.limitedKeys = [];
     fullAccess.queries = 0;
   });
 
@@ -155,6 +174,7 @@ describe("createNearWalletKwilSigner my-near-wallet redirect", () => {
   it("ignores a public key that is not a full-access key of the account", async () => {
     const { nonce, signature } = signedRequest();
     fullAccess.keys = [realKey];
+    fullAccess.limitedKeys = [fragmentKey];
 
     expect(
       await signerPublicKey({ accountId: ACCOUNT, signature, publicKey: fragmentKey, nonce }),
