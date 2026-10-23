@@ -3,6 +3,9 @@ import nacl from "tweetnacl";
 
 import { deserializeKwilNep413, nep413SignHash } from "./nep413";
 
+// Must match the recipient the idOS node accepts for NEP-413 wallet signatures.
+const NEP413_RECIPIENT = "idos.network";
+
 export const verifyNearSignature = async (
   message: string,
   signature: string,
@@ -37,6 +40,12 @@ export const verifyNearSignature = async (
     }
 
     const deserializedPayload = deserializeKwilNep413(payloadBytes);
+
+    // NEP-413 binds the signature to a relying party; reject ones addressed elsewhere.
+    if (deserializedPayload.recipient !== NEP413_RECIPIENT) {
+      console.warn("Invalid NEP-413 recipient");
+      return false;
+    }
 
     // Hash the caller-supplied message with the nonce and recipient from the envelope.
     const hash = nep413SignHash({

@@ -217,7 +217,8 @@ overrides:
   shell-quote: '>= 1.11.0'
   source-map-js: '>= 1.2.2'
   tinypool: '>= 2.1.1'
-  toml: '>= 4.1.2'
+  toml: 5.0.1
+  dompurify: '>=3.4.17'
   vite: 8.2.4
   launch-editor: 2.14.2
   ws: '>= 8.21.0'
@@ -718,8 +719,8 @@ importers:
         specifier: catalog:utils
         version: 2.1.0
       dompurify:
-        specifier: ^3.4.13
-        version: 3.4.13
+        specifier: '>=3.4.17'
+        version: 3.4.17
       lucide-preact:
         specifier: ^0.577.0
         version: 0.577.0(preact@10.29.8)
@@ -5684,8 +5685,8 @@ packages:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
 
-  dompurify@3.4.13:
-    resolution: {integrity: sha512-2vmYIoqjze2d+kakP8S/nS5shfsl587kzwEjcGlTdiksUVgFHnFCsLYDVj/JNqJVOQZGSYBTmuycv0PodwmnMQ==}
+  dompurify@3.4.17:
+    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
@@ -8511,8 +8512,8 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
-  toml@5.0.0:
-    resolution: {integrity: sha512-bsqEd+g7fzlrw7LEynQ6W6aOK/lTOlepz5x1sJyIV9fTZVJS2Q76nuju6FK+gZhW5bUpvB7mCEqdR0u4WziMFw==}
+  toml@5.0.1:
+    resolution: {integrity: sha512-EqYNA/YvUNndrA2B3O2ojzLQoTQrBxeZ9UIjQwk8t10oe6n7dwclBwd9IdZQTOKwe6vWX+AXtl6IntXRbepdxQ==}
     engines: {node: '>=20'}
 
   tough-cookie@4.1.4:
@@ -12590,7 +12591,7 @@ snapshots:
       eventsource: 2.0.2
       feaxios: 0.0.23
       randombytes: 2.1.0
-      toml: 5.0.0
+      toml: 5.0.1
       urijs: 1.19.11
     transitivePeerDependencies:
       - bare-url
@@ -14975,7 +14976,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.4.13:
+  dompurify@3.4.17:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -18061,7 +18062,7 @@ snapshots:
 
   toidentifier@1.0.1: {}
 
-  toml@5.0.0: {}
+  toml@5.0.1: {}
 
   tough-cookie@4.1.4:
     dependencies:
