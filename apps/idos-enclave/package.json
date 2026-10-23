@@ -23,7 +23,7 @@
     "@rollup/plugin-inject": "^5.0.5",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
-    "dompurify": "^3.4.13",
+    "dompurify": "^3.4.17",
     "lucide-preact": "^0.577.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
