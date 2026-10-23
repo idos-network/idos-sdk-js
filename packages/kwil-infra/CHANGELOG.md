@@ -1,5 +1,12 @@
 # @idos-network/kwil-infra
 
+## 3.0.1
+
+### Patch Changes
+
+- 47c1b10: Only trust a my-near-wallet redirect when its signature matches the saved request, its account is the connected account, and its public key is a full-access key of that account.
+- dc34ffe: Reject NEAR signatures whose NEP-413 recipient is not `idos.network`.
+
 ## 3.0.0
 
 ### Patch Changes

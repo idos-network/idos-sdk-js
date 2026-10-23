@@ -1,5 +1,15 @@
 # @idos-network/client
 
+## 3.0.1
+
+### Patch Changes
+
+- 5dac941: Look up NEAR profiles by public key so `hasProfile()` finds an existing NEAR user.
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+  - @idos-network/kwil-infra@3.0.1
+  - @idos-network/enclave@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes
