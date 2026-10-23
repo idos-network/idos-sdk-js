@@ -11,16 +11,17 @@ import { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
   binaryWriteUint16BE,
-  borshSerialize,
   bs58Decode,
   bytesConcat,
   hexEncode,
   utf8Decode,
 } from "@idos-network/utils/codecs";
+import nacl from "tweetnacl";
 
 import type { KwilActionClient } from "../create-kwil-client";
 
 import { getNearConnectionConfig } from "./get-config";
+import { nep413SignHash, serializeKwilNep413 } from "./nep413";
 
 const NEAR_WALLET_TYPES: string[] = [
   "browser",
@@ -88,25 +89,12 @@ function createNearWalletSigner(
       nonce: nonceSuggestion,
     }))!;
 
-    const nep413BorschSchema = {
-      struct: {
-        tag: "u32",
-        message: "string",
-        nonce: { array: { type: "u8", len: 32 } },
-        recipient: "string",
-        callbackUrl: { option: "string" },
-      },
-    };
-
-    const nep413BorshParams = {
-      tag: 2147484061,
+    const nep413BorshPayload = serializeKwilNep413({
       message: messageString,
       nonce: Array.from(nonce),
       recipient,
       callbackUrl,
-    };
-
-    const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
+    });
     const result = bytesConcat(
       binaryWriteUint16BE(nep413BorshPayload.length),
       nep413BorshPayload,
@@ -149,6 +137,112 @@ export async function getNearFullAccessPublicKeys(
   }
 }
 
+type NearRedirect = {
+  accountId?: string;
+  publicKey?: string;
+  signature?: string;
+  error?: string;
+};
+
+function parseNearRedirect(hash: string): NearRedirect {
+  const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+  const signature = params.get("signature");
+  return {
+    accountId: params.get("accountId") ?? undefined,
+    publicKey: params.get("publicKey") ?? undefined,
+    // URLSearchParams decodes a literal "+" as a space. NEP-413 signatures are base64.
+    signature: signature?.replaceAll(" ", "+"),
+    error: params.get("error") ?? undefined,
+  };
+}
+
+function takeNearRedirect(): NearRedirect {
+  const redirect = parseNearRedirect(window.location.hash);
+  if (!redirect.accountId && !redirect.publicKey && !redirect.signature && !redirect.error) {
+    return redirect;
+  }
+
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  for (const key of ["accountId", "publicKey", "signature", "error", "state"]) params.delete(key);
+  const rest = params.toString();
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${window.location.search}${rest ? `#${rest}` : ""}`,
+  );
+  return redirect;
+}
+
+function verifyNep413Signature(
+  message: string,
+  nonce: Uint8Array,
+  recipient: string,
+  callbackUrl: string,
+  signature: string,
+  publicKey: string,
+): boolean {
+  const pieces = publicKey.split(":");
+  if (pieces.length !== 2 || pieces[0] !== "ed25519" || !pieces[1] || nonce.length !== 32) {
+    return false;
+  }
+
+  try {
+    const publicKeyBytes = bs58Decode(pieces[1]);
+    const signatureBytes = base64Decode(signature);
+    if (publicKeyBytes.length !== 32 || signatureBytes.length !== 64) return false;
+
+    return nacl.sign.detached.verify(
+      nep413SignHash({ message, nonce, recipient, callbackUrl }),
+      signatureBytes,
+      publicKeyBytes,
+    );
+  } catch {
+    return false;
+  }
+}
+
+// The hash is attacker-controlled. A signature is only the wallet's if it verifies
+// against the request we stored before the redirect, for a full-access key of this account.
+async function trustedNearRedirect(
+  redirect: NearRedirect,
+  currentAddress: string,
+  recipient: string,
+  store: Store,
+): Promise<{ signature: string; publicKey: string } | undefined> {
+  if (
+    redirect.error ||
+    !redirect.signature ||
+    !redirect.publicKey ||
+    redirect.accountId !== currentAddress
+  ) {
+    return;
+  }
+
+  const message = await store.get<string>("sign-last-message");
+  const savedNonce = await store.get<number[] | Uint8Array>("sign-last-nonce");
+  const callbackUrl = await store.get<string>("sign-last-url");
+  if (!message || !savedNonce || !callbackUrl) return;
+
+  const nonce = Uint8Array.from(savedNonce);
+  if (
+    !verifyNep413Signature(
+      message,
+      nonce,
+      recipient,
+      callbackUrl,
+      redirect.signature,
+      redirect.publicKey,
+    )
+  ) {
+    return;
+  }
+
+  const keys = await getNearFullAccessPublicKeys(currentAddress);
+  if (!keys?.includes(redirect.publicKey)) return;
+
+  return { signature: redirect.signature, publicKey: redirect.publicKey };
+}
+
 export async function signNearMessage(
   wallet: NearWallet,
   message: string,
@@ -169,34 +263,33 @@ export async function createNearWalletKwilSigner(
   if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
   if (wallet.id === "my-near-wallet") {
-    const { accountId, signature, publicKey, error } = Object.fromEntries(
-      new URLSearchParams(window.location.hash.slice(1)).entries(),
-    );
+    const redirect = takeNearRedirect();
+    const trusted = await trustedNearRedirect(redirect, currentAddress, recipient, store);
 
-    if (signature) {
-      await store.set("signer-address", accountId);
-      await store.set("signer-public-key", publicKey);
+    if (trusted) {
+      await store.set("signer-address", currentAddress);
+      await store.set("signer-public-key", trusted.publicKey);
     }
 
     const signMessageOriginal = wallet.signMessage.bind(wallet);
 
     wallet.signMessage = async ({
       message,
-      recipient,
+      recipient: signRecipient,
     }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
-      if (error) return Promise.reject();
+      if (redirect.error) return Promise.reject();
 
       const lastMessage = await store.get<string>("sign-last-message");
       const lastNonce = await store.get<Uint8Array>("sign-last-nonce");
 
-      if (signature && message === lastMessage && lastNonce) {
+      if (trusted && message === lastMessage && lastNonce) {
         const nonce = Buffer.from(lastNonce);
         const callbackUrl = await store.get<string>("sign-last-url");
 
         return Promise.resolve({
           accountId: currentAddress,
-          publicKey,
-          signature,
+          publicKey: trusted.publicKey,
+          signature: trusted.signature,
           nonce,
           message,
           callbackUrl,
@@ -210,7 +303,7 @@ export async function createNearWalletKwilSigner(
       await store.set("sign-last-nonce", Array.from(nonce));
       await store.set("sign-last-url", callbackUrl);
 
-      signMessageOriginal({ message, nonce, recipient, callbackUrl });
+      signMessageOriginal({ message, nonce, recipient: signRecipient, callbackUrl });
 
       return new Promise(() => ({}) as SignedMessage);
     };
