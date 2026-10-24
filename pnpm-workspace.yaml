@@ -34,7 +34,7 @@ catalogs:
     "tiny-invariant": "^1.3.3"
     "tweetnacl": "^1.0.3"
     "web-streams-polyfill": "3.3.3"
-    "zod": "4.5.4"
+    "zod": "4.6.7"
 
   ethereum:
     "@wagmi/core": "3.6.4"
@@ -192,6 +192,16 @@ overrides:
   # Security: js-yaml DoS (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj)
   "js-yaml@3": "3.15.2"
   "js-yaml@4": "4.3.2"
+
+  # Security: Zod accumulates one issue per element of an unconstrained array (GHSA-mrhx-c7xc-m3w5).
+  # Pin the patch. An open range lets pnpm reuse 4.5.4 already in the lockfile.
+  # Zod 3 has no patched release; the advisory starts at 0 and is fixed in 4.6.6.
+  "zod@3": "4.6.7"
+  "zod@4": "4.6.7"
+
+  # Security: body-parser keeps reading after a compressed body (GHSA-27r3-jxmh-p828).
+  # Pin the patch. An open range lets pnpm reuse 2.3.0 already in the lockfile.
+  "body-parser": "2.4.0"
 
   # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
   "nanoid@3": "3.3.18"

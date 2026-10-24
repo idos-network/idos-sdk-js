@@ -30,4 +30,14 @@ describe("isAnonymousScriptEvent", () => {
   it("keeps an event with no stack", () => {
     expect(isAnonymousScriptEvent({})).toBe(false);
   });
+
+  it("keeps an exception with no frames beside an anonymous stack", () => {
+    expect(
+      isAnonymousScriptEvent({
+        exception: {
+          values: [{}, { stacktrace: { frames: [{ filename: "<anonymous>" }] } }],
+        },
+      }),
+    ).toBe(false);
+  });
 });

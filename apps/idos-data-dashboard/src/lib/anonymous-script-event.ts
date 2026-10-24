@@ -6,6 +6,16 @@ export function isAnonymousScriptEvent(event: {
     }>;
   } | null;
 }): boolean {
-  const frames = event.exception?.values?.flatMap((value) => value.stacktrace?.frames ?? []) ?? [];
-  return frames.length > 0 && frames.every((frame) => frame.filename === "<anonymous>");
+  const values = event.exception?.values ?? [];
+  return (
+    values.length > 0 &&
+    values.every((value) => {
+      const frames = value.stacktrace?.frames;
+      return (
+        frames != null &&
+        frames.length > 0 &&
+        frames.every((frame) => frame.filename === "<anonymous>")
+      );
+    })
+  );
 }
