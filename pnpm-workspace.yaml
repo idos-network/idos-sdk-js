@@ -194,9 +194,11 @@ overrides:
   "js-yaml@4": "4.3.2"
 
   # Security: Zod accumulates one issue per element of an unconstrained array (GHSA-mrhx-c7xc-m3w5).
-  # Pin the patch. An open range lets pnpm reuse 4.5.4 already in the lockfile.
-  # Zod 3 has no patched release; the advisory starts at 0 and is fixed in 4.6.6.
-  "zod@3": "4.6.7"
+  # Fixed in 4.6.6. An open range lets pnpm reuse 4.5.4 already in the lockfile.
+  # Zod 3 has no patched release. Only the packages that depend on it are moved:
+  # @reown/appkit-wallet (z.object/string/email/record) and prisma-field-encryption (zod.z.object/array/readonly).
+  "@reown/appkit-wallet>zod": "4.6.7"
+  "prisma-field-encryption>zod": "4.6.7"
   "zod@4": "4.6.7"
 
   # Security: body-parser keeps reading after a compressed body (GHSA-27r3-jxmh-p828).
