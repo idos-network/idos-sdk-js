@@ -5,6 +5,8 @@ import { COMMON_ENV } from "@/core/envFlags.common";
 import { useSelector } from "@/machines/dashboard/provider";
 import { selectWalletAddress, selectWalletType } from "@/machines/dashboard/selectors";
 
+import { isAnonymousScriptEvent } from "./anonymous-script-event";
+
 // Version for cookie consent localStorage format
 const COOKIE_CONSENT_VERSION = "1.0";
 
@@ -87,6 +89,8 @@ export function CookieProvider({ children }: CookieProviderProps) {
         release: COMMON_ENV.SENTRY_RELEASE ?? "unknown",
         environment: COMMON_ENV.SENTRY_ENVIRONMENT ?? "unknown",
         beforeSend(event, hint) {
+          if (isAnonymousScriptEvent(event)) return null;
+
           const error = hint?.originalException;
 
           // Check against usual metamask errors, which we can't do anything about
