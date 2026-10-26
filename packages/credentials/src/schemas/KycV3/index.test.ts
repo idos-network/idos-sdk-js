@@ -93,6 +93,20 @@ describe("KycV3 validity", () => {
     expect(credential.level()).toBe("unverified+phoneNumber");
   });
 
+  it("leaves a MANUAL email and phone number out of the level", () => {
+    const credential = basicCredential();
+    credential.addSection("contact", {
+      email: "john@example.com",
+      emailSource: "MANUAL",
+      phoneNumber: "+1234567890",
+      phoneNumberSource: "VERIFIED",
+    });
+
+    expect(() => credential.checkValidity()).not.toThrow();
+    expect(credential.level()).toBe("basic+phoneNumber");
+    expect(credential.serializeSubject()).toMatchObject({ contactEmailSource: "MANUAL" });
+  });
+
   it("rejects a subject missing a required section", () => {
     const credential = new KycV3();
     credential.setEnvelope({ id: "https://issuer.example/credentials/123" });

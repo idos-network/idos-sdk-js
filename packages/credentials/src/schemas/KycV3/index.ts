@@ -48,8 +48,8 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
 
     const addons = [
       biometric?.selfieFile && "liveness",
-      contact?.email && "email",
-      contact?.phoneNumber && "phoneNumber",
+      contact?.email && contact.emailSource !== "MANUAL" && "email",
+      contact?.phoneNumber && contact.phoneNumberSource !== "MANUAL" && "phoneNumber",
       edd && "edd",
       sourceOfWealth && "sow",
       screening && "screening",

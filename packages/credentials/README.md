@@ -278,7 +278,9 @@ if (parsed instanceof VerifiableCredentialKycV3) {
 
 For KYC v3, call `level()` to derive the string level from structured subject data:
 a verified address proof yields `plus`, and optional addons include `liveness`,
-`email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`. `kycLevel()`
+`email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`. An email or
+phone number with `emailSource` / `phoneNumberSource` set to `"MANUAL"` (typed in,
+not verified) is kept in the credential but does not add its addon. `kycLevel()`
 derives the numeric level (0–3) from the same data.
 
 ```javascript

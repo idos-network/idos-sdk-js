@@ -33,6 +33,9 @@ export const ResidentialAddressSources = [
 ] as const;
 export type ResidentialAddressSource = (typeof ResidentialAddressSources)[number];
 
+export const ContactSources = ["MANUAL", "VERIFIED"] as const;
+export type ContactSource = (typeof ContactSources)[number];
+
 export const ScreeningResults = ["CLEAR", "NOT_CHECKED"] as const;
 export type ScreeningResult = (typeof ScreeningResults)[number];
 
