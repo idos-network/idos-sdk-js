@@ -1,0 +1,43 @@
+import { describe, expect, it } from "vitest";
+
+import { isAnonymousScriptEvent } from "./anonymous-script-event";
+
+describe("isAnonymousScriptEvent", () => {
+  it("matches a stack that is only anonymous frames", () => {
+    expect(
+      isAnonymousScriptEvent({
+        exception: { values: [{ stacktrace: { frames: [{ filename: "<anonymous>" }] } }] },
+      }),
+    ).toBe(true);
+  });
+
+  it("keeps an app frame", () => {
+    expect(
+      isAnonymousScriptEvent({
+        exception: {
+          values: [
+            {
+              stacktrace: {
+                frames: [{ filename: "<anonymous>" }, { filename: "/assets/app.js" }],
+              },
+            },
+          ],
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps an event with no stack", () => {
+    expect(isAnonymousScriptEvent({})).toBe(false);
+  });
+
+  it("keeps an exception with no frames beside an anonymous stack", () => {
+    expect(
+      isAnonymousScriptEvent({
+        exception: {
+          values: [{}, { stacktrace: { frames: [{ filename: "<anonymous>" }] } }],
+        },
+      }),
+    ).toBe(false);
+  });
+});
