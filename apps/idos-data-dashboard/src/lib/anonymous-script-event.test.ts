@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isAnonymousScriptEvent } from "./anonymous-script-event";
 
 describe("isAnonymousScriptEvent", () => {
-  it("drops a stack that is only a console snippet", () => {
+  it("matches a stack that is only anonymous frames", () => {
     expect(
       isAnonymousScriptEvent({
         exception: { values: [{ stacktrace: { frames: [{ filename: "<anonymous>" }] } }] },

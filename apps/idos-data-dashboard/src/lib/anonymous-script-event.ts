@@ -1,4 +1,4 @@
-// DevTools snippets and eval report every frame as <anonymous>.
+// DevTools, eval, and extension scripts report every frame as <anonymous>.
 export function isAnonymousScriptEvent(event: {
   exception?: {
     values?: Array<{
