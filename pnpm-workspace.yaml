@@ -34,7 +34,7 @@ catalogs:
     "tiny-invariant": "^1.3.3"
     "tweetnacl": "^1.0.3"
     "web-streams-polyfill": "3.3.3"
-    "zod": "4.5.4"
+    "zod": "4.6.7"
 
   ethereum:
     "@wagmi/core": "3.6.4"
@@ -171,6 +171,12 @@ overrides:
   toml: "5.0.1"
   # Security: DOMPurify template and IN_PLACE bypass (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr).
   dompurify: ">=3.4.17"
+  # Security: Zod memory exhaustion on oversized constrained collections (GHSA-mrhx-c7xc-m3w5).
+  # Pin every copy. Zod 3 is inside the advisory range and has no 3.x fix.
+  zod: "4.6.7"
+  # Security: body-parser DoS from trailing bytes after a compressed body (GHSA-27r3-jxmh-p828).
+  # Pin the patch. An open range lets pnpm reuse 2.3.0 already in the lockfile.
+  "body-parser@2": "2.4.0"
   # Security: launch-editor Windows path check bypass (GHSA-587h-7wmj-h5pm).
   # Pin the patch. An open range lets pnpm reuse a vulnerable release already in the lockfile.
   vite: "8.2.4"
