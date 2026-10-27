@@ -65,10 +65,6 @@ export class LocalEnclave<
   // during the load() method.
   protected storedEncryptionProfile?: PrivateEncryptionProfile;
 
-  // Copied when this profile is cached. Another enclave's reset() deletes the shared
-  // marker, and a missing marker means "no duration", not "still valid".
-  private rememberedUntil?: number;
-
   constructor(options: K) {
     super(options);
 
@@ -100,7 +96,6 @@ export class LocalEnclave<
   async reset(): Promise<void> {
     await super.reset();
     this.storedEncryptionProfile = undefined;
-    this.rememberedUntil = undefined;
     await this.store.reset();
   }
 
@@ -225,21 +220,12 @@ export class LocalEnclave<
       );
     }
 
-    const previousUserId = this.storedEncryptionProfile?.userId;
     this.storedEncryptionProfile = {
       userId,
       password,
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
       encryptionPasswordStore,
     };
-    // A missing marker keeps this instance's deadline for the same user.
-    // A different user with no marker must not inherit it.
-    const deadline = await this.store.getRememberDeadline();
-    if (deadline !== null) {
-      this.rememberedUntil = deadline;
-    } else if (previousUserId !== userId) {
-      this.rememberedUntil = undefined;
-    }
   }
 
   /**
@@ -280,23 +266,14 @@ export class LocalEnclave<
    * @see BaseProvider#getPrivateEncryptionProfile
    */
   async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
-    // Remember duration is a key-use check. A long-lived iframe keeps this profile
-    // in memory, so construction-time store expiry is not enough.
-    if (this.storedEncryptionProfile && (await this.cachedProfileExpired())) {
-      const sharedDeadline = await this.store.getRememberDeadline();
-      const storedUserId =
-        sharedDeadline !== null && sharedDeadline >= Date.now()
-          ? await this.store.get<string>(STORAGE_KEYS.USER_ID)
-          : undefined;
-
-      // This copy expired, but another enclave extended the shared session.
-      if (storedUserId !== undefined && storedUserId === this.storedEncryptionProfile.userId) {
-        this.storedEncryptionProfile = undefined;
-        this.rememberedUntil = undefined;
-        await this.load();
-      } else {
-        await this.reset();
-      }
+    // The cached profile is a copy of shared storage, which other enclave instances
+    // can expire, reset, or replace. Check storage on every key use.
+    const cached = this.storedEncryptionProfile;
+    if (cached && (await this.store.hasRememberDurationElapsed())) {
+      await this.reset();
+    } else if (cached && !(await this.storeHoldsProfile(cached))) {
+      // Storage now belongs to another session: drop the copy, keep their data.
+      if (this.storedEncryptionProfile === cached) this.storedEncryptionProfile = undefined;
     }
 
     // A cached key is only reusable while it still matches the canonical public key;
@@ -333,7 +310,6 @@ export class LocalEnclave<
 
     if (context.encryptionPasswordStore === "user") {
       await this.store.setRememberDuration(context.duration);
-      this.rememberedUntil = (await this.store.getRememberDeadline()) ?? undefined;
 
       password = context.password;
       encryptionPasswordStore = context.encryptionPasswordStore;
@@ -342,7 +318,6 @@ export class LocalEnclave<
     if (context.encryptionPasswordStore === "mpc") {
       // TODO: This is resetting duration, but should?
       await this.store.setRememberDuration(undefined);
-      this.rememberedUntil = undefined;
 
       password = await this.ensureMPCPassword();
       encryptionPasswordStore = "mpc";
@@ -366,6 +341,14 @@ export class LocalEnclave<
     return profile;
   }
 
+  private async storeHoldsProfile(profile: PrivateEncryptionProfile): Promise<boolean> {
+    if ((await this.store.get<string>(STORAGE_KEYS.USER_ID)) !== profile.userId) return false;
+
+    // Profiles saved before the public key was stored can only be matched by user id.
+    const publicKey = await this.storeBase64.get<Uint8Array>(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY);
+    return !publicKey || base64Encode(publicKey) === base64Encode(profile.keyPair.publicKey);
+  }
+
   /** @see BaseProvider#ensureUserEncryptionProfile */
   async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
     const { keyPair, encryptionPasswordStore, userId } = await this.getPrivateEncryptionProfile();
@@ -375,14 +358,6 @@ export class LocalEnclave<
       userEncryptionPublicKey: base64Encode(keyPair.publicKey),
       encryptionPasswordStore: encryptionPasswordStore,
     };
-  }
-
-  // A missing marker is not expiry. A copied deadline is, and so is a wiped user id.
-  private async cachedProfileExpired(): Promise<boolean> {
-    if (this.rememberedUntil !== undefined && this.rememberedUntil < Date.now()) return true;
-    if (await this.store.hasRememberDurationElapsed()) return true;
-
-    return (await this.store.get<string>(STORAGE_KEYS.USER_ID)) === undefined;
   }
 
   /**

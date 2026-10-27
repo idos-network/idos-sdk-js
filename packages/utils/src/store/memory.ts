@@ -4,7 +4,7 @@
 
 import type { PipeCodecArgs, Store } from "./interface";
 
-import { parseRememberDeadline, setDuration } from "./duration";
+import { durationElapsed, setDuration } from "./duration";
 
 export class MemoryStore implements Store {
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
@@ -56,20 +56,15 @@ export class MemoryStore implements Store {
     return Promise.resolve();
   }
 
-  async getRememberDeadline(): Promise<number | null> {
+  async hasRememberDurationElapsed(): Promise<boolean> {
     const value = this.storage.get(this.REMEMBER_DURATION_KEY);
 
     try {
-      return parseRememberDeadline(value);
+      return durationElapsed(value);
     } catch (_) {
       this.storage.delete(this.REMEMBER_DURATION_KEY);
-      return null;
+      return false;
     }
-  }
-
-  async hasRememberDurationElapsed(): Promise<boolean> {
-    const deadline = await this.getRememberDeadline();
-    return deadline !== null && deadline < Date.now();
   }
 
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): MemoryStore {

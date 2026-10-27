@@ -11,20 +11,19 @@ export const setDuration = (days?: number): Date | undefined => {
   return date;
 };
 
-/** Epoch ms for a stored remember-duration, or null when none is set. Invalid JSON throws. */
-export const parseRememberDeadline = (date?: string | null): number | null => {
-  if (!date) return null;
+export const durationElapsed = (date?: string | null): boolean => {
+  if (!date) return false;
 
   // If the value doesn't decode right, we're going to assume that somebody messed around with it.
   // The absence of a value means `false` today. So, we're following suit on the reasoning: consider it absent.
   // Furthermore, since this is not really a recoverable situation, we're going to clean up that stored value.
-  const expires = Date.parse(JSON.parse(date));
-  if (Number.isNaN(expires)) return null;
 
-  return expires;
-};
+  const str = JSON.parse(date);
 
-export const durationElapsed = (date?: string | null): boolean => {
-  const expires = parseRememberDeadline(date);
-  return expires !== null && expires < Date.now();
+  const expires = Date.parse(str);
+  if (Number.isNaN(expires)) {
+    return false;
+  }
+
+  return expires < Date.now();
 };

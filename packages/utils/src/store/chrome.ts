@@ -4,7 +4,7 @@
 
 import type { PipeCodecArgs, Store } from "./interface";
 
-import { parseRememberDeadline, setDuration } from "./duration";
+import { durationElapsed, setDuration } from "./duration";
 
 export class ChromeExtensionStore implements Store {
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
@@ -68,20 +68,15 @@ export class ChromeExtensionStore implements Store {
     }
   }
 
-  async getRememberDeadline(): Promise<number | null> {
+  async hasRememberDurationElapsed(): Promise<boolean> {
     const value = await chrome.storage.local.get(this.REMEMBER_DURATION_KEY);
 
     try {
-      return parseRememberDeadline(value[this.REMEMBER_DURATION_KEY] as string | null);
+      return durationElapsed(value[this.REMEMBER_DURATION_KEY] as string | null);
     } catch (_) {
       await chrome.storage.local.remove(this.REMEMBER_DURATION_KEY);
-      return null;
+      return false;
     }
-  }
-
-  async hasRememberDurationElapsed(): Promise<boolean> {
-    const deadline = await this.getRememberDeadline();
-    return deadline !== null && deadline < Date.now();
   }
 
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): ChromeExtensionStore {

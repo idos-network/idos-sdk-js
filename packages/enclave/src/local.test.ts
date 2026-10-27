@@ -2,7 +2,7 @@ import type { idOSCredentialRecord as idOSCredential } from "@idos-network/crede
 
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
-import { LocalStorageStore, MemoryStore } from "@idos-network/utils/store";
+import { MemoryStore } from "@idos-network/utils/store";
 import tweetnacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
 
@@ -54,34 +54,6 @@ class TestEnclave extends LocalEnclave {
       password: "super-secret",
       duration: 1,
     } as const;
-  }
-}
-
-// `reset()` walks `Object.keys(storage)`. Methods stay on the prototype so only stored keys show up.
-class SharedStorage {
-  get length(): number {
-    return Object.keys(this).length;
-  }
-
-  clear(): void {
-    for (const key of Object.keys(this)) delete this[key as keyof this];
-  }
-
-  getItem(key: string): string | null {
-    const value = this[key as keyof this];
-    return typeof value === "string" ? value : null;
-  }
-
-  key(index: number): string | null {
-    return Object.keys(this)[index] ?? null;
-  }
-
-  removeItem(key: string): void {
-    delete this[key as keyof this];
-  }
-
-  setItem(key: string, value: string): void {
-    Object.assign(this, { [key]: String(value) });
   }
 }
 
@@ -346,141 +318,18 @@ describe("LocalEnclave", () => {
     }
   });
 
-  it("reloads the shared profile when another enclave extends the deadline", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
+  it("forgets a cached profile when another enclave resets the shared store", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
 
-    try {
-      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-      const store = new MemoryStore();
-      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
-      await enclave.getPrivateEncryptionProfile();
-      await store.setRememberDuration(30);
+    await store.reset();
 
-      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
-      const after = await enclave.getPrivateEncryptionProfile();
-
-      expect(after.userId).toBe(userId);
-      expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(userId);
-      expect(await store.getRememberDeadline()).toBe(new Date("2026-01-31T00:00:00Z").getTime());
-      expect(enclave.userIdPresentOnPrompt).toEqual([false]);
-    } finally {
-      vi.useRealTimers();
-    }
+    expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+    expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
   });
 
-  it("forgets a loaded profile after another enclave removes the elapsed marker", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    const prefix = `idOS-expiry-${Math.random().toString(36).slice(2)}-`;
-    const storage = new SharedStorage() as Storage;
-    const store = new LocalStorageStore(storage, prefix);
-
-    try {
-      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-      await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
-
-      const live = new TestEnclave({ userId, store } as LocalEnclaveOptions);
-      await live.load();
-      const cached = await live.getPrivateEncryptionProfile();
-      // Constructed while the marker is still in the future, so its startup check does not wipe.
-      const other = new LocalStorageStore(storage, prefix);
-      await other.checkRememberDurationElapsed();
-
-      expect(live.userIdPresentOnPrompt).toEqual([]);
-
-      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
-      // The marker is gone, the stored secret is not. Store expiry alone stays false.
-      await other.delete(other.REMEMBER_DURATION_KEY);
-      expect(await store.hasRememberDurationElapsed()).toBe(false);
-      expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(userId);
-
-      const after = await live.getPrivateEncryptionProfile();
-
-      expect(after).not.toBe(cached);
-      expect(live.userIdPresentOnPrompt).toEqual([false]);
-    } finally {
-      await store.reset();
-      vi.useRealTimers();
-    }
-  });
-
-  it("forgets a loaded profile when another enclave resets before the duration elapses", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    const prefix = `idOS-expiry-${Math.random().toString(36).slice(2)}-`;
-    const storage = new SharedStorage() as Storage;
-    const store = new LocalStorageStore(storage, prefix);
-
-    try {
-      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-      await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
-
-      const live = new TestEnclave({ userId, store } as LocalEnclaveOptions);
-      await live.load();
-      const cached = await live.getPrivateEncryptionProfile();
-
-      await new LocalStorageStore(storage, prefix).reset();
-
-      const after = await live.getPrivateEncryptionProfile();
-
-      expect(after).not.toBe(cached);
-      expect(live.userIdPresentOnPrompt).toEqual([false]);
-    } finally {
-      await store.reset();
-      vi.useRealTimers();
-    }
-  });
-
-  it("keeps a copied deadline when the same user reloads without a marker", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-
-    try {
-      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-      const store = new MemoryStore();
-      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
-      const first = await enclave.getPrivateEncryptionProfile();
-
-      await store.setRememberDuration(undefined);
-      await enclave.load();
-      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
-
-      expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
-      expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("drops a copied deadline when load replaces the profile with another user", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-
-    try {
-      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-      const store = new MemoryStore();
-      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
-      await enclave.getPrivateEncryptionProfile();
-      await store.reset();
-
-      const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
-      await new TestEnclave({
-        userId: otherUserId,
-        store,
-      } as LocalEnclaveOptions).createEncryptionProfileFromPassword(
-        "other-secret",
-        otherUserId,
-        "user",
-      );
-
-      await enclave.load();
-      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
-      const cached = await enclave.getPrivateEncryptionProfile();
-
-      expect(cached.userId).toBe(otherUserId);
-      expect(enclave.userIdPresentOnPrompt).toEqual([false]);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("forgets a cached profile with no deadline when the stored user id is wiped", async () => {
+  it("forgets a cached MPC profile, which has no deadline, when the shared store is reset", async () => {
     const store = new MemoryStore();
     const enclave = new MPCTestEnclave({ userId, store } as LocalEnclaveOptions);
     const first = await enclave.getPrivateEncryptionProfile();
@@ -490,5 +339,59 @@ describe("LocalEnclave", () => {
     await store.reset();
 
     expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+  });
+
+  it("keeps a cached profile past its own deadline when another enclave extends it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      const first = await enclave.getPrivateEncryptionProfile();
+
+      await store.setRememberDuration(30);
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+
+      expect(await enclave.getPrivateEncryptionProfile()).toBe(first);
+      expect(enclave.userIdPresentOnPrompt).toEqual([false]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("drops a cached profile without wiping another user's shared session", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+
+    await store.reset();
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    await new TestEnclave({
+      userId: otherUserId,
+      store,
+    } as LocalEnclaveOptions).createEncryptionProfileFromPassword(
+      "other-secret",
+      otherUserId,
+      "user",
+    );
+
+    expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+    // The re-prompt still finds the other user's session: dropping the copy did not reset it.
+    expect(enclave.userIdPresentOnPrompt).toEqual([false, true]);
+  });
+
+  it("handles concurrent key use after the shared store is reset", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    await enclave.getPrivateEncryptionProfile();
+
+    await store.reset();
+    const results = await Promise.all([
+      enclave.getPrivateEncryptionProfile(),
+      enclave.getPrivateEncryptionProfile(),
+    ]);
+
+    expect(results.map((profile) => profile.userId)).toEqual([userId, userId]);
   });
 });
