@@ -225,15 +225,21 @@ export class LocalEnclave<
       );
     }
 
+    const previousUserId = this.storedEncryptionProfile?.userId;
     this.storedEncryptionProfile = {
       userId,
       password,
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
       encryptionPasswordStore,
     };
-    // Don't clear a deadline already copied in this instance when the marker is gone.
+    // A missing marker keeps this instance's deadline for the same user.
+    // A different user with no marker must not inherit it.
     const deadline = await this.store.getRememberDeadline();
-    if (deadline !== null) this.rememberedUntil = deadline;
+    if (deadline !== null) {
+      this.rememberedUntil = deadline;
+    } else if (previousUserId !== userId) {
+      this.rememberedUntil = undefined;
+    }
   }
 
   /**
@@ -358,16 +364,12 @@ export class LocalEnclave<
     };
   }
 
-  // A missing shared marker is not expiry. This instance's copied deadline still is,
-  // and so is another enclave's reset(), which deletes the stored secret as well.
+  // A missing marker is not expiry. A copied deadline is, and so is a wiped user id.
   private async cachedProfileExpired(): Promise<boolean> {
     if (this.rememberedUntil !== undefined && this.rememberedUntil < Date.now()) return true;
     if (await this.store.hasRememberDurationElapsed()) return true;
 
-    return (
-      this.rememberedUntil !== undefined &&
-      (await this.store.get<string>(STORAGE_KEYS.USER_ID)) === undefined
-    );
+    return (await this.store.get<string>(STORAGE_KEYS.USER_ID)) === undefined;
   }
 
   /**

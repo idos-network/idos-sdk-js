@@ -3,4 +3,4 @@
 "@idos-network/utils": patch
 ---
 
-Copy a profile's remember-duration deadline onto the live enclave, so another enclave wiping the shared storage marker cannot keep that iframe's key usable past the deadline.
+Copy a profile's remember-duration deadline onto the live enclave, and drop a cached key when the stored user id is gone, so another enclave's reset cannot leave that key usable.

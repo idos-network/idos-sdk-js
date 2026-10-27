@@ -406,4 +406,67 @@ describe("LocalEnclave", () => {
       vi.useRealTimers();
     }
   });
+
+  it("keeps a copied deadline when the same user reloads without a marker", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      const first = await enclave.getPrivateEncryptionProfile();
+
+      await store.setRememberDuration(undefined);
+      await enclave.load();
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+
+      expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+      expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("drops a copied deadline when load replaces the profile with another user", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      await enclave.getPrivateEncryptionProfile();
+      await store.reset();
+
+      const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+      await new TestEnclave({
+        userId: otherUserId,
+        store,
+      } as LocalEnclaveOptions).createEncryptionProfileFromPassword(
+        "other-secret",
+        otherUserId,
+        "user",
+      );
+
+      await enclave.load();
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+      const cached = await enclave.getPrivateEncryptionProfile();
+
+      expect(cached.userId).toBe(otherUserId);
+      expect(enclave.userIdPresentOnPrompt).toEqual([false]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("forgets a cached profile with no deadline when the stored user id is wiped", async () => {
+    const store = new MemoryStore();
+    const enclave = new MPCTestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+
+    expect(await enclave.getPrivateEncryptionProfile()).toBe(first);
+
+    await store.reset();
+
+    expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+  });
 });
