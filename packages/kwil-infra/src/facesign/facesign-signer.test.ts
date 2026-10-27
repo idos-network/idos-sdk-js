@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { FaceSignSignerProvider } from "./facesign-signer";
+import { FaceSignSignerProvider, resetStoredFaceSignKey } from "./facesign-signer";
 
 const ENCLAVE_ORIGIN = "https://facesign.example";
 
@@ -20,6 +20,63 @@ function iframeWindow(): Window {
   }
   return iframe.contentWindow;
 }
+
+describe("resetStoredFaceSignKey", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    document.body.replaceChildren();
+  });
+
+  async function readyProvider(hasKey: boolean) {
+    const signer = provider();
+    const posted: unknown[] = [];
+    const pending = resetStoredFaceSignKey(signer);
+
+    await vi.waitFor(() => {
+      expect(document.querySelector("iframe")).not.toBeNull();
+    });
+
+    vi.spyOn(iframeWindow(), "postMessage").mockImplementation((message) => {
+      posted.push(message);
+    });
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        origin: ENCLAVE_ORIGIN,
+        data: { type: "facesign_ready", hasKey },
+      }),
+    );
+
+    return { signer, posted, pending };
+  }
+
+  it("deletes a stored key and tears the provider down", async () => {
+    const { posted, pending } = await readyProvider(true);
+
+    await vi.waitFor(() => {
+      expect(posted).toContainEqual({ type: "reset", data: { id: 1 } });
+    });
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        origin: ENCLAVE_ORIGIN,
+        data: { type: "reset_complete", data: { id: 1, ok: true } },
+      }),
+    );
+
+    await expect(pending).resolves.toBe(true);
+    expect(document.querySelector("iframe")).toBeNull();
+  });
+
+  it("leaves a provider with no stored key ready to scan", async () => {
+    const { signer, posted, pending } = await readyProvider(false);
+
+    await expect(pending).resolves.toBe(false);
+    expect(posted).toEqual([]);
+    expect(document.querySelector("iframe")).not.toBeNull();
+    signer.destroy();
+  });
+});
 
 describe("FaceSignSignerProvider.reset", () => {
   afterEach(() => {

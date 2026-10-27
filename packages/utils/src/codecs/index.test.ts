@@ -69,6 +69,8 @@ describe("codecs", () => {
     expect(deserialized).toStrictEqual(image);
   });
 
+  // The 400KB fixture finishes in under a second locally and blows the 5s
+  // default when coverage runs the large blob hashes beside it.
   it("round-trips files (pdf) through base85", () => {
     const document = readFileSync(path.join(__dirname, "test", "document.pdf"));
 
@@ -77,7 +79,7 @@ describe("codecs", () => {
 
     expect(deserialized).not.toBeFalsy();
     expect(deserialized).toStrictEqual(document);
-  });
+  }, 15_000);
 
   it("round-trips files (webp) through base85", () => {
     const image = readFileSync(path.join(__dirname, "test", "image.webp"));

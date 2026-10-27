@@ -28,15 +28,12 @@ export function FacesignBanner() {
 
     try {
       const provider = await createFaceSignProvider();
-      const { hasKey } = await provider.preload();
+      providerRef.current = provider;
 
-      if (hasKey) {
-        providerRef.current = provider;
-        await runAddWalletFlow(provider);
-      } else {
-        providerRef.current = provider;
-        setDialogOpen(true);
-      }
+      const { resetStoredFaceSignKey } = await import("@idos-network/kwil-infra/facesign");
+      const cleared = await resetStoredFaceSignKey(provider);
+      if (cleared) providerRef.current = null;
+      setDialogOpen(true);
     } catch (error) {
       console.error("FaceSign preload failed:", error);
       providerRef.current?.destroy();
