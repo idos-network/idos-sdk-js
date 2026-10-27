@@ -11,6 +11,8 @@ export interface Store {
   delete(key: string): Promise<void>;
   reset(): Promise<void>;
   setRememberDuration(duration?: number): Promise<void>;
+  /** Epoch ms the remember duration expires, or null when no finite duration is stored. */
+  getRememberDeadline(): Promise<number | null>;
   hasRememberDurationElapsed(): Promise<boolean>;
   pipeCodec<T>(codec: PipeCodecArgs<T>): Store;
 }

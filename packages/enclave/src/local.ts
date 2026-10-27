@@ -65,6 +65,10 @@ export class LocalEnclave<
   // during the load() method.
   protected storedEncryptionProfile?: PrivateEncryptionProfile;
 
+  // Copied when this profile is cached. Another enclave's reset() deletes the shared
+  // marker, and a missing marker means "no duration", not "still valid".
+  private rememberedUntil?: number;
+
   constructor(options: K) {
     super(options);
 
@@ -96,6 +100,7 @@ export class LocalEnclave<
   async reset(): Promise<void> {
     await super.reset();
     this.storedEncryptionProfile = undefined;
+    this.rememberedUntil = undefined;
     await this.store.reset();
   }
 
@@ -226,6 +231,9 @@ export class LocalEnclave<
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
       encryptionPasswordStore,
     };
+    // Don't clear a deadline already copied in this instance when the marker is gone.
+    const deadline = await this.store.getRememberDeadline();
+    if (deadline !== null) this.rememberedUntil = deadline;
   }
 
   /**
@@ -268,7 +276,7 @@ export class LocalEnclave<
   async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
     // Remember duration is a key-use check. A long-lived iframe keeps this profile
     // in memory, so construction-time store expiry is not enough.
-    if (this.storedEncryptionProfile && (await this.store.hasRememberDurationElapsed())) {
+    if (this.storedEncryptionProfile && (await this.cachedProfileExpired())) {
       await this.reset();
     }
 
@@ -306,6 +314,7 @@ export class LocalEnclave<
 
     if (context.encryptionPasswordStore === "user") {
       await this.store.setRememberDuration(context.duration);
+      this.rememberedUntil = (await this.store.getRememberDeadline()) ?? undefined;
 
       password = context.password;
       encryptionPasswordStore = context.encryptionPasswordStore;
@@ -314,6 +323,7 @@ export class LocalEnclave<
     if (context.encryptionPasswordStore === "mpc") {
       // TODO: This is resetting duration, but should?
       await this.store.setRememberDuration(undefined);
+      this.rememberedUntil = undefined;
 
       password = await this.ensureMPCPassword();
       encryptionPasswordStore = "mpc";
@@ -346,6 +356,18 @@ export class LocalEnclave<
       userEncryptionPublicKey: base64Encode(keyPair.publicKey),
       encryptionPasswordStore: encryptionPasswordStore,
     };
+  }
+
+  // A missing shared marker is not expiry. This instance's copied deadline still is,
+  // and so is another enclave's reset(), which deletes the stored secret as well.
+  private async cachedProfileExpired(): Promise<boolean> {
+    if (this.rememberedUntil !== undefined && this.rememberedUntil < Date.now()) return true;
+    if (await this.store.hasRememberDurationElapsed()) return true;
+
+    return (
+      this.rememberedUntil !== undefined &&
+      (await this.store.get<string>(STORAGE_KEYS.USER_ID)) === undefined
+    );
   }
 
   /**

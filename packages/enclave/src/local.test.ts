@@ -2,7 +2,7 @@ import type { idOSCredentialRecord as idOSCredential } from "@idos-network/crede
 
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
-import { MemoryStore } from "@idos-network/utils/store";
+import { LocalStorageStore, MemoryStore } from "@idos-network/utils/store";
 import tweetnacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
 
@@ -54,6 +54,34 @@ class TestEnclave extends LocalEnclave {
       password: "super-secret",
       duration: 1,
     } as const;
+  }
+}
+
+// `reset()` walks `Object.keys(storage)`. Methods stay on the prototype so only stored keys show up.
+class SharedStorage {
+  get length(): number {
+    return Object.keys(this).length;
+  }
+
+  clear(): void {
+    for (const key of Object.keys(this)) delete this[key as keyof this];
+  }
+
+  getItem(key: string): string | null {
+    const value = this[key as keyof this];
+    return typeof value === "string" ? value : null;
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this)[index] ?? null;
+  }
+
+  removeItem(key: string): void {
+    delete this[key as keyof this];
+  }
+
+  setItem(key: string, value: string): void {
+    Object.assign(this, { [key]: String(value) });
   }
 }
 
@@ -314,6 +342,67 @@ describe("LocalEnclave", () => {
       // First prompt finds an empty store. The second must too: expiry resets before re-entry.
       expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
     } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("forgets a loaded profile after another enclave removes the elapsed marker", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const prefix = `idOS-expiry-${Math.random().toString(36).slice(2)}-`;
+    const storage = new SharedStorage() as Storage;
+    const store = new LocalStorageStore(storage, prefix);
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
+
+      const live = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      await live.load();
+      const cached = await live.getPrivateEncryptionProfile();
+      // Constructed while the marker is still in the future, so its startup check does not wipe.
+      const other = new LocalStorageStore(storage, prefix);
+      await other.checkRememberDurationElapsed();
+
+      expect(live.userIdPresentOnPrompt).toEqual([]);
+
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+      // The marker is gone, the stored secret is not. Store expiry alone stays false.
+      await other.delete(other.REMEMBER_DURATION_KEY);
+      expect(await store.hasRememberDurationElapsed()).toBe(false);
+      expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(userId);
+
+      const after = await live.getPrivateEncryptionProfile();
+
+      expect(after).not.toBe(cached);
+      expect(live.userIdPresentOnPrompt).toEqual([false]);
+    } finally {
+      await store.reset();
+      vi.useRealTimers();
+    }
+  });
+
+  it("forgets a loaded profile when another enclave resets before the duration elapses", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const prefix = `idOS-expiry-${Math.random().toString(36).slice(2)}-`;
+    const storage = new SharedStorage() as Storage;
+    const store = new LocalStorageStore(storage, prefix);
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
+
+      const live = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      await live.load();
+      const cached = await live.getPrivateEncryptionProfile();
+
+      await new LocalStorageStore(storage, prefix).reset();
+
+      const after = await live.getPrivateEncryptionProfile();
+
+      expect(after).not.toBe(cached);
+      expect(live.userIdPresentOnPrompt).toEqual([false]);
+    } finally {
+      await store.reset();
       vi.useRealTimers();
     }
   });

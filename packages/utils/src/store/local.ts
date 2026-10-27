@@ -4,7 +4,7 @@
 
 import type { PipeCodecArgs, Store } from "./interface";
 
-import { durationElapsed, setDuration } from "./duration";
+import { parseRememberDeadline, setDuration } from "./duration";
 
 export class LocalStorageStore implements Store {
   readonly keyPrefix: string;
@@ -75,15 +75,20 @@ export class LocalStorageStore implements Store {
     }
   }
 
-  async hasRememberDurationElapsed(): Promise<boolean> {
+  async getRememberDeadline(): Promise<number | null> {
     const value = this.#getLocalStorage(this.REMEMBER_DURATION_KEY);
 
     try {
-      return durationElapsed(value);
+      return parseRememberDeadline(value);
     } catch (_) {
       this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
-      return false;
+      return null;
     }
+  }
+
+  async hasRememberDurationElapsed(): Promise<boolean> {
+    const deadline = await this.getRememberDeadline();
+    return deadline !== null && deadline < Date.now();
   }
 
   // oxlint-disable-next-line typescript/no-explicit-any -- `any` is fine here.
