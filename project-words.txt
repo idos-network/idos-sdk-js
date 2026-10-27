@@ -8,6 +8,8 @@ appusers
 arweave
 attestment
 betanet
+Blockhash
+blockstore
 Borsh
 bowser
 Bundesdruckerei
@@ -134,6 +136,7 @@ tsdown
 tweetnacl
 txjson
 ukyc
+unixfs
 unminified
 unpadded
 unparseable

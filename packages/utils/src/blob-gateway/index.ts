@@ -1,4 +1,6 @@
-import { of as ipfsOnlyHash } from "ipfs-only-hash";
+import { BlackHoleBlockstore } from "blockstore-core/black-hole";
+import { importer } from "ipfs-unixfs-importer";
+import { fixedSize } from "ipfs-unixfs-importer/chunker";
 
 import { base64Decode } from "../codecs";
 
@@ -120,20 +122,26 @@ export function requireAccessTokenForUkycContent(
   }
 }
 
+// Changing any of these changes every CID, so stored blobs would stop verifying.
 const CID_IMPORT_POLICY = {
   cidVersion: 1,
   rawLeaves: true,
-  chunker: "size-262144",
-  hashAlg: "sha2-256",
+  chunker: fixedSize({ chunkSize: 262144 }),
   wrapWithDirectory: false,
-  onlyHash: true,
 } as const;
+
+async function ipfsOnlyHash(content: Uint8Array): Promise<string> {
+  let cid = "";
+  for await (const entry of importer([{ content }], new BlackHoleBlockstore(), CID_IMPORT_POLICY)) {
+    cid = entry.cid.toString();
+  }
+  return cid;
+}
 
 export async function createBlobContentReference(
   encryptedContent: Uint8Array,
 ): Promise<BlobContentReference> {
-  const cid = await ipfsOnlyHash(encryptedContent, CID_IMPORT_POLICY);
-  const cidString = cid.toString();
+  const cidString = await ipfsOnlyHash(encryptedContent);
 
   return {
     cid: cidString,
@@ -300,12 +308,10 @@ export class BlobGateway {
 
     if (isIpfsContentUri(contentUri)) {
       const cid = rootCidFromContentUri(contentUri);
-      const contentCid = await ipfsOnlyHash(content, CID_IMPORT_POLICY);
+      const contentCid = await ipfsOnlyHash(content);
 
-      if (contentCid.toString() !== cid) {
-        throw new Error(
-          `blob gateway returned content with CID ${contentCid.toString()}, expected ${cid}`,
-        );
+      if (contentCid !== cid) {
+        throw new Error(`blob gateway returned content with CID ${contentCid}, expected ${cid}`);
       }
     }
 

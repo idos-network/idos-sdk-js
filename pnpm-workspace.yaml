@@ -34,7 +34,7 @@ catalogs:
     "tiny-invariant": "^1.3.3"
     "tweetnacl": "^1.0.3"
     "web-streams-polyfill": "3.3.3"
-    "zod": "4.5.4"
+    "zod": "4.6.7"
 
   ethereum:
     "@wagmi/core": "3.6.4"
@@ -102,9 +102,11 @@ catalogs:
     "@stablelib/sha256": "^2.0.1"
     "@stablelib/utf8": "^2.1.0"
     "base85": "^3.2.0"
+    "blockstore-core": "^7.0.1"
     "borsh": "^2.0.0"
     "bs58": "^6.0.0"
     "es-toolkit": "^1.50.0"
+    "ipfs-unixfs-importer": "^17.1.1"
     "qs": "6.15.3"
 
   xrp:
@@ -156,17 +158,13 @@ overrides:
   "follow-redirects": "1.16.1"
   base-x: ">=3.0.11"
   compression: ">= 1.8.2"
+  # Security overrides. Each one blocks a dependent whose declared range still
+  # resolves to a vulnerable release. Drop an entry once that dependent moves on.
   lodash: ">= 4.18.0"
   mysql2: ">= 3.22.0"
-  nanoid: ">= 3.3.18"
-  postcss: ">= 8.5.18"
   protobufjs: ">=7.5.5"
-  proxy-addr: ">= 2.0.8"
-  react-router: ">= 8.3.0"
   secp256k1: ">=5.0.1"
   seroval: ">= 1.6.3"
-  shell-quote: ">= 1.11.0"
-  source-map-js: ">= 1.2.2"
   tinypool: ">= 2.1.1"
   # Security: toml DoS in parse() (GHSA-4qx8-w7c3-pj3p, GHSA-9j65-hcg3-gc64, GHSA-9qmh-m7c6-f92p).
   # Pin the patch. An open range lets pnpm reuse 5.0.0 already in the lockfile.
@@ -189,13 +187,20 @@ overrides:
   # but the import is the same
   bs58: "6.0.0"
 
-  # Security: js-yaml DoS (GHSA-52cp-r559-cp3m, GHSA-5p4m-2wfm-xmqj)
-  "js-yaml@3": "3.15.2"
-  "js-yaml@4": "4.3.2"
+  # Security: Zod accumulates one issue per element of an unconstrained array (GHSA-mrhx-c7xc-m3w5).
+  # Fixed in 4.6.6. An open range lets pnpm reuse 4.5.4 already in the lockfile.
+  # Zod 3 has no patched release. Only the packages that depend on it are moved:
+  # @reown/appkit-wallet (z.object/string/email/record) and prisma-field-encryption (zod.z.object/array/readonly).
+  "@reown/appkit-wallet>zod": "4.6.7"
+  "prisma-field-encryption>zod": "4.6.7"
+  "zod@4": "4.6.7"
+
+  # Security: body-parser keeps reading after a compressed body (GHSA-27r3-jxmh-p828).
+  # Pin the patch. An open range lets pnpm reuse 2.3.0 already in the lockfile.
+  "body-parser": "2.4.0"
 
   # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
   "nanoid@3": "3.3.18"
-  "nanoid@5": "5.1.16"
 
   # Security: deepmerge-ts stack exhaustion on recursive graphs (GHSA-ggr8-5vv4-36mx)
   # Prisma still pins 7.1.5; no 7.x patch exists (fix is >=8.0.0).

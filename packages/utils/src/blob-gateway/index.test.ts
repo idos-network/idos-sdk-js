@@ -45,6 +45,24 @@ describe("createBlobContentReference", () => {
       size: 2,
     });
   });
+
+  // Reference CIDs computed with ipfs-only-hash@4, which produced the CIDs of stored blobs.
+  const CHUNK = 262144;
+  it.each([
+    [0, "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku"],
+    [1, "bafkreidogqfzz75tpkmjzjke425xqcrmpcib2p5tg44hnbirumdbpl5adu"],
+    [CHUNK - 1, "bafkreiagptg6ztonoojy4wflk3wwusl5xt4vcy6uult4wa7oemsjtxhjsu"],
+    [CHUNK, "bafkreibruh455iawsviqslif5c7uurdcfdemh22mtnytyzvnzn75kpejxy"],
+    [CHUNK + 1, "bafybeiexg2oqkfnj56l7fcmawswqbijt5shq4b5rg6a546uwpkqqzwjioi"],
+    [3 * CHUNK + 17, "bafybeiazf3hwcyssmk5zulxipul4hzjd3xeuhvxssc4a3kp5ffwvsqxnse"],
+    [174 * CHUNK, "bafybeihpe5snhzneq7xs53nivmsopto5lrogo3wjynauqylqeym5a3irbm"],
+    [174 * CHUNK + 1, "bafybeib4y7ghw2rq7bracc4xwtxrbzo7cfvagdpte2tmrkgwl6dyard3cm"],
+    [175 * CHUNK + 5, "bafybeig3ditv32awk5ax5w3lwugydoz5vhxs6vsycpmyv4qdosmpgv47da"],
+  ])("keeps the legacy CID for a %i byte blob", async (size, cid) => {
+    const content = Uint8Array.from({ length: size }, (_, i) => i % 251);
+
+    expect((await createBlobContentReference(content)).cid).toBe(cid);
+  });
 });
 
 describe("resolveCredentialEncryptedContent", () => {
