@@ -286,11 +286,15 @@ export class LocalEnclave<
     ) {
       // A matching cached profile still needs origin authorization before key use.
       // Denying it must keep the profile and the allowlist; only a different user resets.
+      const profile = this.storedEncryptionProfile;
       if (!skipGuard && !(await this.guardKeys())) {
         throw new Error("Origin is not authorized to use the keys");
       }
 
-      return this.storedEncryptionProfile;
+      // guardKeys() can wait on the user while another enclave changes storage.
+      if (!(await this.isCurrentProfile(profile)))
+        return this.getPrivateEncryptionProfile(skipGuard);
+      return profile;
     }
 
     if (this.storedEncryptionProfile) {
@@ -338,8 +342,20 @@ export class LocalEnclave<
       throw new Error("Origin is not authorized to use the keys");
     }
 
+    if (!(await this.isCurrentProfile(profile))) return this.getPrivateEncryptionProfile(skipGuard);
     return profile;
   }
+
+  private async isCurrentProfile(profile: PrivateEncryptionProfile): Promise<boolean> {
+    return (
+      this.storedEncryptionProfile === profile &&
+      !(await this.store.hasRememberDurationElapsed()) &&
+      (await this.storeHoldsProfile(profile))
+    );
+  }
+
+  /** Called after a new profile overwrites a different stored one. Clear anything tied to the old one. */
+  protected async onStoredProfileReplaced(): Promise<void> {}
 
   private async storeHoldsProfile(profile: PrivateEncryptionProfile): Promise<boolean> {
     if ((await this.store.get<string>(STORAGE_KEYS.USER_ID)) !== profile.userId) return false;
@@ -394,6 +410,14 @@ export class LocalEnclave<
       );
     }
 
+    const profile: PrivateEncryptionProfile = {
+      userId,
+      password,
+      keyPair,
+      encryptionPasswordStore,
+    };
+    const replacesStoredProfile = !(await this.storeHoldsProfile(profile));
+
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
     await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
@@ -404,15 +428,10 @@ export class LocalEnclave<
     );
     await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
     await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+    if (replacesStoredProfile) await this.onStoredProfileReplaced();
 
-    this.storedEncryptionProfile = {
-      userId,
-      password,
-      keyPair,
-      encryptionPasswordStore,
-    };
-
-    return this.storedEncryptionProfile;
+    this.storedEncryptionProfile = profile;
+    return profile;
   }
 
   protected async ensureMPCPassword(): Promise<string> {

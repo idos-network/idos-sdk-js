@@ -52,6 +52,11 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     return JSON.parse((await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]");
   }
 
+  /** @see LocalEnclave#onStoredProfileReplaced */
+  protected async onStoredProfileReplaced(): Promise<void> {
+    await this.store.delete(ENCLAVE_AUTHORIZED_ORIGINS_KEY);
+  }
+
   /** @see LocalEnclave#guardKeys */
   async guardKeys(): Promise<boolean> {
     if ((await this.authorizedOrigins()).includes(this.parentOrigin)) {
