@@ -9,8 +9,6 @@ import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/enclave/lo
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
 export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
-  // Origins
-  private authorizedOrigins: string[] = [];
   private parentOrigin: string;
 
   // Buttons & UI
@@ -49,25 +47,19 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.listenToRequests();
   }
 
-  /** @see LocalEnclave#load */
-  async load(): Promise<void> {
-    await super.load();
-
-    this.authorizedOrigins = JSON.parse(
-      (await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]",
-    );
+  // Read from shared storage on every check, so another enclave's reset revokes it here too.
+  private async authorizedOrigins(): Promise<string[]> {
+    return JSON.parse((await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]");
   }
 
-  /** @see LocalEnclave#reset */
-  async reset(): Promise<void> {
-    await super.reset();
-
-    this.authorizedOrigins = [];
+  /** @see LocalEnclave#onStoredProfileReplaced */
+  protected async onStoredProfileReplaced(): Promise<void> {
+    await this.store.delete(ENCLAVE_AUTHORIZED_ORIGINS_KEY);
   }
 
   /** @see LocalEnclave#guardKeys */
   async guardKeys(): Promise<boolean> {
-    if (this.authorizedOrigins.includes(this.parentOrigin)) {
+    if ((await this.authorizedOrigins()).includes(this.parentOrigin)) {
       return true;
     }
 
@@ -218,9 +210,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
    * So next time enclave won't ask for permission again.
    */
   private async acceptParentOrigin(): Promise<void> {
-    this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
+    const origins = [...new Set([...(await this.authorizedOrigins()), this.parentOrigin])];
 
-    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
+    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(origins));
   }
 
   private listenToRequests() {
