@@ -49,9 +49,11 @@ const profile = loggedInClient.user;
 
 // Now we can filer over users credentials (no access to them)
 const credentials = await loggedInClient.filterCredentials({
-  credentialLevelOrHigherFilter: {
-    userLevel: "basic",
-    requiredAddons: ["email", "liveness"],
+  // Accepted sources per claim; a self-attested ("MANUAL") email is fine here.
+  claimsFilter: {
+    identity: ["VERIFIED"],
+    liveness: ["VERIFIED"],
+    email: ["VERIFIED", "MANUAL"],
   },
 });
 

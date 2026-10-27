@@ -171,6 +171,8 @@ const kycCredential = new VerifiableCredentialKycV3()
   })
   .addSection("biometric", {
     selfieFile: Buffer.from("Selfie"),
+    selfieFileType: "image/jpeg",
+    selfieFileName: "selfie.jpg",
   });
 
 // Optional: inspect the flat subject or derived level without issuing
@@ -280,8 +282,14 @@ For KYC v3, call `level()` to derive the string level from structured subject da
 a verified address proof yields `plus`, and optional addons include `liveness`,
 `email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`. An email or
 phone number with `emailSource` / `phoneNumberSource` set to `"MANUAL"` (typed in,
-not verified) is kept in the credential but does not add its addon. `kycLevel()`
-derives the numeric level (0–3) from the same data.
+not verified) is kept in the credential but does not add its addon. The same goes
+for a `sourceOfWealth` whose required `source` is `"MANUAL"` (self-attested): it adds
+no `sow` and does not count towards `kycLevel` 3. An `edd` whose required
+`sourceOfFundsSource` is `"MANUAL"` adds no `edd`. `kycLevel()` derives the numeric
+level (0–3) from the same data.
+
+The level only counts verified data. `publicNotes()` also carries `claims`, which list
+self-attested data too; see [Match claims](#match-claims).
 
 ```javascript
 import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
@@ -305,6 +313,8 @@ const kycCredential = new VerifiableCredentialKycV3()
   })
   .addSection("biometric", {
     selfieFile: Buffer.from("Selfie"),
+    selfieFileType: "image/jpeg",
+    selfieFileName: "selfie.jpg",
   });
 
 const level = kycCredential.level();
@@ -314,11 +324,52 @@ const kycLevel = kycCredential.kycLevel();
 // kycLevel = 1
 ```
 
-## Match levels and credentials
+## Match claims
 
-Use the matching helpers to check whether a credential level satisfies a required
-base level and set of addons, or to pick the strongest matching credential from a
-list.
+KYC v3 public notes carry `claims`: what the credential claims and how each claim was
+obtained. The keys are `identity`, `address` and the level addons (`liveness`, `email`,
+`phoneNumber`, `edd`, `sow`, `screening`, `onboarding`). The values are the sources:
+`residentialAddress.source` for `address`, `"MANUAL"` or `"VERIFIED"` for `email`,
+`phoneNumber`, `edd` and `sow`, `screening.source` (`"DB"`) for `screening`, `"MANUAL"` for
+`onboarding` (a questionnaire the person fills in), and `"VERIFIED"` for `identity` and
+`liveness`.
+Unlike the level, claims include self-attested (`"MANUAL"`) data.
+
+`matchClaims` checks that every required claim is present with one of its accepted
+sources. Credentials issued before `claims` existed only have a level, so their claims
+are derived from it: each part of the level counts as `"VERIFIED"` (`screening` as `"DB"`,
+`onboarding` as `"MANUAL"`), and `plus` as an address from `"PROOF_OF_ADDRESS"`.
+
+```javascript
+import { highestMatchingCredential, matchClaims } from "@idos-network/credentials/utils";
+
+kycCredential.publicNotes();
+// { type: "kyc", level: "basic", kycLevel: 0,
+//   claims: { identity: "VERIFIED", email: "MANUAL" } }
+
+matchClaims({ identity: ["VERIFIED"], email: ["VERIFIED", "MANUAL"] }, publicNotes);
+// true: a self-attested email is accepted
+
+matchClaims({ email: ["VERIFIED"] }, publicNotes);
+// false
+
+const pickedCredential = highestMatchingCredential([...idOSCredentials], "unverified", {
+  claims: { liveness: ["VERIFIED"], address: ["PROOF_OF_ADDRESS", "MANUAL"] },
+});
+// The highest-scoring credential with verified liveness and an address from a proof or typed in.
+
+await loggedInClient.filterCredentials({
+  acceptedIssuers,
+  claimsFilter: { liveness: ["VERIFIED"], email: ["VERIFIED", "MANUAL"] },
+});
+```
+
+## Match levels and credentials (deprecated)
+
+`matchLevelOrHigher`, `pickHighestMatchingLevel` and the `addons` option of
+`highestMatchingCredential` are deprecated: the level leaves out self-attested data. Use
+[`matchClaims`](#match-claims) and the `claims` option instead. They keep working, and
+issuers still write the level into public notes for consumers on older versions.
 
 ```javascript
 import {

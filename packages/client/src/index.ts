@@ -8,11 +8,17 @@ import {
   buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
   mapPreliminaryToIDOSCredential,
+  matchClaims,
   matchLevelOrHigher,
   type PreliminaryIDOSCredential,
   recordFilter,
   type BaseLevel,
   type Addon,
+  type Claim,
+  type ClaimRequirements,
+  type Claims,
+  type ClaimSource,
+  type ClaimSources,
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
@@ -853,10 +859,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       pick: Parameters<typeof recordFilter>[1];
       omit: Parameters<typeof recordFilter>[2];
     };
+    /** @deprecated The level leaves out self-attested data. Use `claimsFilter` instead. */
     credentialLevelOrHigherFilter?: {
       userLevel: BaseLevel;
       requiredAddons: Addon[];
     };
+    /** Accepted sources per claim, e.g. `{ email: ["VERIFIED", "MANUAL"] }`. See `matchClaims`. */
+    claimsFilter?: ClaimRequirements;
   }): Promise<idOSCredentialListItem[]> {
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter(
@@ -873,6 +882,21 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
     const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
     const privateFieldFilters = requirements.privateFieldFilters;
+    const claimsFilter = requirements.claimsFilter;
+
+    if (claimsFilter) {
+      result = result.filter((credential) => {
+        let publicNotes: Parameters<typeof matchClaims>[1];
+
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (_) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
+        }
+
+        return matchClaims(claimsFilter, publicNotes);
+      });
+    }
 
     if (credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
@@ -1039,6 +1063,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 }
 
 export type {
+  Claim,
+  ClaimRequirements,
+  Claims,
+  ClaimSource,
+  ClaimSources,
   idOSDelegatedWriteGrant,
   DelegatedWriteGrantBaseParams,
   idOSCredential,

@@ -6,7 +6,9 @@ import {
   buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
   buildSignedCredentialContentReference,
+  claimsFromPublicNotes,
   highestMatchingCredential,
+  matchClaims,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
   recordFilter,
@@ -127,7 +129,78 @@ describe("pickHighestMatchingLevel", () => {
   });
 });
 
+describe("matchClaims", () => {
+  it("matches each claim against its accepted sources", () => {
+    const publicNotes = {
+      level: "basic",
+      claims: { identity: "VERIFIED", email: "MANUAL" },
+    } as const;
+
+    expect(matchClaims({ email: ["VERIFIED", "MANUAL"] }, publicNotes)).toBe(true);
+    expect(matchClaims({ email: ["VERIFIED"] }, publicNotes)).toBe(false);
+    expect(matchClaims({ identity: ["VERIFIED"], liveness: ["VERIFIED"] }, publicNotes)).toBe(
+      false,
+    );
+    expect(matchClaims({}, publicNotes)).toBe(true);
+    // @ts-expect-error - an unknown source is a type error, not a silent non-match
+    expect(matchClaims({ email: ["APPROVED"] }, publicNotes)).toBe(false);
+    // @ts-expect-error - each claim only takes its own sources: an address is never VERIFIED
+    expect(matchClaims({ address: ["VERIFIED"] }, publicNotes)).toBe(false);
+    // @ts-expect-error - onboarding is always self-attested
+    expect(matchClaims({ onboarding: ["VERIFIED"] }, publicNotes)).toBe(false);
+  });
+
+  it("derives the claims of a credential issued before claims from its level", () => {
+    expect(claimsFromPublicNotes({ level: "plus+liveness+email" })).toEqual({
+      identity: "VERIFIED",
+      address: "PROOF_OF_ADDRESS",
+      liveness: "VERIFIED",
+      email: "VERIFIED",
+    });
+    expect(claimsFromPublicNotes({ level: "unverified+phoneNumber+screening+onboarding" })).toEqual(
+      {
+        phoneNumber: "VERIFIED",
+        screening: "DB",
+        onboarding: "MANUAL",
+      },
+    );
+    expect(claimsFromPublicNotes({})).toEqual({});
+    expect(matchClaims({ liveness: ["VERIFIED"] }, { level: "basic+liveness" })).toBe(true);
+  });
+});
+
 describe("highestMatchingCredential", () => {
+  it("matches claims against the accepted sources", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness+email",
+          claims: { email: "VERIFIED" },
+        }),
+      },
+      { public_notes: JSON.stringify({ level: "basic+liveness", claims: { email: "MANUAL" } }) },
+      { public_notes: JSON.stringify({ level: "plus+liveness+phoneNumber" }) },
+    ];
+
+    expect(
+      highestMatchingCredential(credentials, "basic", { claims: { email: ["MANUAL"] } }),
+    ).toEqual(credentials[1]);
+    expect(
+      highestMatchingCredential(credentials, "basic", {
+        claims: { email: ["VERIFIED", "MANUAL"] },
+      }),
+    ).toEqual(credentials[0]);
+    expect(
+      highestMatchingCredential(credentials, "basic", { claims: { address: ["MANUAL"] } }),
+    ).toBeUndefined();
+    // The last one has no claims, so they come from its level.
+    expect(
+      highestMatchingCredential(credentials, "basic", {
+        claims: { address: ["PROOF_OF_ADDRESS"] },
+      }),
+    ).toEqual(credentials[2]);
+  });
+
   it("choose basic, because plus did not match constraints", () => {
     const credentials = [
       {
