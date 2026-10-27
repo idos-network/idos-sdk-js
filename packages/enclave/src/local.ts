@@ -283,7 +283,20 @@ export class LocalEnclave<
     // Remember duration is a key-use check. A long-lived iframe keeps this profile
     // in memory, so construction-time store expiry is not enough.
     if (this.storedEncryptionProfile && (await this.cachedProfileExpired())) {
-      await this.reset();
+      const sharedDeadline = await this.store.getRememberDeadline();
+      const storedUserId =
+        sharedDeadline !== null && sharedDeadline >= Date.now()
+          ? await this.store.get<string>(STORAGE_KEYS.USER_ID)
+          : undefined;
+
+      // This copy expired, but another enclave extended the shared session.
+      if (storedUserId !== undefined && storedUserId === this.storedEncryptionProfile.userId) {
+        this.storedEncryptionProfile = undefined;
+        this.rememberedUntil = undefined;
+        await this.load();
+      } else {
+        await this.reset();
+      }
     }
 
     // A cached key is only reusable while it still matches the canonical public key;

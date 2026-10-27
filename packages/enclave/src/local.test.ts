@@ -346,6 +346,28 @@ describe("LocalEnclave", () => {
     }
   });
 
+  it("reloads the shared profile when another enclave extends the deadline", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      await enclave.getPrivateEncryptionProfile();
+      await store.setRememberDuration(30);
+
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+      const after = await enclave.getPrivateEncryptionProfile();
+
+      expect(after.userId).toBe(userId);
+      expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(userId);
+      expect(await store.getRememberDeadline()).toBe(new Date("2026-01-31T00:00:00Z").getTime());
+      expect(enclave.userIdPresentOnPrompt).toEqual([false]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("forgets a loaded profile after another enclave removes the elapsed marker", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     const prefix = `idOS-expiry-${Math.random().toString(36).slice(2)}-`;
