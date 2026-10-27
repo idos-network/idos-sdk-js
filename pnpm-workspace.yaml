@@ -171,12 +171,6 @@ overrides:
   toml: "5.0.1"
   # Security: DOMPurify template and IN_PLACE bypass (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr).
   dompurify: ">=3.4.17"
-  # Security: Zod memory exhaustion on oversized constrained collections (GHSA-mrhx-c7xc-m3w5).
-  # Pin every copy. Zod 3 is inside the advisory range and has no 3.x fix.
-  zod: "4.6.7"
-  # Security: body-parser DoS from trailing bytes after a compressed body (GHSA-27r3-jxmh-p828).
-  # Pin the patch. An open range lets pnpm reuse 2.3.0 already in the lockfile.
-  "body-parser@2": "2.4.0"
   # Security: launch-editor Windows path check bypass (GHSA-587h-7wmj-h5pm).
   # Pin the patch. An open range lets pnpm reuse a vulnerable release already in the lockfile.
   vite: "8.2.4"
@@ -192,6 +186,18 @@ overrides:
   # Bs58 is broken < 6.0.0 together with vite 8.x
   # but the import is the same
   bs58: "6.0.0"
+
+  # Security: Zod accumulates one issue per element of an unconstrained array (GHSA-mrhx-c7xc-m3w5).
+  # Fixed in 4.6.6. An open range lets pnpm reuse 4.5.4 already in the lockfile.
+  # Zod 3 has no patched release. Only the packages that depend on it are moved:
+  # @reown/appkit-wallet (z.object/string/email/record) and prisma-field-encryption (zod.z.object/array/readonly).
+  "@reown/appkit-wallet>zod": "4.6.7"
+  "prisma-field-encryption>zod": "4.6.7"
+  "zod@4": "4.6.7"
+
+  # Security: body-parser keeps reading after a compressed body (GHSA-27r3-jxmh-p828).
+  # Pin the patch. An open range lets pnpm reuse 2.3.0 already in the lockfile.
+  "body-parser": "2.4.0"
 
   # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
   "nanoid@3": "3.3.18"

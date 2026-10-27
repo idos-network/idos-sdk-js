@@ -37,6 +37,9 @@ catalogs:
     tweetnacl:
       specifier: ^1.0.3
       version: 1.0.3
+    zod:
+      specifier: 4.6.7
+      version: 4.6.7
   ethereum:
     '@wagmi/core':
       specifier: 3.6.4
@@ -219,14 +222,16 @@ overrides:
   tinypool: '>= 2.1.1'
   toml: 5.0.1
   dompurify: '>=3.4.17'
-  zod: 4.6.7
-  body-parser@2: 2.4.0
   vite: 8.2.4
   launch-editor: 2.14.2
   ws: '>= 8.21.0'
   chevrotain: 10.5.0
   web-streams-polyfill: 3.3.3
   bs58: 6.0.0
+  '@reown/appkit-wallet>zod': 4.6.7
+  prisma-field-encryption>zod: 4.6.7
+  zod@4: 4.6.7
+  body-parser: 2.4.0
   nanoid@3: 3.3.18
   deepmerge-ts: '>=8.0.1'
 
@@ -325,7 +330,7 @@ importers:
         specifier: catalog:ethereum
         version: 3.7.6(@tanstack/query-core@5.101.4)(@tanstack/react-query@5.101.4(react@19.2.8))(@types/react@19.2.18)(immer@10.2.0)(react@19.2.8)(typescript@5.9.3)(viem@2.55.11(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.7))
       zod:
-        specifier: 4.6.7
+        specifier: catalog:core
         version: 4.6.7
     devDependencies:
       '@tailwindcss/vite':
@@ -612,7 +617,7 @@ importers:
         specifier: catalog:xrp
         version: 1.8.0(supports-color@10.2.2)
       zod:
-        specifier: 4.6.7
+        specifier: catalog:core
         version: 4.6.7
     devDependencies:
       '@near-js/types':
@@ -871,7 +876,7 @@ importers:
         specifier: catalog:core
         version: 1.0.3
       zod:
-        specifier: 4.6.7
+        specifier: catalog:core
         version: 4.6.7
     devDependencies:
       '@types/node':
@@ -926,7 +931,7 @@ importers:
         specifier: catalog:core
         version: 1.0.3
       zod:
-        specifier: 4.6.7
+        specifier: catalog:core
         version: 4.6.7
     devDependencies:
       '@types/chrome':
@@ -1064,7 +1069,7 @@ importers:
         specifier: catalog:xrp
         version: 4.6.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       zod:
-        specifier: 4.6.7
+        specifier: catalog:core
         version: 4.6.7
     devDependencies:
       '@gemwallet/api':
@@ -4873,7 +4878,7 @@ packages:
     resolution: {integrity: sha512-ZeiI6h3GnW06uYDLx0etQtX/p8E24UaHHBj57RSjK7YBFe7iuVn07EDpOeP451D06sF27VOz9JJPlIKJmXgkEg==}
     peerDependencies:
       typescript: '>=5.0.4'
-      zod: 4.6.7
+      zod: ^3 >=3.22.0
     peerDependenciesMeta:
       typescript:
         optional: true
