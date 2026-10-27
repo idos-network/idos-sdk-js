@@ -399,6 +399,24 @@ describe("LocalEnclave", () => {
     expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
   });
 
+  it("does not return a cached profile for a user the parent switched to during the origin prompt", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    vi.spyOn(enclave, "guardKeys")
+      .mockImplementationOnce(async () => {
+        await enclave.reconfigure({ userId: otherUserId });
+        return true;
+      })
+      .mockImplementation(async () => true);
+
+    const after = await enclave.getPrivateEncryptionProfile();
+
+    expect(after).not.toBe(first);
+    expect(after.userId).toBe(otherUserId);
+  });
+
   it("signals a profile replacement only when a different stored profile is overwritten", async () => {
     const store = new MemoryStore();
     const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";

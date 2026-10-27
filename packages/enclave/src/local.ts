@@ -291,7 +291,6 @@ export class LocalEnclave<
         throw new Error("Origin is not authorized to use the keys");
       }
 
-      // guardKeys() can wait on the user while another enclave changes storage.
       if (!(await this.isCurrentProfile(profile)))
         return this.getPrivateEncryptionProfile(skipGuard);
       return profile;
@@ -346,9 +345,13 @@ export class LocalEnclave<
     return profile;
   }
 
+  // Rechecked after guardKeys(), which can wait while the parent reconfigures or storage changes.
   private async isCurrentProfile(profile: PrivateEncryptionProfile): Promise<boolean> {
+    const expectedPublicKey = this.options.expectedUserEncryptionPublicKey;
     return (
       this.storedEncryptionProfile === profile &&
+      profile.userId === this.options.userId &&
+      (!expectedPublicKey || base64Encode(profile.keyPair.publicKey) === expectedPublicKey) &&
       !(await this.store.hasRememberDurationElapsed()) &&
       (await this.storeHoldsProfile(profile))
     );
