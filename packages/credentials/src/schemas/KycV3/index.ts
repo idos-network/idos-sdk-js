@@ -113,7 +113,8 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     // A contact without a source predates the field and counts as verified, as in level().
     if (contact?.email) claims.email = contact.emailSource ?? "VERIFIED";
     if (contact?.phoneNumber) claims.phoneNumber = contact.phoneNumberSource ?? "VERIFIED";
-    if (edd) claims.edd = edd.sourceOfFundsSource;
+    // An EDD without a source counts as verified, as in level().
+    if (edd) claims.edd = edd.sourceOfFundsSource ?? "MANUAL";
     if (sourceOfWealth) claims.sow = sourceOfWealth.source;
     if (screening) claims.screening = screening.source;
     // The onboarding questionnaire is filled in by the person, so it is always self-attested.

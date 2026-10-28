@@ -287,7 +287,7 @@ phone number with `emailSource` / `phoneNumberSource` set to `"MANUAL"` (typed i
 not verified) is kept in the credential but does not add its addon. The same goes
 for a `sourceOfWealth` whose required `source` is `"MANUAL"` (self-attested): it adds
 no `sow` and does not count towards `kycLevel` 3. An `edd` whose required
-`sourceOfFundsSource` is `"MANUAL"` adds no `edd`. Only a `biometric` whose required
+`sourceOfFundsSource` (required with a `sourceOfFundsProofFile`) is `"MANUAL"` adds no `edd`. Only a `biometric` whose required
 `source` is `"LIVENESS"` adds `liveness` and reaches `kycLevel` 1; a plain `"SELFIE"` does
 not. `kycLevel()` derives the numeric level (0–3) from the same data.
 

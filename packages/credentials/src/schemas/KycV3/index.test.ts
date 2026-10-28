@@ -584,8 +584,21 @@ describe("KycV3 derived fields", () => {
 
     expect(credential.level()).toBe("basic");
     expect(credential.claims()).toEqual({ identity: "VERIFIED", edd: "MANUAL" });
+  });
+
+  it("requires the source of funds only with a proof file", () => {
+    const credential = basicCredential();
+    credential.addSection("edd", { sourceOfFundsCategory: "SALARY" });
+    expect(credential.level()).toBe("basic+edd");
+    expect(credential.claims()).toMatchObject({ edd: "VERIFIED" });
+
     expect(() =>
-      new KycV3().addSection("edd", { sourceOfFundsCategory: "SALARY" } as never),
+      new KycV3().addSection("edd", {
+        sourceOfFundsCategory: "SALARY",
+        sourceOfFundsProofFile: Buffer.from("Funds"),
+        sourceOfFundsProofFileType: "application/pdf",
+        sourceOfFundsProofFileName: "funds.pdf",
+      }),
     ).toThrow(/sourceOfFundsSource/);
   });
 

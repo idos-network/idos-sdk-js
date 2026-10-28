@@ -19,9 +19,10 @@ export class EDD {
   @IsString()
   sourceOfFundsCategory?: string;
 
-  /* How the source of funds was obtained: self-attested by the person (MANUAL) or verified. A MANUAL one does not count towards the level. */
+  /* How the source of funds was obtained: self-attested by the person (MANUAL) or verified. Required with a proof file. A MANUAL one does not count towards the level. */
+  @RequiredWhen((edd: EDD) => !!edd.sourceOfFundsProofFile)
   @IsIn(SourceOfFundsSources)
-  sourceOfFundsSource: SourceOfFundsSource;
+  sourceOfFundsSource?: SourceOfFundsSource;
 
   /* A file containing proof of the person's source of funds. */
   @IsOptional()
