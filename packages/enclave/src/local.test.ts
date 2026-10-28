@@ -317,4 +317,141 @@ describe("LocalEnclave", () => {
       vi.useRealTimers();
     }
   });
+
+  it("forgets a cached profile when another enclave resets the shared store", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+
+    await store.reset();
+
+    expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+    expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
+  });
+
+  it("forgets a cached MPC profile, which has no deadline, when the shared store is reset", async () => {
+    const store = new MemoryStore();
+    const enclave = new MPCTestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+
+    expect(await enclave.getPrivateEncryptionProfile()).toBe(first);
+
+    await store.reset();
+
+    expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+  });
+
+  it("keeps a cached profile past its own deadline when another enclave extends it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      const first = await enclave.getPrivateEncryptionProfile();
+
+      await store.setRememberDuration(30);
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+
+      expect(await enclave.getPrivateEncryptionProfile()).toBe(first);
+      expect(enclave.userIdPresentOnPrompt).toEqual([false]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("drops a cached profile without wiping another user's shared session", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+
+    await store.reset();
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    await new TestEnclave({
+      userId: otherUserId,
+      store,
+    } as LocalEnclaveOptions).createEncryptionProfileFromPassword(
+      "other-secret",
+      otherUserId,
+      "user",
+    );
+
+    expect(await enclave.getPrivateEncryptionProfile()).not.toBe(first);
+    // The re-prompt still finds the other user's session: dropping the copy did not reset it.
+    expect(enclave.userIdPresentOnPrompt).toEqual([false, true]);
+  });
+
+  it("does not return a cached profile that another enclave reset during the origin prompt", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+    vi.spyOn(enclave, "guardKeys")
+      .mockImplementationOnce(async () => {
+        await store.reset();
+        return true;
+      })
+      .mockImplementation(async () => true);
+
+    const after = await enclave.getPrivateEncryptionProfile();
+
+    expect(after).not.toBe(first);
+    expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(userId);
+    expect(enclave.userIdPresentOnPrompt).toEqual([false, false]);
+  });
+
+  it("does not return a cached profile for a user the parent switched to during the origin prompt", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const first = await enclave.getPrivateEncryptionProfile();
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    vi.spyOn(enclave, "guardKeys")
+      .mockImplementationOnce(async () => {
+        await enclave.reconfigure({ userId: otherUserId });
+        return true;
+      })
+      .mockImplementation(async () => true);
+
+    const after = await enclave.getPrivateEncryptionProfile();
+
+    expect(after).not.toBe(first);
+    expect(after.userId).toBe(otherUserId);
+  });
+
+  it("signals a profile replacement only when a different stored profile is overwritten", async () => {
+    const store = new MemoryStore();
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    await new TestEnclave({
+      userId: otherUserId,
+      store,
+    } as LocalEnclaveOptions).createEncryptionProfileFromPassword(
+      "other-secret",
+      otherUserId,
+      "user",
+    );
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const replaced = vi.spyOn(
+      enclave as unknown as { onStoredProfileReplaced(): Promise<void> },
+      "onStoredProfileReplaced",
+    );
+
+    await enclave.createEncryptionProfileFromPassword("super-secret", userId, "user");
+    expect(replaced).toHaveBeenCalledTimes(1);
+
+    await enclave.createEncryptionProfileFromPassword("super-secret", userId, "user");
+    expect(replaced).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles concurrent key use after the shared store is reset", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    await enclave.getPrivateEncryptionProfile();
+
+    await store.reset();
+    const results = await Promise.all([
+      enclave.getPrivateEncryptionProfile(),
+      enclave.getPrivateEncryptionProfile(),
+    ]);
+
+    expect(results.map((profile) => profile.userId)).toEqual([userId, userId]);
+  });
 });

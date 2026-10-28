@@ -9,12 +9,12 @@ Before you report work done, run the pull-request checks this diff can fail. Fix
 
 Spell check and OpenTelemetry targets stay in `AGENTS.md`. Run those too.
 
-Run a row only when the diff can affect that check.
+Run a row only when the diff can affect that check. Always run the audit: a newly published advisory can fail the current lockfile without any dependency file changing.
 
 - **Quality** (`.github/workflows/format.yml`): source, scripts, or config that oxlint or oxfmt reads. `pnpm turbo run quality`
 - **Typecheck** (`.github/workflows/typecheck.yml`): TypeScript, tsconfig, or package exports. `pnpm --filter <pkg> typecheck`. If you changed types other packages import, run `CI=true pnpm typecheck`. Do not make a package `typecheck` script rebuild `dist` when that `dist` already exists: CI typechecks dependents in parallel, and a rebuild deletes it out from under them.
 - **Tests** (`.github/workflows/coverage.yml`): the package or its tests, for `@idos-network/credentials`, `@idos-network/enclave`, `@idos-network/kwil-infra`, `@idos-network/kwil-js`, `@idos-network/utils`, `data-dashboard`, `facesign-enclave`. `pnpm turbo run test --filter <pkg>`. kwil-js integration tests need a live node and `PRIVATE_KEY`; the unit script does not run them.
-- **Audit** (`.github/workflows/security-audit.yml`): `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, or `audit-ci.jsonc`. `pnpm exec audit-ci --config ./audit-ci.jsonc --package-manager pnpm --high --critical`
+- **Audit** (`.github/workflows/security-audit.yml`): every change. `pnpm exec audit-ci --config ./audit-ci.jsonc --package-manager pnpm --high --critical`
 - **Changeset** (quality workflow): files inside a workspace package. `pnpm changeset status --since=origin/main`. An empty changeset is enough when nothing is publishable. The command only sees changeset files git already tracks, so stage the file before running it.
 
 Do not run these locally: bundle size, enclave end-to-end tests, the license scan, Pages deploy, release, or pkg.pr.new. Bundle size is slow and rarely fails. The others need a browser, Docker, or publish credentials.
