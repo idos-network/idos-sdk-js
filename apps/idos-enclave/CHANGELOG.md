@@ -1,5 +1,24 @@
 # idos-enclave
 
+## 0.4.6
+
+### Patch Changes
+
+- dc34ffe: Update DOMPurify to a release that closes the template and in-place sanitizer bypasses.
+- 86303bd: Check shared storage on every key use, so a live enclave drops its cached key and origin authorizations once another enclave instance expires, resets, or replaces the stored profile.
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [86303bd]
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/enclave@3.0.1
+
 ## 0.4.5
 
 ### Patch Changes

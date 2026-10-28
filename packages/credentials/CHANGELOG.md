@@ -1,5 +1,22 @@
 # @idos-network/credentials
 
+## 3.1.0
+
+### Minor Changes
+
+- 9486131: Add optional `emailSource` / `phoneNumberSource` to the KYC v3 `contact` section. A `"MANUAL"` email or phone number no longer adds the `email` / `phoneNumber` addon to `level()`.
+- 9486131: Add a required `source` (`"LIVENESS"` | `"SELFIE"`) and `provider` to the KYC v3 `biometric` section. Only an active liveness check adds `liveness` to `level()` and reaches `kycLevel` 1; a plain selfie does not. `claims.liveness` carries the source. KYC v3 credentials with a biometric but no `source` or `provider` no longer pass validation.
+- 9486131: Add `claims` to KYC v3 public notes: what the credential claims (`identity`, `address` and each level addon) and how each claim was obtained, self-attested (`"MANUAL"`) data included. Add `matchClaims()` and `claimsFromPublicNotes()`, which derive the claims of older credentials from their level, and a `claims` option to `highestMatchingCredential()`. Deprecate `matchLevelOrHigher()`, `pickHighestMatchingLevel()` and the `addons` option of `highestMatchingCredential()`, since the level leaves out self-attested data. Export the `Claim`, `Claims`, `ClaimSource`, `ClaimSources` and `ClaimRequirements` types.
+- 9486131: Add `selfieFileType` / `selfieFileName` to the KYC v3 `biometric` section and `sourceOfWealthProofFileType` / `sourceOfWealthProofFileName` to `sourceOfWealth`. A selfie now always needs both; a source-of-wealth proof file needs both when it is set. KYC v3 credentials with a selfie but no type or name no longer pass validation.
+- 9486131: Add a required `source` (`"DB"`) to the KYC v3 `screening` section, shown as `claims.screening` in the public notes. Claims derived from the level of older credentials count `screening` as `"DB"` too. KYC v3 credentials with a screening but no `source` no longer pass validation.
+- 9486131: Add `sourceOfFundsSource` (`"MANUAL"` | `"VERIFIED"`) to the KYC v3 `edd` section, required when it has a `sourceOfFundsProofFile`. A `"MANUAL"` (self-attested) source of funds adds no `edd` to `level()` and shows up as `claims.edd` in the public notes. An `edd` without a source counts as verified, as before. KYC v3 credentials with a source-of-funds proof file but no `sourceOfFundsSource` no longer pass validation.
+- 9486131: Add a required `source` (`"MANUAL"` | `"VERIFIED"`) to the KYC v3 `sourceOfWealth` section. A `"MANUAL"` (self-attested) source of wealth is kept in the credential but adds no `sow` to `level()` and does not count towards `kycLevel` 3. KYC v3 credentials with a source of wealth but no `source` no longer pass validation.
+
+### Patch Changes
+
+- Updated dependencies [78ad0a9]
+  - @idos-network/utils@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes
