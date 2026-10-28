@@ -107,7 +107,7 @@ catalogs:
     "bs58": "^6.0.0"
     "es-toolkit": "^1.50.0"
     "ipfs-unixfs-importer": "^17.1.1"
-    "qs": "6.15.3"
+    "qs": "6.16.1"
 
   xrp:
     "@gemwallet/api": "^3.8.0"
@@ -120,6 +120,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   # Declared pins that may be newer than minimumReleaseAge
   - "@noble/hashes@2.3.0"
+  # Renovate security update: qs@6.16.1
+  - qs@6.16.1
 
 onlyBuiltDependencies:
   - "@prisma/engines"
