@@ -436,7 +436,7 @@ describe("BlobGateway", () => {
     await expect(
       gateway.fetchBlob({
         credentialId: "credential-1",
-        contentUri: "ukyc://object-1",
+        contentUri: "ukyc://storage-abc/blobs/0198c21d-79cb-7000-8000-000000000001",
         expectedSize: content.byteLength,
       }),
     ).resolves.toEqual(content);
