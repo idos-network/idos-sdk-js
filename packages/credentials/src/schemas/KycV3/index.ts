@@ -1,3 +1,4 @@
+import type { Claims } from "../../utils";
 import type { PublicNotes } from "../types";
 
 import { CONTEXT_IDOS_CREDENTIAL_V2, CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT } from "../../utils/loader";
@@ -47,11 +48,11 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     }
 
     const addons = [
-      biometric?.selfieFile && "liveness",
-      contact?.email && "email",
-      contact?.phoneNumber && "phoneNumber",
-      edd && "edd",
-      sourceOfWealth && "sow",
+      biometric?.source === "LIVENESS" && "liveness",
+      contact?.email && contact.emailSource !== "MANUAL" && "email",
+      contact?.phoneNumber && contact.phoneNumberSource !== "MANUAL" && "phoneNumber",
+      edd && edd.sourceOfFundsSource !== "MANUAL" && "edd",
+      sourceOfWealth && sourceOfWealth.source !== "MANUAL" && "sow",
       screening && "screening",
       onboarding && "onboarding",
     ].filter(Boolean);
@@ -66,7 +67,7 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     let kycLevel = 0;
 
     // basic+liveness are always at least kycLevel = 1
-    if (biometric?.selfieFile && person && idDocument) {
+    if (biometric?.source === "LIVENESS" && person && idDocument) {
       kycLevel = 1;
     }
 
@@ -80,11 +81,45 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     }
 
     // full SOW and onboarding questionnaire are always at least kycLevel = 3
-    if (kycLevel >= 2 && sourceOfWealth && onboarding) {
+    if (kycLevel >= 2 && sourceOfWealth && sourceOfWealth.source !== "MANUAL" && onboarding) {
       kycLevel = 3;
     }
 
     return kycLevel;
+  }
+
+  /**
+   * What the credential claims and how each claim was obtained, so consumers can match on it
+   * with `matchClaims`, self-attested (MANUAL) data included. The level only counts verified
+   * data. Sections without a source of their own count as verified, as they do in the level.
+   */
+  claims(): Claims {
+    const {
+      person,
+      idDocument,
+      biometric,
+      residentialAddress,
+      contact,
+      edd,
+      sourceOfWealth,
+      screening,
+      onboarding,
+    } = this.subject;
+
+    const claims: Claims = {};
+    if (person && idDocument) claims.identity = "VERIFIED";
+    if (biometric) claims.liveness = biometric.source;
+    if (residentialAddress) claims.address = residentialAddress.source;
+    // A contact without a source predates the field and counts as verified, as in level().
+    if (contact?.email) claims.email = contact.emailSource ?? "VERIFIED";
+    if (contact?.phoneNumber) claims.phoneNumber = contact.phoneNumberSource ?? "VERIFIED";
+    // An EDD without a source counts as verified, as in level().
+    if (edd) claims.edd = edd.sourceOfFundsSource ?? "MANUAL";
+    if (sourceOfWealth) claims.sow = sourceOfWealth.source;
+    if (screening) claims.screening = screening.source;
+    // The onboarding questionnaire is filled in by the person, so it is always self-attested.
+    if (onboarding) claims.onboarding = "MANUAL";
+    return claims;
   }
 
   override publicNotes(): PublicNotes {
@@ -92,6 +127,7 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
       type: "kyc",
       level: this.level(),
       kycLevel: this.kycLevel(),
+      claims: this.claims(),
     };
   }
 

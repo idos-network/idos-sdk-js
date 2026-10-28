@@ -5,6 +5,8 @@ import nacl from "tweetnacl";
 import { getDb } from "@/core/db.server";
 import { COMMON_ENV } from "@/core/envFlags.common";
 import { getUserId, sessionStorage } from "@/core/sessions.server";
+import { claimRows } from "@/lib/claims";
+import { safeParse } from "@/lib/credential-utils";
 
 import type { Route } from "./+types/developer-credentials";
 
@@ -41,15 +43,22 @@ export async function loader({ request }: Route.LoaderArgs) {
     const credentials = await Promise.all(
       grants.grants.map(async (grant) => {
         try {
-          return consumer
-            .getCredentialSharedContentDecrypted(grant.data_id)
-            .then((content) => JSON.parse(content))
-            .then((data) => ({
-              id: data.id,
-              level: data.level,
-              firstName: data.credentialSubject.firstName,
-              lastName: data.credentialSubject.lastName,
-            }));
+          // Claims live in the public notes, so they need no decryption.
+          const [credential, data] = await Promise.all([
+            consumer.getCredentialSharedFromIDOS(grant.data_id),
+            consumer
+              .getCredentialSharedContentDecrypted(grant.data_id)
+              .then((content) => JSON.parse(content)),
+          ]);
+
+          const publicNotes = safeParse(credential?.public_notes);
+          return {
+            id: data.id,
+            level: typeof publicNotes.level === "string" ? publicNotes.level : undefined,
+            claims: claimRows(publicNotes),
+            firstName: data.credentialSubject.firstName,
+            lastName: data.credentialSubject.lastName,
+          };
         } catch (error) {
           Sentry.captureException(error);
           console.error("Failed to fetch credential:", error);
