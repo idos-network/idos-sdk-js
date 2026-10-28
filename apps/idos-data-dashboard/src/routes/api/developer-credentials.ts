@@ -51,9 +51,11 @@ export async function loader({ request }: Route.LoaderArgs) {
               .then((content) => JSON.parse(content)),
           ]);
 
+          const publicNotes = safeParse(credential?.public_notes);
           return {
             id: data.id,
-            claims: claimRows(safeParse(credential?.public_notes)),
+            level: typeof publicNotes.level === "string" ? publicNotes.level : undefined,
+            claims: claimRows(publicNotes),
             firstName: data.credentialSubject.firstName,
             lastName: data.credentialSubject.lastName,
           };

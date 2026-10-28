@@ -590,7 +590,7 @@ describe("KycV3 derived fields", () => {
     const credential = basicCredential();
     credential.addSection("edd", { sourceOfFundsCategory: "SALARY" });
     expect(credential.level()).toBe("basic+edd");
-    expect(credential.claims()).toMatchObject({ edd: "VERIFIED" });
+    expect(credential.claims()).toMatchObject({ edd: "MANUAL" });
 
     expect(() =>
       new KycV3().addSection("edd", {

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 export interface Credential {
   id: string;
+  level?: string;
   claims: ClaimRow[];
   firstName: string;
   lastName: string;
@@ -23,6 +24,9 @@ function CredentialMeta({ credential }: { credential: Credential }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{credential.id}</p>
+        {credential.claims.length === 0 && credential.level && (
+          <p className="text-muted-foreground truncate text-sm">{credential.level}</p>
+        )}
         <p className="text-muted-foreground truncate text-sm">
           {credential.firstName} {credential.lastName}
         </p>

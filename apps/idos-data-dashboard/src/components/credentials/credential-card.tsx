@@ -48,11 +48,11 @@ export function CredentialCard({
   const issuer = typeof publicFields.issuer === "string" ? publicFields.issuer : null;
   const status = typeof publicFields.status === "string" ? publicFields.status : null;
 
-  const detailEntries = Object.entries(publicFields)
-    .filter(([key]) => !HEADER_FIELDS.has(key))
-    .map(([key, value]) => [key, typeof value === "string" ? value : String(value ?? "")] as const);
-
   const claims = claimRows(publicFields);
+  // Credentials without claims (e.g. FaceID, EDD) still show their level as a row.
+  const detailEntries = Object.entries(publicFields)
+    .filter(([key]) => !HEADER_FIELDS.has(key) || (key === "level" && claims.length === 0))
+    .map(([key, value]) => [key, typeof value === "string" ? value : String(value ?? "")] as const);
   const grantsCount = grants.data?.length ?? 0;
 
   return (

@@ -291,8 +291,10 @@ no `sow` and does not count towards `kycLevel` 3. An `edd` whose required
 `source` is `"LIVENESS"` adds `liveness` and reaches `kycLevel` 1; a plain `"SELFIE"` does
 not. `kycLevel()` derives the numeric level (0–3) from the same data.
 
-The level only counts verified data. `publicNotes()` also carries `claims`, which list
-self-attested data too; see [Match claims](#match-claims).
+The level leaves out the `"MANUAL"` data above. The one exception is `onboarding`: the
+questionnaire is always filled in by the person, yet it still adds its addon.
+`publicNotes()` also carries `claims`, which list self-attested data too; see
+[Match claims](#match-claims).
 
 ```javascript
 import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
@@ -349,7 +351,7 @@ from `"PROOF_OF_ADDRESS"`.
 ```javascript
 import { highestMatchingCredential, matchClaims } from "@idos-network/credentials/utils";
 
-kycCredential.publicNotes();
+const publicNotes = kycCredential.publicNotes();
 // { type: "kyc", level: "basic", kycLevel: 0,
 //   claims: { identity: "VERIFIED", email: "MANUAL" } }
 
