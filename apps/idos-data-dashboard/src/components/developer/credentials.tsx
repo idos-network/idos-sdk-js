@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { DatabaseIcon, RefreshCwIcon } from "lucide-react";
 
+import type { ClaimRow } from "@/lib/claims";
+
+import { ClaimList } from "@/components/credentials/claim-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface Credential {
   id: string;
-  level: string;
+  claims: ClaimRow[];
   firstName: string;
   lastName: string;
 }
@@ -20,10 +23,12 @@ function CredentialMeta({ credential }: { credential: Credential }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{credential.id}</p>
-        <p className="text-muted-foreground truncate text-sm">{credential.level}</p>
         <p className="text-muted-foreground truncate text-sm">
           {credential.firstName} {credential.lastName}
         </p>
+        <div className="mt-2">
+          <ClaimList rows={credential.claims} />
+        </div>
       </div>
       <Badge variant="success" className="capitalize">
         Available

@@ -172,6 +172,8 @@ const kycCredential = new VerifiableCredentialKycV3()
   .addSection("biometric", {
     selfieFile: Buffer.from("Selfie"),
     selfieFileType: "image/jpeg",
+    source: "LIVENESS",
+    provider: "FaceTec",
     selfieFileName: "selfie.jpg",
   });
 
@@ -285,8 +287,9 @@ phone number with `emailSource` / `phoneNumberSource` set to `"MANUAL"` (typed i
 not verified) is kept in the credential but does not add its addon. The same goes
 for a `sourceOfWealth` whose required `source` is `"MANUAL"` (self-attested): it adds
 no `sow` and does not count towards `kycLevel` 3. An `edd` whose required
-`sourceOfFundsSource` is `"MANUAL"` adds no `edd`. `kycLevel()` derives the numeric
-level (0–3) from the same data.
+`sourceOfFundsSource` is `"MANUAL"` adds no `edd`. Only a `biometric` whose required
+`source` is `"LIVENESS"` adds `liveness` and reaches `kycLevel` 1; a plain `"SELFIE"` does
+not. `kycLevel()` derives the numeric level (0–3) from the same data.
 
 The level only counts verified data. `publicNotes()` also carries `claims`, which list
 self-attested data too; see [Match claims](#match-claims).
@@ -314,6 +317,8 @@ const kycCredential = new VerifiableCredentialKycV3()
   .addSection("biometric", {
     selfieFile: Buffer.from("Selfie"),
     selfieFileType: "image/jpeg",
+    source: "LIVENESS",
+    provider: "FaceTec",
     selfieFileName: "selfie.jpg",
   });
 
@@ -331,14 +336,15 @@ obtained. The keys are `identity`, `address` and the level addons (`liveness`, `
 `phoneNumber`, `edd`, `sow`, `screening`, `onboarding`). The values are the sources:
 `residentialAddress.source` for `address`, `"MANUAL"` or `"VERIFIED"` for `email`,
 `phoneNumber`, `edd` and `sow`, `screening.source` (`"DB"`) for `screening`, `"MANUAL"` for
-`onboarding` (a questionnaire the person fills in), and `"VERIFIED"` for `identity` and
-`liveness`.
+`onboarding` (a questionnaire the person fills in), `biometric.source` (`"LIVENESS"` or
+`"SELFIE"`, a plain photo) for `liveness`, and `"VERIFIED"` for `identity`.
 Unlike the level, claims include self-attested (`"MANUAL"`) data.
 
 `matchClaims` checks that every required claim is present with one of its accepted
 sources. Credentials issued before `claims` existed only have a level, so their claims
-are derived from it: each part of the level counts as `"VERIFIED"` (`screening` as `"DB"`,
-`onboarding` as `"MANUAL"`), and `plus` as an address from `"PROOF_OF_ADDRESS"`.
+are derived from it: each part of the level counts as `"VERIFIED"` (`liveness` as
+`"LIVENESS"`, `screening` as `"DB"`, `onboarding` as `"MANUAL"`), and `plus` as an address
+from `"PROOF_OF_ADDRESS"`.
 
 ```javascript
 import { highestMatchingCredential, matchClaims } from "@idos-network/credentials/utils";
@@ -354,13 +360,13 @@ matchClaims({ email: ["VERIFIED"] }, publicNotes);
 // false
 
 const pickedCredential = highestMatchingCredential([...idOSCredentials], "unverified", {
-  claims: { liveness: ["VERIFIED"], address: ["PROOF_OF_ADDRESS", "MANUAL"] },
+  claims: { liveness: ["LIVENESS"], address: ["PROOF_OF_ADDRESS", "MANUAL"] },
 });
 // The highest-scoring credential with verified liveness and an address from a proof or typed in.
 
 await loggedInClient.filterCredentials({
   acceptedIssuers,
-  claimsFilter: { liveness: ["VERIFIED"], email: ["VERIFIED", "MANUAL"] },
+  claimsFilter: { liveness: ["LIVENESS"], email: ["VERIFIED", "MANUAL"] },
 });
 ```
 

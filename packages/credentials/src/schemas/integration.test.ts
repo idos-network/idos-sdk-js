@@ -175,6 +175,8 @@ describe("all versions issue + verify + parse", () => {
       .addSection("biometric", {
         selfieFile: Buffer.from("S"),
         selfieFileType: "image/jpeg",
+        source: "LIVENESS",
+        provider: "FaceTec",
         selfieFileName: "selfie.jpg",
         selfieMatch: 99,
       })

@@ -42,6 +42,9 @@ export type SourceOfWealthSource = (typeof SourceOfWealthSources)[number];
 export const SourceOfFundsSources = ["MANUAL", "VERIFIED"] as const;
 export type SourceOfFundsSource = (typeof SourceOfFundsSources)[number];
 
+export const BiometricSources = ["LIVENESS", "SELFIE"] as const;
+export type BiometricSource = (typeof BiometricSources)[number];
+
 export const ScreeningSources = ["DB"] as const;
 export type ScreeningSource = (typeof ScreeningSources)[number];
 

@@ -138,7 +138,7 @@ describe("matchClaims", () => {
 
     expect(matchClaims({ email: ["VERIFIED", "MANUAL"] }, publicNotes)).toBe(true);
     expect(matchClaims({ email: ["VERIFIED"] }, publicNotes)).toBe(false);
-    expect(matchClaims({ identity: ["VERIFIED"], liveness: ["VERIFIED"] }, publicNotes)).toBe(
+    expect(matchClaims({ identity: ["VERIFIED"], liveness: ["LIVENESS"] }, publicNotes)).toBe(
       false,
     );
     expect(matchClaims({}, publicNotes)).toBe(true);
@@ -154,7 +154,7 @@ describe("matchClaims", () => {
     expect(claimsFromPublicNotes({ level: "plus+liveness+email" })).toEqual({
       identity: "VERIFIED",
       address: "PROOF_OF_ADDRESS",
-      liveness: "VERIFIED",
+      liveness: "LIVENESS",
       email: "VERIFIED",
     });
     expect(claimsFromPublicNotes({ level: "unverified+phoneNumber+screening+onboarding" })).toEqual(
@@ -165,7 +165,7 @@ describe("matchClaims", () => {
       },
     );
     expect(claimsFromPublicNotes({})).toEqual({});
-    expect(matchClaims({ liveness: ["VERIFIED"] }, { level: "basic+liveness" })).toBe(true);
+    expect(matchClaims({ liveness: ["LIVENESS"] }, { level: "basic+liveness" })).toBe(true);
   });
 });
 

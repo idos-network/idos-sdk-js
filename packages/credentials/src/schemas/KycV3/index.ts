@@ -48,7 +48,7 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     }
 
     const addons = [
-      biometric?.selfieFile && "liveness",
+      biometric?.source === "LIVENESS" && "liveness",
       contact?.email && contact.emailSource !== "MANUAL" && "email",
       contact?.phoneNumber && contact.phoneNumberSource !== "MANUAL" && "phoneNumber",
       edd && edd.sourceOfFundsSource !== "MANUAL" && "edd",
@@ -67,7 +67,7 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
     let kycLevel = 0;
 
     // basic+liveness are always at least kycLevel = 1
-    if (biometric?.selfieFile && person && idDocument) {
+    if (biometric?.source === "LIVENESS" && person && idDocument) {
       kycLevel = 1;
     }
 
@@ -108,7 +108,7 @@ export class KycV3 extends VerifiableCredentialBase<EnvelopeV2, Subject> {
 
     const claims: Claims = {};
     if (person && idDocument) claims.identity = "VERIFIED";
-    if (biometric?.selfieFile) claims.liveness = "VERIFIED";
+    if (biometric) claims.liveness = biometric.source;
     if (residentialAddress) claims.address = residentialAddress.source;
     // A contact without a source predates the field and counts as verified, as in level().
     if (contact?.email) claims.email = contact.emailSource ?? "VERIFIED";

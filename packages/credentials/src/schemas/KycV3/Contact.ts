@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsOptional, IsString } from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsString, ValidateIf } from "class-validator";
 
 import { ContactSources, type ContactSource } from "../enums";
 
@@ -9,7 +9,8 @@ export class Contact {
   email?: string;
 
   /* How the email was obtained: typed in (MANUAL) or verified. A MANUAL email does not count towards the level. */
-  @IsOptional()
+  // Unlike @IsOptional(), lets only an omitted source through: a null one would count as verified.
+  @ValidateIf((_, value) => value !== undefined)
   @IsEnum(ContactSources)
   emailSource?: ContactSource;
 
@@ -19,7 +20,8 @@ export class Contact {
   phoneNumber?: string;
 
   /* How the phone number was obtained: typed in (MANUAL) or verified. A MANUAL phone number does not count towards the level. */
-  @IsOptional()
+  // Unlike @IsOptional(), lets only an omitted source through: a null one would count as verified.
+  @ValidateIf((_, value) => value !== undefined)
   @IsEnum(ContactSources)
   phoneNumberSource?: ContactSource;
 }

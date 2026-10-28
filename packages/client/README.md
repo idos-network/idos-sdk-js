@@ -52,7 +52,7 @@ const credentials = await loggedInClient.filterCredentials({
   // Accepted sources per claim; a self-attested ("MANUAL") email is fine here.
   claimsFilter: {
     identity: ["VERIFIED"],
-    liveness: ["VERIFIED"],
+    liveness: ["LIVENESS"],
     email: ["VERIFIED", "MANUAL"],
   },
 });

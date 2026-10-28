@@ -5,6 +5,7 @@ import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 
 import type {
+  BiometricSource,
   ContactSource,
   ResidentialAddressSource,
   ScreeningSource,
@@ -30,7 +31,7 @@ export type Addon =
 // The sources each level addon can have. Keyed by every Addon (see ClaimSources), so adding
 // an addon without its sources fails to compile.
 interface AddonSources {
-  liveness: "VERIFIED";
+  liveness: BiometricSource;
   email: ContactSource;
   phoneNumber: ContactSource;
   edd: SourceOfFundsSource;
@@ -51,12 +52,12 @@ export type Claim = keyof ClaimSources;
 export type ClaimSource = ClaimSources[Claim];
 /** The claims in KYC public notes, each with how it was obtained. */
 export type Claims = { [K in Claim]?: ClaimSources[K] };
-/** Accepted sources per claim, e.g. `{ liveness: ["VERIFIED"], email: ["VERIFIED", "MANUAL"] }`. */
+/** Accepted sources per claim, e.g. `{ liveness: ["LIVENESS"], email: ["VERIFIED", "MANUAL"] }`. */
 export type ClaimRequirements = { [K in Claim]?: ClaimSources[K][] };
 
 // What a level addon says about how its claim was obtained.
 const LEVEL_ADDON_SOURCES: { [K in Addon]: ClaimSources[K] } = {
-  liveness: "VERIFIED",
+  liveness: "LIVENESS",
   email: "VERIFIED",
   phoneNumber: "VERIFIED",
   edd: "VERIFIED",
@@ -68,7 +69,8 @@ const LEVEL_ADDON_SOURCES: { [K in Addon]: ClaimSources[K] } = {
 /**
  * The claims in a credential's public notes. Credentials issued before `claims` existed only
  * have a level, so their claims are derived from it: everything a level lists counts as
- * verified, except screening (a database check) and onboarding (always self-attested).
+ * verified, except liveness (a liveness check), screening (a database check) and onboarding
+ * (always self-attested).
  */
 export function claimsFromPublicNotes(publicNotes: { level?: string; claims?: Claims }): Claims {
   if (publicNotes.claims) return publicNotes.claims;

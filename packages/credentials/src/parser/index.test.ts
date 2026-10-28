@@ -87,6 +87,8 @@ describe("parseCredential", () => {
         contactPhoneNumber: "+1234567890",
         biometricSelfieFile: SELFIE_FILE,
         biometricSelfieFileType: "image/jpeg",
+        biometricSource: "LIVENESS",
+        biometricProvider: "FaceTec",
         biometricSelfieFileName: "selfie.jpg",
         residentialAddressSource: "PROOF_OF_ADDRESS",
         residentialAddressStreet: "Main St",

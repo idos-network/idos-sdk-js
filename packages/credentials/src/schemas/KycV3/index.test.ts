@@ -69,6 +69,8 @@ describe("KycV3 validity", () => {
     credential.addSection("biometric", {
       selfieFile: Buffer.from("Selfie"),
       selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
       selfieFileName: "selfie.jpg",
       selfieMatch: 99,
     });
@@ -99,7 +101,7 @@ describe("KycV3 validity", () => {
     expect(credential.level()).toBe("unverified+phoneNumber");
   });
 
-  it("leaves a MANUAL email and phone number out of the level", () => {
+  it("leaves a MANUAL email out of the level but keeps a VERIFIED phone number", () => {
     const credential = basicCredential();
     credential.addSection("contact", {
       email: "john@example.com",
@@ -116,6 +118,61 @@ describe("KycV3 validity", () => {
       email: "MANUAL",
       phoneNumber: "VERIFIED",
     });
+  });
+
+  it("leaves a SELFIE without a liveness check out of the level", () => {
+    const credential = basicCredential();
+    credential.addSection("biometric", {
+      source: "SELFIE",
+      provider: "FaceTec",
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      selfieFileName: "selfie.jpg",
+    });
+
+    expect(credential.level()).toBe("basic");
+    expect(credential.kycLevel()).toBe(0);
+    expect(credential.claims()).toEqual({ identity: "VERIFIED", liveness: "SELFIE" });
+  });
+
+  it("requires the source and provider of a biometric", () => {
+    expect(() =>
+      new KycV3().addSection("biometric", {
+        selfieFile: Buffer.from("Selfie"),
+        selfieFileType: "image/jpeg",
+        selfieFileName: "selfie.jpg",
+      } as never),
+    ).toThrow(/source.*provider|provider.*source/);
+    expect(() =>
+      new KycV3().addSection("biometric", {
+        source: "LIVENESS",
+        provider: "",
+        selfieFile: Buffer.from("Selfie"),
+        selfieFileType: "image/jpeg",
+        selfieFileName: "selfie.jpg",
+      }),
+    ).toThrow(/provider/);
+  });
+
+  it("leaves a MANUAL phone number out of the level", () => {
+    const credential = basicCredential();
+    credential.addSection("contact", { phoneNumber: "+1234567890", phoneNumberSource: "MANUAL" });
+
+    expect(credential.level()).toBe("basic");
+    expect(credential.claims()).toEqual({ identity: "VERIFIED", phoneNumber: "MANUAL" });
+  });
+
+  it("rejects a null contact source, which would otherwise count as verified", () => {
+    expect(() =>
+      new KycV3().addSection("contact", { email: "john@example.com", emailSource: null as never }),
+    ).toThrow(/emailSource/);
+    expect(() =>
+      new KycV3().addSection("contact", {
+        phoneNumber: "+1234567890",
+        phoneNumberSource: null as never,
+      }),
+    ).toThrow(/phoneNumberSource/);
+    expect(() => new KycV3().addSection("contact", { email: "john@example.com" })).not.toThrow();
   });
 
   it("rejects a subject missing a required section", () => {
@@ -357,6 +414,8 @@ describe("KycV3 derived fields", () => {
     credential.addSection("biometric", {
       selfieFile: Buffer.from("Selfie"),
       selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
       selfieFileName: "selfie.jpg",
       selfieMatch: 99,
     });
@@ -462,6 +521,8 @@ describe("KycV3 derived fields", () => {
     credential.addSection("biometric", {
       selfieFile: Buffer.from("Selfie"),
       selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
       selfieFileName: "selfie.jpg",
       selfieMatch: 99,
     });
@@ -494,7 +555,7 @@ describe("KycV3 derived fields", () => {
       kycLevel: 3,
       claims: {
         identity: "VERIFIED",
-        liveness: "VERIFIED",
+        liveness: "LIVENESS",
         address: "PROOF_OF_ADDRESS",
         sow: "VERIFIED",
         onboarding: "MANUAL",
@@ -587,6 +648,8 @@ describe("KycV3 serialization", () => {
     credential.addSection("biometric", {
       selfieFile: Buffer.from("Selfie"),
       selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
       selfieFileName: "selfie.jpg",
       selfieMatch: 99,
     });
@@ -648,7 +711,7 @@ describe("KycV3 serialization", () => {
       kycLevel: 3,
       claims: {
         identity: "VERIFIED",
-        liveness: "VERIFIED",
+        liveness: "LIVENESS",
         address: "PROOF_OF_ADDRESS",
         email: "VERIFIED",
         phoneNumber: "VERIFIED",
@@ -697,6 +760,8 @@ describe("KycV3 serialization", () => {
       contactPhoneNumber: "+1234567890",
       biometricSelfieFile: fileToBase85(Buffer.from("Selfie")),
       biometricSelfieFileType: "image/jpeg",
+      biometricSource: "LIVENESS",
+      biometricProvider: "FaceTec",
       biometricSelfieFileName: "selfie.jpg",
       biometricSelfieMatch: 99,
       residentialAddressSource: "PROOF_OF_ADDRESS",
@@ -799,6 +864,8 @@ describe("KycV3 deserialization", () => {
     credential.addSection("biometric", {
       selfieFile: Buffer.from("Selfie"),
       selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
       selfieFileName: "selfie.jpg",
       selfieMatch: 99,
     });
