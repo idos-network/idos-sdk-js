@@ -1,5 +1,30 @@
 # data-dashboard
 
+## 1.4.9
+
+### Patch Changes
+
+- 9486131: Show a credential's claims, with how each was obtained, instead of its level on the credential card and in the developer console. Older credentials show claims derived from their level.
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [b1466c8]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [5dac941]
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+  - @idos-network/client@3.1.0
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/kwil-infra@3.0.1
+  - @idos-network/consumer@3.1.0
+  - @idos-network/issuer@3.1.0
+
 ## 1.4.8
 
 ### Patch Changes
