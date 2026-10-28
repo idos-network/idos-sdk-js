@@ -106,20 +106,17 @@ describe("idOSIssuer", () => {
     );
   });
 
-  it("uses and enforces distinct custom content URIs for delegated write grants", async () => {
+  it("addresses both delegated write grant blobs from one ukyc storage id", async () => {
     const issuer = await idOSIssuer.init({
       nodeUrl: "https://nodes.example",
       blobGatewayUrl: "https://blob.example",
       signingKeyPair: nacl.sign.keyPair(),
     });
-    const originalContentUri = "ukyc://storage-abc/blobs/original";
-    const copyContentUri = "ukyc://storage-abc/blobs/copy";
     const credentialParams = {
       publicNotes: "{}",
       plaintextContent: new Uint8Array([1, 2, 3]),
       recipientEncryptionPublicKey: nacl.box.keyPair().publicKey,
-      originalContentUri,
-      copyContentUri,
+      ukycStorageId: "storage-abc",
     };
     const delegatedWriteGrant = {
       id: crypto.randomUUID(),
@@ -140,19 +137,11 @@ describe("idOSIssuer", () => {
     );
 
     const payload = mocks.createPreliminaryCredentialsByDwg.mock.calls[0]?.[1];
-    expect(payload.original_content_uri).toBe(originalContentUri);
-    expect(payload.copy_content_uri).toBe(copyContentUri);
-    expect(result.originalCredential.content_uri).toBe(originalContentUri);
-    expect(result.copyCredential.content_uri).toBe(copyContentUri);
-
-    await expect(
-      issuer.createCredentialByDelegatedWriteGrant(
-        { ...credentialParams, copyContentUri: originalContentUri },
-        delegatedWriteGrant,
-        consumerEncryptionPublicKey,
-      ),
-    ).rejects.toThrow("Original and copy credentials must use distinct content URIs");
-    expect(mocks.createPreliminaryCredentialsByDwg).toHaveBeenCalledOnce();
+    expect(payload.original_content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\/[0-9a-f]{64}$/);
+    expect(payload.copy_content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\/[0-9a-f]{64}$/);
+    expect(payload.original_content_uri).not.toBe(payload.copy_content_uri);
+    expect(result.originalCredential.content_uri).toBe(payload.original_content_uri);
+    expect(result.copyCredential.content_uri).toBe(payload.copy_content_uri);
   });
 
   it("maps request params for createCredentialByDelegatedWriteGrant via toDelegatedWriteGrantBaseParams", async () => {

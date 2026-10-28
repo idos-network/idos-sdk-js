@@ -1,4 +1,4 @@
-import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import { hexEncode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
@@ -354,15 +354,17 @@ describe("buildPreliminaryIDOSCredential", () => {
     expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 
-  it("uses a provided contentUri instead of hashing to ipfs", async () => {
+  it("addresses ukyc content by the sha256 of the ciphertext", async () => {
     const result = await buildPreliminaryIDOSCredential({
       publicNotes: "{}",
       plaintextContent: utf8Encode("secret"),
       recipientEncryptionPublicKey: recipient.publicKey,
-      contentUri: "ukyc://storage-abc/blobs/blob-1",
+      ukycStorageId: "storage-abc",
     });
 
-    expect(result.contentUri).toBe("ukyc://storage-abc/blobs/blob-1");
+    expect(result.contentUri).toBe(
+      `ukyc://storage-abc/blobs/${hexEncodeSha256Hash(result.encryptedContent)}`,
+    );
     expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 });
