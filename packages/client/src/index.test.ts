@@ -5,7 +5,12 @@ import type { BaseProvider } from "@idos-network/enclave";
 import { createMmTokenAuth, KwilActionClient } from "@idos-network/kwil-infra";
 import { NodeKwil } from "@idos-network/kwil-js";
 import { BlobGateway, createBlobContentReference } from "@idos-network/utils/blob-gateway";
-import { base64Encode, base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
+import {
+  base64Encode,
+  base64UrlEncode,
+  hexEncodeSha256Hash,
+  utf8Encode,
+} from "@idos-network/utils/codecs";
 import { MemoryStore } from "@idos-network/utils/store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -527,7 +532,9 @@ describe("credential blob storage", () => {
   it("creates MM credentials with ukyc:// and the encrypted byte size", async () => {
     const { credential, preliminaryInput, uploadedBytes } = await createCredentialForWallet("MM");
 
-    expect(credential.content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\//);
+    expect(credential.content_uri).toBe(
+      `ukyc://storage-abc/blobs/${hexEncodeSha256Hash(uploadedBytes ?? new Uint8Array())}`,
+    );
     expect(preliminaryInput?.content_uri).toBe(credential.content_uri);
     expect(preliminaryInput?.content_size).toBe(
       credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,

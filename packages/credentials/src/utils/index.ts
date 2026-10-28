@@ -1,4 +1,7 @@
-import { createBlobContentReference } from "@idos-network/utils/blob-gateway";
+import {
+  createBlobContentReference,
+  createUkycContentReference,
+} from "@idos-network/utils/blob-gateway";
 import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
@@ -228,8 +231,8 @@ export interface BuildPreliminaryIDOSCredentialArgs {
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
   issuerSigningSecretKey?: Uint8Array;
-  /** When set (MM / `ukyc://`), skip IPFS CID hashing. */
-  contentUri?: string;
+  /** When set (MM / UKYC), `blob_id` is `sha256` of the ciphertext instead of an IPFS CID. */
+  ukycStorageId?: string;
 }
 
 export async function buildPreliminaryIDOSCredential({
@@ -239,7 +242,7 @@ export async function buildPreliminaryIDOSCredential({
   // For user-issued credentials, use a fresh ephemeral key for the signed reference
   // For issuer-side, use the signing key pair
   issuerSigningSecretKey = nacl.sign.keyPair().secretKey,
-  contentUri,
+  ukycStorageId,
 }: BuildPreliminaryIDOSCredentialArgs): Promise<Omit<PreliminaryIDOSCredential, "id">> {
   const ephemeralKeyPair = nacl.box.keyPair();
   const encryptedContent = encryptContent(
@@ -248,8 +251,8 @@ export async function buildPreliminaryIDOSCredential({
     ephemeralKeyPair.secretKey,
   );
 
-  const contentReference = contentUri
-    ? { uri: contentUri, size: encryptedContent.byteLength }
+  const contentReference = ukycStorageId
+    ? createUkycContentReference(ukycStorageId, encryptedContent)
     : await createBlobContentReference(encryptedContent);
   const signedReference = buildSignedCredentialContentReference(
     publicNotes,

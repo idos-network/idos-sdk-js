@@ -2,7 +2,7 @@ import { BlackHoleBlockstore } from "blockstore-core/black-hole";
 import { importer } from "ipfs-unixfs-importer";
 import { fixedSize } from "ipfs-unixfs-importer/chunker";
 
-import { base64Decode } from "../codecs";
+import { base64Decode, hexEncodeSha256Hash } from "../codecs";
 
 export type BlobContentReference = {
   cid: string;
@@ -109,6 +109,40 @@ export function createUkycContentUri(storageId: string, blobId: string): string 
     throw new Error("ukyc content uri requires a blob_id without path segments");
   }
   return `${UKYC_URI_PREFIX}${trimmedStorageId}/blobs/${trimmedBlobId}`;
+}
+
+const CONTENT_ADDRESSED_UKYC_BLOB_ID = /^[0-9a-f]{64}$/;
+
+/**
+ * The blob id when it is `sha256(ciphertext)` as lowercase hex.
+ * Legacy ids (dev credentials created before content addressing) return undefined.
+ */
+export function contentAddressedUkycBlobId(uri: string | null | undefined): string | undefined {
+  if (!isUkycContentUri(uri)) {
+    return undefined;
+  }
+  const marker = "/blobs/";
+  const markerIndex = uri.indexOf(marker);
+  if (markerIndex < 0) {
+    return undefined;
+  }
+  const blobId = uri.slice(markerIndex + marker.length);
+  if (blobId.includes("/") || blobId.includes("?") || blobId.includes("#")) {
+    return undefined;
+  }
+  // shortcut: dev still has ukyc:// rows whose blob id is the credential UUID, from before blob id was sha256(ciphertext). `: undefined` makes fetchBlob skip the hash compare for those. Delete it once those rows are wiped; a blob id that is not 64 hex should then fail the compare. Keep the compare.
+  return CONTENT_ADDRESSED_UKYC_BLOB_ID.test(blobId) ? blobId : undefined;
+}
+
+/** `blob_id` is `sha256(ciphertext)`, so the signed URI pins the encrypted bytes. */
+export function createUkycContentReference(
+  storageId: string,
+  encryptedContent: Uint8Array,
+): { uri: string; size: number } {
+  return {
+    uri: createUkycContentUri(storageId, hexEncodeSha256Hash(encryptedContent)),
+    size: encryptedContent.byteLength,
+  };
 }
 
 export function requireAccessTokenForUkycContent(
@@ -312,6 +346,17 @@ export class BlobGateway {
 
       if (contentCid !== cid) {
         throw new Error(`blob gateway returned content with CID ${contentCid}, expected ${cid}`);
+      }
+    }
+
+    // shortcut: this guard is the skip for that `: undefined` branch (dev UUID blob ids). Delete the guard with it once those rows are wiped. Keep `digest !== ukycBlobId`: that is the read check of the downloaded bytes against the blob id in the URI.
+    const ukycBlobId = contentAddressedUkycBlobId(contentUri);
+    if (ukycBlobId !== undefined) {
+      const digest = hexEncodeSha256Hash(content);
+      if (digest !== ukycBlobId) {
+        throw new Error(
+          `blob gateway returned content with sha256 ${digest}, expected ${ukycBlobId}`,
+        );
       }
     }
 

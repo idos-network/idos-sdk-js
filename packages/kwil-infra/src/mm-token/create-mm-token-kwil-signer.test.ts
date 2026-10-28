@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import {
   createMmTokenAuth,
   isMmTokenAuth,
-  mmTokenCredentialContentUri,
   mmTokenStorageId,
   type MmTokenEnvelope,
 } from "./create-mm-token-kwil-signer.js";
@@ -114,21 +113,6 @@ describe("createMmTokenAuth", () => {
 
     expect(signer.mmTokenPayload.storage_id).toBe("storage-abc");
     expect(mmTokenStorageId(signer)).toBe("storage-abc");
-  });
-
-  it("builds the credential ukyc:// URI from a base64url-encoded token", () => {
-    const credentialId = "0198c21d-79cb-7000-8000-000000000001";
-    const encodedToken = encodeEnvelope(createEnvelope());
-    const signer = createMmTokenAuth(encodedToken);
-    const credential = {
-      id: credentialId,
-      content_uri: mmTokenCredentialContentUri(signer, credentialId),
-    };
-
-    expect(credential).toEqual({
-      id: credentialId,
-      content_uri: `ukyc://storage-abc/blobs/${credentialId}`,
-    });
   });
 
   it("fails when the token payload has no storage_id", () => {
