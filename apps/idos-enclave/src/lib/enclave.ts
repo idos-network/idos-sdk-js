@@ -15,6 +15,8 @@ const ORIGIN_AUTHORIZATION_DAYS = 30;
 /** Origin -> authorization expiry, in milliseconds since epoch. */
 type AuthorizedOrigins = Record<string, number>;
 
+class SupersededRequestError extends Error {}
+
 export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   private parentOrigin: string;
 
@@ -23,6 +25,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   private unlockButton: HTMLButtonElement;
   private confirmButton: HTMLButtonElement;
   private backupButton: HTMLButtonElement;
+
+  // Rejects the request waiting on each button, so a newer request doesn't leave it hanging.
+  private supersedeRequest = new Map<HTMLButtonElement, () => void>();
 
   // Signer resolver
   private signTypeDataResponseResolver: ((signature: string) => void)[] = [];
@@ -95,8 +100,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.unlockButton.disabled = false;
 
     return new Promise((resolve, reject) => {
-      // Assign, don't add: each request replaces the previous handler instead of stacking up.
-      this.unlockButton.onclick = async () => {
+      this.onButtonClick(this.unlockButton, reject, async () => {
         this.unlockButton.disabled = true;
 
         try {
@@ -131,7 +135,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         } catch (error) {
           return reject(error);
         }
-      };
+      });
     });
   }
 
@@ -140,8 +144,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.confirmButton.style.display = "block";
     this.confirmButton.disabled = false;
 
-    return new Promise((resolve) => {
-      this.confirmButton.onclick = async () => {
+    return new Promise((resolve, reject) => {
+      this.onButtonClick(this.confirmButton, reject, async () => {
         this.confirmButton.disabled = true;
 
         const { confirmed } = await this.openDialog("confirm", {
@@ -150,7 +154,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         });
 
         resolve(confirmed ?? false);
-      };
+      });
     });
   }
 
@@ -190,7 +194,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.backupButton.disabled = false;
 
     return new Promise((resolve, reject) => {
-      this.backupButton.onclick = async () => {
+      this.onButtonClick(this.backupButton, reject, async () => {
         try {
           this.backupButton.disabled = true;
 
@@ -215,8 +219,24 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           this.backupButton.style.display = "none";
           this.backupButton.disabled = false;
         }
-      };
+      });
     });
+  }
+
+  /**
+   * Assigns, rather than adds, the button's click handler, so handlers don't stack up.
+   * The request whose handler gets replaced is rejected instead of left hanging.
+   */
+  private onButtonClick(
+    button: HTMLButtonElement,
+    reject: (reason: Error) => void,
+    handler: () => Promise<void>,
+  ): void {
+    this.supersedeRequest.get(button)?.();
+    this.supersedeRequest.set(button, () =>
+      reject(new SupersededRequestError("Superseded by a newer enclave request")),
+    );
+    button.onclick = handler;
   }
 
   /**
@@ -237,6 +257,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       if (event.origin !== this.parentOrigin || event.ports.length === 0) {
         return;
       }
+
+      let superseded = false;
 
       try {
         const { method, data } = event.data;
@@ -271,11 +293,15 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         const response = await methodFn.bind(this)(...data);
         event.ports[0].postMessage({ result: response });
       } catch (error) {
+        superseded = error instanceof SupersededRequestError;
         console.error("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
-        this.unlockButton.style.display = "none";
-        this.confirmButton.style.display = "none";
+        // The newer request still needs its button visible.
+        if (!superseded) {
+          this.unlockButton.style.display = "none";
+          this.confirmButton.style.display = "none";
+        }
         event.ports[0].close();
       }
     });
