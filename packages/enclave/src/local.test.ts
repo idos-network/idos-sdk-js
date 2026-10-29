@@ -59,11 +59,8 @@ class TestEnclave extends LocalEnclave {
 }
 
 // Copy of every raw entry in the store, to check that nothing was deleted or overwritten.
-// A password unlock refreshes the remember duration even when the derived key is then rejected.
-function storedEntries(store: MemoryStore, { exceptRememberDuration = false } = {}) {
-  const entries = new Map(store["storage"]);
-  if (exceptRememberDuration) entries.delete(store.REMEMBER_DURATION_KEY);
-  return entries;
+function storedEntries(store: MemoryStore) {
+  return new Map(store["storage"]);
 }
 
 class MPCTestEnclave extends LocalEnclave {
@@ -277,19 +274,19 @@ describe("LocalEnclave", () => {
     await enclave.reconfigure({
       expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
     });
-    const before = storedEntries(store, { exceptRememberDuration: true });
+    const before = storedEntries(store);
     await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
       "Derived encryption public key does not match expectedUserEncryptionPublicKey",
     );
     // The stale key is not used, but storage stays until an unlock replaces it.
     expect(enclave.userIdPresentOnPrompt).toEqual([false, true]);
-    expect(storedEntries(store, { exceptRememberDuration: true })).toEqual(before);
+    expect(storedEntries(store)).toEqual(before);
   });
 
   it("stops using a reloaded cached profile whose key no longer matches the canonical key", async () => {
     const store = new MemoryStore();
     await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
-    const before = storedEntries(store, { exceptRememberDuration: true });
+    const before = storedEntries(store);
 
     const reloaded = new TestEnclave({
       userId,
@@ -302,7 +299,7 @@ describe("LocalEnclave", () => {
       "Derived encryption public key does not match expectedUserEncryptionPublicKey",
     );
     expect(reloaded.userIdPresentOnPrompt).toEqual([true]);
-    expect(storedEntries(store, { exceptRememberDuration: true })).toEqual(before);
+    expect(storedEntries(store)).toEqual(before);
   });
 
   describe("when an unauthorized parent sends values that do not match the stored profile", () => {
@@ -554,6 +551,55 @@ describe("LocalEnclave", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("expires stored data when the deadline passes during a rejected unlock", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      await enclave.getPrivateEncryptionProfile();
+
+      await enclave.reconfigure({
+        expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+      });
+      // The user is still on the prompt when the deadline passes.
+      vi.spyOn(enclave, "getPasswordContext").mockImplementationOnce(async () => {
+        vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+        return { encryptionPasswordStore: "user", password: "super-secret", duration: 1 };
+      });
+
+      await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+        "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+      );
+      expect(storedEntries(store).size).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("retries the replacement cleanup when it failed before the new profile was written", async () => {
+    const store = new MemoryStore();
+    await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    const enclave = new TestEnclave({ userId: otherUserId, store } as LocalEnclaveOptions);
+    const replaced = vi
+      .spyOn(
+        enclave as unknown as { onStoredProfileReplaced(): Promise<void> },
+        "onStoredProfileReplaced",
+      )
+      .mockRejectedValueOnce(new Error("Storage unavailable"));
+
+    await expect(
+      enclave.createEncryptionProfileFromPassword("other-secret", otherUserId, "user"),
+    ).rejects.toThrow("Storage unavailable");
+    expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(userId);
+
+    await enclave.createEncryptionProfileFromPassword("other-secret", otherUserId, "user");
+    expect(replaced).toHaveBeenCalledTimes(2);
+    expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(otherUserId);
   });
 
   it("handles concurrent key use after the shared store is reset", async () => {

@@ -311,20 +311,19 @@ export class LocalEnclave<
 
     let password: string | undefined;
     let encryptionPasswordStore: EncryptionPasswordStore | undefined;
+    let rememberDuration: number | undefined;
 
     const context = await this.getPasswordContext();
 
     if (context.encryptionPasswordStore === "user") {
-      await this.store.setRememberDuration(context.duration);
-
+      rememberDuration = context.duration;
       password = context.password;
       encryptionPasswordStore = context.encryptionPasswordStore;
     }
 
     if (context.encryptionPasswordStore === "mpc") {
       // TODO: This is resetting duration, but should?
-      await this.store.setRememberDuration(undefined);
-
+      rememberDuration = undefined;
       password = await this.ensureMPCPassword();
       encryptionPasswordStore = "mpc";
     }
@@ -333,11 +332,18 @@ export class LocalEnclave<
       throw new Error("Password or encryption password store is not found");
     }
 
+    // The prompt or MPC download can outlast the deadline: expire the old profile first.
+    if (await this.store.hasRememberDurationElapsed()) {
+      await this.reset();
+    }
+
     const profile = await this.createEncryptionProfileFromPassword(
       password,
       this.userId,
       encryptionPasswordStore,
     );
+    // Only a saved profile gets a new deadline, so a failed unlock cannot extend the old one.
+    await this.store.setRememberDuration(rememberDuration);
 
     // Same origin check as the cached path. Password or MPC success is not authorization.
     if (!skipGuard && !(await this.guardKeys())) {
@@ -444,6 +450,8 @@ export class LocalEnclave<
     const replacesStoredProfile =
       !(await this.storeHoldsProfile(profile)) ||
       !(await this.storeHoldsLegacySecretKey(keyPair.secretKey));
+    // Before writing: if the cleanup fails, the old profile is still stored and the next unlock retries it.
+    if (replacesStoredProfile) await this.onStoredProfileReplaced();
 
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
@@ -455,7 +463,6 @@ export class LocalEnclave<
     );
     await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
     await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
-    if (replacesStoredProfile) await this.onStoredProfileReplaced();
 
     this.storedEncryptionProfile = profile;
     return profile;
