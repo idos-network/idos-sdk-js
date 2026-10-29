@@ -268,8 +268,10 @@ export class LocalEnclave<
   async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
     // The cached profile is a copy of shared storage, which other enclave instances
     // can expire, reset, or replace. Check storage on every key use.
+    // Expire even without a cached copy: the unlock below would refresh the deadline
+    // and keep an expired profile and its origin grants.
     const cached = this.storedEncryptionProfile;
-    if (cached && (await this.store.hasRememberDurationElapsed())) {
+    if (await this.store.hasRememberDurationElapsed()) {
       await this.reset();
     } else if (cached && !(await this.storeHoldsProfile(cached))) {
       // Storage now belongs to another session: drop the copy, keep their data.
@@ -369,6 +371,25 @@ export class LocalEnclave<
     return !publicKey || base64Encode(publicKey) === base64Encode(profile.keyPair.publicKey);
   }
 
+  /**
+   * storeHoldsProfile matches profiles saved before the public key was stored by user id only.
+   * Compare their secret key too, so a same-user key change still counts as a replacement.
+   * Only called when saving a profile: the obfuscated read is too slow for every key use.
+   */
+  private async storeHoldsLegacySecretKey(secretKey: Uint8Array): Promise<boolean> {
+    if (await this.store.get(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY)) return true;
+
+    try {
+      const stored = await this.storeObfuscatedBase64.get<Uint8Array>(
+        STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
+      );
+      return !stored || base64Encode(stored) === base64Encode(secretKey);
+    } catch {
+      // Written under another user id: a different profile.
+      return false;
+    }
+  }
+
   /** @see BaseProvider#ensureUserEncryptionProfile */
   async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
     const { keyPair, encryptionPasswordStore, userId } = await this.getPrivateEncryptionProfile();
@@ -420,7 +441,9 @@ export class LocalEnclave<
       keyPair,
       encryptionPasswordStore,
     };
-    const replacesStoredProfile = !(await this.storeHoldsProfile(profile));
+    const replacesStoredProfile =
+      !(await this.storeHoldsProfile(profile)) ||
+      !(await this.storeHoldsLegacySecretKey(keyPair.secretKey));
 
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);

@@ -2,6 +2,7 @@ import type { idOSCredentialRecord as idOSCredential } from "@idos-network/crede
 
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
+import { keyDerivation } from "@idos-network/utils/encryption";
 import { MemoryStore } from "@idos-network/utils/store";
 import tweetnacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
@@ -508,6 +509,51 @@ describe("LocalEnclave", () => {
 
     await enclave.createEncryptionProfileFromPassword("super-secret", userId, "user");
     expect(replaced).toHaveBeenCalledTimes(1);
+  });
+
+  it("signals a replacement when a legacy profile without a stored public key gets a new key", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    await enclave.createEncryptionProfileFromPassword("super-secret", userId, "user");
+    await store.delete(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY);
+    const replaced = vi.spyOn(
+      enclave as unknown as { onStoredProfileReplaced(): Promise<void> },
+      "onStoredProfileReplaced",
+    );
+
+    vi.mocked(keyDerivation).mockResolvedValueOnce(new Uint8Array(32).fill(9));
+    await enclave.createEncryptionProfileFromPassword("other-secret", userId, "user");
+    expect(replaced).toHaveBeenCalledTimes(1);
+  });
+
+  it("expires stored data even after a mismatch dropped the cached profile", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const store = new MemoryStore();
+      const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+      await enclave.getPrivateEncryptionProfile();
+
+      await enclave.reconfigure({
+        expectedUserEncryptionPublicKey: base64Encode(new Uint8Array(32).fill(1)),
+      });
+      await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+        "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+      );
+
+      // MemoryStore wipes expired data on any read, but LocalStore does not: the enclave must reset.
+      const reset = vi.spyOn(enclave, "reset");
+      vi.setSystemTime(new Date("2026-01-03T00:00:00Z"));
+      await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+        "Derived encryption public key does not match expectedUserEncryptionPublicKey",
+      );
+      expect(reset).toHaveBeenCalledTimes(1);
+      // The last unlock found an empty store: the expired profile was wiped, not refreshed.
+      expect(enclave.userIdPresentOnPrompt).toEqual([false, true, false]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("handles concurrent key use after the shared store is reset", async () => {
