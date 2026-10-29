@@ -92,6 +92,12 @@ export class LocalEnclave<
     }
   }
 
+  /** Obfuscated stores keyed to one user id, so a reconfigure mid-write cannot change the key. */
+  private obfuscatedStoresFor(userId: string) {
+    const obfuscated = this.store.pipeCodec(this.userIdObfuscationCodec(userId));
+    return { obfuscated, obfuscatedBase64: obfuscated.pipeCodec(base64Codec) };
+  }
+
   /** @override parent method to reset the enclave */
   async reset(): Promise<void> {
     await super.reset();
@@ -117,23 +123,25 @@ export class LocalEnclave<
    *
    * This ensures that data is minimally obfuscated to avoid low-sophistication attacks.
    */
-  private userIdObfuscationCodec(): PipeCodecArgs<string> {
+  private userIdObfuscationCodec(fixedUserId?: string): PipeCodecArgs<string> {
     // oxlint-disable-next-line typescript/no-this-alias -- Needed for `this` in nested encode/decode functions
     const self = this;
+    const currentUserId = () => fixedUserId ?? self.options.userId;
 
     const toKey = (userId: string, salt: Uint8Array) =>
       syncScrypt(utf8Encode(userId), salt, 16384, 8, 1, nacl.secretbox.keyLength);
 
     return {
       encode(data: string): string {
-        if (!self.options.userId) {
+        const userId = currentUserId();
+        if (!userId) {
           throw new Error("User ID required for encryption");
         }
 
         const dataBytes = utf8Encode(data); // Convert string to Uint8Array
         const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
         const salt = nacl.randomBytes(16);
-        const key = toKey(self.options.userId, salt);
+        const key = toKey(userId, salt);
         const payload = nacl.secretbox(dataBytes, nonce, key);
 
         // Store salt + nonce + ciphertext
@@ -146,7 +154,8 @@ export class LocalEnclave<
       },
 
       decode(payload: string): string {
-        if (!self.options.userId) {
+        const userId = currentUserId();
+        if (!userId) {
           throw new Error("User ID required for decryption");
         }
 
@@ -159,7 +168,7 @@ export class LocalEnclave<
         const nonce = combined.slice(16, 16 + nacl.secretbox.nonceLength);
         const ciphertext = combined.slice(16 + nacl.secretbox.nonceLength);
 
-        const key = toKey(self.options.userId, salt);
+        const key = toKey(userId, salt);
         const result = nacl.secretbox.open(ciphertext, nonce, key);
 
         if (!result) throw new Error("Failed to decrypt data");
@@ -314,7 +323,8 @@ export class LocalEnclave<
     let rememberDuration: number | undefined;
 
     // The password belongs to the user the prompt was opened for. The parent can reconfigure
-    // while it is open, so never save it under another user id.
+    // while it is open, so the MPC calls and the saved profile stay bound to that user. If the
+    // parent moved on, isCurrentProfile below does not return it and the next call unlocks again.
     const userId = this.userId;
     const context = await this.getPasswordContext();
 
@@ -327,16 +337,12 @@ export class LocalEnclave<
     if (context.encryptionPasswordStore === "mpc") {
       // TODO: This is resetting duration, but should?
       rememberDuration = undefined;
-      password = await this.ensureMPCPassword();
+      password = await this.ensureMPCPassword(userId);
       encryptionPasswordStore = "mpc";
     }
 
     if (!password || !encryptionPasswordStore) {
       throw new Error("Password or encryption password store is not found");
-    }
-
-    if (this.options.userId !== userId) {
-      throw new Error("User changed during unlock");
     }
 
     // The prompt or MPC download can outlast the deadline: expire the old profile first.
@@ -389,11 +395,11 @@ export class LocalEnclave<
    * Compare their secret key too, so a same-user key change still counts as a replacement.
    * Only called when saving a profile: the obfuscated read is too slow for every key use.
    */
-  private async storeHoldsLegacySecretKey(secretKey: Uint8Array): Promise<boolean> {
+  private async storeHoldsLegacySecretKey(secretKey: Uint8Array, userId: string): Promise<boolean> {
     if (await this.store.get(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY)) return true;
 
     try {
-      const stored = await this.storeObfuscatedBase64.get<Uint8Array>(
+      const stored = await this.obfuscatedStoresFor(userId).obfuscatedBase64.get<Uint8Array>(
         STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
       );
       return !stored || base64Encode(stored) === base64Encode(secretKey);
@@ -454,17 +460,18 @@ export class LocalEnclave<
       keyPair,
       encryptionPasswordStore,
     };
+    const { obfuscated, obfuscatedBase64 } = this.obfuscatedStoresFor(userId);
     const replacesStoredProfile =
       !(await this.storeHoldsProfile(profile)) ||
-      !(await this.storeHoldsLegacySecretKey(keyPair.secretKey));
+      !(await this.storeHoldsLegacySecretKey(keyPair.secretKey, userId));
     // Before writing: if the cleanup fails, the old profile is still stored and the next unlock retries it.
     if (replacesStoredProfile) await this.onStoredProfileReplaced();
 
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
-    await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
+    await obfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
     await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
-    await this.storeObfuscatedBase64.set(
+    await obfuscatedBase64.set(
       STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
       keyPair.secretKey,
     );
@@ -475,9 +482,10 @@ export class LocalEnclave<
     return profile;
   }
 
-  protected async ensureMPCPassword(): Promise<string> {
+  protected async ensureMPCPassword(userId: string = this.userId): Promise<string> {
     if (this.options?.mode !== "new") {
-      const { status: downloadStatus, secret: downloadedPassword } = await this.downloadSecret();
+      const { status: downloadStatus, secret: downloadedPassword } =
+        await this.downloadSecret(userId);
 
       if (downloadStatus === "ok" && downloadedPassword) {
         return utf8Decode(downloadedPassword);
@@ -487,7 +495,7 @@ export class LocalEnclave<
     }
 
     const password = generatePassword();
-    const { status: uploadStatus } = await this.uploadSecret(password);
+    const { status: uploadStatus } = await this.uploadSecret(password, userId);
 
     if (uploadStatus !== "success") {
       throw Error(`A secret upload failed with status: ${uploadStatus}`);
@@ -503,7 +511,7 @@ export class LocalEnclave<
     return this.mpcClientInstance;
   }
 
-  private async downloadSecret(): Promise<{
+  private async downloadSecret(userId: string): Promise<{
     status: string;
     secret: Buffer<ArrayBufferLike> | undefined;
   }> {
@@ -527,14 +535,14 @@ export class LocalEnclave<
     );
 
     return this.mpcClient.downloadSecret(
-      this.userId,
+      userId,
       downloadRequest,
       signedMessage,
       ephemeralKeyPair.secretKey,
     );
   }
 
-  private async uploadSecret(secret: string): Promise<{ status: string }> {
+  private async uploadSecret(secret: string, userId: string): Promise<{ status: string }> {
     if (!this.options.walletAddress) {
       console.error("signerAddress is not found");
       return { status: "no-signer-address" };
@@ -553,7 +561,7 @@ export class LocalEnclave<
       messageToSign.value as any,
     );
 
-    return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
+    return this.mpcClient.uploadSecret(userId, uploadRequest, signedMessage, blindedShares);
   }
 
   async addAddressMessageToSign(

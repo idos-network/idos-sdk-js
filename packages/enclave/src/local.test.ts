@@ -13,16 +13,20 @@ import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 // ponytail: real scrypt (N=16384) runs on every obfuscated store read/write, which is
 // several hundred ms per test and times out on CI. The codec only needs a deterministic
 // key of the right length, not a real KDF.
+// The key still depends on the password (the user id), so decoding under the wrong one fails.
 vi.mock("scrypt-js", () => ({
   syncScrypt: (
-    _password: Uint8Array,
+    password: Uint8Array,
     salt: Uint8Array,
     _n: number,
     _r: number,
     _p: number,
     dkLen: number,
   ) =>
-    new Uint8Array(Array.from({ length: dkLen }, (_, index) => salt[index % salt.length] ^ index)),
+    Uint8Array.from(
+      { length: dkLen },
+      (_, index) => password[index % password.length] ^ salt[index % salt.length] ^ index,
+    ),
 }));
 
 vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
@@ -35,14 +39,6 @@ vi.mock("@idos-network/utils/encryption", async (importOriginal) => {
     ),
   };
 });
-
-// Obfuscated store uses syncScrypt(N=16384); keep tests under vitest's default 5s timeout on CI.
-vi.mock("scrypt-js", () => ({
-  syncScrypt: vi.fn(
-    (_password: Uint8Array, _salt: Uint8Array, _N: number, _r: number, _p: number, dkLen: number) =>
-      new Uint8Array(dkLen).fill(7),
-  ),
-}));
 
 // The enclave app's origin grants key, cleared the same way on profile replacement.
 const ORIGIN_GRANTS_KEY = "enclave-authorized-origins-v2";
@@ -609,11 +605,9 @@ describe("LocalEnclave", () => {
     expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(otherUserId);
   });
 
-  it("does not save an unlock under a user the parent switched to during the prompt", async () => {
+  it("saves an unlock under the user the prompt was opened for, not one the parent switched to", async () => {
     const store = new MemoryStore();
     await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
-    await store.set(ORIGIN_GRANTS_KEY, "{}");
-    const before = storedEntries(store);
 
     const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
     const enclave = new TestEnclave({ store } as LocalEnclaveOptions);
@@ -624,11 +618,31 @@ describe("LocalEnclave", () => {
       await enclave.reconfigure({ userId });
       return { encryptionPasswordStore: "user", password: "super-secret", duration: 1 };
     });
+    const create = vi.spyOn(enclave, "createEncryptionProfileFromPassword");
 
-    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
-      "User changed during unlock",
-    );
-    expect(storedEntries(store)).toEqual(before);
+    const profile = await enclave.getPrivateEncryptionProfile();
+
+    // The other user's password is saved under their id. It is not returned to the parent,
+    // which now asks for the first user, so a second unlock follows for that user.
+    expect(create.mock.calls.map(([, savedUserId]) => savedUserId)).toEqual([otherUserId, userId]);
+    expect(profile.userId).toBe(userId);
+  });
+
+  it("obfuscates a profile with its own user id when the parent reconfigures mid-write", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store } as LocalEnclaveOptions);
+    const set = store.set.bind(store);
+    vi.spyOn(store, "set").mockImplementation(async (key, value) => {
+      await set(key, value);
+      if (key === STORAGE_KEYS.USER_ID) await enclave.reconfigure({ userId: "someone-else" });
+    });
+
+    await enclave.createEncryptionProfileFromPassword("super-secret", userId, "user");
+
+    const reloaded = new TestEnclave({ store } as LocalEnclaveOptions);
+    await reloaded.load();
+    expect((await reloaded.getPrivateEncryptionProfile()).userId).toBe(userId);
+    expect(reloaded.userIdPresentOnPrompt).toEqual([]);
   });
 
   it("handles concurrent key use after the shared store is reset", async () => {
