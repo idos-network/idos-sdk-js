@@ -183,6 +183,26 @@ describe("dashboard machine session lifecycle", () => {
     actor.stop();
   });
 
+  it("retries the FaceSign wipe instead of connecting when it failed", async () => {
+    let attempts = 0;
+    const actor = start(
+      async () => ({ nearSelector: null }),
+      false,
+      async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error("Failed to clear FaceSign keys");
+      },
+    );
+
+    await waitFor(actor, (s) => s.matches("loggedIn"));
+    actor.send({ type: "DISCONNECT" });
+    await waitFor(actor, (s) => s.matches("error"));
+    actor.send({ type: "RETRY" });
+    await waitFor(actor, (s) => s.matches("disconnected"));
+    expect(attempts).toBe(2);
+    actor.stop();
+  });
+
   it("reconnects on retry when the failure was not session deletion", async () => {
     let connectAttempts = 0;
     const actor = createActor(
