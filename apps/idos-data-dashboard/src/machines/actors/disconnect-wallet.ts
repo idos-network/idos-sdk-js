@@ -36,21 +36,18 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
     if (walletType === "EVM") {
       await disconnectEvm();
     }
-
-    if (walletType === "FaceSign") {
-      try {
-        const { clearFaceSignProvider } = await import("@/core/signers");
-        await clearFaceSignProvider();
-      } catch (error) {
-        console.error("Error during FaceSign reset:", error);
-        throw new Error("Failed to clear FaceSign keys", { cause: error });
-      }
-    }
   } catch (error) {
-    if (error instanceof Error && error.message === "Failed to clear FaceSign keys") {
-      throw error;
-    }
     console.error(`Error during ${walletType} disconnect:`, error);
+  }
+
+  // Not gated on walletType: a FaceSign key enrolled from a non-FaceSign session
+  // would otherwise let the next browser user log in as this one.
+  try {
+    const { clearFaceSignProvider } = await import("@/core/signers");
+    await clearFaceSignProvider();
+  } catch (error) {
+    console.error("Error during FaceSign reset:", error);
+    throw new Error("Failed to clear FaceSign keys", { cause: error });
   }
 
   try {
