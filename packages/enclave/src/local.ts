@@ -277,7 +277,7 @@ export class LocalEnclave<
     }
 
     // A cached key is only reusable while it still matches the canonical public key;
-    // after a rotation it falls through to the reset below and gets wiped.
+    // after a rotation it falls through to the unlock below.
     const expectedPublicKey = this.options.expectedUserEncryptionPublicKey;
     if (
       this.storedEncryptionProfile?.userId === this.userId &&
@@ -285,7 +285,7 @@ export class LocalEnclave<
         base64Encode(this.storedEncryptionProfile.keyPair.publicKey) === expectedPublicKey)
     ) {
       // A matching cached profile still needs origin authorization before key use.
-      // Denying it must keep the profile and the allowlist; only a different user resets.
+      // Denying it must keep the profile and the allowlist; only another unlock replaces them.
       const profile = this.storedEncryptionProfile;
       if (!skipGuard && !(await this.guardKeys())) {
         throw new Error("Origin is not authorized to use the keys");
@@ -296,9 +296,10 @@ export class LocalEnclave<
       return profile;
     }
 
-    if (this.storedEncryptionProfile) {
-      await this.reset();
-    }
+    // userId and the expected key come from the parent, so a mismatch must not wipe storage:
+    // any embedding page could send one. Drop the copy only. The stored profile and origin
+    // grants are replaced once the user unlocks a different profile in the enclave.
+    this.storedEncryptionProfile = undefined;
 
     if (this.options.encryptionPasswordStore === "mm") {
       throw new Error(

@@ -225,7 +225,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         const { method, data } = event.data;
 
         // Whitelisted methods. `reset` is omitted: it deletes every idOS-* key
-        // with no origin check. In-iframe user switches still call reset() directly.
+        // with no origin check. A user switch replaces the stored profile once the new user unlocks.
         const allowedMethods: (keyof this)[] = [
           "load",
           "reconfigure",
