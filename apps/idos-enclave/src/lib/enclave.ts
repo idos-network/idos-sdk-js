@@ -95,7 +95,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.unlockButton.disabled = false;
 
     return new Promise((resolve, reject) => {
-      this.unlockButton.addEventListener("click", async () => {
+      // Assign, don't add: each request replaces the previous handler instead of stacking up.
+      this.unlockButton.onclick = async () => {
         this.unlockButton.disabled = true;
 
         try {
@@ -130,7 +131,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         } catch (error) {
           return reject(error);
         }
-      });
+      };
     });
   }
 
@@ -139,8 +140,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.confirmButton.style.display = "block";
     this.confirmButton.disabled = false;
 
-    return new Promise((resolve) =>
-      this.confirmButton.addEventListener("click", async () => {
+    return new Promise((resolve) => {
+      this.confirmButton.onclick = async () => {
         this.confirmButton.disabled = true;
 
         const { confirmed } = await this.openDialog("confirm", {
@@ -149,8 +150,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         });
 
         resolve(confirmed ?? false);
-      }),
-    );
+      };
+    });
   }
 
   async reconfigure(options: Partial<LocalEnclaveOptions> = {}) {
@@ -189,7 +190,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.backupButton.disabled = false;
 
     return new Promise((resolve, reject) => {
-      this.backupButton.addEventListener("click", async () => {
+      this.backupButton.onclick = async () => {
         try {
           this.backupButton.disabled = true;
 
@@ -214,7 +215,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           this.backupButton.style.display = "none";
           this.backupButton.disabled = false;
         }
-      });
+      };
     });
   }
 
