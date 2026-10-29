@@ -42,20 +42,33 @@ export const disconnect = fromPromise<void, DisconnectInput>(async ({ input }) =
 
   // Not gated on walletType: a FaceSign key enrolled from a non-FaceSign session
   // would otherwise let the next browser user log in as this one.
+  let faceSignError: unknown;
   try {
     const { clearFaceSignProvider } = await import("@/core/signers");
     await clearFaceSignProvider();
   } catch (error) {
     console.error("Error during FaceSign reset:", error);
-    throw new Error("Failed to clear FaceSign keys", { cause: error });
+    faceSignError = error;
   }
 
+  // A failed FaceSign wipe must not skip the client logout below.
+  let logOutError: unknown;
   try {
     if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
       await idOSClient.logOut();
     }
+  } catch (error) {
+    logOutError = error;
   } finally {
     queryClient.clear();
+  }
+
+  if (faceSignError) {
+    throw new Error("Failed to clear FaceSign keys", { cause: faceSignError });
+  }
+
+  if (logOutError) {
+    throw logOutError;
   }
 
   if (sessionError) {
