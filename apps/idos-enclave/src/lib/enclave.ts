@@ -6,7 +6,14 @@ import type {
 
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/enclave/local";
 
-const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
+// v2: before #1521, unlocking alone wrote to "enclave-authorized-origins", so it is no longer read.
+const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins-v2";
+
+// Same as the longest remember duration. MPC sessions never expire, so grants need their own limit.
+const ORIGIN_AUTHORIZATION_DAYS = 30;
+
+/** Origin -> authorization expiry, in milliseconds since epoch. */
+type AuthorizedOrigins = Record<string, number>;
 
 export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   private parentOrigin: string;
@@ -48,8 +55,13 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   }
 
   // Read from shared storage on every check, so another enclave's reset revokes it here too.
-  private async authorizedOrigins(): Promise<string[]> {
-    return JSON.parse((await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]");
+  private async authorizedOrigins(): Promise<AuthorizedOrigins> {
+    const origins: AuthorizedOrigins = JSON.parse(
+      (await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "{}",
+    );
+    return Object.fromEntries(
+      Object.entries(origins).filter(([, expiresAt]) => expiresAt > Date.now()),
+    );
   }
 
   /** @see LocalEnclave#onStoredProfileReplaced */
@@ -59,12 +71,13 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
   /** @see LocalEnclave#guardKeys */
   async guardKeys(): Promise<boolean> {
-    if ((await this.authorizedOrigins()).includes(this.parentOrigin)) {
+    if (Object.hasOwn(await this.authorizedOrigins(), this.parentOrigin)) {
       return true;
     }
 
     const confirmation = await this.confirm(
-      `Do you want to authorize '${this.parentOrigin}' to use the keys?`,
+      `Do you want to authorize '${this.parentOrigin}' to use the keys? ` +
+        `This is remembered on this device for up to ${ORIGIN_AUTHORIZATION_DAYS} days.`,
     );
 
     if (!confirmation) {
@@ -82,7 +95,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.unlockButton.disabled = false;
 
     return new Promise((resolve, reject) => {
-      this.unlockButton.addEventListener("click", async () => {
+      // Assign, don't add: each request replaces the previous handler instead of stacking up.
+      this.unlockButton.onclick = async () => {
         this.unlockButton.disabled = true;
 
         try {
@@ -117,7 +131,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         } catch (error) {
           return reject(error);
         }
-      });
+      };
     });
   }
 
@@ -126,8 +140,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.confirmButton.style.display = "block";
     this.confirmButton.disabled = false;
 
-    return new Promise((resolve) =>
-      this.confirmButton.addEventListener("click", async () => {
+    return new Promise((resolve) => {
+      this.confirmButton.onclick = async () => {
         this.confirmButton.disabled = true;
 
         const { confirmed } = await this.openDialog("confirm", {
@@ -136,8 +150,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         });
 
         resolve(confirmed ?? false);
-      }),
-    );
+      };
+    });
   }
 
   async reconfigure(options: Partial<LocalEnclaveOptions> = {}) {
@@ -176,7 +190,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     this.backupButton.disabled = false;
 
     return new Promise((resolve, reject) => {
-      this.backupButton.addEventListener("click", async () => {
+      this.backupButton.onclick = async () => {
         try {
           this.backupButton.disabled = true;
 
@@ -201,16 +215,19 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           this.backupButton.style.display = "none";
           this.backupButton.disabled = false;
         }
-      });
+      };
     });
   }
 
   /**
    * Accepts the parent origin and stores it in the authorized origins.
-   * So next time enclave won't ask for permission again.
+   * So enclave won't ask for permission again until the authorization expires.
    */
   private async acceptParentOrigin(): Promise<void> {
-    const origins = [...new Set([...(await this.authorizedOrigins()), this.parentOrigin])];
+    const origins: AuthorizedOrigins = {
+      ...(await this.authorizedOrigins()),
+      [this.parentOrigin]: Date.now() + ORIGIN_AUTHORIZATION_DAYS * 24 * 60 * 60 * 1000,
+    };
 
     await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(origins));
   }
