@@ -44,8 +44,15 @@ vi.mock("scrypt-js", () => ({
   ),
 }));
 
+// The enclave app's origin grants key, cleared the same way on profile replacement.
+const ORIGIN_GRANTS_KEY = "enclave-authorized-origins-v2";
+
 class TestEnclave extends LocalEnclave {
   userIdPresentOnPrompt: boolean[] = [];
+
+  protected async onStoredProfileReplaced() {
+    await this.store.delete(ORIGIN_GRANTS_KEY);
+  }
 
   async getPasswordContext() {
     this.userIdPresentOnPrompt.push((await this.store.get(STORAGE_KEYS.USER_ID)) !== undefined);
@@ -325,7 +332,7 @@ describe("LocalEnclave", () => {
           store,
         } as LocalEnclaveOptions).getPrivateEncryptionProfile();
         // Stands in for the enclave app's origin grants, which live in the same store.
-        await store.set("enclave-authorized-origins", "{}");
+        await store.set(ORIGIN_GRANTS_KEY, "{}");
         const before = storedEntries(store);
 
         const enclave = new TestEnclave({ store } as LocalEnclaveOptions);
@@ -600,6 +607,28 @@ describe("LocalEnclave", () => {
     await enclave.createEncryptionProfileFromPassword("other-secret", otherUserId, "user");
     expect(replaced).toHaveBeenCalledTimes(2);
     expect(await store.get(STORAGE_KEYS.USER_ID)).toBe(otherUserId);
+  });
+
+  it("does not save an unlock under a user the parent switched to during the prompt", async () => {
+    const store = new MemoryStore();
+    await new TestEnclave({ userId, store } as LocalEnclaveOptions).getPrivateEncryptionProfile();
+    await store.set(ORIGIN_GRANTS_KEY, "{}");
+    const before = storedEntries(store);
+
+    const otherUserId = "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f";
+    const enclave = new TestEnclave({ store } as LocalEnclaveOptions);
+    await enclave.load();
+    await enclave.reconfigure({ userId: otherUserId });
+    // The prompt is for the other user; the parent switches back before the password arrives.
+    vi.spyOn(enclave, "getPasswordContext").mockImplementationOnce(async () => {
+      await enclave.reconfigure({ userId });
+      return { encryptionPasswordStore: "user", password: "super-secret", duration: 1 };
+    });
+
+    await expect(enclave.getPrivateEncryptionProfile()).rejects.toThrow(
+      "User changed during unlock",
+    );
+    expect(storedEntries(store)).toEqual(before);
   });
 
   it("handles concurrent key use after the shared store is reset", async () => {

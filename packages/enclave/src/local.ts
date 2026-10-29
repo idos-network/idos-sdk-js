@@ -313,6 +313,9 @@ export class LocalEnclave<
     let encryptionPasswordStore: EncryptionPasswordStore | undefined;
     let rememberDuration: number | undefined;
 
+    // The password belongs to the user the prompt was opened for. The parent can reconfigure
+    // while it is open, so never save it under another user id.
+    const userId = this.userId;
     const context = await this.getPasswordContext();
 
     if (context.encryptionPasswordStore === "user") {
@@ -332,6 +335,10 @@ export class LocalEnclave<
       throw new Error("Password or encryption password store is not found");
     }
 
+    if (this.options.userId !== userId) {
+      throw new Error("User changed during unlock");
+    }
+
     // The prompt or MPC download can outlast the deadline: expire the old profile first.
     if (await this.store.hasRememberDurationElapsed()) {
       await this.reset();
@@ -339,7 +346,7 @@ export class LocalEnclave<
 
     const profile = await this.createEncryptionProfileFromPassword(
       password,
-      this.userId,
+      userId,
       encryptionPasswordStore,
     );
     // Only a saved profile gets a new deadline, so a failed unlock cannot extend the old one.
