@@ -77,7 +77,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
     const confirmation = await this.confirm(
       `Do you want to authorize '${this.parentOrigin}' to use the keys? ` +
-        `This is remembered on this device for ${ORIGIN_AUTHORIZATION_DAYS} days, or until you sign out.`,
+        `This is remembered on this device for up to ${ORIGIN_AUTHORIZATION_DAYS} days.`,
     );
 
     if (!confirmation) {
