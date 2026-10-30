@@ -1,5 +1,13 @@
 # data-dashboard
 
+## 1.4.10
+
+### Patch Changes
+
+- @idos-network/client@3.1.1
+- @idos-network/consumer@3.1.1
+- @idos-network/issuer@3.1.1
+
 ## 1.4.9
 
 ### Patch Changes

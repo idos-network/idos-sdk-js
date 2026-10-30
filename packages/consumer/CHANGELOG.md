@@ -1,5 +1,7 @@
 # @idos-network/consumer
 
+## 3.1.1
+
 ## 3.1.0
 
 ### Patch Changes
