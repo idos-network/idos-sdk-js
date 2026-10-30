@@ -1,5 +1,12 @@
 # @idos-network/client
 
+## 3.1.1
+
+### Patch Changes
+
+- Updated dependencies [70c9c5d]
+  - @idos-network/enclave@3.0.2
+
 ## 3.1.0
 
 ### Minor Changes
