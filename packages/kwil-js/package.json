@@ -56,13 +56,13 @@
   "devDependencies": {
     "@types/node": "catalog:build",
     "@vitest/coverage-v8": "catalog:testing",
-    "dotenv": "^16.4.5",
+    "dotenv": "^18.0.0",
     "ethers": "catalog:ethereum",
     "scrypt-js": "^3.0.1",
     "tsdown": "catalog:build",
     "tweetnacl": "catalog:core",
     "typescript": "catalog:build",
-    "uuid": "^11.1.0",
+    "uuid": "^14.0.0",
     "vitest": "catalog:testing"
   },
   "engines": {
