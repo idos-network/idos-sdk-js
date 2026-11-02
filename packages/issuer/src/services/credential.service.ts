@@ -124,6 +124,7 @@ export class CredentialService {
 
     await this.#blobGateway.uploadCredentialBlobs({
       requestId,
+      credentialIds: [originalCredential.id, copyCredential.id],
       original: originalCredential.encryptedContent,
       copy: copyCredential.encryptedContent,
     });

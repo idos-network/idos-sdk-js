@@ -546,6 +546,144 @@ describe("credential blob storage", () => {
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
   });
 
+  describe("when the upload outcome is unknown", () => {
+    type StoredRecord = { content_uri: string; content_size: number; blob: Uint8Array };
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    // The upload POST loses its response; blob GETs serve whatever the record says is stored.
+    function clientWithLostUpload(
+      lookup: (id: string, uploaded: Uint8Array) => Promise<StoredRecord | undefined>,
+      onRead?: (signal: AbortSignal | undefined) => Promise<Response>,
+    ): idOSClientLoggedIn {
+      let uploaded = new Uint8Array();
+      let stored: StoredRecord | undefined;
+      const kwilSigner = {};
+      const kwilClient = {
+        signer: kwilSigner,
+        execute: async () => undefined,
+        call: async ({ name, inputs }: { name: string; inputs: { id: string } }) => {
+          // Other view calls made while building the credential (e.g. a message to sign).
+          if (name !== "get_credential_owned") return [{ message: "credential-message" }];
+          stored = await lookup(inputs.id, uploaded);
+          return stored ? [{ id: inputs.id, ...stored }] : [];
+        },
+      } as unknown as KwilActionClient;
+      const blobGateway = new BlobGateway({
+        url: "https://blob.example",
+        uploadRetries: 0,
+        fetchFn: async (_input, init) => {
+          if (init?.method === "POST") {
+            const original = (init.body as FormData).get("original") as Blob;
+            uploaded = new Uint8Array(await original.arrayBuffer());
+            throw new TypeError("fetch failed");
+          }
+          if (!stored) throw new Error("unexpected blob read");
+          if (onRead) return onRead(init?.signal ?? undefined);
+          return new Response(stored.blob.slice());
+        },
+      });
+      const withSigner = {
+        store: new MemoryStore(),
+        kwilClient,
+        enclaveProvider: {},
+        signer: {},
+        kwilSigner,
+        walletIdentifier: "wallet",
+        walletPublicKey: undefined,
+        walletType: "EVM",
+        blobGateway,
+      } as unknown as idOSClientWithUserSigner;
+      return new idOSClientLoggedIn(withSigner, {
+        id: crypto.randomUUID(),
+        recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+        encryption_password_store: "user",
+      });
+    }
+
+    it("returns the credential when it exists and its blob matches the upload", async () => {
+      const lookedUp: string[] = [];
+      const client = clientWithLostUpload(async (id, uploaded) => {
+        lookedUp.push(id);
+        const { uri } = await createBlobContentReference(uploaded);
+        return { content_uri: uri, content_size: uploaded.byteLength, blob: uploaded };
+      });
+
+      const credential = await client.createCredential("public notes", credentialPlaintext);
+
+      expect(lookedUp).toEqual([credential.id]);
+    });
+
+    it("rethrows when the stored blob differs from the upload", async () => {
+      const client = clientWithLostUpload(async (_id, uploaded) => {
+        const tampered = uploaded.slice();
+        tampered[0] ^= 1;
+        // A non-ipfs URI skips the CID check, so this exercises the byte comparison.
+        return {
+          content_uri: "ukyc://storage-abc/blobs/credential",
+          content_size: tampered.byteLength,
+          blob: tampered,
+        };
+      });
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
+
+    it("gives up on a stalled read-back after the deadline", async () => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      let readStarted!: () => void;
+      const started = new Promise<void>((resolve) => {
+        readStarted = resolve;
+      });
+      const client = clientWithLostUpload(
+        async (_id, uploaded) => {
+          const { uri } = await createBlobContentReference(uploaded);
+          return { content_uri: uri, content_size: uploaded.byteLength, blob: uploaded };
+        },
+        (signal) => {
+          readStarted();
+          // Never answers; only the abort signal can end it.
+          return new Promise((_resolve, reject) => {
+            signal?.addEventListener("abort", () => reject(signal.reason));
+          });
+        },
+      );
+
+      const creation = client.createCredential("public notes", credentialPlaintext);
+      const outcome = expect(creation).rejects.toMatchObject({
+        name: "BlobGatewayUploadOutcomeUnknownError",
+      });
+      await started;
+      await vi.advanceTimersByTimeAsync(60_000);
+      await outcome;
+    });
+
+    it("rethrows with the credential id when the credential isn't there", async () => {
+      const client = clientWithLostUpload(async () => undefined);
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({
+        name: "BlobGatewayUploadOutcomeUnknownError",
+        credentialIds: [expect.any(String)],
+      });
+    });
+
+    it("rethrows the unknown outcome when the lookup itself fails", async () => {
+      const client = clientWithLostUpload(async () => {
+        throw new Error("node unavailable");
+      });
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
+  });
+
   it("returns the dwg message string and maps params via toDelegatedWriteGrantBaseParams", async () => {
     const callAction = vi.fn(async () => [{ message: "mock-dwg-message" }]);
     const kwilClient = {
