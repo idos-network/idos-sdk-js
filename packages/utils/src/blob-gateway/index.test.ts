@@ -229,7 +229,7 @@ describe("BlobGateway", () => {
     expect(fetchFn).toHaveBeenCalledTimes(3);
   });
 
-  it("gives up after the configured number of upload retries", async () => {
+  it("reports an unknown outcome after the configured number of upload retries", async () => {
     const fetchFn = vi.fn(async () =>
       Response.json({ code: "UKYC_REQUEST_TIMEOUT" }, { status: 504 }),
     );
@@ -241,8 +241,17 @@ describe("BlobGateway", () => {
     });
 
     await expect(
-      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
-    ).rejects.toMatchObject({ name: "BlobGatewayHttpError", status: 504 });
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        credentialIds: ["credential-1"],
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayUploadOutcomeUnknownError",
+      uploadRequestId: "request-1",
+      credentialIds: ["credential-1"],
+      cause: { name: "BlobGatewayHttpError", status: 504 },
+    });
     expect(fetchFn).toHaveBeenCalledTimes(2);
   });
 
@@ -299,12 +308,14 @@ describe("BlobGateway", () => {
 
       const upload = gateway.uploadCredentialBlobs({
         requestId: "request-1",
+        credentialIds: ["original-1", "copy-1"],
         original: utf8Encode("original"),
       });
 
       await expect(upload).rejects.toBeInstanceOf(BlobGatewayUploadOutcomeUnknownError);
       await expect(upload).rejects.toMatchObject({
         uploadRequestId: "request-1",
+        credentialIds: ["original-1", "copy-1"],
         cause: { name: "BlobGatewayHttpError", status },
       });
     },
@@ -341,7 +352,7 @@ describe("BlobGateway", () => {
     expect(signals[1]?.aborted).toBe(false);
   });
 
-  it("fails with TimeoutError when every upload attempt times out", async () => {
+  it("reports an unknown outcome when every upload attempt times out", async () => {
     const fetchFn = vi.fn(
       async (_input: Parameters<typeof fetch>[0], init?: RequestInit) =>
         new Promise<Response>((_resolve, reject) => {
@@ -358,7 +369,10 @@ describe("BlobGateway", () => {
 
     await expect(
       gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
-    ).rejects.toMatchObject({ name: "TimeoutError" });
+    ).rejects.toMatchObject({
+      name: "BlobGatewayUploadOutcomeUnknownError",
+      cause: { name: "TimeoutError" },
+    });
     expect(fetchFn).toHaveBeenCalledTimes(2);
   });
 
@@ -378,7 +392,24 @@ describe("BlobGateway", () => {
 
     await expect(
       gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
-    ).rejects.toMatchObject({ status: 502 });
+    ).rejects.toMatchObject({ cause: { status: 502 } });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports an unknown outcome without retrying when a successful response is unreadable", async () => {
+    const fetchFn = vi.fn(async () => new Response("not json", { status: 200 }));
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayUploadOutcomeUnknownError",
+      cause: { name: "SyntaxError" },
+    });
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 
@@ -432,11 +463,13 @@ describe("BlobGateway", () => {
         original: utf8Encode("original"),
       }),
     ).rejects.toMatchObject({
-      message:
-        "blob gateway upload failed with 502 (UKYC_UPLOAD_FAILED, request gateway-request-43): UKYC storage upload request failed",
-      status: 502,
-      code: "UKYC_UPLOAD_FAILED",
-      requestId: "gateway-request-43",
+      cause: {
+        message:
+          "blob gateway upload failed with 502 (UKYC_UPLOAD_FAILED, request gateway-request-43): UKYC storage upload request failed",
+        status: 502,
+        code: "UKYC_UPLOAD_FAILED",
+        requestId: "gateway-request-43",
+      },
     });
   });
 

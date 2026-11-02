@@ -351,27 +351,30 @@ This will create blob-backed original and copy credentials in idOS.
 
 The call has two steps. First it writes preliminary credentials to idOS, which consumes the delegated write grant. Then it uploads the encrypted content to the blob gateway, which turns them into real credentials. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default.
 
-If the call still fails, the write grant is already used up, so calling it again with the same grant fails. The credentials are not created, and the gateway deletes the preliminary records after about 10 minutes. Ask the user to sign a new write grant, then call `createCredentialByDelegatedWriteGrant` again.
+If the call still fails, check the error's `name`:
 
-There is one exception. If the error's `name` is `BlobGatewayUploadOutcomeUnknownError`, an earlier attempt may have succeeded but lost its response. Check before asking the user for a new grant. When the write grant's grantee is the key you initialized `idOSIssuer` with, as in the example above, look up the copy by the SHA-256 hash of the plaintext content:
+- `BlobGatewayUploadOutcomeUnknownError`: an attempt may have reached the gateway and created the credentials, but the SDK couldn't confirm it. `error.credentialIds` holds the original and copy ids. Check whether the copy exists before asking the user for a new grant, or you may create duplicates.
+- Anything else: the credentials were not created. The write grant is already used up, so calling again with the same grant fails. Ask the user to sign a new write grant, then call `createCredentialByDelegatedWriteGrant` again. The gateway deletes the leftover preliminary records after about 10 minutes.
+
+When the write grant's grantee is the key you initialized `idOSIssuer` with, as in the example above, you can check the copy yourself:
 
 ```js
-import { hexEncodeSha256Hash } from "@idos-network/utils/codecs";
-
 try {
   await idOSIssuer.createCredentialByDelegatedWriteGrant(/* ... */);
 } catch (error) {
   if (error.name !== "BlobGatewayUploadOutcomeUnknownError") throw error;
 
-  // Throws if no credential with this content is shared with you.
-  const copyId = await idOSIssuer
-    .getCredentialIdByContentHash(hexEncodeSha256Hash(credentialPayload.plaintextContent))
-    .catch(() => null);
-  if (!copyId) throw error; // Not created: request a new write grant and try again.
+  const [, copyId] = error.credentialIds;
+  // Returns null if the copy isn't visible to you, and throws if the lookup itself fails.
+  const copy = await idOSIssuer.getCredentialShared(copyId);
+  if (!copy) {
+    // Not visible yet. Check again in a few seconds; if it's still missing, the credentials
+    // were not created: request a new write grant and try again.
+  }
 }
 ```
 
-When the grantee is a different consumer, that consumer can look for the copy with `idOSConsumer.getCredentialsSharedByUser(userId)`.
+When the grantee is a different consumer, that consumer can look for `copyId` in `idOSConsumer.getCredentialsSharedByUser(userId)`.
 
 ### [ backend ] Revoking and editing credentials
 

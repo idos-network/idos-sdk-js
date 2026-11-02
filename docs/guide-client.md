@@ -134,33 +134,14 @@ const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
 
 ### If sharing or creating a credential fails
 
-`requestAccessGrant` and `createCredential` have two steps. First they write a preliminary credential to idOS. Then they upload the encrypted content to the blob gateway, which turns it into a real credential. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default. If the call still throws, nothing was created and you can call it again. The gateway deletes the leftover preliminary record after about 10 minutes.
+`requestAccessGrant` and `createCredential` have two steps. First they write a preliminary credential to idOS. Then they upload the encrypted content to the blob gateway, which turns it into a real credential. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default.
 
-There is one exception. If the error's `name` is `BlobGatewayUploadOutcomeUnknownError`, an earlier attempt may have succeeded but lost its response. Check before calling again, or you may create a duplicate:
+If an attempt may have reached the gateway, a lost response can hide a credential that was created. The SDK then looks the credential up by its id, and returns normally if it exists.
 
-- after `requestAccessGrant`: look for a credential in `getAllCredentials()` whose `original_id` is the shared credential, and that has a grant in `getAccessGrantsOwned()` (matched on `data_id`) for the consumer.
-- after `createCredential`: look for a credential in `getAllCredentials()` with the `public_notes` you sent.
+If the call still throws, check the error's `name`:
 
-```ts
-try {
-  await idOSClientLoggedIn.requestAccessGrant(credentialId, grantParams);
-} catch (error) {
-  if ((error as Error).name !== "BlobGatewayUploadOutcomeUnknownError") throw error;
-
-  const copyIds = new Set(
-    (await idOSClientLoggedIn.getAllCredentials())
-      .filter((credential) => credential.original_id === credentialId)
-      .map((credential) => credential.id),
-  );
-  // The SDK stores hex consumer keys in lowercase.
-  const grantee = grantParams.consumerAuthPublicKey.toLowerCase();
-  const alreadyShared = (await idOSClientLoggedIn.getAccessGrantsOwned()).some(
-    (grant) =>
-      copyIds.has(grant.data_id) && grant.ag_grantee_wallet_identifier.toLowerCase() === grantee,
-  );
-  if (!alreadyShared) await idOSClientLoggedIn.requestAccessGrant(credentialId, grantParams);
-}
-```
+- `BlobGatewayUploadOutcomeUnknownError`: the SDK couldn't confirm either way. The credential may have been created, or the lookup failed or ran before the node saw it. `error.credentialIds[0]` is its id. Check again later with `getCredentialById(id)` before you call the method again, or you may create a duplicate.
+- Anything else: nothing was created, so you can call the method again. The gateway deletes the leftover preliminary record after about 10 minutes.
 
 ## 6) Manage wallets
 

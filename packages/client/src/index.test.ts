@@ -546,6 +546,76 @@ describe("credential blob storage", () => {
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
   });
 
+  describe("when the upload outcome is unknown", () => {
+    function clientWithLostUpload(lookup: (id: string) => Promise<unknown[]>): idOSClientLoggedIn {
+      const kwilSigner = {};
+      const kwilClient = {
+        signer: kwilSigner,
+        execute: async () => undefined,
+        call: async ({ name, inputs }: { name: string; inputs: { id: string } }) => {
+          if (name !== "get_credential_owned") throw new Error(`unexpected call ${name}`);
+          return lookup(inputs.id);
+        },
+      } as unknown as KwilActionClient;
+      const blobGateway = new BlobGateway({
+        url: "https://blob.example",
+        uploadRetries: 0,
+        fetchFn: async () => {
+          throw new TypeError("fetch failed");
+        },
+      });
+      const withSigner = {
+        store: new MemoryStore(),
+        kwilClient,
+        enclaveProvider: {},
+        signer: {},
+        kwilSigner,
+        walletIdentifier: "wallet",
+        walletPublicKey: undefined,
+        walletType: "EVM",
+        blobGateway,
+      } as unknown as idOSClientWithUserSigner;
+      return new idOSClientLoggedIn(withSigner, {
+        id: crypto.randomUUID(),
+        recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+        encryption_password_store: "user",
+      });
+    }
+
+    it("returns the credential when the lookup finds it", async () => {
+      const lookedUp: string[] = [];
+      const client = clientWithLostUpload(async (id) => {
+        lookedUp.push(id);
+        return [{ id }];
+      });
+
+      const credential = await client.createCredential("public notes", credentialPlaintext);
+
+      expect(lookedUp).toEqual([credential.id]);
+    });
+
+    it("rethrows with the credential id when the credential isn't there", async () => {
+      const client = clientWithLostUpload(async () => []);
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({
+        name: "BlobGatewayUploadOutcomeUnknownError",
+        credentialIds: [expect.any(String)],
+      });
+    });
+
+    it("rethrows the unknown outcome when the lookup itself fails", async () => {
+      const client = clientWithLostUpload(async () => {
+        throw new Error("node unavailable");
+      });
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
+  });
+
   it("returns the dwg message string and maps params via toDelegatedWriteGrantBaseParams", async () => {
     const callAction = vi.fn(async () => [{ message: "mock-dwg-message" }]);
     const kwilClient = {

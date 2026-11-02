@@ -73,9 +73,11 @@ import {
 import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 import {
   BlobGateway,
+  BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
+  type UploadCredentialBlobsParams,
 } from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
@@ -640,12 +642,30 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     await createPreliminaryCredential(this.kwilClient, payload);
 
-    await this.blobGateway.uploadCredentialBlobs({
+    await this.#uploadOwnedCredentialBlobs({
       requestId,
+      credentialIds: [preliminaryCredential.id],
       original: preliminaryCredential.encryptedContent,
     });
 
     return mapPreliminaryToIDOSCredential(preliminaryCredential);
+  }
+
+  /**
+   * A lost upload response can hide a finalized credential. The user owns it, so look it up
+   * by id; rethrow the unknown outcome if it isn't visible yet or the lookup fails.
+   */
+  async #uploadOwnedCredentialBlobs(
+    params: UploadCredentialBlobsParams & { credentialIds: [string] },
+  ): Promise<void> {
+    try {
+      await this.blobGateway.uploadCredentialBlobs(params);
+    } catch (error) {
+      if (!(error instanceof BlobGatewayUploadOutcomeUnknownError)) throw error;
+
+      const created = await this.getCredentialById(params.credentialIds[0]).catch(() => undefined);
+      if (!created) throw error;
+    }
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
@@ -1027,8 +1047,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     };
 
     await this.shareCredential(preliminaryCredential);
-    await this.blobGateway.uploadCredentialBlobs({
+    await this.#uploadOwnedCredentialBlobs({
       requestId: preliminaryCredential.request_id,
+      credentialIds: [copyId],
       copy: content,
     });
 

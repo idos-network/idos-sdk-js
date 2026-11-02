@@ -38,6 +38,8 @@ type CredentialBlobParts =
 
 export type UploadCredentialBlobsParams = {
   requestId: string;
+  /** Ids of the credentials this upload finalizes, reported on `BlobGatewayUploadOutcomeUnknownError`. */
+  credentialIds?: string[];
 } & CredentialBlobParts;
 
 export type FetchBlobParams = {
@@ -107,17 +109,21 @@ export class BlobGatewayHttpError extends Error {
 }
 
 /**
- * A retried upload found its preliminary credential gone (404) or already finalized by a
- * concurrent attempt (409). An earlier attempt whose response was lost may have finalized
- * the credential, so check whether it exists before creating it again.
+ * The upload may have finalized the credentials even though it failed: the last attempt
+ * failed after possibly reaching the gateway, a retry found the preliminary credential gone
+ * (404) or finalized by a concurrent attempt (409), or a successful response was unreadable.
+ * Look up `credentialIds` before creating the credentials again.
  */
 export class BlobGatewayUploadOutcomeUnknownError extends Error {
   constructor(
     public readonly uploadRequestId: string,
-    cause: BlobGatewayHttpError,
+    public readonly credentialIds: string[],
+    cause: unknown,
   ) {
     super(
-      `blob gateway upload for request ${uploadRequestId} may have succeeded on an earlier attempt: ${cause.message}`,
+      `blob gateway upload for request ${uploadRequestId} may have succeeded: ${
+        cause instanceof Error ? cause.message : String(cause)
+      }`,
       { cause },
     );
     this.name = "BlobGatewayUploadOutcomeUnknownError";
@@ -275,11 +281,13 @@ export class BlobGateway {
   }
 
   /**
-   * Retries network errors and transient gateway statuses. If a retry then finds the
-   * preliminary credential gone or finalized, throws `BlobGatewayUploadOutcomeUnknownError`.
+   * Retries network errors, timeouts and transient gateway statuses. Throws
+   * `BlobGatewayUploadOutcomeUnknownError` when the credentials may have been finalized anyway,
+   * and other errors only when they were not.
    */
   async uploadCredentialBlobs({
     requestId,
+    credentialIds = [],
     original,
     copy,
   }: UploadCredentialBlobsParams): Promise<BlobGatewayUploadResponse> {
@@ -303,12 +311,15 @@ export class BlobGateway {
     // A failed attempt must not leave a hashing rejection unhandled.
     expectedContentIds.catch(() => undefined);
 
-    let parsed: BlobGatewayUploadResponse;
+    const outcomeUnknown = (cause: unknown) =>
+      new BlobGatewayUploadOutcomeUnknownError(requestId, credentialIds, cause);
+
+    let response: Response;
     for (let attempt = 0; ; attempt++) {
       try {
         // The clock also runs while a KGW-authenticated fetch waits for a re-auth signature;
         // the retry then reuses the fresh cookie.
-        const response = await this.#fetch(
+        response = await this.#fetch(
           uploadUrl,
           this.#withAccessToken({
             method: "POST",
@@ -320,8 +331,6 @@ export class BlobGateway {
         if (!response.ok) {
           throw await readBlobGatewayHttpError(response, "upload");
         }
-
-        parsed = JSON.parse(await response.text()) as BlobGatewayUploadResponse;
         break;
       } catch (error) {
         if (
@@ -329,13 +338,25 @@ export class BlobGateway {
           error instanceof BlobGatewayHttpError &&
           (error.status === 404 || error.status === 409)
         ) {
-          throw new BlobGatewayUploadOutcomeUnknownError(requestId, error);
+          throw outcomeUnknown(error);
         }
-        if (attempt >= this.#uploadRetries || !isRetryableUploadError(error)) {
+        if (!isRetryableUploadError(error)) {
           throw error;
+        }
+        // Network errors, timeouts and 5xx can happen after the gateway finalized.
+        if (attempt >= this.#uploadRetries) {
+          throw outcomeUnknown(error);
         }
         await sleep(this.#uploadRetryDelayMs * 2 ** attempt);
       }
+    }
+
+    let parsed: BlobGatewayUploadResponse;
+    try {
+      parsed = JSON.parse(await response.text()) as BlobGatewayUploadResponse;
+    } catch (error) {
+      // The gateway answers 2xx only after finalizing, so don't upload again.
+      throw outcomeUnknown(error);
     }
 
     const [originalCid, copyCid] = await expectedContentIds;
