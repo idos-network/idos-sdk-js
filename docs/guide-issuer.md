@@ -376,6 +376,8 @@ try {
 
 When the grantee is a different consumer, that consumer can look for `copyId` in `idOSConsumer.getCredentialsSharedByUser(userId)`.
 
+Finding the copy proves it was created, not that its stored content is right. If `error.cause` reports a CID mismatch, the gateway answered with CIDs that don't match the bytes the SDK sent. Don't treat a found copy as success in that case: report it, since it points to a fault in the blob gateway.
+
 ### [ backend ] Revoking and editing credentials
 
 The `editCredential` function allows issuers to update the public notes associated with a credential in the idOS. This is useful for actions like marking credentials as revoked or updating metadata.

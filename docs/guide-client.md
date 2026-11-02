@@ -136,11 +136,11 @@ const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
 
 `requestAccessGrant` and `createCredential` have two steps. First they write a preliminary credential to idOS. Then they upload the encrypted content to the blob gateway, which turns it into a real credential. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default.
 
-If an attempt may have reached the gateway, a lost response can hide a credential that was created. The SDK then looks the credential up by its id, and returns normally if it exists.
+If an attempt may have reached the gateway, a lost response can hide a credential that was created. The SDK then looks the credential up by its id and reads its stored content back. It returns normally only if the credential exists and the stored content matches what it uploaded.
 
 If the call still throws, check the error's `name`:
 
-- `BlobGatewayUploadOutcomeUnknownError`: the SDK couldn't confirm either way. The credential may have been created, or the lookup failed or ran before the node saw it. `error.credentialIds[0]` is its id. Don't call the method again until you know the credential doesn't exist, or you may create a duplicate. Look it up again with `getCredentialById(id)`. A missing credential only proves it wasn't created once nothing can still create it: with the default gateway settings, 15 minutes after the call.
+- `BlobGatewayUploadOutcomeUnknownError`: the SDK couldn't confirm either way. The credential may have been created, or the lookup failed or ran before the node saw it. It may also exist with stored content that doesn't match the upload; `error.cause` then reports a CID mismatch, which points to a fault in the blob gateway. `error.credentialIds[0]` is its id. Don't call the method again until you know the credential doesn't exist, or you may create a duplicate. Look it up again with `getCredentialById(id)`. A missing credential only proves it wasn't created once nothing can still create it: with the default gateway settings, 15 minutes after the call.
 - Anything else: nothing was created, so you can call the method again. The gateway deletes the leftover preliminary record after about 10 minutes.
 
 ## 6) Manage wallets

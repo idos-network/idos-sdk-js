@@ -142,6 +142,10 @@ function contentUriForWallet(
   return mmTokenCredentialContentUri(kwilSigner, credentialId);
 }
 
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  return a.byteLength === b.byteLength && a.every((byte, index) => byte === b[index]);
+}
+
 const STALE_CLIENT =
   "This idOS client is stale: another signer was set or it was logged out. Use the client returned by the latest `withUserSigner()`.";
 
@@ -653,7 +657,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   /**
    * A lost upload response can hide a finalized credential. The user owns it, so look it up
-   * by id; rethrow the unknown outcome if it isn't visible yet or the lookup fails.
+   * by id and read its blob back: the record alone doesn't prove the gateway stored our bytes
+   * (a 2xx with a CID mismatch also lands here). Rethrow the unknown outcome unless both check
+   * out, including when the credential isn't visible yet or a read fails.
    */
   async #uploadOwnedCredentialBlobs(
     params: UploadCredentialBlobsParams & { credentialIds: [string] },
@@ -665,6 +671,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
       const created = await this.getCredentialById(params.credentialIds[0]).catch(() => undefined);
       if (!created) throw error;
+
+      const stored = await resolveCredentialEncryptedContent(created, this.blobGateway).catch(
+        () => undefined,
+      );
+      const uploaded = params.original ?? params.copy;
+      if (!stored || !bytesEqual(stored, uploaded)) throw error;
     }
   }
 

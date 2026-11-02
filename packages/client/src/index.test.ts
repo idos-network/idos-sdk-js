@@ -547,21 +547,35 @@ describe("credential blob storage", () => {
   });
 
   describe("when the upload outcome is unknown", () => {
-    function clientWithLostUpload(lookup: (id: string) => Promise<unknown[]>): idOSClientLoggedIn {
+    type StoredRecord = { content_uri: string; content_size: number; blob: Uint8Array };
+
+    // The upload POST loses its response; blob GETs serve whatever the record says is stored.
+    function clientWithLostUpload(
+      lookup: (id: string, uploaded: Uint8Array) => Promise<StoredRecord | undefined>,
+    ): idOSClientLoggedIn {
+      let uploaded = new Uint8Array();
+      let stored: StoredRecord | undefined;
       const kwilSigner = {};
       const kwilClient = {
         signer: kwilSigner,
         execute: async () => undefined,
         call: async ({ name, inputs }: { name: string; inputs: { id: string } }) => {
           if (name !== "get_credential_owned") throw new Error(`unexpected call ${name}`);
-          return lookup(inputs.id);
+          stored = await lookup(inputs.id, uploaded);
+          return stored ? [{ id: inputs.id, ...stored }] : [];
         },
       } as unknown as KwilActionClient;
       const blobGateway = new BlobGateway({
         url: "https://blob.example",
         uploadRetries: 0,
-        fetchFn: async () => {
-          throw new TypeError("fetch failed");
+        fetchFn: async (_input, init) => {
+          if (init?.method === "POST") {
+            const original = (init.body as FormData).get("original") as Blob;
+            uploaded = new Uint8Array(await original.arrayBuffer());
+            throw new TypeError("fetch failed");
+          }
+          if (!stored) throw new Error("unexpected blob read");
+          return new Response(stored.blob.slice());
         },
       });
       const withSigner = {
@@ -582,11 +596,12 @@ describe("credential blob storage", () => {
       });
     }
 
-    it("returns the credential when the lookup finds it", async () => {
+    it("returns the credential when it exists and its blob matches the upload", async () => {
       const lookedUp: string[] = [];
-      const client = clientWithLostUpload(async (id) => {
+      const client = clientWithLostUpload(async (id, uploaded) => {
         lookedUp.push(id);
-        return [{ id }];
+        const { uri } = await createBlobContentReference(uploaded);
+        return { content_uri: uri, content_size: uploaded.byteLength, blob: uploaded };
       });
 
       const credential = await client.createCredential("public notes", credentialPlaintext);
@@ -594,8 +609,25 @@ describe("credential blob storage", () => {
       expect(lookedUp).toEqual([credential.id]);
     });
 
+    it("rethrows when the stored blob differs from the upload", async () => {
+      const client = clientWithLostUpload(async (_id, uploaded) => {
+        const tampered = uploaded.slice();
+        tampered[0] ^= 1;
+        // A non-ipfs URI skips the CID check, so this exercises the byte comparison.
+        return {
+          content_uri: "ukyc://storage-abc/blobs/credential",
+          content_size: tampered.byteLength,
+          blob: tampered,
+        };
+      });
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
+
     it("rethrows with the credential id when the credential isn't there", async () => {
-      const client = clientWithLostUpload(async () => []);
+      const client = clientWithLostUpload(async () => undefined);
 
       await expect(
         client.createCredential("public notes", credentialPlaintext),
