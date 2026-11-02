@@ -565,7 +565,8 @@ describe("credential blob storage", () => {
         signer: kwilSigner,
         execute: async () => undefined,
         call: async ({ name, inputs }: { name: string; inputs: { id: string } }) => {
-          if (name !== "get_credential_owned") throw new Error(`unexpected call ${name}`);
+          // Other view calls made while building the credential (e.g. a message to sign).
+          if (name !== "get_credential_owned") return [{ message: "credential-message" }];
           stored = await lookup(inputs.id, uploaded);
           return stored ? [{ id: inputs.id, ...stored }] : [];
         },
