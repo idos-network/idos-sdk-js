@@ -473,22 +473,27 @@ describe("BlobGateway", () => {
     });
   });
 
-  it("rejects upload responses whose CID does not match the uploaded bytes", async () => {
-    const gateway = new BlobGateway({
-      url: "https://blob.example",
-      fetchFn: async () =>
-        Response.json({
-          request_id: "request-1",
-          original_cid: "bafkreiwrongcidfromgateway000000000000000000000000000000",
-        }),
+  it("reports a CID mismatch in a successful response as an unknown outcome", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({
+        request_id: "request-1",
+        original_cid: "bafkreiwrongcidfromgateway000000000000000000000000000000",
+      }),
+    );
+    const gateway = new BlobGateway({ url: "https://blob.example", fetchFn });
+
+    const upload = gateway.uploadCredentialBlobs({
+      requestId: "request-1",
+      original: utf8Encode("original"),
     });
 
-    await expect(
-      gateway.uploadCredentialBlobs({
-        requestId: "request-1",
-        original: utf8Encode("original"),
-      }),
-    ).rejects.toThrow(/blob gateway upload returned original CID .+, expected .+/);
+    await expect(upload).rejects.toBeInstanceOf(BlobGatewayUploadOutcomeUnknownError);
+    await expect(upload).rejects.toMatchObject({
+      cause: {
+        message: expect.stringMatching(/blob gateway upload returned original CID .+, expected .+/),
+      },
+    });
+    expect(fetchFn).toHaveBeenCalledOnce();
   });
 
   it("fetches blobs through the initialized gateway URL", async () => {

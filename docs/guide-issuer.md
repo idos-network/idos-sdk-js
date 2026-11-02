@@ -353,10 +353,10 @@ The call has two steps. First it writes preliminary credentials to idOS, which c
 
 If the call still fails, check the error's `name`:
 
-- `BlobGatewayUploadOutcomeUnknownError`: an attempt may have reached the gateway and created the credentials, but the SDK couldn't confirm it. `error.credentialIds` holds the original and copy ids. Check whether the copy exists before asking the user for a new grant, or you may create duplicates.
-- Anything else: the credentials were not created. The write grant is already used up, so calling again with the same grant fails. Ask the user to sign a new write grant, then call `createCredentialByDelegatedWriteGrant` again. The gateway deletes the leftover preliminary records after about 10 minutes.
+- `BlobGatewayUploadOutcomeUnknownError`: an attempt may have reached the gateway and created the credentials, but the SDK couldn't confirm it. `error.credentialIds` holds the original and copy ids. Don't ask the user for a new grant until you know the copy doesn't exist, or you may create duplicates.
+- Anything else: the credentials were not created. Call `createCredentialByDelegatedWriteGrant` again with the same write grant. If the failure happened before the preliminary credentials were written, the grant is still unused and this call works. If the grant was already used, idOS rejects the call; then ask the user to sign a new write grant and try with that. The gateway deletes any leftover preliminary records after about 10 minutes.
 
-When the write grant's grantee is the key you initialized `idOSIssuer` with, as in the example above, you can check the copy yourself:
+When the write grant's grantee is the key you initialized `idOSIssuer` with, as in the example above, you can check the copy yourself. A missing copy only proves the credentials were not created once nothing can still create them. With the default gateway settings that's 15 minutes after the call: by then the gateway has deleted the preliminary records and no upload is still running.
 
 ```js
 try {
@@ -368,8 +368,8 @@ try {
   // Returns null if the copy isn't visible to you, and throws if the lookup itself fails.
   const copy = await idOSIssuer.getCredentialShared(copyId);
   if (!copy) {
-    // Not visible yet. Check again in a few seconds; if it's still missing, the credentials
-    // were not created: request a new write grant and try again.
+    // Still unknown. Keep copyId and look it up again 15 minutes after the call. If it's
+    // missing then, the credentials were not created: request a new write grant.
   }
 }
 ```

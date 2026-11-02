@@ -111,7 +111,8 @@ export class BlobGatewayHttpError extends Error {
 /**
  * The upload may have finalized the credentials even though it failed: the last attempt
  * failed after possibly reaching the gateway, a retry found the preliminary credential gone
- * (404) or finalized by a concurrent attempt (409), or a successful response was unreadable.
+ * (404) or finalized by a concurrent attempt (409), or a successful response was unreadable or
+ * reported CIDs that don't match the uploaded bytes.
  * Look up `credentialIds` before creating the credentials again.
  */
 export class BlobGatewayUploadOutcomeUnknownError extends Error {
@@ -351,20 +352,19 @@ export class BlobGateway {
       }
     }
 
-    let parsed: BlobGatewayUploadResponse;
+    // The gateway answers 2xx only after finalizing, so any failure from here on is reported
+    // as an unknown outcome, never as "not created".
     try {
-      parsed = JSON.parse(await response.text()) as BlobGatewayUploadResponse;
+      const parsed = JSON.parse(await response.text()) as BlobGatewayUploadResponse;
+      const [originalCid, copyCid] = await expectedContentIds;
+
+      assertReturnedUploadCid(parsed.original_cid, originalCid, "original");
+      assertReturnedUploadCid(parsed.copy_cid, copyCid, "copy");
+
+      return parsed;
     } catch (error) {
-      // The gateway answers 2xx only after finalizing, so don't upload again.
       throw outcomeUnknown(error);
     }
-
-    const [originalCid, copyCid] = await expectedContentIds;
-
-    assertReturnedUploadCid(parsed.original_cid, originalCid, "original");
-    assertReturnedUploadCid(parsed.copy_cid, copyCid, "copy");
-
-    return parsed;
   }
 
   async fetchBlob({
