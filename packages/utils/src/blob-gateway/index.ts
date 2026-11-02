@@ -23,6 +23,12 @@ export type BlobGatewayParams = {
   maxFetchBytes?: number;
   /** MM / UKYC capability token. Sent as `Authorization: AccessToken …` on blob requests. */
   accessToken?: string;
+  /** Extra upload attempts after a network error or a transient gateway status. Defaults to 2. */
+  uploadRetries?: number;
+  /** Delay before the first upload retry, doubled for each further retry. Defaults to 1000 ms. */
+  uploadRetryDelayMs?: number;
+  /** Time limit for each upload attempt, response body included. Defaults to 150 000 ms. */
+  uploadTimeoutMs?: number;
 };
 
 type CredentialBlobParts =
@@ -56,6 +62,16 @@ export const IPFS_URI_PREFIX = "ipfs://";
 export const UKYC_URI_PREFIX = "ukyc://";
 export const DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES: number = 20 * 1024 * 1024;
 const MAX_BLOB_GATEWAY_ERROR_BYTES = 4 * 1024;
+const DEFAULT_UPLOAD_RETRIES = 2;
+const DEFAULT_UPLOAD_RETRY_DELAY_MS = 1_000;
+// The gateway can spend up to ~120 s pinning and another ~120 s waiting for the Kwil commit,
+// so a timeout here can cut off a slow upload that would have succeeded; the retry then
+// reports BlobGatewayUploadOutcomeUnknownError instead of hanging.
+const DEFAULT_UPLOAD_TIMEOUT_MS = 150_000;
+// The preliminary credential stays uploadable until the gateway's stale sweep removes it
+// (STALE_PRELIM_AGE_SECONDS, 10 minutes by default). The default attempts, timeouts and
+// delays add up to about 7.5 minutes, inside that window.
+const RETRYABLE_UPLOAD_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 
 type BlobGatewayOperation = "upload" | "fetch" | "delete";
 
@@ -87,6 +103,24 @@ export class BlobGatewayHttpError extends Error {
         `${detail ? `: ${detail}` : ""}`,
     );
     this.name = "BlobGatewayHttpError";
+  }
+}
+
+/**
+ * A retried upload found its preliminary credential gone (404) or already finalized by a
+ * concurrent attempt (409). An earlier attempt whose response was lost may have finalized
+ * the credential, so check whether it exists before creating it again.
+ */
+export class BlobGatewayUploadOutcomeUnknownError extends Error {
+  constructor(
+    public readonly uploadRequestId: string,
+    cause: BlobGatewayHttpError,
+  ) {
+    super(
+      `blob gateway upload for request ${uploadRequestId} may have succeeded on an earlier attempt: ${cause.message}`,
+      { cause },
+    );
+    this.name = "BlobGatewayUploadOutcomeUnknownError";
   }
 }
 
@@ -180,12 +214,18 @@ export class BlobGateway {
   readonly #fetch: typeof fetch;
   readonly #maxFetchBytes: number;
   readonly #accessToken?: string;
+  readonly #uploadRetries: number;
+  readonly #uploadRetryDelayMs: number;
+  readonly #uploadTimeoutMs: number;
 
   constructor({
     url,
     fetchFn = fetch,
     maxFetchBytes = DEFAULT_BLOB_GATEWAY_MAX_FETCH_BYTES,
     accessToken,
+    uploadRetries = DEFAULT_UPLOAD_RETRIES,
+    uploadRetryDelayMs = DEFAULT_UPLOAD_RETRY_DELAY_MS,
+    uploadTimeoutMs = DEFAULT_UPLOAD_TIMEOUT_MS,
   }: BlobGatewayParams) {
     const normalizedAccessToken = accessToken?.trim() || undefined;
     if (normalizedAccessToken && !isSecureGatewayOrigin(url)) {
@@ -199,6 +239,14 @@ export class BlobGateway {
     this.#fetch = (input, init) => fetchFn(input, init);
     this.#maxFetchBytes = normalizeByteCount(maxFetchBytes, "maxFetchBytes") ?? maxFetchBytes;
     this.#accessToken = normalizedAccessToken;
+    this.#uploadRetries = normalizeByteCount(uploadRetries, "uploadRetries") ?? uploadRetries;
+    this.#uploadRetryDelayMs =
+      normalizeByteCount(uploadRetryDelayMs, "uploadRetryDelayMs") ?? uploadRetryDelayMs;
+    this.#uploadTimeoutMs =
+      normalizeByteCount(uploadTimeoutMs, "uploadTimeoutMs") ?? uploadTimeoutMs;
+    if (this.#uploadTimeoutMs === 0) {
+      throw new Error("uploadTimeoutMs must be positive");
+    }
   }
 
   get url(): string {
@@ -220,9 +268,16 @@ export class BlobGateway {
       fetchFn: this.#fetch,
       maxFetchBytes: this.#maxFetchBytes,
       accessToken,
+      uploadRetries: this.#uploadRetries,
+      uploadRetryDelayMs: this.#uploadRetryDelayMs,
+      uploadTimeoutMs: this.#uploadTimeoutMs,
     });
   }
 
+  /**
+   * Retries network errors and transient gateway statuses. If a retry then finds the
+   * preliminary credential gone or finalized, throws `BlobGatewayUploadOutcomeUnknownError`.
+   */
   async uploadCredentialBlobs({
     requestId,
     original,
@@ -239,22 +294,51 @@ export class BlobGateway {
 
     // Hash while the upload is in flight so we can fail fast if the gateway
     // reports a different CID than the bytes we sent.
-    const expectedOriginalCid = original
-      ? createBlobContentReference(original).then((reference) => reference.cid)
-      : undefined;
-    const expectedCopyCid = copy
-      ? createBlobContentReference(copy).then((reference) => reference.cid)
-      : undefined;
+    const expectedContentIds = Promise.all([
+      original
+        ? createBlobContentReference(original).then((reference) => reference.cid)
+        : undefined,
+      copy ? createBlobContentReference(copy).then((reference) => reference.cid) : undefined,
+    ]);
+    // A failed attempt must not leave a hashing rejection unhandled.
+    expectedContentIds.catch(() => undefined);
 
-    const response = await this.#fetch(uploadUrl, this.#withAccessToken({ method: "POST", body }));
+    let parsed: BlobGatewayUploadResponse;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        // The clock also runs while a KGW-authenticated fetch waits for a re-auth signature;
+        // the retry then reuses the fresh cookie.
+        const response = await this.#fetch(
+          uploadUrl,
+          this.#withAccessToken({
+            method: "POST",
+            body,
+            signal: AbortSignal.timeout(this.#uploadTimeoutMs),
+          }),
+        );
 
-    if (!response.ok) {
-      throw await readBlobGatewayHttpError(response, "upload");
+        if (!response.ok) {
+          throw await readBlobGatewayHttpError(response, "upload");
+        }
+
+        parsed = JSON.parse(await response.text()) as BlobGatewayUploadResponse;
+        break;
+      } catch (error) {
+        if (
+          attempt > 0 &&
+          error instanceof BlobGatewayHttpError &&
+          (error.status === 404 || error.status === 409)
+        ) {
+          throw new BlobGatewayUploadOutcomeUnknownError(requestId, error);
+        }
+        if (attempt >= this.#uploadRetries || !isRetryableUploadError(error)) {
+          throw error;
+        }
+        await sleep(this.#uploadRetryDelayMs * 2 ** attempt);
+      }
     }
 
-    const responseText = await response.text();
-    const parsed = JSON.parse(responseText) as BlobGatewayUploadResponse;
-    const [originalCid, copyCid] = await Promise.all([expectedOriginalCid, expectedCopyCid]);
+    const [originalCid, copyCid] = await expectedContentIds;
 
     assertReturnedUploadCid(parsed.original_cid, originalCid, "original");
     assertReturnedUploadCid(parsed.copy_cid, copyCid, "copy");
@@ -385,6 +469,22 @@ function blobGatewayHttpError(
     response.headers.get("x-request-id") ?? undefined,
     detail,
   );
+}
+
+function isRetryableUploadError(error: unknown): boolean {
+  if (error instanceof BlobGatewayHttpError) {
+    return RETRYABLE_UPLOAD_STATUSES.has(error.status);
+  }
+  // fetch rejects with TypeError on network failures and TimeoutError when the attempt's
+  // signal fires. Anything else (wallet signature rejection during KGW re-auth, malformed
+  // JSON) would fail the same way again.
+  return (
+    error instanceof TypeError || (error instanceof DOMException && error.name === "TimeoutError")
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function rootCidFromContentUri(contentUri: string): string {

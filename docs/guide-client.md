@@ -132,6 +132,36 @@ const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
 
 `issuer_auth_public_key` on a credential row is whoever **issued that row**. For a shared copy, the **user** is the issuer: the client signs the copy `content_uri` with an ephemeral user-side key. That key need not match the original credential's issuer (often a server app). Kwil verifies the copy signatures under the submitted key and that the original belongs to the caller.
 
+### If sharing or creating a credential fails
+
+`requestAccessGrant` and `createCredential` have two steps. First they write a preliminary credential to idOS. Then they upload the encrypted content to the blob gateway, which turns it into a real credential. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default. If the call still throws, nothing was created and you can call it again. The gateway deletes the leftover preliminary record after about 10 minutes.
+
+There is one exception. If the error's `name` is `BlobGatewayUploadOutcomeUnknownError`, an earlier attempt may have succeeded but lost its response. Check before calling again, or you may create a duplicate:
+
+- after `requestAccessGrant`: look for a credential in `getAllCredentials()` whose `original_id` is the shared credential, and that has a grant in `getAccessGrantsOwned()` (matched on `data_id`) for the consumer.
+- after `createCredential`: look for a credential in `getAllCredentials()` with the `public_notes` you sent.
+
+```ts
+try {
+  await idOSClientLoggedIn.requestAccessGrant(credentialId, grantParams);
+} catch (error) {
+  if ((error as Error).name !== "BlobGatewayUploadOutcomeUnknownError") throw error;
+
+  const copyIds = new Set(
+    (await idOSClientLoggedIn.getAllCredentials())
+      .filter((credential) => credential.original_id === credentialId)
+      .map((credential) => credential.id),
+  );
+  // The SDK stores hex consumer keys in lowercase.
+  const grantee = grantParams.consumerAuthPublicKey.toLowerCase();
+  const alreadyShared = (await idOSClientLoggedIn.getAccessGrantsOwned()).some(
+    (grant) =>
+      copyIds.has(grant.data_id) && grant.ag_grantee_wallet_identifier.toLowerCase() === grantee,
+  );
+  if (!alreadyShared) await idOSClientLoggedIn.requestAccessGrant(credentialId, grantParams);
+}
+```
+
 ## 6) Manage wallets
 
 Add a wallet:

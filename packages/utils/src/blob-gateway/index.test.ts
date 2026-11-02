@@ -6,6 +6,7 @@ import { base64Encode, utf8Encode } from "../codecs";
 import {
   BlobGateway,
   BlobGatewayHttpError,
+  BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
   createUkycContentUri,
   requireAccessTokenForUkycContent,
@@ -201,6 +202,186 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
   });
 
+  it("retries uploads after network errors and transient gateway statuses", async () => {
+    const original = utf8Encode("original");
+    const { cid } = await createBlobContentReference(original);
+    const responses: Array<() => Response> = [
+      () => {
+        throw new TypeError("fetch failed");
+      },
+      () => Response.json({ code: "KWIL_UNAVAILABLE" }, { status: 503 }),
+      () => Response.json({ request_id: "request-1", original_cid: cid }),
+    ];
+    const fetchFn = vi.fn(async () => {
+      const next = responses.shift();
+      if (!next) throw new Error("unexpected extra upload");
+      return next();
+    });
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    const result = await gateway.uploadCredentialBlobs({ requestId: "request-1", original });
+
+    expect(result).toEqual({ request_id: "request-1", original_cid: cid });
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+  });
+
+  it("gives up after the configured number of upload retries", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({ code: "UKYC_REQUEST_TIMEOUT" }, { status: 504 }),
+    );
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetries: 1,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({ name: "BlobGatewayHttpError", status: 504 });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry uploads rejected with a client error", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({ code: "PRELIMINARY_CREDENTIAL_NOT_FOUND" }, { status: 404 }),
+    );
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({ name: "BlobGatewayHttpError", status: 404 });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry errors that are not network failures", async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new Error("User rejected the request");
+    });
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toThrow("User rejected the request");
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([404, 409])(
+    "reports an unknown outcome when a retry gets %i after a lost response",
+    async (status) => {
+      const responses: Array<() => Response> = [
+        () => {
+          throw new TypeError("fetch failed");
+        },
+        () => Response.json({ code: "PRELIMINARY_CREDENTIAL" }, { status }),
+      ];
+      const gateway = new BlobGateway({
+        url: "https://blob.example",
+        uploadRetryDelayMs: 0,
+        fetchFn: async () => {
+          const next = responses.shift();
+          if (!next) throw new Error("unexpected extra upload");
+          return next();
+        },
+      });
+
+      const upload = gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      });
+
+      await expect(upload).rejects.toBeInstanceOf(BlobGatewayUploadOutcomeUnknownError);
+      await expect(upload).rejects.toMatchObject({
+        uploadRequestId: "request-1",
+        cause: { name: "BlobGatewayHttpError", status },
+      });
+    },
+  );
+
+  it("aborts an upload attempt that exceeds the timeout and retries it", async () => {
+    const original = utf8Encode("original");
+    const { cid } = await createBlobContentReference(original);
+    const signals: AbortSignal[] = [];
+    const fetchFn = vi.fn(async (_input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+      const signal = init?.signal;
+      if (!signal) throw new Error("upload sent without a signal");
+      signals.push(signal);
+      if (signals.length === 1) {
+        // Hang until the attempt's timeout aborts it, like a stalled connection.
+        return new Promise<Response>((_resolve, reject) => {
+          signal.addEventListener("abort", () => reject(signal.reason));
+        });
+      }
+      return Response.json({ request_id: "request-1", original_cid: cid });
+    });
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadTimeoutMs: 20,
+      uploadRetryDelayMs: 0,
+    });
+
+    const result = await gateway.uploadCredentialBlobs({ requestId: "request-1", original });
+
+    expect(result).toEqual({ request_id: "request-1", original_cid: cid });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(signals[0]).not.toBe(signals[1]);
+    expect(signals[1]?.aborted).toBe(false);
+  });
+
+  it("fails with TimeoutError when every upload attempt times out", async () => {
+    const fetchFn = vi.fn(
+      async (_input: Parameters<typeof fetch>[0], init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+        }),
+    );
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetries: 1,
+      uploadTimeoutMs: 20,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({ name: "TimeoutError" });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a zero upload timeout", () => {
+    expect(() => new BlobGateway({ url: "https://blob.example", uploadTimeoutMs: 0 })).toThrow(
+      "uploadTimeoutMs must be positive",
+    );
+  });
+
+  it("keeps upload retry settings when cloning with a new access token", async () => {
+    const fetchFn = vi.fn(async () => Response.json({}, { status: 502 }));
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetries: 0,
+    }).withAccessToken("mm-envelope");
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({ status: 502 });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
   it("does not include opaque HTML response bodies in upload errors", async () => {
     const gateway = new BlobGateway({
       url: "https://blob.example",
@@ -234,6 +415,7 @@ describe("BlobGateway", () => {
   it("preserves structured gateway error codes without logging the raw response", async () => {
     const gateway = new BlobGateway({
       url: "https://blob.example",
+      uploadRetries: 0,
       fetchFn: async () =>
         Response.json(
           {

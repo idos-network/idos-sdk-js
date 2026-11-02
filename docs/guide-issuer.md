@@ -347,6 +347,32 @@ await idOSIssuer.createCredentialByDelegatedWriteGrant(
 
 This will create blob-backed original and copy credentials in idOS.
 
+#### If `createCredentialByDelegatedWriteGrant` fails
+
+The call has two steps. First it writes preliminary credentials to idOS, which consumes the delegated write grant. Then it uploads the encrypted content to the blob gateway, which turns them into real credentials. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default.
+
+If the call still fails, the write grant is already used up, so calling it again with the same grant fails. The credentials are not created, and the gateway deletes the preliminary records after about 10 minutes. Ask the user to sign a new write grant, then call `createCredentialByDelegatedWriteGrant` again.
+
+There is one exception. If the error's `name` is `BlobGatewayUploadOutcomeUnknownError`, an earlier attempt may have succeeded but lost its response. Check before asking the user for a new grant. When the write grant's grantee is the key you initialized `idOSIssuer` with, as in the example above, look up the copy by the SHA-256 hash of the plaintext content:
+
+```js
+import { hexEncodeSha256Hash } from "@idos-network/utils/codecs";
+
+try {
+  await idOSIssuer.createCredentialByDelegatedWriteGrant(/* ... */);
+} catch (error) {
+  if (error.name !== "BlobGatewayUploadOutcomeUnknownError") throw error;
+
+  // Throws if no credential with this content is shared with you.
+  const copyId = await idOSIssuer
+    .getCredentialIdByContentHash(hexEncodeSha256Hash(credentialPayload.plaintextContent))
+    .catch(() => null);
+  if (!copyId) throw error; // Not created: request a new write grant and try again.
+}
+```
+
+When the grantee is a different consumer, that consumer can look for the copy with `idOSConsumer.getCredentialsSharedByUser(userId)`.
+
 ### [ backend ] Revoking and editing credentials
 
 The `editCredential` function allows issuers to update the public notes associated with a credential in the idOS. This is useful for actions like marking credentials as revoked or updating metadata.
