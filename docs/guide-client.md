@@ -140,7 +140,10 @@ If an attempt may have reached the gateway, a lost response can hide a credentia
 
 If the call still throws, check the error's `name`:
 
-- `BlobGatewayUploadOutcomeUnknownError`: the SDK couldn't confirm either way. The credential may have been created, or the lookup failed or ran before the node saw it. It may also exist with stored content that doesn't match the upload; `error.cause` then reports a CID mismatch, which points to a fault in the blob gateway. `error.credentialIds[0]` is its id. Don't call the method again until you know the credential doesn't exist, or you may create a duplicate. Look it up again with `getCredentialById(id)`. A missing credential only proves it wasn't created once nothing can still create it: with the default gateway settings, 15 minutes after the call.
+- `BlobGatewayUploadOutcomeUnknownError`: the SDK couldn't confirm either way. The credential may not be visible yet, a lookup or read may have failed or timed out, or its stored content didn't match the upload. `error.credentialIds[0]` is its id. Don't call the method again until you've settled it, or you may create a duplicate:
+  - Treat it as created only once `getCredentialById(id)` finds it **and** its content checks out. After `createCredential`, compare `getCredentialContentSha256Hash(id)` with the hex SHA-256 of the plaintext you passed. A shared copy is encrypted to the consumer, so only the consumer can check it, with `idOSConsumer.getCredentialSharedContentDecrypted(id)`.
+  - Treat it as not created only if it's still missing 15 minutes after the call. With the default gateway settings, nothing can create it after that.
+  - Otherwise the outcome is still unknown.
 - Anything else: nothing was created, so you can call the method again. The gateway deletes the leftover preliminary record after about 10 minutes.
 
 ## 6) Manage wallets

@@ -47,6 +47,8 @@ export type FetchBlobParams = {
   contentUri?: string | null;
   expectedSize?: number | string | bigint | null;
   maxBytes?: number;
+  /** Aborts the request and the body read. */
+  signal?: AbortSignal;
 };
 
 export type DeleteCredentialBlobParams = {
@@ -372,6 +374,7 @@ export class BlobGateway {
     contentUri,
     expectedSize,
     maxBytes,
+    signal,
   }: FetchBlobParams): Promise<Uint8Array> {
     const expectedByteLength = normalizeByteCount(expectedSize, "expectedSize");
     const explicitMaxBytes = normalizeByteCount(maxBytes, "maxBytes");
@@ -386,7 +389,7 @@ export class BlobGateway {
     const maxResponseBytes = expectedByteLength ?? maxFetchBytes;
     const fetchUrl = this.#credentialUrl(credentialId);
 
-    const response = await this.#fetch(fetchUrl, this.#withAccessToken());
+    const response = await this.#fetch(fetchUrl, this.#withAccessToken({ signal }));
     const contentLength = response.headers.get("content-length");
     const declaredContentLength = parseContentLength(contentLength);
 

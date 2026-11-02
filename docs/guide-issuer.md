@@ -376,7 +376,7 @@ try {
 
 When the grantee is a different consumer, that consumer can look for `copyId` in `idOSConsumer.getCredentialsSharedByUser(userId)`.
 
-Finding the copy proves it was created, not that its stored content is right. If `error.cause` reports a CID mismatch, the gateway answered with CIDs that don't match the bytes the SDK sent. Don't treat a found copy as success in that case: report it, since it points to a fault in the blob gateway.
+Finding the copy proves it was created, not that its stored content is right. The issuer SDK can't read the content back; the grantee can, with `idOSConsumer.getCredentialSharedContentDecrypted(copyId)`. Treat the issuance as successful only once that content checks out; until then the outcome is still unknown.
 
 ### [ backend ] Revoking and editing credentials
 

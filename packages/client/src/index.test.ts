@@ -549,9 +549,14 @@ describe("credential blob storage", () => {
   describe("when the upload outcome is unknown", () => {
     type StoredRecord = { content_uri: string; content_size: number; blob: Uint8Array };
 
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     // The upload POST loses its response; blob GETs serve whatever the record says is stored.
     function clientWithLostUpload(
       lookup: (id: string, uploaded: Uint8Array) => Promise<StoredRecord | undefined>,
+      onRead?: (signal: AbortSignal | undefined) => Promise<Response>,
     ): idOSClientLoggedIn {
       let uploaded = new Uint8Array();
       let stored: StoredRecord | undefined;
@@ -575,6 +580,7 @@ describe("credential blob storage", () => {
             throw new TypeError("fetch failed");
           }
           if (!stored) throw new Error("unexpected blob read");
+          if (onRead) return onRead(init?.signal ?? undefined);
           return new Response(stored.blob.slice());
         },
       });
@@ -624,6 +630,35 @@ describe("credential blob storage", () => {
       await expect(
         client.createCredential("public notes", credentialPlaintext),
       ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
+
+    it("gives up on a stalled read-back after the deadline", async () => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      let readStarted!: () => void;
+      const started = new Promise<void>((resolve) => {
+        readStarted = resolve;
+      });
+      const client = clientWithLostUpload(
+        async (_id, uploaded) => {
+          const { uri } = await createBlobContentReference(uploaded);
+          return { content_uri: uri, content_size: uploaded.byteLength, blob: uploaded };
+        },
+        (signal) => {
+          readStarted();
+          // Never answers; only the abort signal can end it.
+          return new Promise((_resolve, reject) => {
+            signal?.addEventListener("abort", () => reject(signal.reason));
+          });
+        },
+      );
+
+      const creation = client.createCredential("public notes", credentialPlaintext);
+      const outcome = expect(creation).rejects.toMatchObject({
+        name: "BlobGatewayUploadOutcomeUnknownError",
+      });
+      await started;
+      await vi.advanceTimersByTimeAsync(60_000);
+      await outcome;
     });
 
     it("rethrows with the credential id when the credential isn't there", async () => {

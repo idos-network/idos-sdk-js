@@ -519,6 +519,26 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.headers).toBeUndefined();
   });
 
+  it("passes the caller's abort signal to the blob fetch", async () => {
+    const controller = new AbortController();
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      accessToken: "mm-envelope",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(utf8Encode("content"));
+      },
+    });
+
+    await gateway.fetchBlob({ credentialId: "credential-1", signal: controller.signal });
+
+    expect(calls[0]?.[1]?.signal).toBe(controller.signal);
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
+  });
+
   it("rejects fetched blobs whose bytes do not match the content URI CID", async () => {
     const { uri } = await createBlobContentReference(utf8Encode("expected"));
     const gateway = new BlobGateway({
