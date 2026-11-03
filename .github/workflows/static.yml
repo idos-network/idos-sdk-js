@@ -43,11 +43,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download ORT WebApp report (from triggering License Scan run)
         if: github.event_name == 'workflow_run'
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v28
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           run_id: ${{ github.event.workflow_run.id }}
@@ -57,7 +57,7 @@ jobs:
 
       - name: Download ORT WebApp report (latest successful scan on main)
         if: github.event_name != 'workflow_run'
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v28
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: license-scan.yml
@@ -88,7 +88,7 @@ jobs:
               '</body></html>' > public/license-scan/index.html
           fi
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           # Upload entire repository
           path: "public"
