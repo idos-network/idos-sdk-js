@@ -1,5 +1,22 @@
 # @idos-network/credentials
 
+## 4.0.0
+
+### Major Changes
+
+- 38a1991: Address new `ukyc://` blobs by the sha256 of the ciphertext, so the signed content URI pins the encrypted bytes. Reads of dev credentials whose blob id is still a UUID keep working (size check only).
+
+  `buildPreliminaryIDOSCredential` takes `ukycStorageId` instead of a finished `contentUri`. `createCredentialByDelegatedWriteGrant` drops `originalContentUri` and `copyContentUri`; pass one `ukycStorageId` (omit it to keep IPFS). `mmTokenCredentialContentUri` is removed; `mmTokenStorageId` remains.
+
+  `@idos-network/credentials` signing helpers now take a required `broaderMessageFor: (publicNotesSignature, contentUri) => Promise<string>` callback and are async: `buildSignedCredentialContentReference` and `buildEphemeralSignedCredentialContentReference` return `Promise<SignedCredentialContentReference>`, and `BuildPreliminaryIDOSCredentialArgs` requires `broaderMessageFor`. Fetch the message from the node with `credentialBroaderMessage` from `@idos-network/kwil-infra/actions` (`.then((row) => row.message)`) and `await` the result. `@idos-network/client` and `@idos-network/issuer` supply the callback themselves.
+
+### Patch Changes
+
+- e999de0: Sign credential broader signatures over the message the node returns, and reject adding an MM wallet.
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/utils@3.1.0
+
 ## 3.1.0
 
 ### Minor Changes

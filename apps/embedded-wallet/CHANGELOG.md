@@ -1,5 +1,15 @@
 # embedded-wallet
 
+## 0.4.10
+
+### Patch Changes
+
+- Updated dependencies [e999de0]
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/kwil-infra@4.0.0
+  - @idos-network/utils@3.1.0
+
 ## 0.4.9
 
 ### Patch Changes

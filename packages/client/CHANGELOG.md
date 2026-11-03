@@ -1,5 +1,31 @@
 # @idos-network/client
 
+## 4.0.0
+
+### Major Changes
+
+- 38a1991: Address new `ukyc://` blobs by the sha256 of the ciphertext, so the signed content URI pins the encrypted bytes. Reads of dev credentials whose blob id is still a UUID keep working (size check only).
+
+  `buildPreliminaryIDOSCredential` takes `ukycStorageId` instead of a finished `contentUri`. `createCredentialByDelegatedWriteGrant` drops `originalContentUri` and `copyContentUri`; pass one `ukycStorageId` (omit it to keep IPFS). `mmTokenCredentialContentUri` is removed; `mmTokenStorageId` remains.
+
+  `@idos-network/credentials` signing helpers now take a required `broaderMessageFor: (publicNotesSignature, contentUri) => Promise<string>` callback and are async: `buildSignedCredentialContentReference` and `buildEphemeralSignedCredentialContentReference` return `Promise<SignedCredentialContentReference>`, and `BuildPreliminaryIDOSCredentialArgs` requires `broaderMessageFor`. Fetch the message from the node with `credentialBroaderMessage` from `@idos-network/kwil-infra/actions` (`.then((row) => row.message)`) and `await` the result. `@idos-network/client` and `@idos-network/issuer` supply the callback themselves.
+
+### Patch Changes
+
+- e999de0: Sign credential broader signatures over the message the node returns, and reject adding an MM wallet.
+- 1668234: Retry credential blob uploads after a network error, a timeout, or a 408, 429, 500, 502, 503 or 504 from the blob gateway: two retries, 1 s then 2 s apart. Each attempt times out after 150 s. Tune this with the new `uploadRetries`, `uploadRetryDelayMs` and `uploadTimeoutMs` options on `BlobGateway`.
+
+  When the credentials may have been created even though the upload failed, the upload throws `BlobGatewayUploadOutcomeUnknownError` with the affected `credentialIds`. This covers a last attempt that may have reached the gateway, a retry that finds the preliminary credential gone or already finalized, and a success response that is unreadable or reports CIDs that do not match the uploaded bytes. `createCredential` and `requestAccessGrant` then look the credential up by id and read its blob back (60 s deadline), and return normally only if it exists and matches the upload. `BlobGateway.fetchBlob` takes an optional `signal`.
+
+- Updated dependencies [e999de0]
+- Updated dependencies [70c9c5d]
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/credentials@4.0.0
+  - @idos-network/kwil-infra@4.0.0
+  - @idos-network/enclave@3.0.2
+  - @idos-network/utils@3.1.0
+
 ## 3.1.0
 
 ### Minor Changes
