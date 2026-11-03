@@ -145,7 +145,10 @@ export class idOSConsumer {
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
     return getAccessGrantsGrantedCount(this.#kwilClient, { user_id: userId ?? null }).then(
-      (res) => res.count,
+      (res) => {
+        if (!res) throw new Error("get_access_grants_granted_count returned no rows");
+        return res.count;
+      },
     );
   }
 

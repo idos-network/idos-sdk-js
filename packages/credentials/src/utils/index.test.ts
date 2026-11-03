@@ -317,10 +317,17 @@ describe("highestMatchingCredential", () => {
   });
 });
 
+const broaderMessageFor = async () => "credential-message";
+
 describe("buildSignedCredentialContentReference", () => {
-  it("derives issuer_auth_public_key from the signing secret key", () => {
+  it("derives issuer_auth_public_key from the signing secret key", async () => {
     const keyPair = nacl.sign.keyPair();
-    const result = buildSignedCredentialContentReference("", "ipfs://cid", keyPair.secretKey);
+    const result = await buildSignedCredentialContentReference(
+      "",
+      "ipfs://cid",
+      keyPair.secretKey,
+      broaderMessageFor,
+    );
 
     expect(result.public_notes).toBe("");
     expect(result.public_notes_signature).toBeTruthy();
@@ -330,8 +337,12 @@ describe("buildSignedCredentialContentReference", () => {
 });
 
 describe("buildEphemeralSignedCredentialContentReference", () => {
-  it("returns a signed reference with a public key", () => {
-    const result = buildEphemeralSignedCredentialContentReference("", "ipfs://cid");
+  it("returns a signed reference with a public key", async () => {
+    const result = await buildEphemeralSignedCredentialContentReference(
+      "",
+      "ipfs://cid",
+      broaderMessageFor,
+    );
 
     expect(result.public_notes).toBe("");
     expect(result.public_notes_signature).toBeTruthy();
@@ -348,6 +359,7 @@ describe("buildPreliminaryIDOSCredential", () => {
       publicNotes: "{}",
       plaintextContent: utf8Encode("secret"),
       recipientEncryptionPublicKey: recipient.publicKey,
+      broaderMessageFor,
     });
 
     expect(result.contentUri).toMatch(/^ipfs:\/\//);
@@ -359,6 +371,7 @@ describe("buildPreliminaryIDOSCredential", () => {
       publicNotes: "{}",
       plaintextContent: utf8Encode("secret"),
       recipientEncryptionPublicKey: recipient.publicKey,
+      broaderMessageFor,
       contentUri: "ukyc://storage-abc/blobs/blob-1",
     });
 
