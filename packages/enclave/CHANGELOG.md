@@ -1,5 +1,25 @@
 # @idos-network/enclave
 
+## 3.0.1
+
+### Patch Changes
+
+- 86303bd: Check shared storage on every key use, so a live enclave drops its cached key and origin authorizations once another enclave instance expires, resets, or replaces the stored profile.
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [b1466c8]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/kwil-infra@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes

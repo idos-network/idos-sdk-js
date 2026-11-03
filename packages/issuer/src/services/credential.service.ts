@@ -10,6 +10,7 @@ import {
 import {
   type CreatePreliminaryCredentialsByDwgInput,
   createPreliminaryCredentialsByDwg,
+  credentialBroaderMessage,
   dwgMessage,
   type EditPublicNotesAsIssuerInput,
   editPublicNotesAsIssuer,
@@ -31,7 +32,7 @@ export type DelegatedWriteGrantParams = DelegatedWriteGrantBaseParams & {
 
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
   BuildPreliminaryIDOSCredentialArgs,
-  "issuerSigningSecretKey"
+  "issuerSigningSecretKey" | "broaderMessageFor"
 >;
 
 export class CredentialService {
@@ -50,7 +51,10 @@ export class CredentialService {
   }
 
   async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
-    return dwgMessage(this.#kwilClient, params).then((res) => res.message);
+    return dwgMessage(this.#kwilClient, params).then((res) => {
+      if (!res) throw new Error("dwg_message returned no rows");
+      return res.message;
+    });
   }
 
   async createCredentialByDelegatedWriteGrant(
@@ -61,9 +65,16 @@ export class CredentialService {
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
   }> {
+    const broaderMessageFor = (publicNotesSignature: string, contentUri: string) =>
+      credentialBroaderMessage(this.#kwilClient, {
+        public_notes_signature: publicNotesSignature,
+        content_uri: contentUri,
+        recipient_wallet: delegatedWriteGrant.ownerWalletIdentifier,
+      }).then((row) => row.message);
     const originalCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
         ...credentialParams,
+        broaderMessageFor,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
@@ -76,6 +87,7 @@ export class CredentialService {
         ...credentialParams,
         publicNotes: "",
         recipientEncryptionPublicKey: consumerEncryptionPublicKey,
+        broaderMessageFor,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
@@ -118,6 +130,7 @@ export class CredentialService {
 
     await this.#blobGateway.uploadCredentialBlobs({
       requestId,
+      credentialIds: [originalCredential.id, copyCredential.id],
       original: originalCredential.encryptedContent,
       copy: copyCredential.encryptedContent,
     });
@@ -144,7 +157,7 @@ export class CredentialService {
 
   async getCredentialIdByContentHash(contentHash: string): Promise<string | null> {
     const id = await getSiblingCredentialId(this.#kwilClient, { content_hash: contentHash }).then(
-      (res) => res.id,
+      (res) => res?.id,
     );
 
     invariant(id, "Required `idOSCredential` id not found");

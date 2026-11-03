@@ -1,8 +1,8 @@
 import type { idOSClientLoggedIn } from "@idos-network/client";
 import type {
   AddWalletInput,
+  AddWalletType,
   GetWalletsOutput,
-  WalletType,
 } from "@idos-network/kwil-infra/actions";
 
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ export const createWalletParamsFactory = ({
   signature: string;
   notBefore: string;
   notAfter: string;
-  walletType: WalletType;
+  walletType: AddWalletType;
 }): AddWalletInput => ({
   id: crypto.randomUUID() as string,
   address,
@@ -42,7 +42,7 @@ export const createWallet = async (
     signature: string;
     notBefore: string;
     notAfter: string;
-    walletType: WalletType;
+    walletType: AddWalletType;
   },
 ): Promise<GetWalletsOutput> => {
   const walletParams = createWalletParamsFactory(params);
@@ -71,7 +71,7 @@ export function useAddWalletMutation() {
       signature: string;
       notBefore: string;
       notAfter: string;
-      walletType: WalletType;
+      walletType: AddWalletType;
     }
   >({
     mutationFn: async ({ address, publicKeys, signature, notBefore, notAfter, walletType }) => {

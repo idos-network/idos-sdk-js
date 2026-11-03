@@ -4,6 +4,7 @@ import type { WalletSelector } from "@near-wallet-selector/core";
 
 import { getWalletClient } from "@wagmi/core";
 
+import { COMMON_ENV } from "@/core/envFlags.common";
 import { createFaceSignProvider } from "@/lib/facesign";
 
 import { wagmiConfig } from "./wagmi";
@@ -17,7 +18,12 @@ export function setFaceSignProvider(provider: FaceSignSignerProvider) {
   faceSignProvider = provider;
 }
 
+// Wipes any FaceSign key stored in this browser, whichever wallet the session used:
+// the FaceSign banner enrols keys during non-FaceSign sessions too.
 export async function clearFaceSignProvider() {
+  // Without an enclave URL no FaceSign key can have been enrolled.
+  if (!faceSignProvider && !COMMON_ENV.FACESIGN_ENCLAVE_URL) return;
+
   const provider = faceSignProvider ?? (await createFaceSignProvider());
   faceSignProvider = null;
   await provider.reset();

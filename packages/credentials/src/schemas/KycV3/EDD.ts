@@ -1,6 +1,11 @@
 import { IsIn, IsMimeType, IsOptional, IsString } from "class-validator";
 
-import { Occupations, type Occupation } from "../enums";
+import {
+  Occupations,
+  SourceOfFundsSources,
+  type Occupation,
+  type SourceOfFundsSource,
+} from "../enums";
 import { Base85FileField, RequiredWhen } from "../utils";
 
 export class EDD {
@@ -13,6 +18,11 @@ export class EDD {
   @IsOptional()
   @IsString()
   sourceOfFundsCategory?: string;
+
+  /* How the source of funds was obtained: self-attested by the person (MANUAL) or verified. Required with a proof file. A MANUAL one does not count towards the level. */
+  @RequiredWhen((edd: EDD) => !!edd.sourceOfFundsProofFile)
+  @IsIn(SourceOfFundsSources)
+  sourceOfFundsSource?: SourceOfFundsSource;
 
   /* A file containing proof of the person's source of funds. */
   @IsOptional()

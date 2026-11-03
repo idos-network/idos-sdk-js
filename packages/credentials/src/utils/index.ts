@@ -7,6 +7,14 @@ import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 
+import type {
+  BiometricSource,
+  ContactSource,
+  ResidentialAddressSource,
+  ScreeningSource,
+  SourceOfFundsSource,
+  SourceOfWealthSource,
+} from "../schemas/enums";
 import type { idOSCredential, SignedCredentialContentReference } from "../types";
 
 // Proxying functions
@@ -22,6 +30,77 @@ export type Addon =
   | "sow"
   | "screening"
   | "onboarding";
+
+// The sources each level addon can have. Keyed by every Addon (see ClaimSources), so adding
+// an addon without its sources fails to compile.
+interface AddonSources {
+  liveness: BiometricSource;
+  email: ContactSource;
+  phoneNumber: ContactSource;
+  edd: SourceOfFundsSource;
+  sow: SourceOfWealthSource;
+  screening: ScreeningSource;
+  // The onboarding questionnaire is filled in by the person, so it is always self-attested.
+  onboarding: "MANUAL";
+}
+
+/** The sources each claim can have, e.g. `ClaimSources["address"]` is a `ResidentialAddressSource`. */
+export type ClaimSources = {
+  identity: "VERIFIED";
+  address: ResidentialAddressSource;
+} & { [K in Addon]: AddonSources[K] };
+/** What a KYC credential claims: its identity, address, and each level addon. */
+export type Claim = keyof ClaimSources;
+/** How a claim was obtained, for any claim. */
+export type ClaimSource = ClaimSources[Claim];
+/** The claims in KYC public notes, each with how it was obtained. */
+export type Claims = { [K in Claim]?: ClaimSources[K] };
+/** Accepted sources per claim, e.g. `{ liveness: ["LIVENESS"], email: ["VERIFIED", "MANUAL"] }`. */
+export type ClaimRequirements = { [K in Claim]?: ClaimSources[K][] };
+
+// What a level addon says about how its claim was obtained.
+const LEVEL_ADDON_SOURCES: { [K in Addon]: ClaimSources[K] } = {
+  liveness: "LIVENESS",
+  email: "VERIFIED",
+  phoneNumber: "VERIFIED",
+  edd: "VERIFIED",
+  sow: "VERIFIED",
+  screening: "DB",
+  onboarding: "MANUAL",
+};
+
+/**
+ * The claims in a credential's public notes. Credentials issued before `claims` existed only
+ * have a level, so their claims are derived from it: everything a level lists counts as
+ * verified, except liveness (a liveness check), screening (a database check) and onboarding
+ * (always self-attested).
+ */
+export function claimsFromPublicNotes(publicNotes: { level?: string; claims?: Claims }): Claims {
+  if (publicNotes.claims) return publicNotes.claims;
+  if (!publicNotes.level) return {};
+
+  const { base, addons } = parseLevel(publicNotes.level);
+  const claims: Claims = Object.fromEntries(
+    addons
+      .filter((addon) => addon in LEVEL_ADDON_SOURCES)
+      .map((addon) => [addon, LEVEL_ADDON_SOURCES[addon]]),
+  );
+  if (base === "basic" || base === "plus") claims.identity = "VERIFIED";
+  if (base === "plus") claims.address = "PROOF_OF_ADDRESS";
+  return claims;
+}
+
+/** Whether every required claim is present with one of its accepted sources. */
+export function matchClaims(
+  required: ClaimRequirements,
+  publicNotes: Parameters<typeof claimsFromPublicNotes>[0],
+): boolean {
+  const claims = claimsFromPublicNotes(publicNotes);
+  return Object.entries(required).every(([claim, sources]) => {
+    const source = claims[claim as Claim];
+    return source !== undefined && (sources as ClaimSource[]).includes(source);
+  });
+}
 
 export function parseLevel(level: string): {
   base: BaseLevel;
@@ -43,6 +122,7 @@ export function assertNoExtraFields(
   }
 }
 
+/** @deprecated The level leaves out self-attested data. Use `matchClaims` instead. */
 export function matchLevelOrHigher(
   level: BaseLevel,
   requiredAddons: Addon[],
@@ -80,6 +160,7 @@ export function levelScore(level: string): number {
   return score;
 }
 
+/** @deprecated The level leaves out self-attested data. Use `matchClaims` instead. */
 export function pickHighestMatchingLevel(
   levels: string[],
   requiredLevel: BaseLevel,
@@ -102,9 +183,13 @@ export function highestMatchingCredential<K extends { public_notes: string }>(
   {
     addons: requiredAddons = [],
     publicNotesConstraint = {},
+    claims: acceptedClaimSources = {},
   }: {
+    /** @deprecated Use `claims` instead. */
     addons?: Addon[];
     publicNotesConstraint?: Record<string, number | string>;
+    /** Accepted sources per claim, e.g. `{ email: ["VERIFIED", "MANUAL"] }`. See `matchClaims`. */
+    claims?: ClaimRequirements;
   },
 ): K | undefined {
   const matchingCredentials = credentials
@@ -130,6 +215,10 @@ export function highestMatchingCredential<K extends { public_notes: string }>(
         if (publicNotes[key] !== publicNotesConstraint[key]) {
           return false;
         }
+      }
+
+      if (!matchClaims(acceptedClaimSources, publicNotes)) {
+        return false;
       }
 
       return true;
@@ -165,25 +254,29 @@ export function recordFilter(
   return true;
 }
 
-export function buildSignedCredentialContentReference(
+// Asks the node for the broader-signature text. The node owns the format.
+export type CredentialBroaderMessageFor = (
+  publicNotesSignature: string,
+  contentUri: string,
+) => Promise<string>;
+
+export async function buildSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
   issuerSigningSecretKey: Uint8Array,
-): SignedCredentialContentReference {
+  broaderMessageFor: CredentialBroaderMessageFor,
+): Promise<SignedCredentialContentReference> {
   const { publicKey, secretKey } = nacl.sign.keyPair.fromSecretKey(issuerSigningSecretKey);
 
   const publicNotesSignature = nacl.sign.detached(utf8Encode(publicNotes), secretKey);
+  const publicNotesSignatureB64 = base64Encode(publicNotesSignature);
+  const broaderMessage = await broaderMessageFor(publicNotesSignatureB64, contentUri);
 
   return {
     public_notes: publicNotes,
-    public_notes_signature: base64Encode(publicNotesSignature),
+    public_notes_signature: publicNotesSignatureB64,
 
-    broader_signature: base64Encode(
-      nacl.sign.detached(
-        Uint8Array.from([...publicNotesSignature, ...utf8Encode(contentUri)]),
-        secretKey,
-      ),
-    ),
+    broader_signature: base64Encode(nacl.sign.detached(utf8Encode(broaderMessage), secretKey)),
 
     issuer_auth_public_key: hexEncode(publicKey, true),
   };
@@ -193,11 +286,13 @@ export function buildSignedCredentialContentReference(
 export function buildEphemeralSignedCredentialContentReference(
   publicNotes: string,
   contentUri: string,
-): SignedCredentialContentReference {
+  broaderMessageFor: CredentialBroaderMessageFor,
+): Promise<SignedCredentialContentReference> {
   return buildSignedCredentialContentReference(
     publicNotes,
     contentUri,
     nacl.sign.keyPair().secretKey,
+    broaderMessageFor,
   );
 }
 
@@ -230,6 +325,7 @@ export interface BuildPreliminaryIDOSCredentialArgs {
   publicNotes: string;
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
+  broaderMessageFor: CredentialBroaderMessageFor;
   issuerSigningSecretKey?: Uint8Array;
   /** When set (MM / UKYC), `blob_id` is `sha256` of the ciphertext instead of an IPFS CID. */
   ukycStorageId?: string;
@@ -239,6 +335,7 @@ export async function buildPreliminaryIDOSCredential({
   publicNotes,
   plaintextContent,
   recipientEncryptionPublicKey,
+  broaderMessageFor,
   // For user-issued credentials, use a fresh ephemeral key for the signed reference
   // For issuer-side, use the signing key pair
   issuerSigningSecretKey = nacl.sign.keyPair().secretKey,
@@ -254,10 +351,11 @@ export async function buildPreliminaryIDOSCredential({
   const contentReference = ukycStorageId
     ? createUkycContentReference(ukycStorageId, encryptedContent)
     : await createBlobContentReference(encryptedContent);
-  const signedReference = buildSignedCredentialContentReference(
+  const signedReference = await buildSignedCredentialContentReference(
     publicNotes,
     contentReference.uri,
     issuerSigningSecretKey,
+    broaderMessageFor,
   );
 
   return {

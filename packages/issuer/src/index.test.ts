@@ -5,11 +5,13 @@ import { idOSIssuer, toDelegatedWriteGrantBaseParams } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
   blobGateway: { fetchBlob: vi.fn(), uploadCredentialBlobs: vi.fn() },
+  credentialBroaderMessage: vi.fn(async () => ({ message: "credential-message" })),
   createPreliminaryCredentialsByDwg: vi.fn(),
   addWalletMessage: vi.fn(async () => ({ message: "add-wallet-message" })),
   dwgMessage: vi.fn(async () => ({ message: "dwg-message-string" })),
   kwilClient: {
     setSigner: vi.fn(),
+    call: vi.fn(),
   },
   signer: { publicKey: "signer" },
 }));
@@ -24,6 +26,7 @@ vi.mock("@idos-network/kwil-infra/actions", async (importOriginal) => ({
   ...((await importOriginal()) as object),
   addWalletMessage: mocks.addWalletMessage,
   createPreliminaryCredentialsByDwg: mocks.createPreliminaryCredentialsByDwg,
+  credentialBroaderMessage: mocks.credentialBroaderMessage,
   dwgMessage: mocks.dwgMessage,
 }));
 
@@ -88,6 +91,7 @@ describe("idOSIssuer", () => {
     expect(payload.copy_content_size).toBeGreaterThan(0);
     expect(mocks.blobGateway.uploadCredentialBlobs).toHaveBeenCalledWith({
       requestId: payload.request_id,
+      credentialIds: [payload.original_id, payload.copy_id],
       original: expect.any(Uint8Array),
       copy: expect.any(Uint8Array),
     });
