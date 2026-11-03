@@ -1,5 +1,4 @@
 import { KwilSigner } from "@idos-network/kwil-js";
-import { createUkycContentUri } from "@idos-network/utils/blob-gateway";
 import {
   base64UrlDecode,
   base64UrlEncode,
@@ -56,10 +55,6 @@ export function mmTokenStorageId(signer: KwilSigner): string {
     throw new Error("mm_token payload is missing storage_id");
   }
   return storageId.trim();
-}
-
-export function mmTokenCredentialContentUri(signer: KwilSigner, credentialId: string): string {
-  return createUkycContentUri(mmTokenStorageId(signer), credentialId);
 }
 
 function isMmTokenEnvelope(value: unknown): value is MmTokenEnvelope {

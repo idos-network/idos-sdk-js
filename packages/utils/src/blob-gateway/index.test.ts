@@ -3,11 +3,14 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { base64Encode, utf8Encode } from "../codecs";
+import { hexEncodeSha256Hash } from "../codecs";
 import {
   BlobGateway,
   BlobGatewayHttpError,
   BlobGatewayUploadOutcomeUnknownError,
+  contentAddressedUkycBlobId,
   createBlobContentReference,
+  createUkycContentReference,
   createUkycContentUri,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
@@ -33,6 +36,29 @@ describe("createUkycContentUri", () => {
 
   it("rejects a storage_id with path segments", () => {
     expect(() => createUkycContentUri("storage-abc/extra", "blob-1")).toThrow(/storage_id/);
+  });
+});
+
+describe("createUkycContentReference", () => {
+  it("uses the sha256 of the ciphertext as the blob id", () => {
+    const content = utf8Encode("ciphertext");
+    const reference = createUkycContentReference("storage-abc", content);
+
+    expect(reference).toEqual({
+      uri: `ukyc://storage-abc/blobs/${hexEncodeSha256Hash(content)}`,
+      size: content.byteLength,
+    });
+    expect(contentAddressedUkycBlobId(reference.uri)).toBe(hexEncodeSha256Hash(content));
+  });
+});
+
+describe("contentAddressedUkycBlobId", () => {
+  it("ignores legacy ids that are not 64 hex characters", () => {
+    expect(contentAddressedUkycBlobId("ukyc://storage-abc/blobs/blob-1")).toBeUndefined();
+    expect(
+      contentAddressedUkycBlobId("ukyc://storage-abc/blobs/0198c21d-79cb-7000-8000-000000000001"),
+    ).toBeUndefined();
+    expect(contentAddressedUkycBlobId("ukyc://object-1")).toBeUndefined();
   });
 });
 
@@ -604,7 +630,43 @@ describe("BlobGateway", () => {
     ).rejects.toThrow("blob gateway expected size 7 exceeds maximum fetch size 4");
   });
 
-  it("skips CID checks for ukyc:// blobs and only verifies size", async () => {
+  it("verifies sha256 for a content-addressed ukyc:// blob", async () => {
+    const content = utf8Encode("ukyc-bytes");
+    const { uri } = createUkycContentReference("storage-abc", content);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(content),
+    });
+
+    await expect(
+      gateway.fetchBlob({
+        credentialId: "credential-1",
+        contentUri: uri,
+        expectedSize: content.byteLength,
+      }),
+    ).resolves.toEqual(content);
+  });
+
+  it("rejects a content-addressed ukyc:// blob whose bytes do not match", async () => {
+    const content = utf8Encode("ukyc-bytes");
+    const other = utf8Encode("other-data");
+    const { uri } = createUkycContentReference("storage-abc", content);
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn: async () => new Response(other),
+    });
+
+    await expect(
+      gateway.fetchBlob({
+        credentialId: "credential-1",
+        contentUri: uri,
+        expectedSize: other.byteLength,
+      }),
+    ).rejects.toThrow(/sha256/);
+  });
+
+  // shortcut: legacy UUID blob IDs (dev only) are not content-verified, remove once dev data is wiped
+  it("reads a legacy ukyc:// blob with only a size check", async () => {
     const content = utf8Encode("ukyc-bytes");
     const gateway = new BlobGateway({
       url: "https://blob.example",
@@ -614,7 +676,7 @@ describe("BlobGateway", () => {
     await expect(
       gateway.fetchBlob({
         credentialId: "credential-1",
-        contentUri: "ukyc://object-1",
+        contentUri: "ukyc://storage-abc/blobs/0198c21d-79cb-7000-8000-000000000001",
         expectedSize: content.byteLength,
       }),
     ).resolves.toEqual(content);

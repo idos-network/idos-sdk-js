@@ -27,7 +27,7 @@ import {
   createWebKwilClient,
   isMmTokenAuth,
   type KwilActionClient,
-  mmTokenCredentialContentUri,
+  mmTokenStorageId,
   signNearMessage,
   type Wallet,
 } from "@idos-network/kwil-infra";
@@ -76,6 +76,7 @@ import {
   BlobGateway,
   BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
+  createUkycContentReference,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
   type UploadCredentialBlobsParams,
@@ -132,15 +133,14 @@ function blobGatewayForSigner(idle: idOSClientIdle, kwilSigner: KwilSigner): Blo
     : idle.blobGateway;
 }
 
-function contentUriForWallet(
+function ukycStorageIdForWallet(
   walletType: WalletType,
   kwilSigner: KwilSigner,
-  credentialId: string,
 ): string | undefined {
   if (walletType !== "MM") {
     return undefined;
   }
-  return mmTokenCredentialContentUri(kwilSigner, credentialId);
+  return mmTokenStorageId(kwilSigner);
 }
 
 // Deadline for reading a blob back after an unknown upload outcome. A slower read leaves the
@@ -653,7 +653,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
             recipient_wallet: credentialRecipientWallet(this),
           }).then((row) => row.message),
         issuerSigningSecretKey,
-        contentUri: contentUriForWallet(this.walletType, this.kwilSigner, credentialId),
+        ukycStorageId: ukycStorageIdForWallet(this.walletType, this.kwilSigner),
       })),
       id: credentialId,
     };
@@ -1076,11 +1076,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // User issues the shared copy: sign content_uri with an ephemeral user-side key.
     // Copy issuer_auth_public_key need not match the original credential's issuer.
     const copyId = crypto.randomUUID();
-    const ukycContentUri = contentUriForWallet(this.walletType, this.kwilSigner, copyId);
-    requireAccessTokenForUkycContent(ukycContentUri, this.blobGateway.hasAccessToken);
-    const copyReference = ukycContentUri
-      ? { uri: ukycContentUri, size: content.byteLength }
+    const ukycStorageId = ukycStorageIdForWallet(this.walletType, this.kwilSigner);
+    const copyReference = ukycStorageId
+      ? createUkycContentReference(ukycStorageId, content)
       : await createBlobContentReference(content);
+    requireAccessTokenForUkycContent(copyReference.uri, this.blobGateway.hasAccessToken);
     const signedReference = await buildEphemeralSignedCredentialContentReference(
       "",
       copyReference.uri,

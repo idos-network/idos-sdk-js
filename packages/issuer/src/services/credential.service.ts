@@ -32,11 +32,8 @@ export type DelegatedWriteGrantParams = DelegatedWriteGrantBaseParams & {
 
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
   BuildPreliminaryIDOSCredentialArgs,
-  "issuerSigningSecretKey" | "contentUri" | "broaderMessageFor"
-> & {
-  originalContentUri?: string;
-  copyContentUri?: string;
-};
+  "issuerSigningSecretKey" | "broaderMessageFor"
+>;
 
 export class CredentialService {
   readonly #kwilClient: KwilActionClient;
@@ -68,7 +65,6 @@ export class CredentialService {
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
   }> {
-    const { originalContentUri, copyContentUri, ...sharedCredentialParams } = credentialParams;
     const broaderMessageFor = (publicNotesSignature: string, contentUri: string) =>
       credentialBroaderMessage(this.#kwilClient, {
         public_notes_signature: publicNotesSignature,
@@ -77,8 +73,7 @@ export class CredentialService {
       }).then((row) => row.message);
     const originalCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
-        ...sharedCredentialParams,
-        contentUri: originalContentUri,
+        ...credentialParams,
         broaderMessageFor,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
@@ -89,8 +84,7 @@ export class CredentialService {
 
     const copyCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
-        ...sharedCredentialParams,
-        contentUri: copyContentUri,
+        ...credentialParams,
         publicNotes: "",
         recipientEncryptionPublicKey: consumerEncryptionPublicKey,
         broaderMessageFor,
