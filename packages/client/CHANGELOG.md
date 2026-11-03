@@ -1,5 +1,31 @@
 # @idos-network/client
 
+## 3.1.0
+
+### Minor Changes
+
+- 9486131: Add a `claimsFilter` to `filterCredentials()` to match credentials on their claims, self-attested data included, and deprecate `credentialLevelOrHigherFilter`. Re-export the `Claim`, `Claims`, `ClaimSource`, `ClaimSources` and `ClaimRequirements` types.
+
+### Patch Changes
+
+- 5dac941: Look up NEAR profiles by public key so `hasProfile()` finds an existing NEAR user.
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [b1466c8]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+- Updated dependencies [86303bd]
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/kwil-infra@3.0.1
+  - @idos-network/enclave@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes

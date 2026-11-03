@@ -1,5 +1,15 @@
 # @idos-network/kwil-infra
 
+## 3.0.1
+
+### Patch Changes
+
+- b1466c8: Delete a FaceSign key already stored in the browser before that key can be added to an idOS profile.
+- 47c1b10: Only trust a my-near-wallet redirect when its signature matches the saved request, its account is the connected account, and its public key is a full-access key of that account.
+- dc34ffe: Reject NEAR signatures whose NEP-413 recipient is not `idos.network`.
+- Updated dependencies [78ad0a9]
+  - @idos-network/utils@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes

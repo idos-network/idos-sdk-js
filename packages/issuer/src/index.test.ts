@@ -91,6 +91,7 @@ describe("idOSIssuer", () => {
     expect(payload.copy_content_size).toBeGreaterThan(0);
     expect(mocks.blobGateway.uploadCredentialBlobs).toHaveBeenCalledWith({
       requestId: payload.request_id,
+      credentialIds: [payload.original_id, payload.copy_id],
       original: expect.any(Uint8Array),
       copy: expect.any(Uint8Array),
     });

@@ -8,11 +8,17 @@ import {
   buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
   mapPreliminaryToIDOSCredential,
+  matchClaims,
   matchLevelOrHigher,
   type PreliminaryIDOSCredential,
   recordFilter,
   type BaseLevel,
   type Addon,
+  type Claim,
+  type ClaimRequirements,
+  type Claims,
+  type ClaimSource,
+  type ClaimSources,
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
@@ -68,9 +74,11 @@ import {
 import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 import {
   BlobGateway,
+  BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
+  type UploadCredentialBlobsParams,
 } from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
@@ -133,6 +141,14 @@ function contentUriForWallet(
     return undefined;
   }
   return mmTokenCredentialContentUri(kwilSigner, credentialId);
+}
+
+// Deadline for reading a blob back after an unknown upload outcome. A slower read leaves the
+// outcome unknown, which callers already have to handle, instead of hanging the call.
+const READ_BACK_TIMEOUT_MS = 60_000;
+
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  return a.byteLength === b.byteLength && a.every((byte, index) => byte === b[index]);
 }
 
 const STALE_CLIENT =
@@ -663,12 +679,47 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     await createPreliminaryCredential(this.kwilClient, payload);
 
-    await this.blobGateway.uploadCredentialBlobs({
+    await this.#uploadOwnedCredentialBlobs({
       requestId,
+      credentialIds: [preliminaryCredential.id],
       original: preliminaryCredential.encryptedContent,
     });
 
     return mapPreliminaryToIDOSCredential(preliminaryCredential);
+  }
+
+  /**
+   * A lost upload response can hide a finalized credential. The user owns it, so look it up
+   * by id and read its blob back: the record alone doesn't prove the gateway stored our bytes
+   * (a 2xx with a CID mismatch also lands here). Rethrow the unknown outcome unless both check
+   * out, including when the credential isn't visible yet, a read fails, or the read takes
+   * longer than READ_BACK_TIMEOUT_MS.
+   */
+  async #uploadOwnedCredentialBlobs(
+    params: UploadCredentialBlobsParams & { credentialIds: [string] },
+  ): Promise<void> {
+    try {
+      await this.blobGateway.uploadCredentialBlobs(params);
+    } catch (error) {
+      if (!(error instanceof BlobGatewayUploadOutcomeUnknownError)) throw error;
+
+      const created = await this.getCredentialById(params.credentialIds[0]).catch(() => undefined);
+      if (!created?.content_uri) throw error;
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), READ_BACK_TIMEOUT_MS);
+      const stored = await this.blobGateway
+        .fetchBlob({
+          credentialId: created.id,
+          contentUri: created.content_uri,
+          expectedSize: created.content_size,
+          signal: controller.signal,
+        })
+        .catch(() => undefined)
+        .finally(() => clearTimeout(timer));
+      const uploaded = params.original ?? params.copy;
+      if (!stored || !bytesEqual(stored, uploaded)) throw error;
+    }
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
@@ -885,10 +936,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       pick: Parameters<typeof recordFilter>[1];
       omit: Parameters<typeof recordFilter>[2];
     };
+    /** @deprecated The level leaves out self-attested data. Use `claimsFilter` instead. */
     credentialLevelOrHigherFilter?: {
       userLevel: BaseLevel;
       requiredAddons: Addon[];
     };
+    /** Accepted sources per claim, e.g. `{ email: ["VERIFIED", "MANUAL"] }`. See `matchClaims`. */
+    claimsFilter?: ClaimRequirements;
   }): Promise<idOSCredentialListItem[]> {
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter(
@@ -905,6 +959,21 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
     const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
     const privateFieldFilters = requirements.privateFieldFilters;
+    const claimsFilter = requirements.claimsFilter;
+
+    if (claimsFilter) {
+      result = result.filter((credential) => {
+        let publicNotes: Parameters<typeof matchClaims>[1];
+
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (_) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
+        }
+
+        return matchClaims(claimsFilter, publicNotes);
+      });
+    }
 
     if (credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
@@ -1044,8 +1113,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     };
 
     await this.shareCredential(preliminaryCredential);
-    await this.blobGateway.uploadCredentialBlobs({
+    await this.#uploadOwnedCredentialBlobs({
       requestId: preliminaryCredential.request_id,
+      credentialIds: [copyId],
       copy: content,
     });
 
@@ -1080,6 +1150,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 }
 
 export type {
+  Claim,
+  ClaimRequirements,
+  Claims,
+  ClaimSource,
+  ClaimSources,
   idOSDelegatedWriteGrant,
   DelegatedWriteGrantBaseParams,
   idOSCredential,

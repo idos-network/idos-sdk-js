@@ -86,6 +86,10 @@ describe("parseCredential", () => {
         contactEmail: "john@example.com",
         contactPhoneNumber: "+1234567890",
         biometricSelfieFile: SELFIE_FILE,
+        biometricSelfieFileType: "image/jpeg",
+        biometricSource: "LIVENESS",
+        biometricProvider: "FaceTec",
+        biometricSelfieFileName: "selfie.jpg",
         residentialAddressSource: "PROOF_OF_ADDRESS",
         residentialAddressStreet: "Main St",
         residentialAddressCity: "New York",
@@ -94,14 +98,18 @@ describe("parseCredential", () => {
         residentialAddressProofFile: PROOF_FILE,
         residentialAddressProofFileType: "image/jpeg",
         residentialAddressProofFileName: "proof.jpg",
+        screeningSource: "DB",
         screeningSanctionsCheckResult: "CLEAR",
         screeningPepCheckResult: "CLEAR",
+        sourceOfWealthSource: "VERIFIED",
         sourceOfWealthType: "SALARY",
         sourceOfWealthYearlyGrossIncome: "LESS_THAN_20000",
         sourceOfWealthYearlyGrossIncomeCurrency: "EUR",
         sourceOfWealthApproximateNetWorth: "UP_TO_25000",
         sourceOfWealthApproximateNetWorthCurrency: "EUR",
         sourceOfWealthSourceOfWealthProofFile: PROOF_FILE,
+        sourceOfWealthSourceOfWealthProofFileType: "application/pdf",
+        sourceOfWealthSourceOfWealthProofFileName: "wealth.pdf",
       }),
     );
 
@@ -137,10 +145,12 @@ describe("parseCredential", () => {
     });
     expect(parsed.subject.residentialAddress?.proofFile?.toString()).toBe("Proof");
     expect(parsed.subject.screening).toEqual({
+      source: "DB",
       sanctionsCheckResult: "CLEAR",
       pepCheckResult: "CLEAR",
     });
     expect(parsed.subject.sourceOfWealth).toMatchObject({
+      source: "VERIFIED",
       type: "SALARY",
       yearlyGrossIncome: "LESS_THAN_20000",
       approximateNetWorth: "UP_TO_25000",

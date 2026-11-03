@@ -132,6 +132,20 @@ const grant = await idOSClientLoggedIn.requestAccessGrant("CREDENTIAL_ID", {
 
 `issuer_auth_public_key` on a credential row is whoever **issued that row**. For a shared copy, the **user** is the issuer: the client signs the copy `content_uri` with an ephemeral user-side key. That key need not match the original credential's issuer (often a server app). Kwil verifies the copy signatures under the submitted key and that the original belongs to the caller.
 
+### If sharing or creating a credential fails
+
+`requestAccessGrant` and `createCredential` have two steps. First they write a preliminary credential to idOS. Then they upload the encrypted content to the blob gateway, which turns it into a real credential. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default.
+
+If an attempt may have reached the gateway, a lost response can hide a credential that was created. The SDK then looks the credential up by its id and reads its stored content back. It returns normally only if the credential exists and the stored content matches what it uploaded.
+
+If the call still throws, check the error's `name`:
+
+- `BlobGatewayUploadOutcomeUnknownError`: the SDK couldn't confirm either way. The credential may not be visible yet, a lookup or read may have failed or timed out, or its stored content didn't match the upload. `error.credentialIds[0]` is its id. Don't call the method again until you've settled it, or you may create a duplicate:
+  - Treat it as created only once `getCredentialById(id)` finds it **and** its content checks out. After `createCredential`, compare `getCredentialContentSha256Hash(id)` with the hex SHA-256 of the plaintext you passed. A shared copy is encrypted to the consumer, so only the consumer can check it, with `idOSConsumer.getCredentialSharedContentDecrypted(id)`.
+  - Treat it as not created only if it's still missing 15 minutes after the call. With the default gateway settings, nothing can create it after that.
+  - Otherwise the outcome is still unknown.
+- Anything else: nothing was created, so you can call the method again. The gateway deletes the leftover preliminary record after about 10 minutes.
+
 ## 6) Manage wallets
 
 Add a wallet:

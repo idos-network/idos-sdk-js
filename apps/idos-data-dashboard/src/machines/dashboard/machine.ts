@@ -504,8 +504,10 @@ export const dashboardMachine = setup({
       on: {
         RETRY: [
           {
-            // A new wallet must not inherit a developer cookie the delete did not clear.
-            guard: ({ context }) => context.error === "Failed to delete session",
+            // A new wallet must not inherit a developer cookie or FaceSign key the delete did not clear.
+            guard: ({ context }) =>
+              context.error === "Failed to delete session" ||
+              context.error === "Failed to clear FaceSign keys",
             target: "disconnecting",
           },
           {

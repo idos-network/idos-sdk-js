@@ -172,7 +172,14 @@ describe("all versions issue + verify + parse", () => {
         issuingSubdivision: "CA",
       })
       .addSection("contact", { email: "j@e.com", phoneNumber: "+1" })
-      .addSection("biometric", { selfieFile: Buffer.from("S"), selfieMatch: 99 })
+      .addSection("biometric", {
+        selfieFile: Buffer.from("S"),
+        selfieFileType: "image/jpeg",
+        source: "LIVENESS",
+        provider: "FaceTec",
+        selfieFileName: "selfie.jpg",
+        selfieMatch: 99,
+      })
       .addSection("residentialAddress", {
         source: "PROOF_OF_ADDRESS",
         street: "S",
@@ -190,6 +197,7 @@ describe("all versions issue + verify + parse", () => {
         ipCountry: "US",
       })
       .addSection("screening", {
+        source: "DB",
         sanctionsCheckResult: "CLEAR",
         sanctionsConfidenceScore: 95,
         pepCheckResult: "CLEAR",
@@ -198,17 +206,21 @@ describe("all versions issue + verify + parse", () => {
       .addSection("edd", {
         occupation: "REAL_ESTATE",
         sourceOfFundsCategory: "SALARY",
+        sourceOfFundsSource: "VERIFIED",
         sourceOfFundsProofFile: Buffer.from("F"),
         sourceOfFundsProofFileType: "application/pdf",
         sourceOfFundsProofFileName: "funds.pdf",
       })
       .addSection("sourceOfWealth", {
+        source: "VERIFIED",
         type: "SALARY",
         yearlyGrossIncome: "LESS_THAN_20000",
         yearlyGrossIncomeCurrency: "EUR",
         approximateNetWorth: "UP_TO_25000",
         approximateNetWorthCurrency: "EUR",
         sourceOfWealthProofFile: Buffer.from("P"),
+        sourceOfWealthProofFileType: "application/pdf",
+        sourceOfWealthProofFileName: "wealth.pdf",
       })
       .addSection("onboarding", {
         intendedUse: "INVESTING",

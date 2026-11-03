@@ -6,6 +6,7 @@ import { base64Encode, utf8Encode } from "../codecs";
 import {
   BlobGateway,
   BlobGatewayHttpError,
+  BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
   createUkycContentUri,
   requireAccessTokenForUkycContent,
@@ -44,6 +45,24 @@ describe("createBlobContentReference", () => {
       uri: "ipfs://bafkreiepinbumzepnoln7co5vea4kf3lcctnqolb3u6bvsellgznymt2uq",
       size: 2,
     });
+  });
+
+  // Reference CIDs computed with ipfs-only-hash@4, which produced the CIDs of stored blobs.
+  const CHUNK = 262144;
+  it.each([
+    [0, "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku"],
+    [1, "bafkreidogqfzz75tpkmjzjke425xqcrmpcib2p5tg44hnbirumdbpl5adu"],
+    [CHUNK - 1, "bafkreiagptg6ztonoojy4wflk3wwusl5xt4vcy6uult4wa7oemsjtxhjsu"],
+    [CHUNK, "bafkreibruh455iawsviqslif5c7uurdcfdemh22mtnytyzvnzn75kpejxy"],
+    [CHUNK + 1, "bafybeiexg2oqkfnj56l7fcmawswqbijt5shq4b5rg6a546uwpkqqzwjioi"],
+    [3 * CHUNK + 17, "bafybeiazf3hwcyssmk5zulxipul4hzjd3xeuhvxssc4a3kp5ffwvsqxnse"],
+    [174 * CHUNK, "bafybeihpe5snhzneq7xs53nivmsopto5lrogo3wjynauqylqeym5a3irbm"],
+    [174 * CHUNK + 1, "bafybeib4y7ghw2rq7bracc4xwtxrbzo7cfvagdpte2tmrkgwl6dyard3cm"],
+    [175 * CHUNK + 5, "bafybeig3ditv32awk5ax5w3lwugydoz5vhxs6vsycpmyv4qdosmpgv47da"],
+  ])("keeps the legacy CID for a %i byte blob", async (size, cid) => {
+    const content = Uint8Array.from({ length: size }, (_, i) => i % 251);
+
+    expect((await createBlobContentReference(content)).cid).toBe(cid);
   });
 });
 
@@ -183,6 +202,217 @@ describe("BlobGateway", () => {
     expect(calls[0]?.[1]?.body).toBeInstanceOf(FormData);
   });
 
+  it("retries uploads after network errors and transient gateway statuses", async () => {
+    const original = utf8Encode("original");
+    const { cid } = await createBlobContentReference(original);
+    const responses: Array<() => Response> = [
+      () => {
+        throw new TypeError("fetch failed");
+      },
+      () => Response.json({ code: "KWIL_UNAVAILABLE" }, { status: 503 }),
+      () => Response.json({ request_id: "request-1", original_cid: cid }),
+    ];
+    const fetchFn = vi.fn(async () => {
+      const next = responses.shift();
+      if (!next) throw new Error("unexpected extra upload");
+      return next();
+    });
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    const result = await gateway.uploadCredentialBlobs({ requestId: "request-1", original });
+
+    expect(result).toEqual({ request_id: "request-1", original_cid: cid });
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+  });
+
+  it("reports an unknown outcome after the configured number of upload retries", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({ code: "UKYC_REQUEST_TIMEOUT" }, { status: 504 }),
+    );
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetries: 1,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        credentialIds: ["credential-1"],
+        original: utf8Encode("original"),
+      }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayUploadOutcomeUnknownError",
+      uploadRequestId: "request-1",
+      credentialIds: ["credential-1"],
+      cause: { name: "BlobGatewayHttpError", status: 504 },
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry uploads rejected with a client error", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({ code: "PRELIMINARY_CREDENTIAL_NOT_FOUND" }, { status: 404 }),
+    );
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({ name: "BlobGatewayHttpError", status: 404 });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry errors that are not network failures", async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new Error("User rejected the request");
+    });
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toThrow("User rejected the request");
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([404, 409])(
+    "reports an unknown outcome when a retry gets %i after a lost response",
+    async (status) => {
+      const responses: Array<() => Response> = [
+        () => {
+          throw new TypeError("fetch failed");
+        },
+        () => Response.json({ code: "PRELIMINARY_CREDENTIAL" }, { status }),
+      ];
+      const gateway = new BlobGateway({
+        url: "https://blob.example",
+        uploadRetryDelayMs: 0,
+        fetchFn: async () => {
+          const next = responses.shift();
+          if (!next) throw new Error("unexpected extra upload");
+          return next();
+        },
+      });
+
+      const upload = gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        credentialIds: ["original-1", "copy-1"],
+        original: utf8Encode("original"),
+      });
+
+      await expect(upload).rejects.toBeInstanceOf(BlobGatewayUploadOutcomeUnknownError);
+      await expect(upload).rejects.toMatchObject({
+        uploadRequestId: "request-1",
+        credentialIds: ["original-1", "copy-1"],
+        cause: { name: "BlobGatewayHttpError", status },
+      });
+    },
+  );
+
+  it("aborts an upload attempt that exceeds the timeout and retries it", async () => {
+    const original = utf8Encode("original");
+    const { cid } = await createBlobContentReference(original);
+    const signals: AbortSignal[] = [];
+    const fetchFn = vi.fn(async (_input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+      const signal = init?.signal;
+      if (!signal) throw new Error("upload sent without a signal");
+      signals.push(signal);
+      if (signals.length === 1) {
+        // Hang until the attempt's timeout aborts it, like a stalled connection.
+        return new Promise<Response>((_resolve, reject) => {
+          signal.addEventListener("abort", () => reject(signal.reason));
+        });
+      }
+      return Response.json({ request_id: "request-1", original_cid: cid });
+    });
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadTimeoutMs: 20,
+      uploadRetryDelayMs: 0,
+    });
+
+    const result = await gateway.uploadCredentialBlobs({ requestId: "request-1", original });
+
+    expect(result).toEqual({ request_id: "request-1", original_cid: cid });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(signals[0]).not.toBe(signals[1]);
+    expect(signals[1]?.aborted).toBe(false);
+  });
+
+  it("reports an unknown outcome when every upload attempt times out", async () => {
+    const fetchFn = vi.fn(
+      async (_input: Parameters<typeof fetch>[0], init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+        }),
+    );
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetries: 1,
+      uploadTimeoutMs: 20,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayUploadOutcomeUnknownError",
+      cause: { name: "TimeoutError" },
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a zero upload timeout", () => {
+    expect(() => new BlobGateway({ url: "https://blob.example", uploadTimeoutMs: 0 })).toThrow(
+      "uploadTimeoutMs must be positive",
+    );
+  });
+
+  it("keeps upload retry settings when cloning with a new access token", async () => {
+    const fetchFn = vi.fn(async () => Response.json({}, { status: 502 }));
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetries: 0,
+    }).withAccessToken("mm-envelope");
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({ cause: { status: 502 } });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports an unknown outcome without retrying when a successful response is unreadable", async () => {
+    const fetchFn = vi.fn(async () => new Response("not json", { status: 200 }));
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      fetchFn,
+      uploadRetryDelayMs: 0,
+    });
+
+    await expect(
+      gateway.uploadCredentialBlobs({ requestId: "request-1", original: utf8Encode("original") }),
+    ).rejects.toMatchObject({
+      name: "BlobGatewayUploadOutcomeUnknownError",
+      cause: { name: "SyntaxError" },
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
   it("does not include opaque HTML response bodies in upload errors", async () => {
     const gateway = new BlobGateway({
       url: "https://blob.example",
@@ -216,6 +446,7 @@ describe("BlobGateway", () => {
   it("preserves structured gateway error codes without logging the raw response", async () => {
     const gateway = new BlobGateway({
       url: "https://blob.example",
+      uploadRetries: 0,
       fetchFn: async () =>
         Response.json(
           {
@@ -232,30 +463,37 @@ describe("BlobGateway", () => {
         original: utf8Encode("original"),
       }),
     ).rejects.toMatchObject({
-      message:
-        "blob gateway upload failed with 502 (UKYC_UPLOAD_FAILED, request gateway-request-43): UKYC storage upload request failed",
-      status: 502,
-      code: "UKYC_UPLOAD_FAILED",
-      requestId: "gateway-request-43",
+      cause: {
+        message:
+          "blob gateway upload failed with 502 (UKYC_UPLOAD_FAILED, request gateway-request-43): UKYC storage upload request failed",
+        status: 502,
+        code: "UKYC_UPLOAD_FAILED",
+        requestId: "gateway-request-43",
+      },
     });
   });
 
-  it("rejects upload responses whose CID does not match the uploaded bytes", async () => {
-    const gateway = new BlobGateway({
-      url: "https://blob.example",
-      fetchFn: async () =>
-        Response.json({
-          request_id: "request-1",
-          original_cid: "bafkreiwrongcidfromgateway000000000000000000000000000000",
-        }),
+  it("reports a CID mismatch in a successful response as an unknown outcome", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({
+        request_id: "request-1",
+        original_cid: "bafkreiwrongcidfromgateway000000000000000000000000000000",
+      }),
+    );
+    const gateway = new BlobGateway({ url: "https://blob.example", fetchFn });
+
+    const upload = gateway.uploadCredentialBlobs({
+      requestId: "request-1",
+      original: utf8Encode("original"),
     });
 
-    await expect(
-      gateway.uploadCredentialBlobs({
-        requestId: "request-1",
-        original: utf8Encode("original"),
-      }),
-    ).rejects.toThrow(/blob gateway upload returned original CID .+, expected .+/);
+    await expect(upload).rejects.toBeInstanceOf(BlobGatewayUploadOutcomeUnknownError);
+    await expect(upload).rejects.toMatchObject({
+      cause: {
+        message: expect.stringMatching(/blob gateway upload returned original CID .+, expected .+/),
+      },
+    });
+    expect(fetchFn).toHaveBeenCalledOnce();
   });
 
   it("fetches blobs through the initialized gateway URL", async () => {
@@ -279,6 +517,26 @@ describe("BlobGateway", () => {
     expect(result).toEqual(content);
     expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/credentials/credential-1");
     expect(calls[0]?.[1]?.headers).toBeUndefined();
+  });
+
+  it("passes the caller's abort signal to the blob fetch", async () => {
+    const controller = new AbortController();
+    const calls: Parameters<typeof fetch>[] = [];
+    const gateway = new BlobGateway({
+      url: "https://blob.example",
+      accessToken: "mm-envelope",
+      fetchFn: async (...args) => {
+        calls.push(args);
+        return new Response(utf8Encode("content"));
+      },
+    });
+
+    await gateway.fetchBlob({ credentialId: "credential-1", signal: controller.signal });
+
+    expect(calls[0]?.[1]?.signal).toBe(controller.signal);
+    expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+      "AccessToken mm-envelope",
+    );
   });
 
   it("rejects fetched blobs whose bytes do not match the content URI CID", async () => {

@@ -347,6 +347,37 @@ await idOSIssuer.createCredentialByDelegatedWriteGrant(
 
 This will create blob-backed original and copy credentials in idOS.
 
+#### If `createCredentialByDelegatedWriteGrant` fails
+
+The call has two steps. First it writes preliminary credentials to idOS, which consumes the delegated write grant. Then it uploads the encrypted content to the blob gateway, which turns them into real credentials. The SDK retries the upload by itself: it retries network errors, timeouts (150 s per attempt) and 408, 429, 500, 502, 503 or 504 responses, twice by default.
+
+If the call still fails, check the error's `name`:
+
+- `BlobGatewayUploadOutcomeUnknownError`: an attempt may have reached the gateway and created the credentials, but the SDK couldn't confirm it. `error.credentialIds` holds the original and copy ids. Don't ask the user for a new grant until you know the copy doesn't exist, or you may create duplicates.
+- Anything else: the credentials were not created. Call `createCredentialByDelegatedWriteGrant` again with the same write grant. If the failure happened before the preliminary credentials were written, the grant is still unused and this call works. If the grant was already used, idOS rejects the call; then ask the user to sign a new write grant and try with that. The gateway deletes any leftover preliminary records after about 10 minutes.
+
+When the write grant's grantee is the key you initialized `idOSIssuer` with, as in the example above, you can check the copy yourself. A missing copy only proves the credentials were not created once nothing can still create them. With the default gateway settings that's 15 minutes after the call: by then the gateway has deleted the preliminary records and no upload is still running.
+
+```js
+try {
+  await idOSIssuer.createCredentialByDelegatedWriteGrant(/* ... */);
+} catch (error) {
+  if (error.name !== "BlobGatewayUploadOutcomeUnknownError") throw error;
+
+  const [, copyId] = error.credentialIds;
+  // Returns null if the copy isn't visible to you, and throws if the lookup itself fails.
+  const copy = await idOSIssuer.getCredentialShared(copyId);
+  if (!copy) {
+    // Still unknown. Keep copyId and look it up again 15 minutes after the call. If it's
+    // missing then, the credentials were not created: request a new write grant.
+  }
+}
+```
+
+When the grantee is a different consumer, that consumer can look for `copyId` in `idOSConsumer.getCredentialsSharedByUser(userId)`.
+
+Finding the copy proves it was created, not that its stored content is right. The issuer SDK can't read the content back; the grantee can, with `idOSConsumer.getCredentialSharedContentDecrypted(copyId)`. Treat the issuance as successful only once that content checks out; until then the outcome is still unknown.
+
 ### [ backend ] Revoking and editing credentials
 
 The `editCredential` function allows issuers to update the public notes associated with a credential in the idOS. This is useful for actions like marking credentials as revoked or updating metadata.
