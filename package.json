@@ -23,11 +23,11 @@
     "@size-limit/file": "^11.2.0",
     "audit-ci": "^7.1.0",
     "lefthook": "1.13.6",
-    "oxfmt": "^0.66.0",
+    "oxfmt": "^0.77.0",
     "oxlint": "^1.85.0",
     "size-limit": "^11.2.0",
     "turbo": "^2.10.8",
     "vite-plugin-node-polyfills": "catalog:build"
   },
-  "packageManager": "pnpm@11.26.0"
+  "packageManager": "pnpm@11.28.11"
 }
