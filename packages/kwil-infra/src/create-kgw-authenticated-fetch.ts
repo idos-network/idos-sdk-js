@@ -2,9 +2,6 @@ import { type KwilSigner, NodeKwil } from "@idos-network/kwil-js";
 import { BlobGateway, type BlobGatewayParams } from "@idos-network/utils/blob-gateway";
 
 import type { KwilActionClient } from "./create-kwil-client";
-import type { MmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
-
-import { isMmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
 
 const KGW_AUTH_ERROR_CODE = -901;
 
@@ -23,10 +20,10 @@ export type CreateKgwAuthenticatedBlobGatewayParams = CreateKgwAuthenticatedFetc
   url: string;
   maxFetchBytes?: BlobGatewayParams["maxFetchBytes"];
   /**
-   * UKYC storage authority for blob requests. Defaults to `signer` when that signer
-   * is itself an MM authentication object, so the capability is never passed twice.
+   * UKYC storage token, sent as `Authorization: AccessToken <token>` next to the KGW session
+   * cookie. Only MM operators use it; `BlobGateway.withAccessToken()` swaps it per request.
    */
-  mmAuth?: MmTokenAuth;
+  accessToken?: string;
 };
 
 type KgwSessionNodeKwil = NodeKwil & {
@@ -37,16 +34,13 @@ type KgwSessionNodeKwil = NodeKwil & {
 export function createKgwAuthenticatedBlobGateway({
   url,
   maxFetchBytes,
-  mmAuth,
+  accessToken,
   ...fetchParams
 }: CreateKgwAuthenticatedBlobGatewayParams): BlobGateway {
-  const storageAuth =
-    mmAuth ?? (isMmTokenAuth(fetchParams.signer) ? fetchParams.signer : undefined);
-
   return new BlobGateway({
     url,
     maxFetchBytes,
-    accessToken: storageAuth?.accessToken,
+    accessToken,
     fetchFn: createKgwAuthenticatedFetch(fetchParams),
   });
 }
@@ -302,20 +296,22 @@ function withCookie(
   return [input, { ...init, headers }];
 }
 
-async function defaultKgwAuthFailurePredicate(response: Response): Promise<boolean> {
-  if (response.status === 401) {
-    return true;
-  }
+// blob-gateway also answers 401 for a bad UKYC storage token. A new KGW session doesn't fix that.
+const STORAGE_TOKEN_AUTH_ERROR_CODES = new Set(["MM_TOKEN_INVALID", "MM_TOKEN_EXPIRED"]);
 
+async function defaultKgwAuthFailurePredicate(response: Response): Promise<boolean> {
   const contentType = response.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
-    return false;
+    return response.status === 401;
   }
 
   try {
-    const body = (await response.json()) as { error?: { code?: number } };
+    const body = (await response.json()) as { code?: unknown; error?: { code?: number } };
+    if (response.status === 401) {
+      return !(typeof body.code === "string" && STORAGE_TOKEN_AUTH_ERROR_CODES.has(body.code));
+    }
     return body.error?.code === KGW_AUTH_ERROR_CODE;
   } catch {
-    return false;
+    return response.status === 401;
   }
 }

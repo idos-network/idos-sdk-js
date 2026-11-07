@@ -184,6 +184,20 @@ export const TARGETS: ModuleTarget[] = [
           "getCredentialShared",
         ],
       },
+      {
+        // Arguments carry user ids and storage tokens: no attributes.
+        className: "idOSMmOperator",
+        staticMethods: ["init"],
+        methods: [
+          "getUser",
+          "createUser",
+          "getCredentials",
+          "createCredential",
+          "getCredentialContent",
+          "requestUserWipe",
+          "wipeUser",
+        ],
+      },
     ],
   },
   {

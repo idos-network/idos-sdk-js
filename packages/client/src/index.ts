@@ -25,9 +25,7 @@ import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
   createWebKwilClient,
-  isMmTokenAuth,
   type KwilActionClient,
-  mmTokenStorageId,
   signNearMessage,
   type Wallet,
 } from "@idos-network/kwil-infra";
@@ -76,8 +74,7 @@ import {
   BlobGateway,
   BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
-  createUkycContentReference,
-  requireAccessTokenForUkycContent,
+  isUkycContentUri,
   resolveCredentialEncryptedContent,
   type UploadCredentialBlobsParams,
 } from "@idos-network/utils/blob-gateway";
@@ -128,19 +125,7 @@ function blobGatewayForSigner(idle: idOSClientIdle, kwilSigner: KwilSigner): Blo
     });
   }
 
-  return isMmTokenAuth(kwilSigner)
-    ? idle.blobGateway.withAccessToken(kwilSigner.accessToken)
-    : idle.blobGateway;
-}
-
-function ukycStorageIdForWallet(
-  walletType: WalletType,
-  kwilSigner: KwilSigner,
-): string | undefined {
-  if (walletType !== "MM") {
-    return undefined;
-  }
-  return mmTokenStorageId(kwilSigner);
+  return idle.blobGateway;
 }
 
 // Deadline for reading a blob back after an unknown upload outcome. A slower read leaves the
@@ -653,14 +638,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
             recipient_wallet: credentialRecipientWallet(this),
           }).then((row) => row.message),
         issuerSigningSecretKey,
-        ukycStorageId: ukycStorageIdForWallet(this.walletType, this.kwilSigner),
       })),
       id: credentialId,
     };
-    requireAccessTokenForUkycContent(
-      preliminaryCredential.contentUri,
-      this.blobGateway.hasAccessToken,
-    );
 
     const requestId = crypto.randomUUID();
 
@@ -727,7 +707,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
     const contentUri = credential.content_uri ?? null;
-    requireAccessTokenForUkycContent(contentUri, this.blobGateway.hasAccessToken);
+    if (isUkycContentUri(contentUri)) {
+      throw new Error("ukyc:// credentials can only be removed by their MM operator's data wipe");
+    }
 
     await removeCredential(this.kwilClient, { id });
 
@@ -1076,11 +1058,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // User issues the shared copy: sign content_uri with an ephemeral user-side key.
     // Copy issuer_auth_public_key need not match the original credential's issuer.
     const copyId = crypto.randomUUID();
-    const ukycStorageId = ukycStorageIdForWallet(this.walletType, this.kwilSigner);
-    const copyReference = ukycStorageId
-      ? createUkycContentReference(ukycStorageId, content)
-      : await createBlobContentReference(content);
-    requireAccessTokenForUkycContent(copyReference.uri, this.blobGateway.hasAccessToken);
+    const copyReference = await createBlobContentReference(content);
     const signedReference = await buildEphemeralSignedCredentialContentReference(
       "",
       copyReference.uri,
@@ -1094,7 +1072,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     // Integrator-supplied. ed25519 @caller is lowercase hex; after exact grantee
     // matching, uppercase hex would store a grant the consumer cannot read. Other
-    // identifier encodings (NEAR, XRPL, Stellar, MM) are case-sensitive, so leave them.
+    // identifier encodings (NEAR, XRPL, Stellar) are case-sensitive, so leave them.
     const granteeWalletIdentifier = /^[0-9a-fA-F]{64}$/.test(consumerAuthPublicKey)
       ? consumerAuthPublicKey.toLowerCase()
       : consumerAuthPublicKey;

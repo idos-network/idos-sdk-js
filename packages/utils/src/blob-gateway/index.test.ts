@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-import { base64Encode, utf8Encode } from "../codecs";
+import { base64Encode, base64UrlEncode, utf8Encode } from "../codecs";
 import { hexEncodeSha256Hash } from "../codecs";
 import {
   BlobGateway,
@@ -12,6 +12,9 @@ import {
   createBlobContentReference,
   createUkycContentReference,
   createUkycContentUri,
+  decodeUkycStorageToken,
+  isBlobGatewayStorageTokenError,
+  isBlobGatewayUserWipeInProgressError,
   requireAccessTokenForUkycContent,
   resolveCredentialEncryptedContent,
 } from "./index.js";
@@ -24,8 +27,46 @@ describe("requireAccessTokenForUkycContent", () => {
 
   it("rejects ukyc deletes when no accessToken was configured", () => {
     expect(() => requireAccessTokenForUkycContent("ukyc://object-1", false)).toThrow(
-      /requires an accessToken/,
+      /requires a UKYC storage token/,
     );
+  });
+});
+
+describe("decodeUkycStorageToken", () => {
+  function token(envelope: unknown): string {
+    return base64UrlEncode(utf8Encode(JSON.stringify(envelope)));
+  }
+
+  it("reads storage_id and signing_public_key from the payload", () => {
+    expect(
+      decodeUkycStorageToken(
+        token({
+          payload: { version: 1, storage_id: " storage-abc ", signing_public_key: "key" },
+          signature: "sig",
+        }),
+      ),
+    ).toEqual({ version: 1, storage_id: "storage-abc", signing_public_key: "key" });
+  });
+
+  it.each(["AccessToken ", "BEARER  ", "Bearer\t", "Bearer\n"])(
+    "strips the %j prefix kwild and blob-gateway accept",
+    (prefix) => {
+      const raw = token({ payload: { storage_id: "storage-abc", signing_public_key: "key" } });
+      expect(decodeUkycStorageToken(` ${prefix}${raw} `)).toMatchObject({
+        storage_id: "storage-abc",
+      });
+    },
+  );
+
+  it.each([
+    ["empty", ""],
+    ["only a prefix", "AccessToken "],
+    ["not base64url JSON", "%%%"],
+    ["no payload", token({ signature: "sig" })],
+    ["no storage_id", token({ payload: { signing_public_key: "key" } })],
+    ["no signing_public_key", token({ payload: { storage_id: "storage-abc" } })],
+  ])("rejects a token with %s", (_label, value) => {
+    expect(() => decodeUkycStorageToken(value)).toThrow(/Invalid UKYC storage token/);
   });
 });
 
@@ -206,6 +247,30 @@ describe("BlobGateway", () => {
       "AccessToken mm-envelope",
     );
   });
+
+  it.each(["AccessToken mm-envelope", "bearer  mm-envelope", " mm-envelope "])(
+    "sends a single AccessToken prefix for the token %j",
+    async (accessToken) => {
+      const calls: Parameters<typeof fetch>[] = [];
+      const gateway = new BlobGateway({
+        url: "https://blob.example",
+        accessToken,
+        fetchFn: async (...args) => {
+          calls.push(args);
+          return Response.json({ request_id: "request-1" });
+        },
+      });
+
+      await gateway.uploadCredentialBlobs({
+        requestId: "request-1",
+        original: utf8Encode("original"),
+      });
+
+      expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
+        "AccessToken mm-envelope",
+      );
+    },
+  );
 
   it("uploads a copy blob without requiring an original blob", async () => {
     const copy = utf8Encode("copy");
@@ -761,5 +826,72 @@ describe("BlobGateway", () => {
     expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe(
       "AccessToken mm-envelope",
     );
+  });
+
+  describe("deleteStorage", () => {
+    function gatewayAnswering(response: Response, accessToken?: string) {
+      const calls: Parameters<typeof fetch>[] = [];
+      const gateway = new BlobGateway({
+        url: "https://blob.example",
+        accessToken,
+        fetchFn: async (...args) => {
+          calls.push(args);
+          return response;
+        },
+      });
+      return { gateway, calls };
+    }
+
+    it("deletes the storage with the token and treats 204 as done", async () => {
+      const { gateway, calls } = gatewayAnswering(new Response(null, { status: 204 }), "token");
+
+      await expect(gateway.deleteStorage()).resolves.toBeUndefined();
+      expect(calls[0]?.[0]).toBe("https://blob.example/blob/v1/storage");
+      expect(calls[0]?.[1]?.method).toBe("DELETE");
+      expect(new Headers(calls[0]?.[1]?.headers).get("Authorization")).toBe("AccessToken token");
+    });
+
+    it("needs a storage token", async () => {
+      const { gateway, calls } = gatewayAnswering(new Response(null, { status: 204 }));
+
+      await expect(gateway.deleteStorage()).rejects.toThrow(/storage token/);
+      expect(calls).toHaveLength(0);
+    });
+
+    it.each([
+      [401, "WIPE_UNAUTHORIZED"],
+      [403, "WIPE_FORBIDDEN"],
+      [409, "WIPE_NOT_REQUESTED"],
+      [409, "WIPE_STORAGE_MISMATCH"],
+      [502, "GATEWAY_WIPE_FAILED"],
+    ])("reports %i %s with its code", async (status, code) => {
+      const { gateway } = gatewayAnswering(
+        Response.json({ error: "no", code }, { status }),
+        "token",
+      );
+
+      await expect(gateway.deleteStorage()).rejects.toMatchObject({
+        name: "BlobGatewayHttpError",
+        operation: "delete-storage",
+        status,
+        code,
+      });
+    });
+  });
+
+  it("classifies storage token and wipe-in-progress errors", () => {
+    const tokenError = new BlobGatewayHttpError("upload", 401, "MM_TOKEN_EXPIRED");
+    const frozen = new BlobGatewayHttpError("fetch", 409, "USER_WIPE_IN_PROGRESS");
+
+    expect(isBlobGatewayStorageTokenError(tokenError)).toBe(true);
+    expect(
+      isBlobGatewayStorageTokenError(
+        new BlobGatewayHttpError("delete-storage", 409, "WIPE_STORAGE_MISMATCH"),
+      ),
+    ).toBe(true);
+    expect(isBlobGatewayStorageTokenError(frozen)).toBe(false);
+    expect(isBlobGatewayStorageTokenError(new Error("MM_TOKEN_EXPIRED"))).toBe(false);
+    expect(isBlobGatewayUserWipeInProgressError(frozen)).toBe(true);
+    expect(isBlobGatewayUserWipeInProgressError(tokenError)).toBe(false);
   });
 });

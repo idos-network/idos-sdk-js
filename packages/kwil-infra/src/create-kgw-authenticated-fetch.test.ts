@@ -1,7 +1,6 @@
 // @vitest-environment node
 
 import { type KwilSigner, NodeKwil } from "@idos-network/kwil-js";
-import { base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -9,19 +8,6 @@ import {
   createKgwAuthenticatedFetch,
 } from "./create-kgw-authenticated-fetch";
 import { KwilActionClient } from "./create-kwil-client";
-import { createMmTokenAuth } from "./mm-token/create-mm-token-kwil-signer";
-
-const mmEnvelopeToken = base64UrlEncode(
-  utf8Encode(
-    JSON.stringify({
-      payload: {
-        signing_public_key: base64UrlEncode(new Uint8Array(32).fill(7)),
-        storage_id: "storage-abc",
-      },
-      signature: base64UrlEncode(new Uint8Array(64).fill(9)),
-    }),
-  ),
-);
 
 function createTestClient(
   initialCookie?: string,
@@ -279,6 +265,33 @@ describe("createKgwAuthenticatedFetch", () => {
     expect(cookieHeader(fetchFn.mock.calls[0])).toBe("kgw_session=valid; Path=/");
   });
 
+  it.each(["MM_TOKEN_INVALID", "MM_TOKEN_EXPIRED"])(
+    "does not reauthenticate when blob-gateway rejects the storage token (%s)",
+    async (code) => {
+      const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=valid; Path=/");
+      fetchFn.mockResolvedValueOnce(Response.json({ error: "token", code }, { status: 401 }));
+
+      const response = await authFetch("https://blob.example/blob/v1/storage");
+
+      expect(response.status).toBe(401);
+      await expect(response.json()).resolves.toMatchObject({ code });
+      expect(refresh).not.toHaveBeenCalled();
+      expect(fetchFn).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("logs in to KGW again when blob-gateway reports a missing session", async () => {
+    const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
+    fetchFn.mockResolvedValueOnce(
+      Response.json({ error: "session", code: "WIPE_UNAUTHORIZED" }, { status: 401 }),
+    );
+
+    await authFetch("https://blob.example/blob/v1/storage", { method: "DELETE" });
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
   it("shares one refresh across parallel auth failures", async () => {
     const { authFetch, fetchFn, refresh } = createTestClient("kgw_session=expired; Path=/");
     fetchFn
@@ -347,17 +360,7 @@ describe("createKgwAuthenticatedBlobGateway", () => {
     return new KwilActionClient(nodeKwil);
   }
 
-  it("infers UKYC authorization from an MM signer", () => {
-    const gateway = createKgwAuthenticatedBlobGateway({
-      url: "https://blob.example",
-      kwilClient: kgwSessionClient(),
-      signer: createMmTokenAuth(mmEnvelopeToken),
-    });
-
-    expect(gateway.hasAccessToken).toBe(true);
-  });
-
-  it("accepts an explicit MM authority for a non-MM signer, and none otherwise", () => {
+  it("sends a storage token only when one is given", () => {
     const kwilClient = kgwSessionClient();
     const signer = {} as KwilSigner;
 
@@ -366,12 +369,29 @@ describe("createKgwAuthenticatedBlobGateway", () => {
         url: "https://blob.example",
         kwilClient,
         signer,
-        mmAuth: createMmTokenAuth(mmEnvelopeToken),
+        accessToken: "storage-token",
       }).hasAccessToken,
     ).toBe(true);
     expect(
       createKgwAuthenticatedBlobGateway({ url: "https://blob.example", kwilClient, signer })
         .hasAccessToken,
     ).toBe(false);
+  });
+
+  it("sends the KGW cookie and the storage token on the same request", async () => {
+    const fetchFn = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
+    const gateway = createKgwAuthenticatedBlobGateway({
+      url: "https://blob.example",
+      kwilClient: kgwSessionClient(),
+      signer: {} as KwilSigner,
+      fetchFn,
+    }).withAccessToken("storage-token");
+
+    await gateway.deleteStorage();
+
+    const [, init] = fetchFn.mock.calls[0];
+    const headers = new Headers(init?.headers);
+    expect(headers.get("Cookie")).toBe("kgw_session=valid; Path=/");
+    expect(headers.get("Authorization")).toBe("AccessToken storage-token");
   });
 });

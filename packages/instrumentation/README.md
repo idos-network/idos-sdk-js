@@ -75,7 +75,7 @@ Two things that look like they should work and do not:
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
 | `@idos-network/kwil-infra` | `KwilActionClient.call` / `.execute` — the idOS equivalent of `pg.Client.query` — and `.waitForTx` |
 | `@idos-network/client`     | `idOSClientConfiguration` / `Idle` / `WithUserSigner` / `LoggedIn` methods                         |
-| `@idos-network/issuer`     | `idOSIssuer` methods and `idOSIssuer.init`                                                         |
+| `@idos-network/issuer`     | `idOSIssuer` and `idOSMmOperator` methods, and their `init`                                        |
 | `@idos-network/consumer`   | `idOSConsumer` methods and `idOSConsumer.init`                                                     |
 
 The enclave is not traced: it is local key material and iframe/MPC work, not

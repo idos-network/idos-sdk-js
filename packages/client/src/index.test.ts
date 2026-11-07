@@ -2,15 +2,10 @@
 
 import type { BaseProvider } from "@idos-network/enclave";
 
-import { createMmTokenAuth, KwilActionClient } from "@idos-network/kwil-infra";
+import { KwilActionClient } from "@idos-network/kwil-infra";
 import { NodeKwil } from "@idos-network/kwil-js";
 import { BlobGateway, createBlobContentReference } from "@idos-network/utils/blob-gateway";
-import {
-  base64Encode,
-  base64UrlEncode,
-  hexEncodeSha256Hash,
-  utf8Encode,
-} from "@idos-network/utils/codecs";
+import { base64Encode, base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
 import { MemoryStore } from "@idos-network/utils/store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -21,18 +16,6 @@ import {
   idOSClientWithUserSigner,
   toDelegatedWriteGrantBaseParams,
 } from "./index.js";
-
-const mmToken = base64UrlEncode(
-  utf8Encode(
-    JSON.stringify({
-      payload: {
-        signing_public_key: base64UrlEncode(new Uint8Array(32).fill(7)),
-        storage_id: "storage-abc",
-      },
-      signature: base64UrlEncode(new Uint8Array(64).fill(9)),
-    }),
-  ),
-);
 
 function idleClient(): idOSClientIdle {
   const kwilClient = {
@@ -89,44 +72,20 @@ function nodeIdleClient(): idOSClientIdle {
   );
 }
 
-describe("UKYC blob authorization is scoped to the signed session", () => {
-  it("binds the MM capability when the signer is selected", async () => {
-    const idle = idleClient();
-
-    const withSigner = await idle.withUserSigner(createMmTokenAuth(mmToken));
-
-    expect(withSigner.blobGateway.hasAccessToken).toBe(true);
-    expect(idle.blobGateway.hasAccessToken).toBe(false);
-  });
-
-  it("drops the MM capability on logout", async () => {
-    const withSigner = await idleClient().withUserSigner(createMmTokenAuth(mmToken));
-
-    expect((await withSigner.logOut()).blobGateway.hasAccessToken).toBe(false);
-  });
-
+describe("logout", () => {
   it("resets the enclave on logout", async () => {
     const idle = idleClient();
     const reset = vi.fn(async () => {});
     idle.enclaveProvider.reset = reset;
-    const withSigner = await idle.withUserSigner(createMmTokenAuth(mmToken));
+    const withSigner = await idle.withUserSigner(ed25519Signer(3) as never);
 
     await withSigner.logOut();
 
     expect(reset).toHaveBeenCalledOnce();
   });
 
-  it("leaves a non-MM session without UKYC authorization", async () => {
-    const idle = idleClient();
-    const customSigner = {
-      publicAddress: "0x1234567890123456789012345678901234567890",
-      publicKey: base64UrlEncode(new Uint8Array(32).fill(3)),
-      signatureType: "ed25519",
-      walletType: "EVM",
-      signMessage: async () => new Uint8Array(64),
-    };
-
-    const withSigner = await idle.withUserSigner(customSigner as never);
+  it("never sends a UKYC storage token from a user session", async () => {
+    const withSigner = await idleClient().withUserSigner(ed25519Signer(3) as never);
 
     expect(withSigner.blobGateway.hasAccessToken).toBe(false);
   });
@@ -393,7 +352,7 @@ describe("Node KGW-authenticated blob sessions", () => {
     vi.unstubAllGlobals();
   });
 
-  it("sends the KGW cookie and MM AccessToken, then drops both on logout", async () => {
+  it("sends the KGW cookie without a storage token, then drops it on logout", async () => {
     const ciphertext = utf8Encode("ciphertext");
     const fetchFn = vi.fn<typeof fetch>(async () => {
       return new Response("ciphertext", {
@@ -402,8 +361,8 @@ describe("Node KGW-authenticated blob sessions", () => {
     });
     vi.stubGlobal("fetch", fetchFn);
 
-    const withSigner = await nodeIdleClient().withUserSigner(createMmTokenAuth(mmToken));
-    expect(withSigner.blobGateway.hasAccessToken).toBe(true);
+    const withSigner = await nodeIdleClient().withUserSigner(ed25519Signer(3) as never);
+    expect(withSigner.blobGateway.hasAccessToken).toBe(false);
 
     await expect(
       withSigner.blobGateway.fetchBlob({
@@ -413,7 +372,7 @@ describe("Node KGW-authenticated blob sessions", () => {
     ).resolves.toEqual(ciphertext);
 
     expect(header(fetchFn.mock.calls[0], "cookie")).toBe("kgw_session=fresh; Path=/");
-    expect(header(fetchFn.mock.calls[0], "authorization")).toBe(`AccessToken ${mmToken}`);
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBeNull();
 
     const idle = await withSigner.logOut();
     expect(idle.blobGateway.hasAccessToken).toBe(false);
@@ -439,7 +398,7 @@ describe("Node KGW-authenticated blob sessions", () => {
     });
     vi.stubGlobal("fetch", fetchFn);
 
-    const withSigner = await nodeIdleClient().withUserSigner(createMmTokenAuth(mmToken));
+    const withSigner = await nodeIdleClient().withUserSigner(ed25519Signer(3) as never);
     vi.spyOn(withSigner.kwilClient, "call").mockResolvedValue([
       {
         id: credentialId,
@@ -466,21 +425,21 @@ describe("Node KGW-authenticated blob sessions", () => {
     expect(credential.content).toBe(base64Encode(ciphertext));
     expect(credential.content_uri).toBeNull();
     expect(header(fetchFn.mock.calls[0], "cookie")).toBe("kgw_session=fresh; Path=/");
-    expect(header(fetchFn.mock.calls[0], "authorization")).toBe(`AccessToken ${mmToken}`);
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBeNull();
   });
 });
 
 const NACL_BOX_ENCRYPTION_OVERHEAD_BYTES = 24 + 16; // nonce + authentication tag
 const credentialPlaintext = utf8Encode("private credential content");
 
-async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
+async function createCredentialForWallet(walletType: "EVM"): Promise<{
   credential: Awaited<ReturnType<idOSClientLoggedIn["createCredential"]>>;
   preliminaryInput: Record<string, unknown> | undefined;
   uploadedBytes: Uint8Array | undefined;
 }> {
   let preliminaryInput: Record<string, unknown> | undefined;
   let uploadedBytes: Uint8Array | undefined;
-  const kwilSigner = walletType === "MM" ? createMmTokenAuth(mmToken) : {};
+  const kwilSigner = {};
   const kwilClient = {
     signer: kwilSigner,
     call: async () => [{ message: "credential-message" }],
@@ -490,7 +449,6 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
   } as unknown as KwilActionClient;
   const blobGateway = new BlobGateway({
     url: "https://blob.example",
-    accessToken: walletType === "MM" ? mmToken : undefined,
     fetchFn: async (_input, init) => {
       const body = init?.body;
       if (!(body instanceof FormData)) throw new Error("Expected multipart upload");
@@ -530,19 +488,6 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
 }
 
 describe("credential blob storage", () => {
-  it("creates MM credentials with ukyc:// and the encrypted byte size", async () => {
-    const { credential, preliminaryInput, uploadedBytes } = await createCredentialForWallet("MM");
-
-    expect(credential.content_uri).toBe(
-      `ukyc://storage-abc/blobs/${hexEncodeSha256Hash(uploadedBytes ?? new Uint8Array())}`,
-    );
-    expect(preliminaryInput?.content_uri).toBe(credential.content_uri);
-    expect(preliminaryInput?.content_size).toBe(
-      credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,
-    );
-    expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
-  });
-
   it("creates non-MM credentials through the IPFS CID-validation flow", async () => {
     const { credential, preliminaryInput, uploadedBytes } = await createCredentialForWallet("EVM");
 
