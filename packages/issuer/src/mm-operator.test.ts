@@ -176,6 +176,29 @@ describe("idOSMmOperator", () => {
       await expect(op.getUser(storageToken({ signing_public_key: OTHER_KEY }))).resolves.toBeNull();
     });
 
+    it("sends Kwil the raw token when it carries an AccessToken or Bearer prefix", async () => {
+      const op = await operator();
+      const token = storageToken();
+      state.credentials = [];
+
+      await op.getUser(` AccessToken ${token}\n`);
+      await op.createUser({
+        id: "00000000-0000-4000-8000-000000000002",
+        recipientEncryptionPublicKey: "enc-key",
+        walletId: "00000000-0000-4000-8000-000000000003",
+        storageToken: `Bearer ${token}`,
+      });
+      await op.getCredentials({ userId: USER_ID, storageToken: `bearer\t${token}` });
+      await op.requestUserWipe({ userId: USER_ID, deleteToken: `AccessToken ${token}` });
+
+      expect(state.calls.map((call) => call.inputs.storage_token)).toEqual([
+        token,
+        token,
+        token,
+        token,
+      ]);
+    });
+
     it("creates the user and its MM wallet in one action with the write token", async () => {
       const op = await operator();
       const token = storageToken();

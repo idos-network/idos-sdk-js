@@ -20,6 +20,7 @@ import {
   type BlobGateway,
   BlobGatewayUploadOutcomeUnknownError,
   decodeUkycStorageToken,
+  normalizeUkycStorageToken,
 } from "@idos-network/utils/blob-gateway";
 import { base64Decode, hexEncodeSha256Hash } from "@idos-network/utils/codecs";
 
@@ -160,7 +161,9 @@ export class idOSMmOperator {
    */
   async getUser(storageToken: string): Promise<MmUser | null> {
     const [row] = await kwil(() =>
-      getUserAsMmOperator(this.#kwilClient, { storage_token: storageToken }),
+      getUserAsMmOperator(this.#kwilClient, {
+        storage_token: normalizeUkycStorageToken(storageToken),
+      }),
     );
     if (!row) return null;
     return {
@@ -180,7 +183,7 @@ export class idOSMmOperator {
         id: params.id,
         recipient_encryption_public_key: params.recipientEncryptionPublicKey,
         wallet_id: params.walletId,
-        storage_token: params.storageToken,
+        storage_token: normalizeUkycStorageToken(params.storageToken),
       }),
     );
   }
@@ -190,7 +193,7 @@ export class idOSMmOperator {
     return kwil(() =>
       getCredentialsAsMmOperator(this.#kwilClient, {
         user_id: params.userId,
-        storage_token: params.storageToken,
+        storage_token: normalizeUkycStorageToken(params.storageToken),
       }),
     );
   }
@@ -243,7 +246,7 @@ export class idOSMmOperator {
         public_notes: credential.publicNotes,
         public_notes_signature: credential.publicNotesSignature,
         broader_signature: credential.broaderSignature,
-        storage_token: params.storageToken,
+        storage_token: normalizeUkycStorageToken(params.storageToken),
       }),
     );
 
@@ -314,7 +317,7 @@ export class idOSMmOperator {
     await kwil(() =>
       requestUserWipeAsMmOperator(this.#kwilClient, {
         user_id: params.userId,
-        storage_token: params.deleteToken,
+        storage_token: normalizeUkycStorageToken(params.deleteToken),
       }),
     );
   }
