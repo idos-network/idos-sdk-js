@@ -603,6 +603,19 @@ describe("idOSMmOperator", () => {
       expect(request().headers.get("authorization")).toBe(`AccessToken ${token}`);
     });
 
+    it("wipes the user the token names when no userId is given", async () => {
+      storageDeleted();
+      const token = storageToken({ operations: ["delete"] });
+
+      await (await operator()).wipeUser({ deleteToken: token });
+
+      expect(executed("request_user_wipe_as_mm_operator")).toEqual({
+        user_id: USER_ID,
+        storage_token: token,
+      });
+      expect(request().method).toBe("DELETE");
+    });
+
     it("skips the request for a frozen user", async () => {
       state.users = [mmUser({ frozen: true })];
       storageDeleted();

@@ -113,11 +113,14 @@ await operator.wipeUser({ userId: user.id, deleteToken });
 | `createCredential({ userId, storageToken, publicNotes, plaintextContent, issuerAuthSecretKey })` | `write`  | Encrypts, signs with the MM wallet as recipient, stages, uploads to `ukyc://<storage_id>/blobs/<sha256(ciphertext)>`, waits for the finalize |
 | `getCredentialContent({ credentialId, storageToken })`                                           | `read`   | `{ ciphertext, encryptorPublicKey }`, checked against the URI hash and size                                                                  |
 | `requestUserWipe({ userId, deleteToken })`                                                       | `delete` | Freezes the user. No-op when already frozen (the token is still checked)                                                                     |
-| `wipeUser({ userId, deleteToken })`                                                              | `delete` | `getUser(deleteToken)`, `requestUserWipe` unless frozen, then `DELETE /blob/v1/storage`                                                      |
+| `wipeUser({ userId?, deleteToken })`                                                             | `delete` | `getUser(deleteToken)`, `requestUserWipe` unless frozen, then `DELETE /blob/v1/storage`                                                      |
 
-`wipeUser` is safe to repeat. When no user this operator manages has the token's key (the user
-is already wiped), it calls blob-gateway anyway, which answers 204 without touching UKYC. It
-can't check `userId` in that case, because every lookup by user id needs a token of that user.
+`wipeUser` wipes the user the token names. With `userId`, a token of another user is refused
+(`STORAGE_TOKEN_USER_MISMATCH`). It is safe to repeat, and it succeeds when idOS has no MM user for
+the token's key: never created and already wiped look the same, since a wipe leaves no trace, and
+either way idOS holds nothing for that key. It then calls blob-gateway anyway, which answers 204
+without touching UKYC; `userId` can't be checked in that case, because every lookup by user id
+needs a token of that user. Another operator's user gets 403 `WIPE_FORBIDDEN`.
 
 Errors:
 

@@ -83,7 +83,11 @@ export type RequestMmUserWipeParams = {
 };
 
 export type WipeMmUserParams = {
-  userId: string;
+  /**
+   * The user you expect the token to name. When given, a token of another user is refused with
+   * `STORAGE_TOKEN_USER_MISMATCH`. Omit it to wipe whichever user the token names.
+   */
+  userId?: string;
   /** The user's UKYC storage token with the `delete` operation. */
   deleteToken: string;
 };
@@ -328,18 +332,21 @@ export class idOSMmOperator {
    * already frozen, then blob-gateway `DELETE /blob/v1/storage`. Run it as a retried job: on
    * failure the user stays frozen and consistent.
    *
-   * Safe to repeat, also after the user is gone: when no user this operator manages has the
-   * token's key, it goes straight to blob-gateway, which answers 204 without touching UKYC
-   * (and 403 `WIPE_FORBIDDEN` for another operator's user). In that case `userId` can't be
-   * checked, because every lookup by user id needs a token of that user.
+   * Safe to repeat, also after the user is gone. When idOS has no MM user for the token's key
+   * (never created, or already wiped: a wipe leaves no trace, so the two look the same), it goes
+   * straight to blob-gateway, which answers 204 without touching UKYC, and the call succeeds:
+   * idOS holds nothing for that key. `userId` can't be checked then, because every lookup by
+   * user id needs a token of that user. Another operator's user gets 403 `WIPE_FORBIDDEN`.
    */
   async wipeUser(params: WipeMmUserParams): Promise<void> {
     const user = await this.getUser(params.deleteToken);
 
     if (user) {
-      if (user.id !== params.userId) throw tokenUserMismatch(params.userId);
+      if (params.userId !== undefined && user.id !== params.userId) {
+        throw tokenUserMismatch(params.userId);
+      }
       if (!user.frozen) {
-        await this.requestUserWipe({ userId: params.userId, deleteToken: params.deleteToken });
+        await this.requestUserWipe({ userId: user.id, deleteToken: params.deleteToken });
       }
     }
 
