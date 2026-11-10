@@ -57,8 +57,10 @@ MM wallet key; blob-gateway and UKYC verify it again on blob requests
 (`Authorization: AccessToken …`). Tokens passed to write actions end up on-chain; they are
 useless without an MM operator key or session. A token may carry an `AccessToken ` or
 `Bearer ` prefix and surrounding whitespace: the SDK strips them, so Kwil (which takes the raw
-token only) and blob-gateway get the same token. A rejected token always throws `idOSMmOperatorError` (also from the read
-methods); an empty result never means a bad token.
+token only) and blob-gateway get the same token. A token Kwil rejects throws `idOSMmOperatorError`
+(also from the read methods); an empty result never means a bad token. blob-gateway's rejections
+are `BlobGatewayHttpError` (see Errors below), and `createCredential` decodes the token first, so
+one that isn't base64url JSON throws a plain `Error` before any request.
 
 **One storage per user:** the storage of the user's first `ukyc://` credential (also while it is
 still pending) is the user's storage. Tokens for another storage are refused for reads, new
