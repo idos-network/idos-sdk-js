@@ -1087,6 +1087,10 @@ export type CreatePreliminaryCredentialInput = z.infer<
   typeof CreatePreliminaryCredentialInputSchema
 >;
 
+/**
+ *  Refused for MM users, also when signed in with another wallet: their MM operator stages
+ *  their credentials (create_preliminary_credential_as_mm_operator), with their storage token.
+ */
 export async function createPreliminaryCredential(
   kwilClient: KwilActionClient,
   params: CreatePreliminaryCredentialInput,
@@ -1286,6 +1290,7 @@ export const SharePreliminaryCredentialInputSchema: z.ZodObject<{
 
 export type SharePreliminaryCredentialInput = z.infer<typeof SharePreliminaryCredentialInputSchema>;
 
+/**  Refused for MM users, also when signed in with another wallet: their credentials can't be shared. */
 export async function sharePreliminaryCredential(
   kwilClient: KwilActionClient,
   params: SharePreliminaryCredentialInput,
