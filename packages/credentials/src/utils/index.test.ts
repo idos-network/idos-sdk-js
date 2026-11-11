@@ -357,6 +357,13 @@ describe("prepareCredentialBroaderMessage", () => {
     expect(() => localCredentialBroaderMessageFor("r", undefined)).toThrow();
   });
 
+  it("rejects line breaks in any field", () => {
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r", "c\nx: y")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r\r", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://c\nid", "r", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2\nln", "ipfs://cid", "r", "c")).toThrow();
+  });
+
   it("signs the local message: the broader signature verifies against it", async () => {
     const keyPair = nacl.sign.keyPair();
     const result = await buildSignedCredentialContentReference(

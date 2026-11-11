@@ -275,6 +275,10 @@ export function prepareCredentialBroaderMessage(
 ): string {
   invariant(recipientWallet, "recipientWallet is required");
   invariant(chainId, "chainId is required");
+  // One field per line: a value with a line break would add lines to the signed text.
+  for (const value of [publicNotesSignature, contentUri, recipientWallet, chainId]) {
+    invariant(!/[\r\n]/.test(value), "credential message fields must not contain line breaks");
+  }
   return [
     "operation: credential",
     `public notes signature: ${publicNotesSignature}`,
