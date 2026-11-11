@@ -38,7 +38,6 @@ import { idOSMmOperator } from "@idos-network/mm-operator";
 
 const operator = await idOSMmOperator.init({
   nodeUrl: "https://nodes.idos.network",
-  blobGatewayUrl: "https://blob.idos.network",
   signingKeyPair, // the operator's delegate key (nacl.SignKeyPair)
 });
 
