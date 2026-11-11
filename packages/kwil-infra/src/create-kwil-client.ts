@@ -65,21 +65,15 @@ export class KwilActionClient {
   throwOnCallError = false;
   readonly client: NodeKwil | WebKwil;
   /**
-   * The chain id this client signs transactions for: the one passed here, else the one the
-   * wrapped Kwil client was created with. Credential signatures bind to it too.
+   * The chain id the wrapped Kwil client signs transactions for. Credential signatures bind to
+   * the same value, so they can't target a different chain than the transactions.
    */
   readonly chainId?: string;
 
-  constructor(client: NodeKwil | WebKwil, chainId?: string) {
+  constructor(client: NodeKwil | WebKwil) {
     this.client = client;
-    // kwil-js keeps chainId protected; read it so `new KwilActionClient(nodeKwil)` keeps it.
-    const wrappedChainId = (client as unknown as { chainId?: string } | undefined)?.chainId;
-    // Credential signatures must bind to the chain the transactions are signed for.
-    invariant(
-      !chainId || !wrappedChainId || chainId === wrappedChainId,
-      `chainId "${chainId}" conflicts with the Kwil client's chainId "${wrappedChainId}"`,
-    );
-    this.chainId = chainId || wrappedChainId;
+    // kwil-js keeps chainId protected; it is set when the Kwil client is created.
+    this.chainId = (client as unknown as { chainId?: string } | undefined)?.chainId || undefined;
   }
 
   #createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
@@ -187,7 +181,6 @@ const createKwilClient =
 
     const client = new KwilActionClient(
       new Cls({ kwilProvider, chainId, timeout: DEFAULT_TIMEOUT }),
-      chainId,
     );
 
     return client;

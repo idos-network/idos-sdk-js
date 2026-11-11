@@ -46,13 +46,8 @@ describe("KwilActionClient.chainId", () => {
     expect(new KwilActionClient(nodeKwil()).chainId).toBe("test-chain");
   });
 
-  it("accepts a matching explicit chain id and rejects a conflicting one", () => {
-    expect(new KwilActionClient(nodeKwil(), "test-chain").chainId).toBe("test-chain");
-    expect(() => new KwilActionClient(nodeKwil(), "other-chain")).toThrow(/conflicts/);
-  });
-
-  it("uses the explicit chain id when the wrapped client has none", () => {
+  it("is undefined when the wrapped client has no chain id", () => {
     const bare = new NodeKwil({ kwilProvider: "https://nodes.example", chainId: "" });
-    expect(new KwilActionClient(bare, "test-chain").chainId).toBe("test-chain");
+    expect(new KwilActionClient(bare).chainId).toBeUndefined();
   });
 });
