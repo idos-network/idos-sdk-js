@@ -1,5 +1,11 @@
 # @idos-network/mm-operator
 
+## 0.2.1
+
+### Patch Changes
+
+- d2c34bf: `blobGatewayUrl` is now optional in `idOSMmOperator.init`; it defaults to `nodeUrl`, like in the issuer, consumer and client.
+
 ## 0.2.0
 
 ### Minor Changes
