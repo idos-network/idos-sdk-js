@@ -158,6 +158,21 @@ describe("idOSMmOperator", () => {
     });
   });
 
+  it("falls back to nodeUrl when blobGatewayUrl is omitted", async () => {
+    const { createKgwAuthenticatedBlobGateway } = await import("@idos-network/kwil-infra");
+
+    await idOSMmOperator.init({
+      nodeUrl: "https://nodes.example",
+      signingKeyPair: nacl.sign.keyPair(),
+    });
+
+    expect(createKgwAuthenticatedBlobGateway).toHaveBeenLastCalledWith({
+      url: "https://nodes.example",
+      kwilClient,
+      signer: { signer: "operator" },
+    });
+  });
+
   describe("users", () => {
     it("looks the user up by a storage token and returns null otherwise", async () => {
       const op = await operator();

@@ -36,7 +36,8 @@ export type MmUser = {
 
 export type idOSMmOperatorParams = {
   nodeUrl: string;
-  blobGatewayUrl: string;
+  /** Defaults to `nodeUrl`. */
+  blobGatewayUrl?: string;
   /** The MM operator's ed25519 delegate key. Signs Kwil calls and the KGW login. */
   signingKeyPair: SignKeyPair;
   chainId?: string;
@@ -146,7 +147,7 @@ export class idOSMmOperator {
     kwilClient.setSigner(signer);
 
     const blobGateway = createKgwAuthenticatedBlobGateway({
-      url: params.blobGatewayUrl,
+      url: params.blobGatewayUrl ?? params.nodeUrl,
       kwilClient,
       signer,
     });
