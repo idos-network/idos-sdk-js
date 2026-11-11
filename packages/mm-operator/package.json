@@ -1,0 +1,53 @@
+{
+  "name": "@idos-network/mm-operator",
+  "version": "0.0.0",
+  "description": "idOS MetaMask (MM) operator SDK for server environments",
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git",
+    "directory": "packages/mm-operator"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown  --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
+    "@idos-network/utils": "workspace:*",
+    "tweetnacl": "catalog:core"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:build"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}

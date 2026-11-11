@@ -11,11 +11,12 @@
 
 ## SDKs
 
-| Folder                                    | Contents                                     |
-| :---------------------------------------- | :------------------------------------------- |
-| **[`📁 consumer`](./packages/consumer/)** | idOS JavaScript SDK for consumers            |
-| **[`📁 issuer`](./packages/issuer)**      | idOS JavaScript SDK for issuers              |
-| **[`📁 client`](./packages/client)**      | idOS JavaScript SDK for browser environments |
+| Folder                                         | Contents                                           |
+| :--------------------------------------------- | :------------------------------------------------- |
+| **[`📁 consumer`](./packages/consumer/)**      | idOS JavaScript SDK for consumers                  |
+| **[`📁 issuer`](./packages/issuer)**           | idOS JavaScript SDK for issuers                    |
+| **[`📁 mm-operator`](./packages/mm-operator)** | idOS JavaScript SDK for the MetaMask (MM) operator |
+| **[`📁 client`](./packages/client)**           | idOS JavaScript SDK for browser environments       |
 
 ## Auxiliary Applications
 

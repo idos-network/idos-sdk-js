@@ -37,11 +37,32 @@ type AllKwilExecuteAction = {
 type KwilExecuteActionRequestParams = AllKwilExecuteAction[ActionName];
 
 /**
+ * A view action ran but failed (its `error()` or a runtime error). kwild reports that in the
+ * call response's `error` field, not as an HTTP/RPC error, so it is only thrown when
+ * `KwilActionClient.throwOnCallError` is set.
+ */
+export class KwilCallError extends Error {
+  readonly name = "KwilCallError";
+
+  constructor(
+    readonly actionName: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+/**
  * A client for interacting with kwil with type-safe abstractions for `call` and `execute`.
  * Has utility methods for creating actions and setting a signer.
  */
 export class KwilActionClient {
   signer?: KwilSigner;
+  /**
+   * When true, `call` throws `KwilCallError` if the view action reports an error. When false
+   * (default) such a call resolves to its (empty) result, as it always has.
+   */
+  throwOnCallError = false;
   readonly client: NodeKwil | WebKwil;
 
   constructor(client: NodeKwil | WebKwil) {
@@ -81,6 +102,10 @@ export class KwilActionClient {
     };
 
     const response = await this.client.call(action as CallBody, signer);
+    const actionError = response?.data?.error;
+    if (this.throwOnCallError && actionError) {
+      throw new KwilCallError(params.name, actionError);
+    }
     return response?.data?.result as T;
   }
 

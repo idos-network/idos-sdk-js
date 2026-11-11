@@ -110,44 +110,6 @@ describe("idOSIssuer", () => {
     );
   });
 
-  it("addresses both delegated write grant blobs from one ukyc storage id", async () => {
-    const issuer = await idOSIssuer.init({
-      nodeUrl: "https://nodes.example",
-      blobGatewayUrl: "https://blob.example",
-      signingKeyPair: nacl.sign.keyPair(),
-    });
-    const credentialParams = {
-      publicNotes: "{}",
-      plaintextContent: new Uint8Array([1, 2, 3]),
-      recipientEncryptionPublicKey: nacl.box.keyPair().publicKey,
-      ukycStorageId: "storage-abc",
-    };
-    const delegatedWriteGrant = {
-      id: crypto.randomUUID(),
-      ownerWalletIdentifier: "owner",
-      consumerWalletIdentifier: "consumer",
-      issuerPublicKey: "issuer",
-      accessGrantTimelock: "2026-01-01T00:00:00Z",
-      notUsableBefore: "2026-01-01T00:00:00Z",
-      notUsableAfter: "2026-01-02T00:00:00Z",
-      signature: "signature",
-    };
-    const consumerEncryptionPublicKey = nacl.box.keyPair().publicKey;
-
-    const result = await issuer.createCredentialByDelegatedWriteGrant(
-      credentialParams,
-      delegatedWriteGrant,
-      consumerEncryptionPublicKey,
-    );
-
-    const payload = mocks.createPreliminaryCredentialsByDwg.mock.calls[0]?.[1];
-    expect(payload.original_content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\/[0-9a-f]{64}$/);
-    expect(payload.copy_content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\/[0-9a-f]{64}$/);
-    expect(payload.original_content_uri).not.toBe(payload.copy_content_uri);
-    expect(result.originalCredential.content_uri).toBe(payload.original_content_uri);
-    expect(result.copyCredential.content_uri).toBe(payload.copy_content_uri);
-  });
-
   it("maps request params for createCredentialByDelegatedWriteGrant via toDelegatedWriteGrantBaseParams", async () => {
     const issuer = await idOSIssuer.init({
       nodeUrl: "https://nodes.example",

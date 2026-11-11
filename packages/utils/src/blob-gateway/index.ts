@@ -2,7 +2,7 @@ import { BlackHoleBlockstore } from "blockstore-core/black-hole";
 import { importer } from "ipfs-unixfs-importer";
 import { fixedSize } from "ipfs-unixfs-importer/chunker";
 
-import { base64Decode, hexEncodeSha256Hash } from "../codecs";
+import { base64Decode, base64UrlDecode, hexEncodeSha256Hash, utf8Decode } from "../codecs";
 
 export type BlobContentReference = {
   cid: string;
@@ -21,7 +21,10 @@ export type BlobGatewayParams = {
   url: string;
   fetchFn?: typeof fetch;
   maxFetchBytes?: number;
-  /** MM / UKYC capability token. Sent as `Authorization: AccessToken …` on blob requests. */
+  /**
+   * UKYC storage token of an MM user. Sent as `Authorization: AccessToken …` on blob requests,
+   * next to whatever session `fetchFn` adds (the MM operator's KGW cookie).
+   */
   accessToken?: string;
   /** Extra upload attempts after a network error or a transient gateway status. Defaults to 2. */
   uploadRetries?: number;
@@ -77,7 +80,67 @@ const DEFAULT_UPLOAD_TIMEOUT_MS = 150_000;
 // delays add up to about 7.5 minutes, inside that window.
 const RETRYABLE_UPLOAD_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 
-type BlobGatewayOperation = "upload" | "fetch" | "delete";
+type BlobGatewayOperation = "upload" | "fetch" | "delete" | "delete-storage";
+
+/**
+ * Error codes blob-gateway returns on the MM operator (`ukyc://`) routes. `BlobGatewayHttpError.code`
+ * carries them; other routes return further codes, and `BLOB_GATEWAY_HTTP_ERROR` means the
+ * response had none.
+ */
+export const BLOB_GATEWAY_MM_ERROR_CODES = [
+  // KGW session missing or expired (the KGW-authenticated fetch re-logs in once on these).
+  "UPLOAD_UNAUTHORIZED",
+  "READ_UNAUTHORIZED",
+  "WIPE_UNAUTHORIZED",
+  // The operator does not manage the user, or the token belongs to another user.
+  "UPLOAD_FORBIDDEN",
+  "READ_FORBIDDEN",
+  "WIPE_FORBIDDEN",
+  "MM_TOKEN_STORAGE_MISMATCH",
+  // 409 on DELETE /blob/v1/storage: the delete token's storage is not the one holding the
+  // user's credentials. Nothing was deleted; a delete token for the user's storage is needed.
+  "WIPE_STORAGE_MISMATCH",
+  // Storage token problems: ask the user's app for a new token.
+  "UKYC_TOKEN_MISSING",
+  "MM_TOKEN_INVALID",
+  "MM_TOKEN_EXPIRED",
+  "MM_TOKEN_OPERATION_REQUIRED",
+  // State.
+  "PRELIMINARY_CREDENTIAL_NOT_FOUND",
+  "CREDENTIAL_NOT_FOUND",
+  "USER_WIPE_IN_PROGRESS",
+  "WIPE_NOT_REQUESTED",
+  "UKYC_SINGLE_DELETE_UNSUPPORTED",
+  // UKYC or Kwil failed behind the gateway; retry.
+  "UKYC_DELETE_FORBIDDEN",
+  "UKYC_DELETE_FAILED",
+  "UKYC_REQUEST_TIMEOUT",
+  "UKYC_TRANSPORT_ERROR",
+  "GATEWAY_WIPE_FAILED",
+] as const;
+
+export type BlobGatewayMmErrorCode = (typeof BLOB_GATEWAY_MM_ERROR_CODES)[number];
+
+const MM_TOKEN_ERROR_CODES: ReadonlySet<string> = new Set([
+  "UKYC_TOKEN_MISSING",
+  "MM_TOKEN_INVALID",
+  "MM_TOKEN_EXPIRED",
+  "MM_TOKEN_OPERATION_REQUIRED",
+  "MM_TOKEN_STORAGE_MISMATCH",
+  "WIPE_STORAGE_MISMATCH",
+]);
+
+/** True when blob-gateway rejected the UKYC storage token itself (a new token is needed). */
+export function isBlobGatewayStorageTokenError(error: unknown): error is BlobGatewayHttpError {
+  return error instanceof BlobGatewayHttpError && MM_TOKEN_ERROR_CODES.has(error.code);
+}
+
+/** True when blob-gateway refused because the MM user is frozen for a data wipe. */
+export function isBlobGatewayUserWipeInProgressError(
+  error: unknown,
+): error is BlobGatewayHttpError {
+  return error instanceof BlobGatewayHttpError && error.code === "USER_WIPE_IN_PROGRESS";
+}
 
 function isSecureGatewayOrigin(url: string): boolean {
   try {
@@ -95,6 +158,7 @@ export class BlobGatewayHttpError extends Error {
   constructor(
     public readonly operation: BlobGatewayOperation,
     public readonly status: number,
+    /** A `BlobGatewayMmErrorCode` on the MM operator routes. */
     public readonly code: string,
     public readonly requestId?: string,
     public readonly detail?: string,
@@ -188,13 +252,77 @@ export function createUkycContentReference(
   };
 }
 
+/** Fields of a UKYC storage token payload the SDK reads. blob-gateway verifies the token. */
+export type UkycStorageTokenPayload = {
+  storage_id: string;
+  signing_public_key: string;
+  [key: string]: unknown;
+};
+
+const STORAGE_TOKEN_SCHEME_PREFIX = /^(?:AccessToken|Bearer)[ \t\n\v\f\r]+/i;
+
+/**
+ * The bare storage token: trimmed, without an optional `AccessToken ` / `Bearer ` prefix
+ * (case-insensitive, ASCII whitespace after it), which kwild and blob-gateway also accept.
+ */
+export function normalizeUkycStorageToken(token: string): string {
+  return token.trim().replace(STORAGE_TOKEN_SCHEME_PREFIX, "").trim();
+}
+
+/**
+ * Decode (not verify) a UKYC storage token: base64url JSON `{ payload, signature }`.
+ * Use it to build `ukyc://<storage_id>/…` URIs; blob-gateway and UKYC do the verification.
+ */
+export function decodeUkycStorageToken(token: string): UkycStorageTokenPayload {
+  const trimmed = normalizeUkycStorageToken(token);
+  if (!trimmed) {
+    throw new Error("Invalid UKYC storage token: empty");
+  }
+
+  let envelope: unknown;
+  try {
+    envelope = JSON.parse(utf8Decode(base64UrlDecode(trimmed)));
+  } catch (error) {
+    throw new Error("Invalid UKYC storage token: expected base64url JSON", { cause: error });
+  }
+
+  const payload =
+    envelope !== null && typeof envelope === "object" && "payload" in envelope
+      ? (envelope as { payload: unknown }).payload
+      : undefined;
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("Invalid UKYC storage token: missing payload");
+  }
+
+  const { storage_id: storageId, signing_public_key: signingPublicKey } = payload as Record<
+    string,
+    unknown
+  >;
+  if (typeof storageId !== "string" || !storageId.trim()) {
+    throw new Error("Invalid UKYC storage token: payload is missing storage_id");
+  }
+  if (typeof signingPublicKey !== "string" || !signingPublicKey.trim()) {
+    throw new Error("Invalid UKYC storage token: payload is missing signing_public_key");
+  }
+
+  return {
+    ...(payload as Record<string, unknown>),
+    storage_id: storageId.trim(),
+    signing_public_key: signingPublicKey.trim(),
+  };
+}
+
+/**
+ * @deprecated Only MM operators reach `ukyc://` blobs now (`idOSMmOperator` in
+ * `@idos-network/issuer`). Kept for compatibility; will be removed in the next major.
+ */
 export function requireAccessTokenForUkycContent(
   contentUri: string | null | undefined,
   hasAccessToken: boolean,
 ): void {
   if (isUkycContentUri(contentUri) && !hasAccessToken) {
     throw new Error(
-      "A ukyc:// credential requires an accessToken; use MM authentication for this session",
+      "A ukyc:// credential requires a UKYC storage token; only its MM operator can access it",
     );
   }
 }
@@ -270,7 +398,8 @@ export class BlobGateway {
     uploadRetryDelayMs = DEFAULT_UPLOAD_RETRY_DELAY_MS,
     uploadTimeoutMs = DEFAULT_UPLOAD_TIMEOUT_MS,
   }: BlobGatewayParams) {
-    const normalizedAccessToken = accessToken?.trim() || undefined;
+    const normalizedAccessToken =
+      (accessToken && normalizeUkycStorageToken(accessToken)) || undefined;
     if (normalizedAccessToken && !isSecureGatewayOrigin(url)) {
       throw new Error(
         "Blob gateway accessToken requires HTTPS, except for HTTP localhost or 127.0.0.1",
@@ -480,6 +609,30 @@ export class BlobGateway {
     if (!response.ok) {
       throw await readBlobGatewayHttpError(response, "delete");
     }
+  }
+
+  /**
+   * MM user data wipe: `DELETE /blob/v1/storage` with the user's delete token
+   * (`withAccessToken(deleteToken)`) and the MM operator's KGW session. Resolves on 204,
+   * including when the user is already gone, so it is safe to repeat. The operator must have
+   * called `request_user_wipe_as_mm_operator` first (else 409 `WIPE_NOT_REQUESTED`). A delete
+   * token for another storage than the user's gets 409 `WIPE_STORAGE_MISMATCH` (nothing deleted).
+   * 502 `GATEWAY_WIPE_FAILED` and other 5xx are worth retrying.
+   */
+  async deleteStorage(): Promise<void> {
+    if (!this.#accessToken) {
+      throw new Error("deleteStorage requires a UKYC storage token with the delete operation");
+    }
+
+    const response = await this.#fetch(
+      `${this.#url}/blob/v1/storage`,
+      this.#withAccessToken({ method: "DELETE" }),
+    );
+
+    if (!response.ok) {
+      throw await readBlobGatewayHttpError(response, "delete-storage");
+    }
+    await response.body?.cancel().catch(() => undefined);
   }
 
   #credentialUrl(credentialId: string): string {

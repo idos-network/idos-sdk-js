@@ -51,6 +51,7 @@ export type ModuleTarget = {
 };
 
 const SUPPORTED = [">=2.0.0 <3"];
+const MM_OPERATOR_SUPPORTED = [">=0.1.0 <1"];
 
 /**
  * Kwil `call`/`execute` are the idOS equivalent of `pg.Client.query`: every SDK
@@ -182,6 +183,26 @@ export const TARGETS: ModuleTarget[] = [
           "editCredentialAsIssuer",
           "getCredentialIdByContentHash",
           "getCredentialShared",
+        ],
+      },
+    ],
+  },
+  {
+    name: "@idos-network/mm-operator",
+    supportedVersions: MM_OPERATOR_SUPPORTED,
+    classes: [
+      {
+        // Arguments carry user ids and storage tokens: no attributes.
+        className: "idOSMmOperator",
+        staticMethods: ["init"],
+        methods: [
+          "getUser",
+          "createUser",
+          "getCredentials",
+          "createCredential",
+          "getCredentialContent",
+          "requestUserWipe",
+          "wipeUser",
         ],
       },
     ],

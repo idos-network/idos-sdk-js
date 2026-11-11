@@ -51,6 +51,7 @@
     "@idos-network/consumer": "workspace:*",
     "@idos-network/issuer": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
+    "@idos-network/mm-operator": "workspace:*",
     "@opentelemetry/api": "catalog:otel",
     "@opentelemetry/context-async-hooks": "catalog:otel",
     "@opentelemetry/sdk-trace": "catalog:otel",

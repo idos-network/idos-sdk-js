@@ -55,10 +55,35 @@ const buildNamespaces = () => {
     }
   }
 
+  class idOSMmOperator {
+    static async init(): Promise<idOSMmOperator> {
+      return new idOSMmOperator();
+    }
+
+    async getUser(storageToken: string): Promise<{ id: string }> {
+      await kwil.call({ name: "get_user_as_mm_operator", inputs: { storage_token: storageToken } });
+      return { id: "u1" };
+    }
+
+    async createUser(_params: { storageToken: string }): Promise<void> {}
+    async getCredentials(_params: { storageToken: string }): Promise<[]> {
+      return [];
+    }
+    async createCredential(_params: { storageToken: string }): Promise<{ id: string }> {
+      return { id: "c1" };
+    }
+    async getCredentialContent(_params: { storageToken: string }): Promise<string> {
+      return "content";
+    }
+    async requestUserWipe(_params: { deleteToken: string }): Promise<void> {}
+    async wipeUser(_params: { deleteToken: string }): Promise<void> {}
+  }
+
   return {
     kwil,
     kwilInfra: { KwilActionClient },
     issuer: { idOSIssuer },
+    mmOperator: { idOSMmOperator },
   };
 };
 
@@ -155,6 +180,39 @@ describe("IdosInstrumentation", () => {
     expect(parent.attributes[ATTR_IDOS_SDK_METHOD]).toBe("getUser");
     expect(child.name).toBe("idos.kwil.call get_user");
     expect(child.parentSpanContext?.spanId).toBe(parent.spanContext().spanId);
+  });
+
+  it("traces idOSMmOperator.init and every operator method without their arguments", async () => {
+    instrumentation.patchModuleExports("@idos-network/mm-operator", namespaces.mmOperator);
+    const token = "secret-storage-token";
+
+    const operator = await namespaces.mmOperator.idOSMmOperator.init();
+    await operator.getUser(token);
+    await operator.createUser({ storageToken: token });
+    await operator.getCredentials({ storageToken: token });
+    await operator.createCredential({ storageToken: token });
+    await operator.getCredentialContent({ storageToken: token });
+    await operator.requestUserWipe({ deleteToken: token });
+    await operator.wipeUser({ deleteToken: token });
+
+    const methods = [
+      "init",
+      "getUser",
+      "createUser",
+      "getCredentials",
+      "createCredential",
+      "getCredentialContent",
+      "requestUserWipe",
+      "wipeUser",
+    ];
+    expect(finished().map((span) => span.name)).toEqual(
+      methods.map((method) => `idOSMmOperator.${method}`),
+    );
+    for (const [index, span] of finished().entries()) {
+      expect(span.attributes[ATTR_IDOS_SDK_CLASS]).toBe("idOSMmOperator");
+      expect(span.attributes[ATTR_IDOS_SDK_METHOD]).toBe(methods[index]);
+      expect(JSON.stringify(span.attributes)).not.toContain(token);
+    }
   });
 
   it("skips instrumentation when requireParentSpan is set and there is no parent", async () => {

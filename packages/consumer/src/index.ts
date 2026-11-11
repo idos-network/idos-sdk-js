@@ -3,7 +3,6 @@ import type {
   idOSCredentialRecord as idOSCredential,
   VerifiableCredential,
 } from "@idos-network/credentials/types";
-import type { MmTokenAuth } from "@idos-network/kwil-infra";
 import type { KwilSigner } from "@idos-network/kwil-js";
 
 import { verifyCredential, type VerifyCredentialResult } from "@idos-network/credentials/verifier";
@@ -26,7 +25,7 @@ import {
 } from "@idos-network/kwil-infra/actions";
 import {
   BlobGateway,
-  requireAccessTokenForUkycContent,
+  isUkycContentUri,
   resolveCredentialEncryptedContent,
 } from "@idos-network/utils/blob-gateway";
 import { base64Decode, base64Encode } from "@idos-network/utils/codecs";
@@ -38,11 +37,6 @@ export type idOSConsumerConfig = {
   nodeUrl?: string;
   chainId?: string;
   blobGatewayUrl?: string;
-  /**
-   * UKYC storage authority for blob GET/DELETE, from `createMmTokenAuth`. Only needed when
-   * `consumerSigner` is not itself an MM authentication object. Re-init the consumer to change it.
-   */
-  mmAuth?: MmTokenAuth;
   consumerSigner: KwilSignerType;
 };
 
@@ -58,7 +52,6 @@ export class idOSConsumer {
     nodeUrl = "https://nodes.idos.network",
     chainId,
     blobGatewayUrl,
-    mmAuth,
     consumerSigner,
   }: idOSConsumerConfig): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
@@ -72,7 +65,6 @@ export class idOSConsumer {
       url: blobGatewayUrl ?? nodeUrl,
       kwilClient,
       signer,
-      mmAuth,
     });
 
     return new idOSConsumer(
@@ -126,7 +118,10 @@ export class idOSConsumer {
     invariant(credential, `Credential with id ${credentialId} not found`);
 
     const contentUri = credential.content_uri ?? null;
-    requireAccessTokenForUkycContent(contentUri, this.#blobGateway?.hasAccessToken ?? false);
+    // ukyc:// blobs belong to an MM user's storage and go only with a full data wipe.
+    if (isUkycContentUri(contentUri)) {
+      throw new Error("ukyc:// credentials can only be removed by their MM operator's data wipe");
+    }
 
     await rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
 

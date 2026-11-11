@@ -133,11 +133,11 @@ describe("SharePreliminaryCredentialInputSchema", () => {
 });
 
 describe("MM wallet type schemas", () => {
-  it("accepts MM as a wallet type", () => {
+  it("accepts MM as a stored wallet type", () => {
     expect(walletTypeSchema.parse("MM")).toBe("MM");
   });
 
-  it("accepts MM wallets created by trusted inserters", () => {
+  it("rejects MM wallets from inserters (MM operators create them)", () => {
     expect(() =>
       UpsertWalletAsInserterInputSchema.parse({
         id: "00000000-0000-4000-8000-000000000008",
@@ -145,9 +145,11 @@ describe("MM wallet type schemas", () => {
         address: "mm-signing-public-key",
         public_key: "mm-signing-public-key",
         wallet_type: "MM",
+        not_before: "2025-02-13T11:22:06Z",
+        not_after: "2025-02-13T11:37:06Z",
         signature: "",
       }),
-    ).not.toThrow();
+    ).toThrow();
   });
 });
 
