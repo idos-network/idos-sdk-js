@@ -2,9 +2,10 @@ import {
   createBlobContentReference,
   createUkycContentReference,
 } from "@idos-network/utils/blob-gateway";
-import { base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import { base64Encode, hexEncode, toChecksumAddress, utf8Encode } from "@idos-network/utils/codecs";
 import { encryptContent } from "@idos-network/utils/cryptography";
 import { every, get } from "es-toolkit/compat";
+import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
 import type {
@@ -254,11 +255,44 @@ export function recordFilter(
   return true;
 }
 
-// Asks the node for the broader-signature text. The node owns the format.
+// Returns the text the issuer signs as `broader_signature`. Use `localCredentialBroaderMessageFor`:
+// the issuer key signs whatever this returns, so it must not come from the network.
 export type CredentialBroaderMessageFor = (
   publicNotesSignature: string,
   contentUri: string,
 ) => Promise<string>;
+
+/**
+ * The `broader_signature` message, byte for byte equal to idos-kwild's
+ * `PrepareCredentialBroaderMessage`. Binds the credential to the wallet that submits it
+ * (`@caller`, or the owner / MM wallet the action names) and to the chain.
+ */
+export function prepareCredentialBroaderMessage(
+  publicNotesSignature: string,
+  contentUri: string,
+  recipientWallet: string,
+  chainId: string,
+): string {
+  invariant(recipientWallet, "recipientWallet is required");
+  invariant(chainId, "chainId is required");
+  return [
+    "operation: credential",
+    `public notes signature: ${publicNotesSignature}`,
+    `content uri: ${contentUri}`,
+    `recipient wallet: ${toChecksumAddress(recipientWallet)}`,
+    `chain id: ${chainId}`,
+  ].join("\n");
+}
+
+/** Builds the broader message locally for one recipient wallet and chain. */
+export function localCredentialBroaderMessageFor(
+  recipientWallet: string,
+  chainId: string | undefined,
+): CredentialBroaderMessageFor {
+  invariant(chainId, "chainId is required to sign a credential");
+  return async (publicNotesSignature, contentUri) =>
+    prepareCredentialBroaderMessage(publicNotesSignature, contentUri, recipientWallet, chainId);
+}
 
 export async function buildSignedCredentialContentReference(
   publicNotes: string,

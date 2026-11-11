@@ -4,13 +4,13 @@ import type { KwilActionClient } from "@idos-network/kwil-infra";
 import {
   buildPreliminaryIDOSCredential,
   BuildPreliminaryIDOSCredentialArgs,
+  localCredentialBroaderMessageFor,
   mapPreliminaryToIDOSCredential,
   PreliminaryIDOSCredential,
 } from "@idos-network/credentials/utils";
 import {
   type CreatePreliminaryCredentialsByDwgInput,
   createPreliminaryCredentialsByDwg,
-  credentialBroaderMessage,
   dwgMessage,
   type EditPublicNotesAsIssuerInput,
   editPublicNotesAsIssuer,
@@ -66,12 +66,10 @@ export class CredentialService {
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
   }> {
-    const broaderMessageFor = (publicNotesSignature: string, contentUri: string) =>
-      credentialBroaderMessage(this.#kwilClient, {
-        public_notes_signature: publicNotesSignature,
-        content_uri: contentUri,
-        recipient_wallet: delegatedWriteGrant.ownerWalletIdentifier,
-      }).then((row) => row.message);
+    const broaderMessageFor = localCredentialBroaderMessageFor(
+      delegatedWriteGrant.ownerWalletIdentifier,
+      this.#kwilClient.chainId,
+    );
     const originalCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
         ...credentialParams,

@@ -1,6 +1,9 @@
 import type { SignKeyPair } from "tweetnacl";
 
-import { buildPreliminaryIDOSCredential } from "@idos-network/credentials/utils";
+import {
+  buildPreliminaryIDOSCredential,
+  localCredentialBroaderMessageFor,
+} from "@idos-network/credentials/utils";
 import {
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
@@ -10,7 +13,6 @@ import {
 import {
   createPreliminaryCredentialAsMmOperator,
   createUserAsMmOperator,
-  credentialBroaderMessage,
   type GetCredentialsAsMmOperatorOutput,
   getCredentialsAsMmOperator,
   getUserAsMmOperator,
@@ -228,12 +230,10 @@ export class idOSMmOperator {
       recipientEncryptionPublicKey: base64Decode(user.recipientEncryptionPublicKey),
       // The MM wallet is the recipient: MM users never sign, so there is no @caller wallet.
       // Kwil checked in getUser that the token's key is this user's MM wallet.
-      broaderMessageFor: (publicNotesSignature, contentUri) =>
-        credentialBroaderMessage(this.#kwilClient, {
-          public_notes_signature: publicNotesSignature,
-          content_uri: contentUri,
-          recipient_wallet: token.signing_public_key,
-        }).then((row) => row.message),
+      broaderMessageFor: localCredentialBroaderMessageFor(
+        token.signing_public_key,
+        this.#kwilClient.chainId,
+      ),
       issuerSigningSecretKey: params.issuerAuthSecretKey,
       ukycStorageId: token.storage_id,
     });
