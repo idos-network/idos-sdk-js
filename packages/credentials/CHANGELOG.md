@@ -1,5 +1,12 @@
 # @idos-network/credentials
 
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [729c7d7]
+  - @idos-network/utils@3.2.0
+
 ## 4.0.0
 
 ### Major Changes

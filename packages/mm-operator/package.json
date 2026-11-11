@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/mm-operator",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "idOS MetaMask (MM) operator SDK for server environments",
   "homepage": "https://idos.network",
   "license": "MIT",
