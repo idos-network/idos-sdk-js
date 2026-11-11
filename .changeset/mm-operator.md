@@ -1,10 +1,11 @@
 ---
-"@idos-network/issuer": minor
+"@idos-network/mm-operator": minor
+"@idos-network/instrumentation": minor
 "@idos-network/utils": minor
 "@idos-network/kwil-infra": minor
 ---
 
-Add `idOSMmOperator` to `@idos-network/issuer`: the MM operator creates MetaMask users, reads and writes their `ukyc://` credentials through blob-gateway, and wipes them (`getUser`, `createUser`, `getCredentials`, `createCredential`, `getCredentialContent`, `requestUserWipe`, `wipeUser`). It signs Kwil calls with the operator's ed25519 key and reaches blob-gateway with a KGW session of the same key. Every method also takes the user's UKYC storage token, which kwild verifies in each MM operator action and blob-gateway on each blob request: `getUser(storageToken)`, `createUser({ id, recipientEncryptionPublicKey, walletId, storageToken })`, `getCredentials({ userId, storageToken })`, `requestUserWipe({ userId, deleteToken })`. A user's credentials all live in one UKYC storage (the first credential's); tokens for another storage are refused. Kwil token rejections surface as `idOSMmOperatorError` codes `STORAGE_TOKEN_INVALID`, `STORAGE_TOKEN_USER_MISMATCH` and `STORAGE_MISMATCH`. See the issuer README.
+New package `@idos-network/mm-operator` with `idOSMmOperator`: the MM operator creates MetaMask users, reads and writes their `ukyc://` credentials through blob-gateway, and wipes them (`getUser`, `createUser`, `getCredentials`, `createCredential`, `getCredentialContent`, `requestUserWipe`, `wipeUser`). It signs Kwil calls with the operator's ed25519 key and reaches blob-gateway with a KGW session of the same key. Every method also takes the user's UKYC storage token, which kwild verifies in each MM operator action and blob-gateway on each blob request: `getUser(storageToken)`, `createUser({ id, recipientEncryptionPublicKey, walletId, storageToken })`, `getCredentials({ userId, storageToken })`, `requestUserWipe({ userId, deleteToken })`. A user's credentials all live in one UKYC storage (the first credential's); tokens for another storage are refused. Kwil token rejections surface as `idOSMmOperatorError` codes `STORAGE_TOKEN_INVALID`, `STORAGE_TOKEN_USER_MISMATCH` and `STORAGE_MISMATCH`. See the package README. `@idos-network/instrumentation` traces it as the `@idos-network/mm-operator` module.
 
 `@idos-network/utils/blob-gateway`: `BlobGateway.deleteStorage()` (`DELETE /blob/v1/storage`, the MM user wipe), `decodeUkycStorageToken()`, `BLOB_GATEWAY_MM_ERROR_CODES` / `BlobGatewayMmErrorCode` (including `WIPE_STORAGE_MISMATCH`), `isBlobGatewayStorageTokenError()` and `isBlobGatewayUserWipeInProgressError()`. `requireAccessTokenForUkycContent` is deprecated.
 

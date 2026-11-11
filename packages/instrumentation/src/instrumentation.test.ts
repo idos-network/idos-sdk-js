@@ -82,7 +82,8 @@ const buildNamespaces = () => {
   return {
     kwil,
     kwilInfra: { KwilActionClient },
-    issuer: { idOSIssuer, idOSMmOperator },
+    issuer: { idOSIssuer },
+    mmOperator: { idOSMmOperator },
   };
 };
 
@@ -182,10 +183,10 @@ describe("IdosInstrumentation", () => {
   });
 
   it("traces idOSMmOperator.init and every operator method without their arguments", async () => {
-    instrumentation.patchModuleExports("@idos-network/issuer", namespaces.issuer);
+    instrumentation.patchModuleExports("@idos-network/mm-operator", namespaces.mmOperator);
     const token = "secret-storage-token";
 
-    const operator = await namespaces.issuer.idOSMmOperator.init();
+    const operator = await namespaces.mmOperator.idOSMmOperator.init();
     await operator.getUser(token);
     await operator.createUser({ storageToken: token });
     await operator.getCredentials({ storageToken: token });

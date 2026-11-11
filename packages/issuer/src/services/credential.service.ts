@@ -30,7 +30,7 @@ export type DelegatedWriteGrantParams = DelegatedWriteGrantBaseParams & {
   signature: string;
 };
 
-// MM users' ukyc:// credentials are created by their MM operator only (idOSMmOperator).
+// MM users' ukyc:// credentials are created by their MM operator only (@idos-network/mm-operator).
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
   BuildPreliminaryIDOSCredentialArgs,
   "issuerSigningSecretKey" | "broaderMessageFor" | "ukycStorageId"
