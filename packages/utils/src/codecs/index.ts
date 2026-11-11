@@ -1,3 +1,4 @@
+import { keccak_256 } from "@noble/hashes/sha3.js";
 import {
   decode as base64Decode,
   decodeURLSafe,
@@ -22,6 +23,22 @@ export { hexEncode, sha256Hash };
 
 export function hexEncodeSha256Hash(data: Uint8Array): string {
   return hexEncode(sha256Hash(data), true);
+}
+
+/**
+ * EIP-55 checksum casing for a `0x`-prefixed 20-byte hex address. Anything else is returned
+ * unchanged. Matches idos-kwild's identifier canonicalization (go-ethereum `HexToAddress(s).Hex()`
+ * for `0x` + 40 hex characters, verbatim otherwise).
+ */
+export function toChecksumAddress(address: string): string {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return address;
+  const lower = address.slice(2).toLowerCase();
+  const hash = hexEncode(keccak_256(utf8Encode(lower)), true);
+  let checksummed = "0x";
+  for (let i = 0; i < lower.length; i++) {
+    checksummed += Number.parseInt(hash[i], 16) >= 8 ? lower[i].toUpperCase() : lower[i];
+  }
+  return checksummed;
 }
 
 export function fileToBase85(file: Buffer): string {

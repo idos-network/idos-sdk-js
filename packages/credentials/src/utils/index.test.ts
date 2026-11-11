@@ -1,4 +1,9 @@
-import { hexEncode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
+import {
+  base64Decode,
+  hexEncode,
+  hexEncodeSha256Hash,
+  utf8Encode,
+} from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
@@ -8,9 +13,11 @@ import {
   buildSignedCredentialContentReference,
   claimsFromPublicNotes,
   highestMatchingCredential,
+  localCredentialBroaderMessageFor,
   matchClaims,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
+  prepareCredentialBroaderMessage,
   recordFilter,
   type Addon,
   type BaseLevel,
@@ -318,6 +325,68 @@ describe("highestMatchingCredential", () => {
 });
 
 const broaderMessageFor = async () => "credential-message";
+
+describe("prepareCredentialBroaderMessage", () => {
+  it("equals idos-kwild Test_PrepareCredentialBroaderMessage (EVM recipient in EIP-55)", () => {
+    expect(
+      prepareCredentialBroaderMessage(
+        "c2ln",
+        "ipfs://cid",
+        "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed",
+        "kwil-testnet",
+      ),
+    ).toBe(
+      "operation: credential\npublic notes signature: c2ln\ncontent uri: ipfs://cid\nrecipient wallet: 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed\nchain id: kwil-testnet",
+    );
+  });
+
+  it.each([
+    ["MM base64url key", "AbC-dEf_123"],
+    ["ed25519 / NEAR hex key", "ab".repeat(32)],
+    ["NEAR ed25519: prefixed key", "ed25519:AbCdEf"],
+    ["0X prefix (not an EVM address for idos-kwild)", "0X5aaeb6053f3e94c9b9a09f33669435e7ef1beaed"],
+  ])("keeps a non-EVM recipient verbatim: %s", (_, recipient) => {
+    expect(prepareCredentialBroaderMessage("c2ln", "ipfs://cid", recipient, "c")).toContain(
+      `\nrecipient wallet: ${recipient}\n`,
+    );
+  });
+
+  it("requires a recipient and a chain id", () => {
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r", "")).toThrow();
+    expect(() => localCredentialBroaderMessageFor("r", undefined)).toThrow();
+  });
+
+  it("rejects line breaks in any field", () => {
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r", "c\nx: y")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r\r", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://c\nid", "r", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2\nln", "ipfs://cid", "r", "c")).toThrow();
+  });
+
+  it("signs the local message: the broader signature verifies against it", async () => {
+    const keyPair = nacl.sign.keyPair();
+    const result = await buildSignedCredentialContentReference(
+      "{}",
+      "ipfs://cid",
+      keyPair.secretKey,
+      localCredentialBroaderMessageFor("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed", "chain"),
+    );
+    const expected = prepareCredentialBroaderMessage(
+      result.public_notes_signature,
+      "ipfs://cid",
+      "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed",
+      "chain",
+    );
+    expect(
+      nacl.sign.detached.verify(
+        utf8Encode(expected),
+        base64Decode(result.broader_signature),
+        keyPair.publicKey,
+      ),
+    ).toBe(true);
+  });
+});
 
 describe("buildSignedCredentialContentReference", () => {
   it("derives issuer_auth_public_key from the signing secret key", async () => {

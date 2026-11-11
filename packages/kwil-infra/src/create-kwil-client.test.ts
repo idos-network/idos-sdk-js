@@ -1,5 +1,4 @@
-import type { NodeKwil } from "@idos-network/kwil-js";
-
+import { NodeKwil } from "@idos-network/kwil-js";
 import { describe, expect, it, vi } from "vitest";
 
 import { KwilActionClient, KwilCallError } from "./create-kwil-client";
@@ -36,5 +35,19 @@ describe("KwilActionClient.call", () => {
     client.throwOnCallError = true;
 
     await expect(client.call(params)).resolves.toEqual([{ id: "1" }]);
+  });
+});
+
+describe("KwilActionClient.chainId", () => {
+  const nodeKwil = () =>
+    new NodeKwil({ kwilProvider: "https://nodes.example", chainId: "test-chain" });
+
+  it("keeps the wrapped client's chain id with one-argument construction", () => {
+    expect(new KwilActionClient(nodeKwil()).chainId).toBe("test-chain");
+  });
+
+  it("is undefined when the wrapped client has no chain id", () => {
+    const bare = new NodeKwil({ kwilProvider: "https://nodes.example", chainId: "" });
+    expect(new KwilActionClient(bare).chainId).toBeUndefined();
   });
 });

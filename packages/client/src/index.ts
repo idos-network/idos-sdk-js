@@ -7,6 +7,7 @@ import type {
 import {
   buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
+  localCredentialBroaderMessageFor,
   mapPreliminaryToIDOSCredential,
   matchClaims,
   matchLevelOrHigher,
@@ -38,7 +39,6 @@ import {
   addWallets,
   addAttribute as createAttribute,
   createPreliminaryCredential,
-  credentialBroaderMessage,
   type CreatePreliminaryCredentialInput,
   dwgMessage,
   type GetAccessGrantsGrantedInput,
@@ -171,6 +171,9 @@ function boundKwilClient(kwilClient: KwilActionClient, kwilSigner: KwilSigner): 
     get client() {
       guard();
       return raw.client;
+    },
+    get chainId() {
+      return raw.chainId;
     },
     call: async (...args: Parameters<KwilActionClient["call"]>) => {
       guard();
@@ -631,12 +634,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         publicNotes,
         plaintextContent,
         recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
-        broaderMessageFor: (publicNotesSignature, contentUri) =>
-          credentialBroaderMessage(this.kwilClient, {
-            public_notes_signature: publicNotesSignature,
-            content_uri: contentUri,
-            recipient_wallet: credentialRecipientWallet(this),
-          }).then((row) => row.message),
+        broaderMessageFor: localCredentialBroaderMessageFor(
+          credentialRecipientWallet(this),
+          this.kwilClient.chainId,
+        ),
         issuerSigningSecretKey,
       })),
       id: credentialId,
@@ -1062,12 +1063,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const signedReference = await buildEphemeralSignedCredentialContentReference(
       "",
       copyReference.uri,
-      (publicNotesSignature, contentUri) =>
-        credentialBroaderMessage(this.kwilClient, {
-          public_notes_signature: publicNotesSignature,
-          content_uri: contentUri,
-          recipient_wallet: credentialRecipientWallet(this),
-        }).then((row) => row.message),
+      localCredentialBroaderMessageFor(credentialRecipientWallet(this), this.kwilClient.chainId),
     );
 
     // Integrator-supplied. ed25519 @caller is lowercase hex; after exact grantee

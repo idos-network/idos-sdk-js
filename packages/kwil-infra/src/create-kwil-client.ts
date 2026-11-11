@@ -64,9 +64,16 @@ export class KwilActionClient {
    */
   throwOnCallError = false;
   readonly client: NodeKwil | WebKwil;
+  /**
+   * The chain id the wrapped Kwil client signs transactions for. Credential signatures bind to
+   * the same value, so they can't target a different chain than the transactions.
+   */
+  readonly chainId?: string;
 
   constructor(client: NodeKwil | WebKwil) {
     this.client = client;
+    // kwil-js keeps chainId protected; it is set when the Kwil client is created.
+    this.chainId = (client as unknown as { chainId?: string } | undefined)?.chainId || undefined;
   }
 
   #createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {

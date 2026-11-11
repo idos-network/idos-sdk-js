@@ -33,6 +33,7 @@ const { state, kwilClient } = vi.hoisted(() => {
     fetchFn: vi.fn<typeof fetch>(),
   };
   const kwilClient = {
+    chainId: "test-chain",
     setSigner: vi.fn(),
     async call({ name, inputs }: ActionCall) {
       state.calls.push({ kind: "call", name, inputs });
@@ -46,8 +47,6 @@ const { state, kwilClient } = vi.hoisted(() => {
         }
         case "get_credentials_as_mm_operator":
           return state.credentials.filter((row) => row.user_id === inputs.user_id);
-        case "credential_broader_message":
-          return [{ message: `broader:${inputs.content_uri}:${inputs.recipient_wallet}` }];
         default:
           throw new Error(`unexpected call ${name}`);
       }
@@ -359,8 +358,15 @@ describe("idOSMmOperator", () => {
         issuer_auth_public_key: Buffer.from(issuerKeyPair.publicKey).toString("hex"),
       });
 
-      // Issuer signatures: the recipient wallet is the user's MM public key.
-      const broaderMessage = `broader:${staged?.content_uri}:${MM_KEY}`;
+      // Issuer signatures: built locally (no node call), bound to the user's MM key and the chain.
+      expect(state.calls.map((c) => c.name)).not.toContain("credential_broader_message");
+      const broaderMessage = [
+        "operation: credential",
+        `public notes signature: ${staged?.public_notes_signature}`,
+        `content uri: ${staged?.content_uri}`,
+        `recipient wallet: ${MM_KEY}`,
+        "chain id: test-chain",
+      ].join("\n");
       expect(
         nacl.sign.detached.verify(
           utf8Encode(broaderMessage),

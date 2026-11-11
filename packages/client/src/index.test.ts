@@ -442,7 +442,8 @@ async function createCredentialForWallet(walletType: "EVM"): Promise<{
   const kwilSigner = {};
   const kwilClient = {
     signer: kwilSigner,
-    call: async () => [{ message: "credential-message" }],
+    chainId: "test-chain",
+    call: async () => [],
     execute: async ({ inputs }: { inputs: Record<string, unknown> }) => {
       preliminaryInput = inputs;
     },
@@ -516,10 +517,10 @@ describe("credential blob storage", () => {
       const kwilSigner = {};
       const kwilClient = {
         signer: kwilSigner,
+        chainId: "test-chain",
         execute: async () => undefined,
         call: async ({ name, inputs }: { name: string; inputs: { id: string } }) => {
-          // Other view calls made while building the credential (e.g. a message to sign).
-          if (name !== "get_credential_owned") return [{ message: "credential-message" }];
+          if (name !== "get_credential_owned") return [];
           stored = await lookup(inputs.id, uploaded);
           return stored ? [{ id: inputs.id, ...stored }] : [];
         },
