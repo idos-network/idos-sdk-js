@@ -65,14 +65,15 @@ export class KwilActionClient {
   throwOnCallError = false;
   readonly client: NodeKwil | WebKwil;
   /**
-   * The chain id this client signs transactions for: the configured one, else the one discovered
-   * from the node at creation. Credential signatures bind to it too.
+   * The chain id this client signs transactions for: the one passed here, else the one the
+   * wrapped Kwil client was created with. Credential signatures bind to it too.
    */
   readonly chainId?: string;
 
   constructor(client: NodeKwil | WebKwil, chainId?: string) {
     this.client = client;
-    this.chainId = chainId;
+    // kwil-js keeps chainId protected; read it so `new KwilActionClient(nodeKwil)` keeps it.
+    this.chainId = chainId || (client as unknown as { chainId?: string } | undefined)?.chainId;
   }
 
   #createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
