@@ -1,5 +1,18 @@
 # data-dashboard
 
+## 1.4.12
+
+### Patch Changes
+
+- b054e4c: Stop sending PII to sentry (ip address, etc)
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+  - @idos-network/credentials@4.1.0
+  - @idos-network/kwil-infra@5.1.0
+  - @idos-network/client@5.0.1
+  - @idos-network/issuer@5.0.1
+  - @idos-network/consumer@5.0.1
+
 ## 1.4.11
 
 ### Patch Changes
