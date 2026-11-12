@@ -33,7 +33,7 @@ Sentry.init({
   release: process.env.VITE_SENTRY_RELEASE ?? process.env.VERCEL_DEPLOYMENT_ID ?? "unknown",
   // Adds request headers and IP for users, for more info visit:
   // https://docs.sentry.io/platforms/javascript/guides/react-router/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: false,
   tracesSampleRate: 0,
   ignoreErrors: [/^No route matches URL /],
   beforeSend(event, hint) {
