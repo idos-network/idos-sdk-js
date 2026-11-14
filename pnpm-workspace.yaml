@@ -20,10 +20,10 @@ allowBuilds:
 
 catalogs:
   build:
-    "@types/node": "25.9.5"
+    "@types/node": "25.9.9"
     "tsdown": "^0.23.0"
     "typescript": "^5.9.3"
-    "vite": "8.2.4"
+    "vite": "8.3.8"
     "vite-plugin-node-polyfills": "0.28.0"
 
   core:
@@ -37,10 +37,10 @@ catalogs:
     "zod": "4.6.7"
 
   ethereum:
-    "@wagmi/core": "3.6.4"
+    "@wagmi/core": "3.6.9"
     "ethers": "^6.17.0"
-    "viem": "2.55.11"
-    "wagmi": "3.7.6"
+    "viem": "2.57.19"
+    "wagmi": "3.7.11"
 
   near:
     "@near-wallet-selector/core": "8.10.2"
@@ -52,7 +52,7 @@ catalogs:
   otel:
     "@opentelemetry/api": "^1.10.0"
     "@opentelemetry/context-async-hooks": "^3.0.0"
-    "@opentelemetry/instrumentation": "^0.300.0"
+    "@opentelemetry/instrumentation": "^0.301.0"
     "@opentelemetry/sdk-trace": "^3.0.0"
     "@opentelemetry/semantic-conventions": "^1.43.0"
 
@@ -77,8 +77,8 @@ catalogs:
     # This version needs to be 1.7.20 untill this
     # https://github.com/reown-com/appkit/issues/5481
     # is solved.
-    "@reown/appkit": "1.7.20"
-    "@reown/appkit-adapter-wagmi": "1.7.20"
+    "@reown/appkit": "1.8.24"
+    "@reown/appkit-adapter-wagmi": "1.8.24"
 
   stellar:
     "@creit.tech/stellar-wallets-kit": "^1.9.5"
@@ -91,8 +91,8 @@ catalogs:
     "@tanstack/react-table": "^8.21.3"
 
   testing:
-    "vitest": "4.1.11"
-    "@vitest/coverage-v8": "4.1.11"
+    "vitest": "4.1.12"
+    "@vitest/coverage-v8": "4.1.12"
 
   utils:
     "@stablelib/base64": "^2.0.1"
@@ -107,7 +107,7 @@ catalogs:
     "bs58": "^6.0.0"
     "es-toolkit": "^1.50.0"
     "ipfs-unixfs-importer": "^17.1.1"
-    "qs": "6.16.1"
+    "qs": "6.17.1"
 
   xrp:
     "@gemwallet/api": "^3.8.0"
@@ -142,7 +142,7 @@ onlyBuiltDependencies:
 
 overrides:
   # LRU-cache includes now forced dependency to node:diagnostic internal library
-  "path-scurry>lru-cache": "11.5.2"
+  "path-scurry>lru-cache": "11.5.3"
 
   # Overrides for security-updates (floors match top-level / catalog pins)
   "@react-router/dev": ">=8.3.0"
@@ -154,11 +154,11 @@ overrides:
   # Security: undici DoS and TLS bypass (GHSA-rfgv-xxqx-mfg5, GHSA-w293-vg96-wgc3)
   # Pin the major. An open range lets pnpm reuse a vulnerable release already in the lockfile.
   "undici@6": "6.29.1"
-  "undici@7": "7.30.1"
+  "undici@7": "7.30.2"
   axios: ">=1.20.0"
   # Security: header stripping bypass (GHSA-8r9p-f939-6h3c, GHSA-q3jh-wrc6-jgq8) and
   # cross-realm sensitiveHeaders discarded (GHSA-mrwp-f3q8-3g9p)
-  "follow-redirects": "1.16.2"
+  "follow-redirects": "1.16.3"
   base-x: ">=3.0.11"
   compression: ">= 1.8.2"
   # Security overrides. Each one blocks a dependent whose declared range still
@@ -176,7 +176,7 @@ overrides:
   dompurify: ">=3.4.17"
   # Security: launch-editor Windows path check bypass (GHSA-587h-7wmj-h5pm).
   # Pin the patch. An open range lets pnpm reuse a vulnerable release already in the lockfile.
-  vite: "8.2.4"
+  vite: "8.3.8"
   "launch-editor": "2.14.2"
   ws: ">= 8.21.0"
   # Security: decode-uri-component quadratic DoS (GHSA-qr28-fpjm-wq7f). query-string@7 (WalletConnect,
@@ -206,7 +206,7 @@ overrides:
   "body-parser": "2.4.0"
 
   # Security: nanoid infinite loop (GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8)
-  "nanoid@3": "3.3.18"
+  "nanoid@3": "3.3.20"
 
   # Security: deepmerge-ts stack exhaustion on recursive graphs (GHSA-ggr8-5vv4-36mx)
   # Prisma still pins 7.1.5; no 7.x patch exists (fix is >=8.0.0).
