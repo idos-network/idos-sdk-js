@@ -1,5 +1,12 @@
 # facesign-enclave
 
+## 0.4.12
+
+### Patch Changes
+
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+
 ## 0.4.11
 
 ### Patch Changes

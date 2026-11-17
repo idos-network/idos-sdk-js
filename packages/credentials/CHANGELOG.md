@@ -1,5 +1,18 @@
 # @idos-network/credentials
 
+## 4.1.0
+
+### Minor Changes
+
+- 406ea59: Build the credential `broader_signature` message locally instead of asking the node for it. The issuer key signed whatever text `credential_broader_message` returned, so a lying node could pick the recipient or get arbitrary text signed. `@idos-network/client`, `@idos-network/issuer` and `@idos-network/mm-operator` no longer call that action.
+
+  New: `prepareCredentialBroaderMessage` and `localCredentialBroaderMessageFor(recipientWallet, chainId)` in `@idos-network/credentials/utils` (byte for byte equal to idos-kwild's `PrepareCredentialBroaderMessage`), `toChecksumAddress` (EIP-55) in `@idos-network/utils/codecs`, and `KwilActionClient.chainId`. If you pass your own `broaderMessageFor`, switch to `localCredentialBroaderMessageFor`; don't sign text fetched from the network.
+
+### Patch Changes
+
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+
 ## 4.0.1
 
 ### Patch Changes
