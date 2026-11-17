@@ -232,6 +232,13 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(origins));
   }
 
+  /** Parent logout: drop the cached key and this origin's grant, keep storage other sites share. */
+  async forgetParentOrigin(): Promise<void> {
+    this.storedEncryptionProfile = undefined;
+    const { [this.parentOrigin]: _, ...origins } = await this.authorizedOrigins();
+    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(origins));
+  }
+
   private listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.ports.length === 0) {
@@ -242,7 +249,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         const { method, data } = event.data;
 
         // Whitelisted methods. `reset` is omitted: it deletes every idOS-* key
-        // with no origin check. A user switch replaces the stored profile once the new user unlocks.
+        // with no origin check; parent logout uses `forgetParentOrigin` instead.
+        // A user switch replaces the stored profile once the new user unlocks.
         const allowedMethods: (keyof this)[] = [
           "load",
           "reconfigure",
@@ -253,6 +261,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           "signTypedDataResponse",
           "backupUserEncryptionProfile",
           "filterCredentials",
+          "forgetParentOrigin",
           "addAddressMessageToSign",
           "removeAddressMessageToSign",
           "addAddressToMpcSecret",

@@ -55,11 +55,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   /**
-   * Embedding pages cannot reset enclave storage. The iframe rejects `reset`
-   * because it deletes every idOS-* key with no origin check.
+   * Logs this page out of the enclave: the iframe drops its cached key and this origin's grant.
+   * Storage is shared with other sites, so the iframe never wipes it for an embedding page.
    */
   async reset(): Promise<void> {
-    throw new Error("Embedding pages cannot reset enclave storage");
+    await this.requestToEnclave("forgetParentOrigin");
   }
 
   /** @override parent method to call iframe */

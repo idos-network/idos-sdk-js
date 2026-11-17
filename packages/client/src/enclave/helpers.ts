@@ -4,6 +4,7 @@ import type { BaseProvider } from "@idos-network/enclave";
 type BaseProviderInstance = typeof BaseProvider.prototype & {
   // Custom method from enclave to ensure <-> iframe communication
   signTypedDataResponse: (signature: string) => Promise<void>;
+  forgetParentOrigin: () => Promise<void>;
 };
 
 // Gets the method argument type
