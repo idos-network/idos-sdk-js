@@ -6,6 +6,8 @@ import type {
 
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/enclave/local";
 
+import { resolveConfig } from "@/lib/config";
+
 // v2: before #1521, unlocking alone wrote to "enclave-authorized-origins", so it is no longer read.
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins-v2";
 
@@ -28,20 +30,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   private signTypeDataResponseResolver: ((signature: string) => void)[] = [];
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
-    super({
-      allowedEncryptionStores:
-        import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "user"] : ["user"],
-      mpcConfiguration:
-        import.meta.env.VITE_ENABLE_MPC === "true"
-          ? {
-              nodeUrl: import.meta.env.VITE_MPC_READER_NODE_URL,
-              contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
-              numMalicious: import.meta.env.VITE_MPC_NUM_MALICIOUS || 2,
-              numNodes: import.meta.env.VITE_MPC_NUM_NODES || 5,
-              numToReconstruct: import.meta.env.VITE_MPC_NUM_TO_RECONSTRUCT || 3,
-            }
-          : undefined,
-    });
+    // Chosen by this page's hostname, never by Vercel environment variables (see config.ts).
+    super(resolveConfig(window.location.hostname));
 
     this.parentOrigin = parentOrigin;
 

@@ -1,16 +1,20 @@
-import axios from "axios";
+import axios, { type AxiosInstance } from "axios";
 
-import { env } from "../env";
+import { getConfig } from "@/config";
 
-const faceSignService = axios.create({
-  baseURL: env.VITE_FACESIGN_SERVICE_URL,
-  timeout: 10000,
-});
+let clients: { faceSign: AxiosInstance; entropy: AxiosInstance } | undefined;
 
-const entropyService = axios.create({
-  baseURL: env.VITE_ENTROPY_SERVICE_URL,
-  timeout: 10000,
-});
+// Created on first use, in the browser, from the page's own configuration (see config.ts).
+function services() {
+  if (!clients) {
+    const config = getConfig();
+    clients = {
+      faceSign: axios.create({ baseURL: config.facesignServiceUrl, timeout: 10000 }),
+      entropy: axios.create({ baseURL: config.entropyServiceUrl, timeout: 10000 }),
+    };
+  }
+  return clients;
+}
 
 export interface FaceSignResponse {
   responseBlob: string;
@@ -50,7 +54,7 @@ export function isNewUserResponse(
 }
 
 export async function login(requestBlob: string): Promise<LoginResponse | NewUserResponse> {
-  const response = await faceSignService.post<LoginResponse | NewUserResponse>(
+  const response = await services().faceSign.post<LoginResponse | NewUserResponse>(
     "/facesign",
     JSON.stringify({
       requestBlob,
@@ -71,7 +75,7 @@ export async function login(requestBlob: string): Promise<LoginResponse | NewUse
 export async function confirmNewUser(
   newUserConfirmationToken: string,
 ): Promise<ConfirmUserResponse> {
-  const response = await faceSignService.post<ConfirmUserResponse>(
+  const response = await services().faceSign.post<ConfirmUserResponse>(
     "/facesign/confirmation",
     JSON.stringify({
       newUserConfirmationToken,
@@ -87,7 +91,7 @@ export async function confirmNewUser(
 }
 
 export async function getEntropy(token: string): Promise<{ entropy: string }> {
-  const response = await entropyService.post<{ entropy: string }>(
+  const response = await services().entropy.post<{ entropy: string }>(
     "/facesign/entropy",
     JSON.stringify({ token }),
     {

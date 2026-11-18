@@ -5,7 +5,7 @@ import type {
 } from "@/assets/facetec/FaceTecPublicApi.d";
 import type { FaceTecSDK } from "@/assets/facetec/FaceTecSDK";
 
-import { env } from "@/env";
+import { getConfig } from "@/config";
 
 import { SessionRequestProcessor } from "./session-request-processor";
 
@@ -57,7 +57,7 @@ export class FaceTecContainer {
     }
 
     this.#FaceTecSDK.initializeWithSessionRequest(
-      env.VITE_FACETEC_DEVICE_KEY_IDENTIFIER,
+      getConfig().facetecDeviceKeyIdentifier,
       new SessionRequestProcessor(),
       {
         onSuccess: (newFaceTecSdkInstance: FaceTecSDKInstance) => {
@@ -102,7 +102,7 @@ export class FaceTecContainer {
     const sdk = this.#FaceTecSDK;
     if (!sdk) throw new Error("FaceTecSDK is not loaded");
 
-    const iFrameFeatureFlag = [{ ac_ziif: env.VITE_FACETEC_IFRAME_FEATURE_FLAG }];
+    const iFrameFeatureFlag = [{ ac_ziif: getConfig().facetecIframeFeatureFlag }];
     const c = new sdk.FaceTecCustomization(iFrameFeatureFlag);
 
     c.frameCustomization.borderCornerRadius = "20px";

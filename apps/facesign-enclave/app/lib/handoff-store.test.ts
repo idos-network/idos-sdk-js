@@ -35,8 +35,16 @@ vi.mock("@upstash/redis", () => ({
   },
 }));
 
-const { completeSession, consumeAttestationToken, createSession, getAttestationToken, getSession } =
-  await import("./handoff-store");
+vi.stubEnv("KV_REST_API_URL", "https://equal-calf-29258.upstash.io");
+
+const {
+  assertAllowedRedisUrl,
+  completeSession,
+  consumeAttestationToken,
+  createSession,
+  getAttestationToken,
+  getSession,
+} = await import("./handoff-store");
 
 describe("handoff-store", () => {
   beforeEach(() => {
@@ -115,5 +123,36 @@ describe("handoff-store", () => {
 
   it("rejects completing an unknown session", async () => {
     expect(await completeSession(crypto.randomUUID(), "token")).toBe(false);
+  });
+});
+
+describe("assertAllowedRedisUrl", () => {
+  it("accepts the idOS Upstash database and a local Redis", () => {
+    expect(assertAllowedRedisUrl("https://equal-calf-29258.upstash.io")).toBe(
+      "https://equal-calf-29258.upstash.io",
+    );
+    expect(assertAllowedRedisUrl("http://localhost:8079")).toBe("http://localhost:8079");
+  });
+
+  it("refuses any other store, so an env edit cannot redirect attestation tokens", () => {
+    for (const url of [
+      "https://attacker-12345.upstash.io",
+      "http://equal-calf-29258.upstash.io",
+      "https://equal-calf-29258.upstash.io.attacker.example",
+    ]) {
+      expect(() => assertAllowedRedisUrl(url)).toThrow(/not an allowed handoff store/);
+    }
+    expect(() => assertAllowedRedisUrl(undefined)).toThrow(/missing or not a URL/);
+  });
+
+  it("fails the handoff calls before any Redis request when the URL is not allowed", async () => {
+    vi.resetModules();
+    vi.stubEnv("KV_REST_API_URL", "https://attacker-12345.upstash.io");
+    const fresh = await import("./handoff-store");
+
+    await expect(fresh.createSession()).rejects.toThrow(/not an allowed handoff store/);
+    expect(store.size).toBe(0);
+
+    vi.stubEnv("KV_REST_API_URL", "https://equal-calf-29258.upstash.io");
   });
 });
