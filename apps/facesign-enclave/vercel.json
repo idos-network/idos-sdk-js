@@ -1,4 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "react-router"
+  "framework": "react-router",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm exec turbo run build"
 }
