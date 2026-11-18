@@ -5,9 +5,10 @@ const SESSION_TTL_SECONDS = 5 * 60; // 5 minutes
 // The only Redis the handoff may use. Attestation tokens pass through it, and whoever reads one
 // can redeem it for the user's mnemonic, so an environment variable alone must not be able to
 // point the store somewhere else. Today one Upstash database serves every environment (keys are
-// separated by KV_PREFIX). Local development may use a Redis on localhost.
+// separated by KV_PREFIX). The dev server (`import.meta.env.DEV`, false in every build) may also
+// use a Redis REST endpoint on loopback; see the README.
 const ALLOWED_REDIS_HOSTS = new Set(["equal-calf-29258.upstash.io"]);
-const LOCAL_REDIS_HOSTS = new Set(["localhost", "127.0.0.1"]);
+const LOOPBACK_REDIS_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 export function assertAllowedRedisUrl(raw: string | undefined): string {
   let url: URL;
@@ -19,12 +20,13 @@ export function assertAllowedRedisUrl(raw: string | undefined): string {
 
   const allowed =
     (url.protocol === "https:" && ALLOWED_REDIS_HOSTS.has(url.hostname)) ||
-    LOCAL_REDIS_HOSTS.has(url.hostname);
+    (import.meta.env.DEV && LOOPBACK_REDIS_HOSTS.has(url.hostname));
   if (!allowed) {
     throw new Error(`KV_REST_API_URL host "${url.hostname}" is not an allowed handoff store`);
   }
 
-  return raw as string;
+  // The normalized form that passed the check, e.g. a lowercase scheme.
+  return url.href;
 }
 
 let client: Redis | undefined;

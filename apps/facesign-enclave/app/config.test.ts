@@ -25,11 +25,24 @@ describe("resolveConfig", () => {
     });
   });
 
-  it("maps each deployed host to its own environment", () => {
-    expect(resolveConfig("facesign.playground.idos.network", hostileEnv)).toBe(CONFIGS.playground);
-    expect(resolveConfig("facesign.staging.idos.network", hostileEnv)).toBe(CONFIGS.staging);
-    expect(resolveConfig("facesign-enclave-git-x-idos-engineering.vercel.app", hostileEnv)).toBe(
-      CONFIGS.staging,
+  it("maps each deployed host to its own environment and parent apps", () => {
+    const origins = (host: string) => resolveConfig(host, hostileEnv).allowedOrigins;
+
+    expect(origins("facesign.playground.idos.network")).toEqual([
+      "https://app.playground.idos.network",
+      "https://embedded-wallet.playground.idos.network",
+    ]);
+    expect(origins("facesign.staging.idos.network")).toEqual([
+      "https://app.staging.idos.network",
+      "https://embedded-wallet.staging.idos.network",
+    ]);
+    // Vercel previews run against staging.
+    expect(origins("facesign-enclave-git-x-idos-engineering.vercel.app")).toEqual([
+      "https://app.staging.idos.network",
+      "https://embedded-wallet.staging.idos.network",
+    ]);
+    expect(resolveConfig("facesign.staging.idos.network", hostileEnv).entropyServiceUrl).toBe(
+      "https://entropy.tee.staging.idos.network/",
     );
   });
 
@@ -97,6 +110,7 @@ describe("isLocalHost", () => {
     for (const host of [
       "localhost",
       "127.0.0.1",
+      "[::1]",
       "10.0.0.5",
       "172.16.4.2",
       "192.168.1.138",
@@ -106,6 +120,7 @@ describe("isLocalHost", () => {
     }
     for (const host of [
       "8.8.8.8",
+      "[2001:db8::1]",
       "172.32.0.1",
       "100.128.0.1",
       "192.168.1.1.attacker.example",

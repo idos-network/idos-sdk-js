@@ -62,13 +62,13 @@ const HOSTS: Record<string, EnvironmentName> = {
   "facesign.staging.idos.network": "staging",
 };
 
-// Local development: localhost, or a private-network IP (developers open the dev server from
+// Local development: localhost, IPv6 loopback, or a private-network IP (developers open the dev server from
 // another device on the LAN, e.g. a phone). Deployed hosts are never IP literals.
 const PRIVATE_IPV4 =
   /^(?:10|127)(?:\.\d{1,3}){3}$|^192\.168(?:\.\d{1,3}){2}$|^172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}$|^100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])(?:\.\d{1,3}){2}$/;
 
 export function isLocalHost(hostname: string): boolean {
-  return hostname === "localhost" || PRIVATE_IPV4.test(hostname);
+  return hostname === "localhost" || hostname === "[::1]" || PRIVATE_IPV4.test(hostname);
 }
 
 /**

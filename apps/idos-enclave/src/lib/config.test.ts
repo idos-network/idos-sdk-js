@@ -48,6 +48,9 @@ describe("resolveConfig", () => {
 
   it("reads the environment on localhost only", () => {
     expect(resolveConfig("127.0.0.1", {})).toEqual({ allowedEncryptionStores: ["user"] });
+    expect(() =>
+      resolveConfig("localhost", { ...hostileEnv, VITE_MPC_CONTRACT_ADDRESS: undefined }),
+    ).toThrow(/VITE_MPC_CONTRACT_ADDRESS must be set/);
     expect(resolveConfig("localhost", hostileEnv).mpcConfiguration).toEqual({
       nodeUrl: "https://reader.attacker.example",
       contractAddress: "02attacker",
@@ -93,6 +96,7 @@ describe("isLocalHost", () => {
     for (const host of [
       "localhost",
       "127.0.0.1",
+      "[::1]",
       "10.0.0.5",
       "172.16.4.2",
       "192.168.1.138",
@@ -102,6 +106,7 @@ describe("isLocalHost", () => {
     }
     for (const host of [
       "8.8.8.8",
+      "[2001:db8::1]",
       "172.32.0.1",
       "100.128.0.1",
       "192.168.1.1.attacker.example",

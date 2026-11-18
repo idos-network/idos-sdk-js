@@ -45,6 +45,8 @@ Vite assigns the first available port starting from 5173. When running alongside
 
 ### Environment Variables
 
+The `VITE_*` variables below are read only when the enclave runs on a local development host (localhost, `[::1]` or a private-network IP). Deployed hosts ignore them and use the values in `app/config.ts` (see [Deployment](#deployment)).
+
 Create a `.env.local` file with (all required unless noted):
 
 ```bash
@@ -59,9 +61,9 @@ VITE_FACETEC_IFRAME_FEATURE_FLAG="your-iframe-feature-flag-uuid"
 # Allowed parent origins for iframe embedding (comma-separated). "*" is not supported.
 VITE_ALLOWED_ORIGINS="https://localhost:5173,https://localhost:5174"
 
-# Upstash Redis (for mobile handoff sessions) — provided by the Vercel KV integration
-KV_REST_API_URL="https://your-instance.upstash.io"
-KV_REST_API_TOKEN="your-token"
+# Redis REST endpoint for mobile handoff sessions (see "Local Redis" below)
+KV_REST_API_URL="http://localhost:8079"
+KV_REST_API_TOKEN="local-dev-token"
 KV_PREFIX="your keys prefix"
 
 # Sessions
@@ -79,6 +81,21 @@ SECRET_KEY_BASE="abcd1234"
 | `KV_REST_API_TOKEN`                  | Yes      | Upstash Redis REST token.                                                     |
 | `KV_PREFIX`                          | Yes      | Redis keys prefix.                                                            |
 | `SECRET_KEY_BASE`                    | Yes      | Session secret key.                                                           |
+
+### Local Redis
+
+The handoff store only accepts the idOS Upstash database, plus a loopback Redis REST endpoint when running under the dev server (`pnpm dev`). A plain Redis TCP listener is not enough: the client speaks Upstash's REST protocol. Run Redis behind [serverless-redis-http](https://github.com/hiett/serverless-redis-http):
+
+```bash
+docker network create facesign-dev
+docker run -d --name facesign-redis --network facesign-dev redis:7
+docker run -d --name facesign-srh --network facesign-dev -p 8079:80 \
+  -e SRH_MODE=env -e SRH_TOKEN=local-dev-token \
+  -e SRH_CONNECTION_STRING=redis://facesign-redis:6379 \
+  hiett/serverless-redis-http:latest
+```
+
+`KV_REST_API_TOKEN` must match `SRH_TOKEN`.
 
 ### Running with the dashboard
 
@@ -125,28 +142,27 @@ pnpm preview
 
 ## Deployment
 
-The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available at [facesign-enclave.idos.network](https://facesign-enclave.idos.network). The app uses React Router 7 in SSR mode with the `@vercel/react-router` preset.
+The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available at [facesign.idos.network](https://facesign.idos.network). The app uses React Router 7 in SSR mode with the `@vercel/react-router` preset.
 
 ### Prerequisites
 
 1. **Vercel KV (Upstash Redis)** — enable the Vercel KV integration on the project. This automatically provisions `KV_REST_API_URL` and `KV_REST_API_TOKEN` as environment variables.
 2. **FaceTec domain whitelist** — ensure the production domain (and the mobile handoff domain, which is the same) is whitelisted in the FaceTec developer dashboard.
 
+### Configuration of deployed hosts
+
+The service URLs, FaceTec settings and allowed parent origins of `facesign.idos.network`, `facesign.playground.idos.network`, `facesign.staging.idos.network` and Vercel previews (`*.vercel.app`, which use staging) are fixed in `app/config.ts`, chosen by hostname. Setting `VITE_*` variables in Vercel has no effect on these hosts; change `CONFIGS` (and `HOSTS` for a new domain) in a reviewed pull request instead. Any other host refuses to start.
+
+The allowed origins control which parent origins can embed the enclave via iframe **and** which origins can call the handoff API routes (via CORS). They are explicit lists; `"*"` is not supported.
+
 ### Vercel environment variables
 
-Set these in the Vercel project settings (KV variables are auto-provisioned by the integration):
-
-| Variable                             | Value                                  | Notes                         |
-| ------------------------------------ | -------------------------------------- | ----------------------------- |
-| `VITE_FACESIGN_SERVICE_URL`          | Production FaceSign service URL        |                               |
-| `VITE_ENTROPY_SERVICE_URL`           | Production entropy service URL         |                               |
-| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Production FaceTec device key          |                               |
-| `VITE_FACETEC_IFRAME_FEATURE_FLAG`   | Production FaceTec iframe feature flag |                               |
-| `VITE_ALLOWED_ORIGINS`               | `https://dashboard.idos.network`       | Never use `"*"` in production |
-| `KV_REST_API_URL`                    | _(auto-provisioned by Vercel KV)_      | Upstash Redis REST URL        |
-| `KV_REST_API_TOKEN`                  | _(auto-provisioned by Vercel KV)_      | Upstash Redis REST token      |
-
-The `VITE_ALLOWED_ORIGINS` variable controls which parent origins can embed the enclave via iframe **and** which origins can call the handoff API routes (via CORS). In production, this must be an explicit list of trusted origins.
+| Variable            | Value                             | Notes                                                              |
+| ------------------- | --------------------------------- | ------------------------------------------------------------------ |
+| `KV_REST_API_URL`   | _(auto-provisioned by Vercel KV)_ | Must be the idOS Upstash host listed in `app/lib/handoff-store.ts` |
+| `KV_REST_API_TOKEN` | _(auto-provisioned by Vercel KV)_ | Upstash Redis REST token                                           |
+| `KV_PREFIX`         | Per environment                   | Redis keys prefix                                                  |
+| `SECRET_KEY_BASE`   | Per environment                   | Session secret key                                                 |
 
 ### Post-deploy testing
 

@@ -4,8 +4,14 @@ const store = new Map<string, { value: string; expiresAt: number }>();
 // Runs right before a DEL, to force an operation to interleave with consumeAttestationToken.
 let beforeDel: (() => Promise<void>) | null = null;
 
+let redisClientsCreated = 0;
+
 vi.mock("@upstash/redis", () => ({
   Redis: class {
+    constructor() {
+      redisClientsCreated++;
+    }
+
     async get(key: string) {
       return store.get(key)?.value ?? null;
     }
@@ -127,11 +133,24 @@ describe("handoff-store", () => {
 });
 
 describe("assertAllowedRedisUrl", () => {
-  it("accepts the idOS Upstash database and a local Redis", () => {
-    expect(assertAllowedRedisUrl("https://equal-calf-29258.upstash.io")).toBe(
-      "https://equal-calf-29258.upstash.io",
+  it("accepts the idOS Upstash database, normalized", () => {
+    expect(assertAllowedRedisUrl("HTTPS://equal-calf-29258.upstash.io")).toBe(
+      "https://equal-calf-29258.upstash.io/",
     );
-    expect(assertAllowedRedisUrl("http://localhost:8079")).toBe("http://localhost:8079");
+  });
+
+  it("accepts a loopback Redis REST endpoint on the dev server only", () => {
+    expect(assertAllowedRedisUrl("http://localhost:8079")).toBe("http://localhost:8079/");
+    expect(assertAllowedRedisUrl("http://[::1]:8079")).toBe("http://[::1]:8079/");
+
+    vi.stubEnv("DEV", false);
+    try {
+      expect(() => assertAllowedRedisUrl("http://127.0.0.1:8079")).toThrow(
+        /not an allowed handoff store/,
+      );
+    } finally {
+      vi.stubEnv("DEV", true);
+    }
   });
 
   it("refuses any other store, so an env edit cannot redirect attestation tokens", () => {
@@ -145,13 +164,14 @@ describe("assertAllowedRedisUrl", () => {
     expect(() => assertAllowedRedisUrl(undefined)).toThrow(/missing or not a URL/);
   });
 
-  it("fails the handoff calls before any Redis request when the URL is not allowed", async () => {
+  it("fails the handoff calls without creating a Redis client when the URL is not allowed", async () => {
     vi.resetModules();
     vi.stubEnv("KV_REST_API_URL", "https://attacker-12345.upstash.io");
+    redisClientsCreated = 0;
     const fresh = await import("./handoff-store");
 
     await expect(fresh.createSession()).rejects.toThrow(/not an allowed handoff store/);
-    expect(store.size).toBe(0);
+    expect(redisClientsCreated).toBe(0);
 
     vi.stubEnv("KV_REST_API_URL", "https://equal-calf-29258.upstash.io");
   });
