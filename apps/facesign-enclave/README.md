@@ -62,7 +62,7 @@ VITE_FACETEC_IFRAME_FEATURE_FLAG="your-iframe-feature-flag-uuid"
 VITE_ALLOWED_ORIGINS="https://localhost:5173,https://localhost:5174"
 
 # Redis REST endpoint for mobile handoff sessions (see "Local Redis" below)
-KV_REST_API_URL="http://localhost:8079"
+KV_REST_API_URL="http://127.0.0.1:8079"
 KV_REST_API_TOKEN="local-dev-token"
 KV_PREFIX="your keys prefix"
 
@@ -89,7 +89,7 @@ The handoff store only accepts the idOS Upstash database, plus a loopback Redis 
 ```bash
 docker network create facesign-dev
 docker run -d --name facesign-redis --network facesign-dev redis:7
-docker run -d --name facesign-srh --network facesign-dev -p 8079:80 \
+docker run -d --name facesign-srh --network facesign-dev -p 127.0.0.1:8079:80 \
   -e SRH_MODE=env -e SRH_TOKEN=local-dev-token \
   -e SRH_CONNECTION_STRING=redis://facesign-redis:6379 \
   hiett/serverless-redis-http:latest
@@ -146,14 +146,14 @@ The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available a
 
 ### Prerequisites
 
-1. **Vercel KV (Upstash Redis)** — enable the Vercel KV integration on the project. This automatically provisions `KV_REST_API_URL` and `KV_REST_API_TOKEN` as environment variables.
+1. **Vercel KV (Upstash Redis)** — connect the project to the existing idOS Upstash database, which provisions `KV_REST_API_URL` and `KV_REST_API_TOKEN`. `KV_REST_API_URL` must be the host listed in `app/lib/handoff-store.ts`; a newly provisioned database has a different host, and the handoff routes (`/login`, `/m/:id`) then fail closed until that list is updated in a reviewed pull request.
 2. **FaceTec domain whitelist** — ensure the production domain (and the mobile handoff domain, which is the same) is whitelisted in the FaceTec developer dashboard.
 
 ### Configuration of deployed hosts
 
-The service URLs, FaceTec settings and allowed parent origins of `facesign.idos.network`, `facesign.playground.idos.network`, `facesign.staging.idos.network` and Vercel previews (`*.vercel.app`, which use staging) are fixed in `app/config.ts`, chosen by hostname. Setting `VITE_*` variables in Vercel has no effect on these hosts; change `CONFIGS` (and `HOSTS` for a new domain) in a reviewed pull request instead. Any other host refuses to start.
+The service URLs, FaceTec settings and allowed parent origins of `facesign.idos.network`, `facesign.playground.idos.network`, `facesign.staging.idos.network` and Vercel previews (`*.vercel.app`, which use staging) are fixed in `app/config.ts`, chosen by hostname. Setting `VITE_*` variables in Vercel has no effect on these hosts; change `CONFIGS` (and `HOSTS` for a new domain) in a reviewed pull request instead. On any other non-local host the page fails when it first reads its configuration in the browser; the server still answers, so an HTTP 200 alone does not show that a new domain is configured.
 
-The allowed origins control which parent origins can embed the enclave via iframe **and** which origins can call the handoff API routes (via CORS). They are explicit lists; `"*"` is not supported.
+The allowed origins are the parent windows (iframe parent or popup opener) the enclave exchanges messages with. They are explicit lists; `"*"` is not supported.
 
 ### Vercel environment variables
 

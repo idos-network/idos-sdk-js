@@ -104,9 +104,11 @@ function configFromEnv(localEnv: LocalEnv): EnclaveConfig {
   const nodeUrl = localEnv.VITE_MPC_READER_NODE_URL;
   const contractAddress = localEnv.VITE_MPC_CONTRACT_ADDRESS;
   if (!nodeUrl || !contractAddress) {
-    throw new Error(
-      "VITE_ENABLE_MPC is true, so VITE_MPC_READER_NODE_URL and VITE_MPC_CONTRACT_ADDRESS must be set",
+    // Keep password unlock working; MPC can't run without a reader and contract.
+    console.error(
+      "VITE_ENABLE_MPC is true but VITE_MPC_READER_NODE_URL or VITE_MPC_CONTRACT_ADDRESS is unset; MPC is disabled",
     );
+    return { allowedEncryptionStores: ["user"] };
   }
 
   return {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { CONFIGS, isLocalHost, type LocalEnv, resolveConfig } from "@/lib/config";
 
@@ -48,9 +48,10 @@ describe("resolveConfig", () => {
 
   it("reads the environment on localhost only", () => {
     expect(resolveConfig("127.0.0.1", {})).toEqual({ allowedEncryptionStores: ["user"] });
-    expect(() =>
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(
       resolveConfig("localhost", { ...hostileEnv, VITE_MPC_CONTRACT_ADDRESS: undefined }),
-    ).toThrow(/VITE_MPC_CONTRACT_ADDRESS must be set/);
+    ).toEqual({ allowedEncryptionStores: ["user"] });
     expect(resolveConfig("localhost", hostileEnv).mpcConfiguration).toEqual({
       nodeUrl: "https://reader.attacker.example",
       contractAddress: "02attacker",
