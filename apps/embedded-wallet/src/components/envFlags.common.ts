@@ -3,9 +3,11 @@ import * as z from "zod";
 export const commonEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   WALLET_CONNECT_PROJECT_ID: z.string(),
-  FACESIGN_ENCLAVE_URL: z.string(),
+  // Local development only: deployed hosts use the values pinned in src/config.ts.
+  FACESIGN_ENCLAVE_URL: z.string().optional(),
   NEAR_NETWORK: z.enum(["testnet", "mainnet"]),
   STELLAR_NETWORK: z.enum(["testnet", "public"]),
+  // Local development only, as above.
   DATA_DASHBOARD_URL: z.string().optional(),
 });
 

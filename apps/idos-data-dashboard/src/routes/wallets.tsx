@@ -7,7 +7,7 @@ import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
 import { WalletsPending } from "@/components/wallets/wallets-pending";
-import { COMMON_ENV } from "@/core/envFlags.common";
+import { isFaceSignEnabled } from "@/core/config";
 import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
 import { useSelector } from "@/machines/dashboard/provider";
@@ -15,13 +15,12 @@ import { selectWalletAddress } from "@/machines/dashboard/selectors";
 
 export const handle = { breadcrumb: "Wallets" };
 
-const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
-
 function WalletsList() {
   const { data: wallets } = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [walletsToDelete, setWalletsToDelete] = useState<GetWalletsOutput[]>([]);
   const address = useSelector(selectWalletAddress);
+  const hasFacesignEnclave = isFaceSignEnabled();
 
   const hasFacesignWallet = Object.values(wallets).some((group) =>
     group?.some((w) => w.wallet_type === "FaceSign"),

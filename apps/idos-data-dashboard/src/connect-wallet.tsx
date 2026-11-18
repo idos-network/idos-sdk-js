@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useActorRef } from "@/machines/dashboard/provider";
 
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
-import { COMMON_ENV } from "./core/envFlags.common";
+import { isFaceSignEnabled } from "./core/config";
 import { createFaceSignProvider } from "./lib/facesign";
 
 export function ConnectWallet() {
@@ -41,7 +41,7 @@ export function ConnectWallet() {
     send({ type: "CONNECT_FACESIGN" });
   };
 
-  const hasFacesign = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
+  const hasFacesign = isFaceSignEnabled();
 
   return (
     <div
