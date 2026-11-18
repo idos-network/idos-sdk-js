@@ -7,21 +7,26 @@ import type {
 import {
   buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
+  localCredentialBroaderMessageFor,
   mapPreliminaryToIDOSCredential,
+  matchClaims,
   matchLevelOrHigher,
   type PreliminaryIDOSCredential,
   recordFilter,
   type BaseLevel,
   type Addon,
+  type Claim,
+  type ClaimRequirements,
+  type Claims,
+  type ClaimSource,
+  type ClaimSources,
 } from "@idos-network/credentials/utils";
 import {
   createClientKwilSigner,
   createKgwAuthenticatedBlobGateway,
   createNodeKwilClient,
   createWebKwilClient,
-  isMmTokenAuth,
   type KwilActionClient,
-  mmTokenCredentialContentUri,
   signNearMessage,
   type Wallet,
 } from "@idos-network/kwil-infra";
@@ -67,9 +72,11 @@ import {
 import { NodeKwil, type KwilSigner } from "@idos-network/kwil-js";
 import {
   BlobGateway,
+  BlobGatewayUploadOutcomeUnknownError,
   createBlobContentReference,
-  requireAccessTokenForUkycContent,
+  isUkycContentUri,
   resolveCredentialEncryptedContent,
+  type UploadCredentialBlobsParams,
 } from "@idos-network/utils/blob-gateway";
 import {
   base64Decode,
@@ -118,20 +125,192 @@ function blobGatewayForSigner(idle: idOSClientIdle, kwilSigner: KwilSigner): Blo
     });
   }
 
-  return isMmTokenAuth(kwilSigner)
-    ? idle.blobGateway.withAccessToken(kwilSigner.accessToken)
-    : idle.blobGateway;
+  return idle.blobGateway;
 }
 
-function contentUriForWallet(
-  walletType: WalletType,
-  kwilSigner: KwilSigner,
-  credentialId: string,
-): string | undefined {
-  if (walletType !== "MM") {
-    return undefined;
+// Deadline for reading a blob back after an unknown upload outcome. A slower read leaves the
+// outcome unknown, which callers already have to handle, instead of hanging the call.
+const READ_BACK_TIMEOUT_MS = 60_000;
+
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  return a.byteLength === b.byteLength && a.every((byte, index) => byte === b[index]);
+}
+
+const STALE_CLIENT =
+  "This idOS client is stale: another signer was set or it was logged out. Use the client returned by the latest `withUserSigner()`.";
+
+// Wrappers from one idle client share its Kwil client and enclave. `rawOf` unwraps the
+// guard below; `turns` keeps signer replacement and enclave reconfiguration from interleaving.
+const rawOf = new WeakMap<KwilActionClient, KwilActionClient>();
+const boundOf = new WeakMap<KwilActionClient, WeakMap<KwilSigner, KwilActionClient>>();
+const rawEnclaveOf = new WeakMap<BaseProvider, BaseProvider>();
+const boundEnclaveOf = new WeakMap<BaseProvider, WeakMap<KwilSigner, BaseProvider>>();
+const turns = new WeakMap<KwilActionClient, Promise<void>>();
+const resetPending = new WeakSet<KwilActionClient>();
+
+function sharedKwilClient(kwilClient: KwilActionClient): KwilActionClient {
+  return rawOf.get(kwilClient) ?? kwilClient;
+}
+
+function assertSigner(kwilClient: KwilActionClient, kwilSigner: KwilSigner): void {
+  if (kwilClient.signer !== kwilSigner) throw new Error(STALE_CLIENT);
+}
+
+// shortcut: guards call/execute/waitForTx/setSigner only; wrap any new KwilActionClient method here.
+function boundKwilClient(kwilClient: KwilActionClient, kwilSigner: KwilSigner): KwilActionClient {
+  const raw = sharedKwilClient(kwilClient);
+  const cached = kwilSigner ? boundOf.get(raw)?.get(kwilSigner) : undefined;
+  if (cached) return cached;
+
+  const guard = (): void => assertSigner(raw, kwilSigner);
+  const bound = {
+    get signer() {
+      guard();
+      return raw.signer;
+    },
+    get client() {
+      guard();
+      return raw.client;
+    },
+    get chainId() {
+      return raw.chainId;
+    },
+    call: async (...args: Parameters<KwilActionClient["call"]>) => {
+      guard();
+      return raw.call(...args);
+    },
+    execute: async (...args: Parameters<KwilActionClient["execute"]>) => {
+      guard();
+      return raw.execute(...args);
+    },
+    waitForTx: async (txHash: string) => {
+      guard();
+      return raw.waitForTx(txHash);
+    },
+    setSigner: (signer: KwilSigner | undefined) => {
+      guard();
+      raw.setSigner(signer);
+    },
+  } as KwilActionClient;
+
+  rawOf.set(bound, raw);
+  if (kwilSigner) {
+    const bySigner = boundOf.get(raw) ?? new WeakMap<KwilSigner, KwilActionClient>();
+    bySigner.set(kwilSigner, bound);
+    boundOf.set(raw, bySigner);
   }
-  return mmTokenCredentialContentUri(kwilSigner, credentialId);
+  return bound;
+}
+
+function sharedEnclave(enclave: BaseProvider): BaseProvider {
+  return (enclave && rawEnclaveOf.get(enclave)) || enclave;
+}
+
+function boundEnclave(
+  enclave: BaseProvider,
+  kwilClient: KwilActionClient,
+  kwilSigner: KwilSigner,
+): BaseProvider {
+  const raw = sharedEnclave(enclave);
+  const cached = kwilSigner ? boundEnclaveOf.get(raw)?.get(kwilSigner) : undefined;
+  if (cached) return cached;
+
+  const bound = new Proxy(raw, {
+    get(target, prop) {
+      if (prop === "then" || typeof prop === "symbol") return undefined;
+      const value = Reflect.get(target, prop, target);
+      if (typeof value !== "function") {
+        assertSigner(kwilClient, kwilSigner);
+        return value;
+      }
+      return (...args: unknown[]) => {
+        assertSigner(kwilClient, kwilSigner);
+        return value.apply(target, args);
+      };
+    },
+  }) as BaseProvider;
+
+  rawEnclaveOf.set(bound, raw);
+  if (kwilSigner) {
+    const bySigner = boundEnclaveOf.get(raw) ?? new WeakMap<KwilSigner, BaseProvider>();
+    bySigner.set(kwilSigner, bound);
+    boundEnclaveOf.set(raw, bySigner);
+  }
+  return bound;
+}
+
+function exclusive<T>(kwilClient: KwilActionClient, run: () => Promise<T>): Promise<T> {
+  const raw = sharedKwilClient(kwilClient);
+  const previous = turns.get(raw) ?? Promise.resolve();
+  const result = previous.then(run, run);
+  turns.set(
+    raw,
+    result.then(
+      () => undefined,
+      () => undefined,
+    ),
+  );
+  return result;
+}
+
+// `setSigner` is synchronous on the real clients. A rejected promise here is not awaited
+// by `withUserSigner` or the enclave constructor, and Node can terminate on it.
+function detachedSurface<T extends object>(): T {
+  return new Proxy({} as T, {
+    get(_target, prop) {
+      if (prop === "signer") return undefined;
+      if (prop === "then" || typeof prop === "symbol") return undefined;
+      if (prop === "client") throw new Error(STALE_CLIENT);
+      if (prop === "setSigner") {
+        return () => {
+          throw new Error(STALE_CLIENT);
+        };
+      }
+      return async () => {
+        throw new Error(STALE_CLIENT);
+      };
+    },
+  });
+}
+
+function staleIdle(store: Store, blobUrl: string): idOSClientIdle {
+  return new idOSClientIdle(
+    store,
+    detachedSurface<KwilActionClient>(),
+    detachedSurface<BaseProvider>(),
+    idleBlobGateway(blobUrl),
+  );
+}
+
+// A replaced signer keeps the session. The signer that actually logged out must finish
+// `reset` on a later attempt; success is only returned once that reset completes.
+function finishLogOut(
+  store: Store,
+  kwilClient: KwilActionClient,
+  kwilSigner: KwilSigner,
+  enclaveProvider: BaseProvider,
+  blobUrl: string,
+): Promise<idOSClientIdle> {
+  const raw = sharedKwilClient(kwilClient);
+  return exclusive(raw, async () => {
+    const current = raw.signer;
+    if (current !== undefined && current !== kwilSigner) return staleIdle(store, blobUrl);
+
+    if (current === kwilSigner) {
+      raw.setSigner(undefined);
+      resetPending.add(raw);
+    }
+
+    if (resetPending.has(raw)) {
+      await enclaveProvider.reset();
+      resetPending.delete(raw);
+    }
+
+    // A signer installed while `reset` was in progress must not ride back on this idle client.
+    if (raw.signer !== undefined && raw.signer !== kwilSigner) return staleIdle(store, blobUrl);
+
+    return new idOSClientIdle(store, raw, enclaveProvider, idleBlobGateway(blobUrl));
+  });
 }
 
 export type idOSClient =
@@ -226,15 +405,16 @@ export class idOSClientIdle {
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
-    return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
+    return hasProfile(this.kwilClient, { address }).then((res) => {
+      if (!res) throw new Error("has_profile returned no rows");
+      return res.has_profile;
+    });
   }
 
   async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
     let signer = _signer;
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
-
-    this.kwilClient.setSigner(kwilSigner);
 
     if (walletType === "NEAR") {
       const originalSigner = signer;
@@ -249,15 +429,18 @@ export class idOSClientIdle {
       } as unknown as Wallet;
     }
 
-    return new idOSClientWithUserSigner(
-      this,
-      signer,
-      kwilSigner,
-      walletIdentifier,
-      walletPublicKey,
-      walletType,
-      blobGatewayForSigner(this, kwilSigner),
-    );
+    return exclusive(this.kwilClient, async () => {
+      this.kwilClient.setSigner(kwilSigner);
+      return new idOSClientWithUserSigner(
+        this,
+        signer,
+        kwilSigner,
+        walletIdentifier,
+        walletPublicKey,
+        walletType,
+        blobGatewayForSigner(this, kwilSigner),
+      );
+    });
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -268,8 +451,8 @@ export class idOSClientIdle {
 export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>, "state"> {
   readonly state: "with-user-signer";
   readonly store: Store;
-  readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: BaseProvider;
+  readonly #kwilClient: KwilActionClient;
+  readonly #enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -288,8 +471,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
-    this.kwilClient = idOSClientIdle.kwilClient;
-    this.enclaveProvider = idOSClientIdle.enclaveProvider;
+    this.#kwilClient = idOSClientIdle.kwilClient;
+    this.#enclaveProvider = idOSClientIdle.enclaveProvider;
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
@@ -297,40 +480,58 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletType = walletType;
     this.blobGateway = blobGateway;
     // @ts-expect-error - TODO: Fix this
-    this.enclaveProvider.setSigner(this.signer);
+    this.#enclaveProvider.setSigner(this.signer);
+  }
+
+  get kwilClient(): KwilActionClient {
+    return boundKwilClient(this.#kwilClient, this.kwilSigner);
+  }
+
+  get enclaveProvider(): BaseProvider {
+    return boundEnclave(this.#enclaveProvider, this.#kwilClient, this.kwilSigner);
   }
 
   async logOut(): Promise<idOSClientIdle> {
-    this.kwilClient.setSigner(undefined);
-    await this.enclaveProvider.reset();
-    return new idOSClientIdle(
+    return finishLogOut(
       this.store,
-      this.kwilClient,
-      this.enclaveProvider,
-      idleBlobGateway(this.blobGateway.url),
+      this.#kwilClient,
+      this.kwilSigner,
+      this.#enclaveProvider,
+      this.blobGateway.url,
     );
   }
 
   async hasProfile(): Promise<boolean> {
-    return hasProfile(this.kwilClient, { address: this.walletIdentifier }).then(
-      (x) => x.has_profile,
-    );
+    // NEAR profiles are keyed by the ed25519 public key. walletIdentifier is the account id.
+    let address = this.walletIdentifier;
+    if (this.walletType === "NEAR") {
+      if (!this.walletPublicKey) throw new Error("NEAR wallet public key is required");
+      address = this.walletPublicKey;
+    }
+    return hasProfile(this.kwilClient, { address }).then((res) => {
+      if (!res) throw new Error("has_profile returned no rows");
+      return res.has_profile;
+    });
   }
 
   async createUserEncryptionProfile(
     userId: string,
     forceEncryptionPasswordStore?: EncryptionPasswordStore,
   ): Promise<PublicEncryptionProfile> {
-    await this.enclaveProvider.reconfigure({
-      mode: "new",
-      userId,
-      walletAddress: this.walletIdentifier,
-      walletPublicKey: this.walletPublicKey,
-      walletType: this.walletType,
-      encryptionPasswordStore: forceEncryptionPasswordStore,
-      expectedUserEncryptionPublicKey: undefined,
+    await exclusive(this.#kwilClient, async () => {
+      assertSigner(this.#kwilClient, this.kwilSigner);
+      await this.enclaveProvider.reconfigure({
+        mode: "new",
+        userId,
+        walletAddress: this.walletIdentifier,
+        walletPublicKey: this.walletPublicKey,
+        walletType: this.walletType,
+        encryptionPasswordStore: forceEncryptionPasswordStore,
+        expectedUserEncryptionPublicKey: undefined,
+      });
+      assertSigner(this.#kwilClient, this.kwilSigner);
     });
-
+    assertSigner(this.#kwilClient, this.kwilSigner);
     return this.enclaveProvider.ensureUserEncryptionProfile();
   }
 
@@ -339,25 +540,41 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
     const kwilUser = await getUser(this.kwilClient);
 
-    await this.enclaveProvider.reconfigure({
-      mode: "existing",
-      userId: kwilUser.id,
-      expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
-      walletAddress: this.walletIdentifier,
-      walletType: this.walletType,
-      encryptionPasswordStore: kwilUser.encryption_password_store,
-      walletPublicKey: this.walletPublicKey,
+    return exclusive(this.#kwilClient, async () => {
+      assertSigner(this.#kwilClient, this.kwilSigner);
+      await this.enclaveProvider.reconfigure({
+        mode: "existing",
+        userId: kwilUser.id,
+        expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
+        walletAddress: this.walletIdentifier,
+        walletType: this.walletType,
+        encryptionPasswordStore: kwilUser.encryption_password_store,
+        walletPublicKey: this.walletPublicKey,
+      });
+      assertSigner(this.#kwilClient, this.kwilSigner);
+      return new idOSClientLoggedIn(this, kwilUser);
     });
-
-    return new idOSClientLoggedIn(this, kwilUser);
   }
+}
+
+function credentialRecipientWallet(client: {
+  walletType: string;
+  walletIdentifier: string;
+  walletPublicKey?: string;
+}): string {
+  // NEAR @caller is the ed25519 public key. walletIdentifier is the account id.
+  if (client.walletType === "NEAR") {
+    if (!client.walletPublicKey) throw new Error("NEAR wallet public key is required");
+    return client.walletPublicKey;
+  }
+  return client.walletIdentifier;
 }
 
 export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
   readonly state: "logged-in";
   readonly store: Store;
-  readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: BaseProvider;
+  readonly #kwilClient: KwilActionClient;
+  readonly #enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -369,8 +586,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
     this.state = "logged-in";
     this.store = idOSClientWithUserSigner.store;
-    this.kwilClient = idOSClientWithUserSigner.kwilClient;
-    this.enclaveProvider = idOSClientWithUserSigner.enclaveProvider;
+    this.#kwilClient = sharedKwilClient(idOSClientWithUserSigner.kwilClient);
+    this.#enclaveProvider = sharedEnclave(idOSClientWithUserSigner.enclaveProvider);
     this.signer = idOSClientWithUserSigner.signer;
     this.kwilSigner = idOSClientWithUserSigner.kwilSigner;
     this.walletIdentifier = idOSClientWithUserSigner.walletIdentifier;
@@ -380,19 +597,29 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.blobGateway = idOSClientWithUserSigner.blobGateway;
   }
 
+  get kwilClient(): KwilActionClient {
+    return boundKwilClient(this.#kwilClient, this.kwilSigner);
+  }
+
+  get enclaveProvider(): BaseProvider {
+    return boundEnclave(this.#enclaveProvider, this.#kwilClient, this.kwilSigner);
+  }
+
   async logOut(): Promise<idOSClientIdle> {
-    this.kwilClient.setSigner(undefined);
-    await this.enclaveProvider.reset();
-    return new idOSClientIdle(
+    return finishLogOut(
       this.store,
-      this.kwilClient,
-      this.enclaveProvider,
-      idleBlobGateway(this.blobGateway.url),
+      this.#kwilClient,
+      this.kwilSigner,
+      this.#enclaveProvider,
+      this.blobGateway.url,
     );
   }
 
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
-    return dwgMessage(this.kwilClient, params).then((res) => res.message);
+    return dwgMessage(this.kwilClient, params).then((res) => {
+      if (!res) throw new Error("dwg_message returned no rows");
+      return res.message;
+    });
   }
 
   async createCredential(
@@ -407,15 +634,14 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         publicNotes,
         plaintextContent,
         recipientEncryptionPublicKey: base64Decode(this.user.recipient_encryption_public_key),
+        broaderMessageFor: localCredentialBroaderMessageFor(
+          credentialRecipientWallet(this),
+          this.kwilClient.chainId,
+        ),
         issuerSigningSecretKey,
-        contentUri: contentUriForWallet(this.walletType, this.kwilSigner, credentialId),
       })),
       id: credentialId,
     };
-    requireAccessTokenForUkycContent(
-      preliminaryCredential.contentUri,
-      this.blobGateway.hasAccessToken,
-    );
 
     const requestId = crypto.randomUUID();
 
@@ -434,12 +660,47 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     await createPreliminaryCredential(this.kwilClient, payload);
 
-    await this.blobGateway.uploadCredentialBlobs({
+    await this.#uploadOwnedCredentialBlobs({
       requestId,
+      credentialIds: [preliminaryCredential.id],
       original: preliminaryCredential.encryptedContent,
     });
 
     return mapPreliminaryToIDOSCredential(preliminaryCredential);
+  }
+
+  /**
+   * A lost upload response can hide a finalized credential. The user owns it, so look it up
+   * by id and read its blob back: the record alone doesn't prove the gateway stored our bytes
+   * (a 2xx with a CID mismatch also lands here). Rethrow the unknown outcome unless both check
+   * out, including when the credential isn't visible yet, a read fails, or the read takes
+   * longer than READ_BACK_TIMEOUT_MS.
+   */
+  async #uploadOwnedCredentialBlobs(
+    params: UploadCredentialBlobsParams & { credentialIds: [string] },
+  ): Promise<void> {
+    try {
+      await this.blobGateway.uploadCredentialBlobs(params);
+    } catch (error) {
+      if (!(error instanceof BlobGatewayUploadOutcomeUnknownError)) throw error;
+
+      const created = await this.getCredentialById(params.credentialIds[0]).catch(() => undefined);
+      if (!created?.content_uri) throw error;
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), READ_BACK_TIMEOUT_MS);
+      const stored = await this.blobGateway
+        .fetchBlob({
+          credentialId: created.id,
+          contentUri: created.content_uri,
+          expectedSize: created.content_size,
+          signal: controller.signal,
+        })
+        .catch(() => undefined)
+        .finally(() => clearTimeout(timer));
+      const uploaded = params.original ?? params.copy;
+      if (!stored || !bytesEqual(stored, uploaded)) throw error;
+    }
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
@@ -447,7 +708,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
     const contentUri = credential.content_uri ?? null;
-    requireAccessTokenForUkycContent(contentUri, this.blobGateway.hasAccessToken);
+    if (isUkycContentUri(contentUri)) {
+      throw new Error("ukyc:// credentials can only be removed by their MM operator's data wipe");
+    }
 
     await removeCredential(this.kwilClient, { id });
 
@@ -537,7 +800,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   async getGrantsCount(): Promise<number> {
     return getAccessGrantsGrantedCount(this.kwilClient, {
       user_id: null,
-    }).then((res) => res.count);
+    }).then((res) => {
+      if (!res) throw new Error("get_access_grants_granted_count returned no rows");
+      return res.count;
+    });
   }
 
   async getCredentialShared(id: string): Promise<idOSCredential | undefined> {
@@ -653,10 +919,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       pick: Parameters<typeof recordFilter>[1];
       omit: Parameters<typeof recordFilter>[2];
     };
+    /** @deprecated The level leaves out self-attested data. Use `claimsFilter` instead. */
     credentialLevelOrHigherFilter?: {
       userLevel: BaseLevel;
       requiredAddons: Addon[];
     };
+    /** Accepted sources per claim, e.g. `{ email: ["VERIFIED", "MANUAL"] }`. See `matchClaims`. */
+    claimsFilter?: ClaimRequirements;
   }): Promise<idOSCredentialListItem[]> {
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter(
@@ -673,6 +942,21 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
     const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
     const privateFieldFilters = requirements.privateFieldFilters;
+    const claimsFilter = requirements.claimsFilter;
+
+    if (claimsFilter) {
+      result = result.filter((credential) => {
+        let publicNotes: Parameters<typeof matchClaims>[1];
+
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (_) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
+        }
+
+        return matchClaims(claimsFilter, publicNotes);
+      });
+    }
 
     if (credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
@@ -775,16 +1059,16 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // User issues the shared copy: sign content_uri with an ephemeral user-side key.
     // Copy issuer_auth_public_key need not match the original credential's issuer.
     const copyId = crypto.randomUUID();
-    const ukycContentUri = contentUriForWallet(this.walletType, this.kwilSigner, copyId);
-    requireAccessTokenForUkycContent(ukycContentUri, this.blobGateway.hasAccessToken);
-    const copyReference = ukycContentUri
-      ? { uri: ukycContentUri, size: content.byteLength }
-      : await createBlobContentReference(content);
-    const signedReference = buildEphemeralSignedCredentialContentReference("", copyReference.uri);
+    const copyReference = await createBlobContentReference(content);
+    const signedReference = await buildEphemeralSignedCredentialContentReference(
+      "",
+      copyReference.uri,
+      localCredentialBroaderMessageFor(credentialRecipientWallet(this), this.kwilClient.chainId),
+    );
 
     // Integrator-supplied. ed25519 @caller is lowercase hex; after exact grantee
     // matching, uppercase hex would store a grant the consumer cannot read. Other
-    // identifier encodings (NEAR, XRPL, Stellar, MM) are case-sensitive, so leave them.
+    // identifier encodings (NEAR, XRPL, Stellar) are case-sensitive, so leave them.
     const granteeWalletIdentifier = /^[0-9a-fA-F]{64}$/.test(consumerAuthPublicKey)
       ? consumerAuthPublicKey.toLowerCase()
       : consumerAuthPublicKey;
@@ -803,8 +1087,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     };
 
     await this.shareCredential(preliminaryCredential);
-    await this.blobGateway.uploadCredentialBlobs({
+    await this.#uploadOwnedCredentialBlobs({
       requestId: preliminaryCredential.request_id,
+      credentialIds: [copyId],
       copy: content,
     });
 
@@ -839,6 +1124,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 }
 
 export type {
+  Claim,
+  ClaimRequirements,
+  Claims,
+  ClaimSource,
+  ClaimSources,
   idOSDelegatedWriteGrant,
   DelegatedWriteGrantBaseParams,
   idOSCredential,

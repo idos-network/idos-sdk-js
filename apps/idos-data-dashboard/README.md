@@ -66,10 +66,10 @@ To use FaceSign locally, the FaceSign enclave must be running alongside the dash
 3. **Configure the enclave's allowed origins** in `apps/facesign-enclave/.env.local`:
 
    ```env
-   VITE_ALLOWED_ORIGINS="*"
+   VITE_ALLOWED_ORIGINS="https://localhost:5173"
    ```
 
-   In production, restrict this to the dashboard's actual origin.
+   Wildcards (`"*"`) are not supported; list each origin. In production, use the dashboard's actual origin.
 
 Both apps must run over HTTPS (handled automatically by `mkcert`).
 
@@ -281,7 +281,7 @@ When deploying, set the following environment variables in each Vercel project:
 | `VITE_FACESIGN_ENCLAVE_URL`      | `https://facesign-enclave.idos.network` |
 | `VITE_WALLET_CONNECT_PROJECT_ID` | Your Reown (WalletConnect) project ID   |
 
-The `VITE_ALLOWED_ORIGINS` variable on the enclave must list every origin that is permitted to embed it (including the embedded-wallet origin if it is hosted separately). In production, never use `"*"`.
+The `VITE_ALLOWED_ORIGINS` variable on the enclave must list every origin that is permitted to embed it (including the embedded-wallet origin if it is hosted separately). `"*"` is not supported.
 
 ## License
 

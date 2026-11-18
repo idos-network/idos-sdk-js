@@ -4,6 +4,7 @@ import type { KwilActionClient } from "@idos-network/kwil-infra";
 import {
   buildPreliminaryIDOSCredential,
   BuildPreliminaryIDOSCredentialArgs,
+  localCredentialBroaderMessageFor,
   mapPreliminaryToIDOSCredential,
   PreliminaryIDOSCredential,
 } from "@idos-network/credentials/utils";
@@ -29,13 +30,11 @@ export type DelegatedWriteGrantParams = DelegatedWriteGrantBaseParams & {
   signature: string;
 };
 
+// MM users' ukyc:// credentials are created by their MM operator only (@idos-network/mm-operator).
 export type CredentialByDelegatedWriteGrantBaseParams = Omit<
   BuildPreliminaryIDOSCredentialArgs,
-  "issuerSigningSecretKey" | "contentUri"
-> & {
-  originalContentUri?: string;
-  copyContentUri?: string;
-};
+  "issuerSigningSecretKey" | "broaderMessageFor" | "ukycStorageId"
+>;
 
 export class CredentialService {
   readonly #kwilClient: KwilActionClient;
@@ -53,7 +52,10 @@ export class CredentialService {
   }
 
   async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
-    return dwgMessage(this.#kwilClient, params).then((res) => res.message);
+    return dwgMessage(this.#kwilClient, params).then((res) => {
+      if (!res) throw new Error("dwg_message returned no rows");
+      return res.message;
+    });
   }
 
   async createCredentialByDelegatedWriteGrant(
@@ -64,11 +66,14 @@ export class CredentialService {
     originalCredential: Omit<idOSCredential, "user_id">;
     copyCredential: Omit<idOSCredential, "user_id">;
   }> {
-    const { originalContentUri, copyContentUri, ...sharedCredentialParams } = credentialParams;
+    const broaderMessageFor = localCredentialBroaderMessageFor(
+      delegatedWriteGrant.ownerWalletIdentifier,
+      this.#kwilClient.chainId,
+    );
     const originalCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
-        ...sharedCredentialParams,
-        contentUri: originalContentUri,
+        ...credentialParams,
+        broaderMessageFor,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
@@ -78,10 +83,10 @@ export class CredentialService {
 
     const copyCredential: PreliminaryIDOSCredential = {
       ...(await buildPreliminaryIDOSCredential({
-        ...sharedCredentialParams,
-        contentUri: copyContentUri,
+        ...credentialParams,
         publicNotes: "",
         recipientEncryptionPublicKey: consumerEncryptionPublicKey,
+        broaderMessageFor,
         issuerSigningSecretKey: this.#signingKeyPair.secretKey,
       })),
       id: crypto.randomUUID(),
@@ -124,6 +129,7 @@ export class CredentialService {
 
     await this.#blobGateway.uploadCredentialBlobs({
       requestId,
+      credentialIds: [originalCredential.id, copyCredential.id],
       original: originalCredential.encryptedContent,
       copy: copyCredential.encryptedContent,
     });
@@ -150,7 +156,7 @@ export class CredentialService {
 
   async getCredentialIdByContentHash(contentHash: string): Promise<string | null> {
     const id = await getSiblingCredentialId(this.#kwilClient, { content_hash: contentHash }).then(
-      (res) => res.id,
+      (res) => res?.id,
     );
 
     invariant(id, "Required `idOSCredential` id not found");

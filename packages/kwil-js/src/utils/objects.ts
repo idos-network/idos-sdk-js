@@ -120,7 +120,7 @@ export const objects = {
    */
   validateRequiredFields<T>(options: T, fields: (keyof T)[]): T {
     fields.forEach((field) => {
-      if (options[field] === undefined && options[field] === null) {
+      if (options[field] === undefined || options[field] === null) {
         throw new Error(`${String(field)} must not be null.`);
       }
     });

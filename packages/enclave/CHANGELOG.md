@@ -1,5 +1,109 @@
 # @idos-network/enclave
 
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+  - @idos-network/credentials@4.1.0
+  - @idos-network/kwil-infra@5.1.0
+
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [729c7d7]
+- Updated dependencies [729c7d7]
+  - @idos-network/utils@3.2.0
+  - @idos-network/kwil-infra@5.0.0
+  - @idos-network/credentials@4.0.1
+
+## 3.0.2
+
+### Patch Changes
+
+- 70c9c5d: Stop wiping enclave storage when the parent sends a userId or expected public key that doesn't match the stored profile. The enclave now ignores the stored profile and asks the user to unlock. The stored keys and origin grants are only replaced after the user unlocks a different profile.
+- Updated dependencies [e999de0]
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/credentials@4.0.0
+  - @idos-network/kwil-infra@4.0.0
+  - @idos-network/utils@3.1.0
+
+## 3.0.1
+
+### Patch Changes
+
+- 86303bd: Check shared storage on every key use, so a live enclave drops its cached key and origin authorizations once another enclave instance expires, resets, or replaces the stored profile.
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [b1466c8]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/kwil-infra@3.0.1
+
+## 3.0.0
+
+### Patch Changes
+
+- @idos-network/kwil-infra@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/utils@2.3.0
+  - @idos-network/kwil-infra@2.3.0
+
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/utils@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- ad3a607: Discard and wipe a cached encryption key when it no longer matches the expected user encryption public key.
+- Updated dependencies [ed9a1ad]
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- fba1c60: Require origin authorization after a key is derived, and keep the cached profile when that authorization is denied.
+- 56b18ea: Forget a cached encryption profile once its remember duration has elapsed, including while the enclave stays open.
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [c27ea68]
+- Updated dependencies [3484957]
+- Updated dependencies [f2dc464]
+- Updated dependencies [56b18ea]
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/credentials@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes

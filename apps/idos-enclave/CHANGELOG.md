@@ -1,5 +1,105 @@
 # idos-enclave
 
+## 0.4.9
+
+### Patch Changes
+
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+  - @idos-network/credentials@4.1.0
+  - @idos-network/enclave@3.0.4
+
+## 0.4.8
+
+### Patch Changes
+
+- Updated dependencies [729c7d7]
+  - @idos-network/utils@3.2.0
+  - @idos-network/credentials@4.0.1
+  - @idos-network/enclave@3.0.3
+
+## 0.4.7
+
+### Patch Changes
+
+- 78a3173: Drop origin authorizations stored before origin confirmation was required, so those sites have to ask again. New authorizations expire after 30 days, and the prompt now says how long the grant is remembered.
+
+  The unlock, confirm and backup buttons no longer stack a click handler per request, so one click opens one dialog.
+
+- 70c9c5d: Stop wiping enclave storage when the parent sends a userId or expected public key that doesn't match the stored profile. The enclave now ignores the stored profile and asks the user to unlock. The stored keys and origin grants are only replaced after the user unlocks a different profile.
+- Updated dependencies [e999de0]
+- Updated dependencies [70c9c5d]
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/credentials@4.0.0
+  - @idos-network/enclave@3.0.2
+  - @idos-network/utils@3.1.0
+
+## 0.4.6
+
+### Patch Changes
+
+- dc34ffe: Update DOMPurify to a release that closes the template and in-place sanitizer bypasses.
+- 86303bd: Check shared storage on every key use, so a live enclave drops its cached key and origin authorizations once another enclave instance expires, resets, or replaces the stored profile.
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [86303bd]
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/enclave@3.0.1
+
+## 0.4.5
+
+### Patch Changes
+
+- @idos-network/enclave@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
+## 0.4.4
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/enclave@2.3.0
+  - @idos-network/utils@2.3.0
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/enclave@2.2.2
+  - @idos-network/utils@2.2.2
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [ad3a607]
+  - @idos-network/enclave@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [f2dc464]
+- Updated dependencies [fba1c60]
+- Updated dependencies [56b18ea]
+  - @idos-network/credentials@2.2.0
+  - @idos-network/enclave@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 0.4.0
 
 ### Minor Changes

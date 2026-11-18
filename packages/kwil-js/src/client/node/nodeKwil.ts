@@ -7,8 +7,6 @@ import { GenericResponse } from "../../core/resreq";
 import { Kwil } from "../kwil";
 
 export class NodeKwil extends Kwil<EnvironmentType.NODE> {
-  private tempCookie?: { previous: string | undefined };
-
   constructor(opts: Config) {
     super(opts);
   }
@@ -25,28 +23,7 @@ export class NodeKwil extends Kwil<EnvironmentType.NODE> {
     actionBody: CallBodyNode,
     kwilSigner?: KwilSigner,
   ): Promise<GenericResponse<MsgReceipt<T>>> {
-    const setCookie = () => {
-      // set the temporary cookie, if the user provided one
-      if (actionBody.cookie) {
-        this.setTemporaryCookie(actionBody.cookie);
-      }
-    };
-
-    const resetCookie = () => {
-      // after the user makes the request, we need to reset the cookie to what it was before
-      // when manually passing cookies, the user is expected to pass the cookie for each request
-      // if a user does not pass a cookie for a subsequent request, the cookie will be reset to the original cookie
-      if (this.tempCookie) {
-        this.resetTempCookie();
-      }
-    };
-
-    const cookieHandler = {
-      setCookie,
-      resetCookie,
-    };
-
-    return await this.baseCall(actionBody, kwilSigner, cookieHandler);
+    return await this.baseCall(actionBody, kwilSigner, actionBody.cookie);
   }
 
   /**
@@ -69,25 +46,5 @@ export class NodeKwil extends Kwil<EnvironmentType.NODE> {
 
     this.cookie = cookie;
     return cookie;
-  }
-
-  /**
-   * set the temp cookie to reset it after the call
-   *
-   * @param {string} cookie - The temporary cookie
-   * @returns the temporary cookie to handle for Node
-   */
-  private setTemporaryCookie(cookie: string): void {
-    this.tempCookie = { previous: this.cookie };
-    this.cookie = cookie;
-  }
-
-  /**
-   * Resets the temporary cookie
-   *
-   */
-  private resetTempCookie(): void {
-    this.cookie = this.tempCookie?.previous;
-    this.tempCookie = undefined;
   }
 }

@@ -66,7 +66,6 @@ export function composeAuthMsg(
     msg += `${authParam.statement}\n`;
   }
   msg += "\n";
-  // @Yaiba: Should I trust the URI provided by KGW or should I use the domain / create my own?
   msg += `URI: ${authParam.uri}\n`;
   if (authParam.origin) {
     msg += `Origin: ${authParam.origin}\n`;
@@ -107,13 +106,49 @@ export function verifyAuthProperties(
   version: string,
   chainId: string,
 ): void {
-  if (authParm.domain && authParm.domain !== domain) {
+  if (authParm.domain !== domain) {
     throw new Error(`Domain mismatch: ${authParm.domain} !== ${domain}`);
   }
-  if (authParm.version && authParm.version !== version) {
+  if (authParm.version !== version) {
     throw new Error(`Version mismatch: ${authParm.version} !== ${version}`);
   }
-  if (authParm.chain_id && authParm.chain_id !== chainId) {
+  if (authParm.chain_id !== chainId) {
     throw new Error(`Chain ID mismatch: ${authParm.chain_id} !== ${chainId}`);
+  }
+
+  const uri = `${domain}/rpc/v1`;
+  if (authParm.uri !== uri) {
+    throw new Error(`URI mismatch: ${authParm.uri} !== ${uri}`);
+  }
+
+  verifyOrigin(authParm.origin);
+}
+
+function verifyOrigin(origin: string | undefined): void {
+  const page = browserWindow();
+  if (page === undefined) {
+    if (origin !== undefined && origin !== "") {
+      throw new Error(`Origin mismatch: ${origin}`);
+    }
+    return;
+  }
+
+  const expected = canonicalOrigin(page.location.origin);
+  if (typeof origin !== "string" || origin === "" || canonicalOrigin(origin) !== expected) {
+    throw new Error(`Origin mismatch: ${origin ?? ""} !== ${expected}`);
+  }
+}
+
+// `window` is a DOM global. Integration typecheck is Node-only, so read it off globalThis.
+function browserWindow(): { location: { origin: string } } | undefined {
+  return (globalThis as { window?: { location: { origin: string } } }).window;
+}
+
+// KGW stamps scheme://host, both lowercased, with no user, path, query, or fragment.
+function canonicalOrigin(value: string): string {
+  try {
+    return new URL(value).origin;
+  } catch {
+    throw new Error(`Origin mismatch: ${value}`);
   }
 }

@@ -1,6 +1,6 @@
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -95,9 +95,12 @@ function GenericErrorView({ message, redirect }: { message: string; redirect: st
 
 export default function AppError() {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   const message = searchParams.get("message") ?? "An unexpected error occurred";
-  const token = searchParams.get("token");
+  // Only /scan sets this; other origins can't write this page's history state.
+  const token = (location.state as { newUserConfirmationToken?: string } | null)
+    ?.newUserConfirmationToken;
   const redirect = searchParams.get("redirect") ?? "/wallet";
 
   if (token) {

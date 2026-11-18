@@ -5,12 +5,15 @@ import { storeDelete, storeGet, storeSet } from "./storage";
 
 export const DB_KEY_KEK = "idOS:facesign:kek";
 export const DB_KEY_MNEMONIC = "idOS:facesign:mnemonic";
+// Origins the user approved a session for. Only these may read the address without a prompt.
+export const DB_KEY_APPROVED_ORIGINS = "idOS:facesign:approvedOrigins";
 const LOCAL_KEY_USER_ID = "faceSignUserId";
 
 export async function clearKeyMaterial(): Promise<void> {
   const removals = await Promise.allSettled([
     storeDelete(DB_KEY_MNEMONIC),
     storeDelete(DB_KEY_KEK),
+    storeDelete(DB_KEY_APPROVED_ORIGINS),
     Promise.resolve().then(() => {
       localStorage.removeItem(LOCAL_KEY_USER_ID);
     }),
@@ -23,6 +26,20 @@ export async function clearKeyMaterial(): Promise<void> {
 
 export async function storeMnemonic(mnemonic: string) {
   await encryptAndStore(DB_KEY_MNEMONIC, utf8Encode(mnemonic));
+  // Approvals were given for the previous key, not this one.
+  await storeDelete(DB_KEY_APPROVED_ORIGINS);
+}
+
+export async function approveOrigin(origin: string): Promise<void> {
+  const origins = (await storeGet<string[]>(DB_KEY_APPROVED_ORIGINS)) ?? [];
+  if (!origins.includes(origin)) {
+    await storeSet(DB_KEY_APPROVED_ORIGINS, [...origins, origin]);
+  }
+}
+
+export async function isOriginApproved(origin: string): Promise<boolean> {
+  const origins = (await storeGet<string[]>(DB_KEY_APPROVED_ORIGINS)) ?? [];
+  return origins.includes(origin);
 }
 
 export async function getKeyPair() {

@@ -18,6 +18,14 @@ interface SessionResponse {
   address: string;
 }
 
+// Browser-stored key is not the active idOS profile. Delete it before add-wallet can sign. reset() destroys this provider.
+export async function resetStoredFaceSignKey(provider: FaceSignSignerProvider): Promise<boolean> {
+  const { hasKey } = await provider.preload();
+  if (!hasKey) return false;
+  await provider.reset();
+  return true;
+}
+
 export class FaceSignSignerProvider {
   #iframe: HTMLIFrameElement | null = null;
   #container: HTMLDialogElement | null = null;

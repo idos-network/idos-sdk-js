@@ -118,6 +118,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   session.unset("proofMessage");
   session.set("userId", user.id);
+  session.set("issuedAt", Date.now());
 
   return Response.json(
     { loggedIn: true },

@@ -207,7 +207,7 @@ describe("Client", () => {
           jsonrpc: "2.0",
           id: 1,
           result: {
-            hash: hexHash,
+            tx_hash: hexHash,
             height: 1,
             tx: {
               body: {
@@ -221,7 +221,8 @@ describe("Client", () => {
         },
       });
 
-      await client.txInfo(hexHash);
+      const result = await client.txInfo(hexHash);
+      expect(result.data?.tx_hash).toBe(hexHash);
       expect(postMock).toHaveBeenCalledWith(
         "/rpc/v1",
         expect.objectContaining({

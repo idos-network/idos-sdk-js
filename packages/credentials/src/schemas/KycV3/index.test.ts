@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import type { VerifiableCredential } from "../../types";
 
 import { KycV3 } from ".";
+import { matchClaims } from "../../utils";
+import { registerTransliteration } from "../../utils/transliterate";
 
 /** A credential with the required sections filled in, ready to be extended per test. */
 function basicCredential(): KycV3 {
@@ -64,7 +66,14 @@ function serializedCredential(
 describe("KycV3 validity", () => {
   it("is valid with required fields", () => {
     const credential = basicCredential();
-    credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
+    credential.addSection("biometric", {
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
+      selfieFileName: "selfie.jpg",
+      selfieMatch: 99,
+    });
 
     expect(() => credential.checkValidity()).not.toThrow();
     expect(credential.level()).toBe("basic+liveness");
@@ -80,7 +89,7 @@ describe("KycV3 validity", () => {
       nationality: "US",
     });
     credential.addSection("residentialAddress", {
-      verified: false,
+      source: "MANUAL",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -90,6 +99,80 @@ describe("KycV3 validity", () => {
     expect(() => credential.checkValidity()).not.toThrow();
     expect(credential.kycLevel()).toBe(0);
     expect(credential.level()).toBe("unverified+phoneNumber");
+  });
+
+  it("leaves a MANUAL email out of the level but keeps a VERIFIED phone number", () => {
+    const credential = basicCredential();
+    credential.addSection("contact", {
+      email: "john@example.com",
+      emailSource: "MANUAL",
+      phoneNumber: "+1234567890",
+      phoneNumberSource: "VERIFIED",
+    });
+
+    expect(() => credential.checkValidity()).not.toThrow();
+    expect(credential.level()).toBe("basic+phoneNumber");
+    expect(credential.serializeSubject()).toMatchObject({ contactEmailSource: "MANUAL" });
+    expect(credential.claims()).toEqual({
+      identity: "VERIFIED",
+      email: "MANUAL",
+      phoneNumber: "VERIFIED",
+    });
+  });
+
+  it("leaves a SELFIE without a liveness check out of the level", () => {
+    const credential = basicCredential();
+    credential.addSection("biometric", {
+      source: "SELFIE",
+      provider: "FaceTec",
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      selfieFileName: "selfie.jpg",
+    });
+
+    expect(credential.level()).toBe("basic");
+    expect(credential.kycLevel()).toBe(0);
+    expect(credential.claims()).toEqual({ identity: "VERIFIED", liveness: "SELFIE" });
+  });
+
+  it("requires the source and provider of a biometric", () => {
+    expect(() =>
+      new KycV3().addSection("biometric", {
+        selfieFile: Buffer.from("Selfie"),
+        selfieFileType: "image/jpeg",
+        selfieFileName: "selfie.jpg",
+      } as never),
+    ).toThrow(/source.*provider|provider.*source/);
+    expect(() =>
+      new KycV3().addSection("biometric", {
+        source: "LIVENESS",
+        provider: "",
+        selfieFile: Buffer.from("Selfie"),
+        selfieFileType: "image/jpeg",
+        selfieFileName: "selfie.jpg",
+      }),
+    ).toThrow(/provider/);
+  });
+
+  it("leaves a MANUAL phone number out of the level", () => {
+    const credential = basicCredential();
+    credential.addSection("contact", { phoneNumber: "+1234567890", phoneNumberSource: "MANUAL" });
+
+    expect(credential.level()).toBe("basic");
+    expect(credential.claims()).toEqual({ identity: "VERIFIED", phoneNumber: "MANUAL" });
+  });
+
+  it("rejects a null contact source, which would otherwise count as verified", () => {
+    expect(() =>
+      new KycV3().addSection("contact", { email: "john@example.com", emailSource: null as never }),
+    ).toThrow(/emailSource/);
+    expect(() =>
+      new KycV3().addSection("contact", {
+        phoneNumber: "+1234567890",
+        phoneNumberSource: null as never,
+      }),
+    ).toThrow(/phoneNumberSource/);
+    expect(() => new KycV3().addSection("contact", { email: "john@example.com" })).not.toThrow();
   });
 
   it("rejects a subject missing a required section", () => {
@@ -139,7 +222,7 @@ describe("KycV3 validity", () => {
   it("requires proof fields on a verified address, but still checks their types when unverified", () => {
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        verified: true,
+        source: "PROOF_OF_ADDRESS",
         street: "Main St",
         city: "New York",
         country: "US",
@@ -148,7 +231,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        verified: false,
+        source: "MANUAL",
         street: "Oak Ave",
         city: "Boston",
         country: "US",
@@ -157,7 +240,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("residentialAddress", {
-        verified: false,
+        source: "MANUAL",
         street: "Oak Ave",
         city: "Boston",
         country: "US",
@@ -168,9 +251,32 @@ describe("KycV3 validity", () => {
     ).toThrow(/proofFile/);
   });
 
+  it("accepts an external-database address without proof, but does not count it as plus", () => {
+    const credential = basicCredential();
+    credential.addSection("residentialAddress", {
+      source: "EXTERNAL_DB",
+      street: "Main St",
+      city: "New York",
+      country: "US",
+    });
+
+    expect(() => credential.checkValidity()).not.toThrow();
+    expect(credential.level()).toBe("basic");
+
+    expect(() =>
+      new KycV3().addSection("residentialAddress", {
+        source: "bogus" as never,
+        street: "Main St",
+        city: "New York",
+        country: "US",
+      }),
+    ).toThrow(/source/);
+  });
+
   it("requires a currency alongside each source-of-wealth amount", () => {
     expect(() =>
       new KycV3().addSection("sourceOfWealth", {
+        source: "VERIFIED",
         type: "SALARY",
         yearlyGrossIncome: "LESS_THAN_20000",
       }),
@@ -178,6 +284,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("sourceOfWealth", {
+        source: "VERIFIED",
         type: "SALARY",
         approximateNetWorth: "UP_TO_25000",
       }),
@@ -185,6 +292,7 @@ describe("KycV3 validity", () => {
 
     expect(() =>
       new KycV3().addSection("sourceOfWealth", {
+        source: "VERIFIED",
         type: "SALARY",
         yearlyGrossIncome: "LESS_THAN_20000",
         yearlyGrossIncomeCurrency: "EUR",
@@ -193,17 +301,45 @@ describe("KycV3 validity", () => {
   });
 
   it("rejects values outside an enum, and out-of-range scores", () => {
-    expect(() => new KycV3().addSection("edd", { occupation: "ASTRONAUT" as never })).toThrow(
-      /occupation/,
-    );
+    expect(() =>
+      new KycV3().addSection("edd", {
+        occupation: "ASTRONAUT" as never,
+        sourceOfFundsSource: "VERIFIED",
+      }),
+    ).toThrow(/occupation/);
 
     expect(() =>
       new KycV3().addSection("screening", {
+        source: "DB",
         sanctionsCheckResult: "CLEAR",
         pepCheckResult: "CLEAR",
         pepConfidenceScore: 101,
       }),
     ).toThrow(/pepConfidenceScore/);
+  });
+
+  it("requires the type and name of a selfie or source-of-wealth proof file", () => {
+    expect(() =>
+      new KycV3().addSection("biometric", { selfieFile: Buffer.from("Selfie") } as never),
+    ).toThrow(/selfieFileType.*selfieFileName|selfieFileName.*selfieFileType/);
+
+    expect(() =>
+      new KycV3().addSection("sourceOfWealth", {
+        source: "VERIFIED",
+        type: "SALARY",
+        sourceOfWealthProofFile: Buffer.from("Proof"),
+      }),
+    ).toThrow(/sourceOfWealthProofFileType.*sourceOfWealthProofFileName/);
+
+    expect(() =>
+      new KycV3().addSection("sourceOfWealth", {
+        source: "VERIFIED",
+        type: "SALARY",
+        sourceOfWealthProofFile: Buffer.from("Proof"),
+        sourceOfWealthProofFileType: "not a mime type",
+        sourceOfWealthProofFileName: "wealth.pdf",
+      }),
+    ).toThrow(/sourceOfWealthProofFileType/);
   });
 
   it("rejects a field that's not part of the schema", () => {
@@ -275,7 +411,14 @@ describe("KycV3 validity", () => {
 describe("KycV3 derived fields", () => {
   it("derives level and kycLevel on serialize when omitted from the envelope", () => {
     const credential = basicCredential();
-    credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
+    credential.addSection("biometric", {
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
+      selfieFileName: "selfie.jpg",
+      selfieMatch: 99,
+    });
     credential.addSection("contact", { email: "john@example.com" });
 
     expect(credential.envelope.level).toBeUndefined();
@@ -311,11 +454,80 @@ describe("KycV3 derived fields", () => {
     expect(credential.envelope.expirationDate).toEqual(new Date("2030-06-01"));
   });
 
+  // cspell:disable
+  it("transliterates names in their original script without serializing the Latin form", async () => {
+    registerTransliteration(() => import("transliteration"));
+
+    const credential = basicCredential();
+    credential.addSection("person", {
+      firstName: "Юлия",
+      familyName: "Müller",
+      fatherName: "Αλέξανδρος",
+      nationality: "DE",
+      dateOfBirth: new Date("1990-01-01"),
+    });
+
+    credential.addSection("residentialAddress", {
+      source: "MANUAL",
+      street: "вулиця Хрещатик",
+      houseNumber: "22",
+      additionalAddressInfo: "квартира 5",
+      city: "Київ",
+      country: "UA",
+    });
+
+    // Each marked field as [<field>Icao, await <field>Latin].
+    const siblings = async ({ person, residentialAddress: address }: KycV3["subject"]) => ({
+      firstName: [person?.firstNameIcao, await person?.firstNameLatin],
+      familyName: [person?.familyNameIcao, await person?.familyNameLatin],
+      fatherName: [person?.fatherNameIcao, await person?.fatherNameLatin],
+      middleName: [person?.middleNameIcao, await person?.middleNameLatin],
+      street: [address?.streetIcao, await address?.streetLatin],
+      additionalAddressInfo: [
+        address?.additionalAddressInfoIcao,
+        await address?.additionalAddressInfoLatin,
+      ],
+      city: [address?.cityIcao, await address?.cityLatin],
+    });
+    const expected = {
+      firstName: ["Iuliia", "Yuliya"],
+      familyName: ["Mueller", "Muller"],
+      // ICAO has no Greek table; an absent field has neither form.
+      fatherName: [undefined, "Alexandros"],
+      middleName: [undefined, undefined],
+      street: ["vulitsia Khreshchatik", "vulicya Hreshchatik"],
+      additionalAddressInfo: ["kvartira 5", "kvartira 5"],
+      city: ["Kiiv", "Kiyiv"],
+    };
+
+    expect(await siblings(credential.subject)).toEqual(expected);
+    expect(
+      Object.keys(credential.subject.person ?? {}).filter((key) => /latin|icao/i.test(key)),
+    ).toEqual([]);
+
+    const serialized = credential.serializeSubject();
+    expect(serialized.personFirstName).toBe("Юлия");
+    expect(Object.keys(serialized).filter((key) => /latin|icao/i.test(key))).toEqual([]);
+
+    const roundTrip = new KycV3();
+    await roundTrip.deserialize(serializedCredential(serialized));
+
+    expect(await siblings(roundTrip.subject)).toEqual(expected);
+  });
+  // cspell:enable
+
   it("reaches plus and kycLevel 3 with a verified address, SOW and onboarding", () => {
     const credential = basicCredential();
-    credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
+    credential.addSection("biometric", {
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
+      selfieFileName: "selfie.jpg",
+      selfieMatch: 99,
+    });
     credential.addSection("residentialAddress", {
-      verified: true,
+      source: "PROOF_OF_ADDRESS",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -325,7 +537,7 @@ describe("KycV3 derived fields", () => {
       proofFileType: "image/jpeg",
       proofFileName: "proof.jpg",
     });
-    credential.addSection("sourceOfWealth", { type: "SALARY" });
+    credential.addSection("sourceOfWealth", { source: "VERIFIED", type: "SALARY" });
     credential.addSection("onboarding", {
       intendedUse: "INVESTING",
       employmentStatus: "EMPLOYED",
@@ -341,7 +553,71 @@ describe("KycV3 derived fields", () => {
       type: "kyc",
       level: "plus+liveness+sow+onboarding",
       kycLevel: 3,
+      claims: {
+        identity: "VERIFIED",
+        liveness: "LIVENESS",
+        address: "PROOF_OF_ADDRESS",
+        sow: "VERIFIED",
+        onboarding: "MANUAL",
+      },
     });
+
+    // A self-attested source of wealth stays in the credential but earns neither "sow" nor kycLevel 3.
+    credential.addSection("sourceOfWealth", { source: "MANUAL", type: "SALARY" });
+    expect(credential.level()).toBe("plus+liveness+onboarding");
+    expect(credential.kycLevel()).toBe(2);
+    expect(credential.serializeSubject()).toMatchObject({ sourceOfWealthSource: "MANUAL" });
+
+    // ...but a consumer that accepts self-attested data can still find it through the claims.
+    const publicNotes = credential.publicNotes();
+    expect(publicNotes.claims).toMatchObject({ sow: "MANUAL" });
+    expect(matchClaims({ sow: ["VERIFIED", "MANUAL"] }, publicNotes)).toBe(true);
+    expect(matchClaims({ sow: ["VERIFIED"] }, publicNotes)).toBe(false);
+  });
+
+  it("leaves a MANUAL source of funds out of the level", () => {
+    const credential = basicCredential();
+    credential.addSection("edd", {
+      sourceOfFundsCategory: "SALARY",
+      sourceOfFundsSource: "MANUAL",
+    });
+
+    expect(credential.level()).toBe("basic");
+    expect(credential.claims()).toEqual({ identity: "VERIFIED", edd: "MANUAL" });
+  });
+
+  it("requires the source of funds only with a proof file", () => {
+    const credential = basicCredential();
+    credential.addSection("edd", { sourceOfFundsCategory: "SALARY" });
+    expect(credential.level()).toBe("basic+edd");
+    expect(credential.claims()).toMatchObject({ edd: "MANUAL" });
+
+    expect(() =>
+      new KycV3().addSection("edd", {
+        sourceOfFundsCategory: "SALARY",
+        sourceOfFundsProofFile: Buffer.from("Funds"),
+        sourceOfFundsProofFileType: "application/pdf",
+        sourceOfFundsProofFileName: "funds.pdf",
+      }),
+    ).toThrow(/sourceOfFundsSource/);
+  });
+
+  it("requires the source of a screening", () => {
+    expect(() =>
+      new KycV3().addSection("screening", {
+        sanctionsCheckResult: "CLEAR",
+        pepCheckResult: "CLEAR",
+      } as never),
+    ).toThrow(/source/);
+  });
+
+  it("requires the source of a source of wealth", () => {
+    expect(() => new KycV3().addSection("sourceOfWealth", { type: "SALARY" } as never)).toThrow(
+      /source/,
+    );
+    expect(() =>
+      new KycV3().addSection("sourceOfWealth", { source: "GPS" as never, type: "SALARY" }),
+    ).toThrow(/source/);
   });
 });
 
@@ -382,9 +658,16 @@ describe("KycV3 serialization", () => {
       mrzLine1: "P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<",
     });
     credential.addSection("contact", { email: "john@example.com", phoneNumber: "+1234567890" });
-    credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
+    credential.addSection("biometric", {
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
+      selfieFileName: "selfie.jpg",
+      selfieMatch: 99,
+    });
     credential.addSection("residentialAddress", {
-      verified: true,
+      source: "PROOF_OF_ADDRESS",
       street: "Main St",
       city: "New York",
       country: "US",
@@ -396,6 +679,7 @@ describe("KycV3 serialization", () => {
       ipCountry: "US",
     });
     credential.addSection("screening", {
+      source: "DB",
       sanctionsCheckResult: "CLEAR",
       sanctionsConfidenceScore: 95,
       pepCheckResult: "NOT_CHECKED",
@@ -404,17 +688,21 @@ describe("KycV3 serialization", () => {
     credential.addSection("edd", {
       occupation: "REAL_ESTATE",
       sourceOfFundsCategory: "SALARY",
+      sourceOfFundsSource: "VERIFIED",
       sourceOfFundsProofFile: Buffer.from("Funds"),
       sourceOfFundsProofFileType: "application/pdf",
       sourceOfFundsProofFileName: "funds.pdf",
     });
     credential.addSection("sourceOfWealth", {
+      source: "VERIFIED",
       type: "SALARY",
       yearlyGrossIncome: "LESS_THAN_20000",
       yearlyGrossIncomeCurrency: "EUR",
       approximateNetWorth: "UP_TO_25000",
       approximateNetWorthCurrency: "EUR",
       sourceOfWealthProofFile: Buffer.from("Proof"),
+      sourceOfWealthProofFileType: "application/pdf",
+      sourceOfWealthProofFileName: "wealth.pdf",
     });
     credential.addSection("onboarding", {
       intendedUse: "INVESTING",
@@ -434,6 +722,17 @@ describe("KycV3 serialization", () => {
       type: "kyc",
       level,
       kycLevel: 3,
+      claims: {
+        identity: "VERIFIED",
+        liveness: "LIVENESS",
+        address: "PROOF_OF_ADDRESS",
+        email: "VERIFIED",
+        phoneNumber: "VERIFIED",
+        edd: "VERIFIED",
+        sow: "VERIFIED",
+        screening: "DB",
+        onboarding: "MANUAL",
+      },
     });
 
     expect(credential.serializeEnvelope()).toEqual({
@@ -473,8 +772,12 @@ describe("KycV3 serialization", () => {
       contactEmail: "john@example.com",
       contactPhoneNumber: "+1234567890",
       biometricSelfieFile: fileToBase85(Buffer.from("Selfie")),
+      biometricSelfieFileType: "image/jpeg",
+      biometricSource: "LIVENESS",
+      biometricProvider: "FaceTec",
+      biometricSelfieFileName: "selfie.jpg",
       biometricSelfieMatch: 99,
-      residentialAddressVerified: true,
+      residentialAddressSource: "PROOF_OF_ADDRESS",
       residentialAddressStreet: "Main St",
       residentialAddressCity: "New York",
       residentialAddressCountry: "US",
@@ -484,21 +787,26 @@ describe("KycV3 serialization", () => {
       residentialAddressProofFileType: "image/jpeg",
       residentialAddressProofFileName: "proof.jpg",
       residentialAddressIpCountry: "US",
+      screeningSource: "DB",
       screeningSanctionsCheckResult: "CLEAR",
       screeningSanctionsConfidenceScore: 95,
       screeningPepCheckResult: "NOT_CHECKED",
       screeningPepConfidenceScore: 10,
       eddOccupation: "REAL_ESTATE",
       eddSourceOfFundsCategory: "SALARY",
+      eddSourceOfFundsSource: "VERIFIED",
       eddSourceOfFundsProofFile: fileToBase85(Buffer.from("Funds")),
       eddSourceOfFundsProofFileType: "application/pdf",
       eddSourceOfFundsProofFileName: "funds.pdf",
+      sourceOfWealthSource: "VERIFIED",
       sourceOfWealthType: "SALARY",
       sourceOfWealthYearlyGrossIncome: "LESS_THAN_20000",
       sourceOfWealthYearlyGrossIncomeCurrency: "EUR",
       sourceOfWealthApproximateNetWorth: "UP_TO_25000",
       sourceOfWealthApproximateNetWorthCurrency: "EUR",
       sourceOfWealthSourceOfWealthProofFile: fileToBase85(Buffer.from("Proof")),
+      sourceOfWealthSourceOfWealthProofFileType: "application/pdf",
+      sourceOfWealthSourceOfWealthProofFileName: "wealth.pdf",
       onboardingIntendedUse: "INVESTING",
       onboardingEmploymentStatus: "EMPLOYED",
       onboardingExpectedMonthlyTransactionCount: "LESS_THAN_5",
@@ -534,6 +842,7 @@ describe("KycV3 deserialization", () => {
         idDocumentNumber: "123456789",
         idDocumentCountry: "US",
         idDocumentFrontFile: fileToBase85(Buffer.from("Front")),
+        eddSourceOfFundsSource: "VERIFIED",
         eddSourceOfFundsProofFile: fileToBase85(Buffer.from("Funds")),
         onboardingIntendedUse: "INVESTING",
         onboardingEmploymentStatus: "EMPLOYED",
@@ -565,9 +874,16 @@ describe("KycV3 deserialization", () => {
 
   it("round-trips an unverified address", async () => {
     const credential = basicCredential();
-    credential.addSection("biometric", { selfieFile: Buffer.from("Selfie"), selfieMatch: 99 });
+    credential.addSection("biometric", {
+      selfieFile: Buffer.from("Selfie"),
+      selfieFileType: "image/jpeg",
+      source: "LIVENESS",
+      provider: "FaceTec",
+      selfieFileName: "selfie.jpg",
+      selfieMatch: 99,
+    });
     credential.addSection("residentialAddress", {
-      verified: false,
+      source: "MANUAL",
       street: "Oak Ave",
       houseNumber: "42",
       city: "Boston",
@@ -579,7 +895,7 @@ describe("KycV3 deserialization", () => {
     expect(credential.kycLevel()).toBe(1);
 
     const serialized = credential.serializeSubject();
-    expect(serialized.residentialAddressVerified).toBe(false);
+    expect(serialized.residentialAddressSource).toBe("MANUAL");
     expect("residentialAddressProofCategory" in serialized).toBe(false);
     expect("residentialAddressProofFile" in serialized).toBe(false);
 
@@ -587,7 +903,7 @@ describe("KycV3 deserialization", () => {
     await roundTrip.deserialize(serializedCredential(serialized));
 
     expect(roundTrip.subject.residentialAddress).toEqual({
-      verified: false,
+      source: "MANUAL",
       street: "Oak Ave",
       houseNumber: "42",
       city: "Boston",

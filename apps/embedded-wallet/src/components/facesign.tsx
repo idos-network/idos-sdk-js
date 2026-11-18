@@ -42,13 +42,10 @@ export function FaceSignConnector() {
       const provider = await createProvider();
       providerRef.current = provider;
 
-      const { hasKey } = await provider.preload();
-
-      if (hasKey) {
-        await runFlow(provider);
-      } else {
-        setStep("consent");
-      }
+      const { resetStoredFaceSignKey } = await import("@idos-network/kwil-infra/facesign");
+      const cleared = await resetStoredFaceSignKey(provider);
+      if (cleared) providerRef.current = null;
+      setStep("consent");
     } catch (err) {
       console.error("FaceSign preload failed:", err);
       providerRef.current?.destroy();

@@ -129,33 +129,15 @@ export async function getXrpTxHash(
   message: string | Uint8Array,
   wallet: Xumm | typeof GemWallet,
 ): Promise<string | undefined> {
-  let messageString: string;
-
   const xrpWalletType = await getXrpWalletType(wallet as Record<string, unknown>);
-
-  messageString = typeof message === "string" ? message : Buffer.from(message).toString("utf8"); // Decode Uint8Array to string
   if (xrpWalletType === "Xumm") {
-    const memoData = Buffer.from(messageString).toString("hex"); // Encode message as hex for Memos
-
-    const payload = {
-      custom_meta: {
-        instruction: messageString,
-      },
-      txjson: {
-        TransactionType: "SignIn",
-        Memos: [
-          {
-            Memo: {
-              MemoData: memoData,
-              MemoType: Buffer.from("idOS").toString("hex"), // Optional type identifier
-            },
-          },
-        ],
-      },
-    };
-    const xummTx = await signXummTx(wallet as Xumm, payload);
-    console.log("xummTx", xummTx);
-  } else if (xrpWalletType === "GemWallet") {
+    // Xaman only signs transactions; KGW's XRPL authenticator verifies a raw signature over the
+    // message itself, which a signed SignIn blob can't satisfy. Fail before prompting the user.
+    throw new Error("Xaman (Xumm) can't sign idOS messages; connect with GemWallet instead");
+  }
+  if (xrpWalletType === "GemWallet") {
+    const messageString =
+      typeof message === "string" ? message : Buffer.from(message).toString("utf8");
     const signature = await signGemWalletTx(wallet as typeof GemWallet, messageString);
     if (!signature) {
       throw new Error("Failed to sign transaction with GemWallet");

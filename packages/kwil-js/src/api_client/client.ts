@@ -298,7 +298,7 @@ export default class Client extends Api {
     });
   }
 
-  protected async callClient(msg: Message): Promise<CallClientResponse<any>> {
+  protected async callClient(msg: Message, cookie?: string): Promise<CallClientResponse<any>> {
     const body = this.buildJsonRpcRequest<CallRequest>(JSONRPCMethod.METHOD_CALL, {
       body: msg.body,
       auth_type: msg.auth_type,
@@ -306,7 +306,11 @@ export default class Client extends Api {
       signature: msg.signature || "",
     });
 
-    const res = await super.post<JsonRPCResponse<CallResponse>>(`/rpc/v1`, body);
+    const res = await super.post<JsonRPCResponse<CallResponse>>(
+      `/rpc/v1`,
+      body,
+      cookie ? { headers: { Cookie: cookie } } : undefined,
+    );
 
     const errorResponse = this.checkAuthError(res);
     if (errorResponse) {

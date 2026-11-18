@@ -1,5 +1,5 @@
 import { getDb } from "@/core/db.server";
-import { sessionStorage } from "@/core/sessions.server";
+import { getUserId, sessionStorage } from "@/core/sessions.server";
 
 import type { Route } from "./+types/developer-tc";
 
@@ -9,7 +9,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const userId = session.get("userId");
+  const userId = getUserId(session);
 
   if (!userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { idOSConsumer } from "./index.js";
 
 const mocks = vi.hoisted(() => ({
-  blobGateway: { fetchBlob: vi.fn(), deleteCredentialBlob: vi.fn(), hasAccessToken: false },
+  blobGateway: { fetchBlob: vi.fn(), deleteCredentialBlob: vi.fn() },
   getCredentialShared: vi.fn(),
   rescindSharedCredential: vi.fn(),
   kwilClient: {
@@ -34,7 +34,6 @@ vi.mock("@idos-network/kwil-infra/actions", () => ({
 describe("idOSConsumer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.blobGateway.hasAccessToken = false;
   });
 
   it("creates a KGW authenticated blob gateway for blob-backed reads", async () => {
@@ -147,26 +146,6 @@ describe("idOSConsumer", () => {
     expect(mocks.blobGateway.fetchBlob).not.toHaveBeenCalled();
   });
 
-  it("passes the MM storage authority through to the blob gateway", async () => {
-    const { createKgwAuthenticatedBlobGateway } = await import("@idos-network/kwil-infra");
-    const mmAuth = { accessToken: "mm-envelope" } as never;
-
-    await idOSConsumer.init({
-      nodeUrl: "https://nodes.example",
-      blobGatewayUrl: "https://blob.example",
-      mmAuth,
-      consumerSigner: nacl.sign.keyPair(),
-      recipientEncryptionPrivateKey: base64Encode(nacl.box.keyPair().secretKey),
-    });
-
-    expect(createKgwAuthenticatedBlobGateway).toHaveBeenCalledWith({
-      url: "https://blob.example",
-      kwilClient: mocks.kwilClient,
-      signer: mocks.signer,
-      mmAuth,
-    });
-  });
-
   it("rescinds a legacy inline credential without calling blob-gateway delete", async () => {
     mocks.getCredentialShared.mockResolvedValueOnce([
       {
@@ -213,7 +192,7 @@ describe("idOSConsumer", () => {
     });
   });
 
-  it("fails before Kwil when rescinding a ukyc:// credential without an accessToken", async () => {
+  it("fails before Kwil when rescinding a ukyc:// credential", async () => {
     mocks.getCredentialShared.mockResolvedValueOnce([
       {
         id: "6796e664-3c0c-4e3f-b900-afe2dc49c08e",
@@ -230,7 +209,7 @@ describe("idOSConsumer", () => {
 
     await expect(
       consumer.rescindSharedCredential("6796e664-3c0c-4e3f-b900-afe2dc49c08e"),
-    ).rejects.toThrow(/requires an accessToken/);
+    ).rejects.toThrow(/MM operator's data wipe/);
     expect(mocks.rescindSharedCredential).not.toHaveBeenCalled();
     expect(mocks.blobGateway.deleteCredentialBlob).not.toHaveBeenCalled();
   });

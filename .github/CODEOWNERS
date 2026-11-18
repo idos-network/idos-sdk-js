@@ -1,1 +1,3 @@
 /apps/idos-enclave/src/lib/idOSKeyDerivation.ts @pkoch
+/.github/workflows/ @idos-network/deployers
+/.github/CODEOWNERS @idos-network/deployers

@@ -39,7 +39,10 @@ export class UserService {
   }
 
   async hasProfile(address: string): Promise<boolean> {
-    return _hasProfile(this.#kwilClient, { address }).then((res) => res.has_profile);
+    return _hasProfile(this.#kwilClient, { address }).then((res) => {
+      if (!res) throw new Error("has_profile returned no rows");
+      return res.has_profile;
+    });
   }
 
   async createUserProfile(params: CreateProfileReqParams): Promise<idOSUser> {
@@ -61,7 +64,9 @@ export class UserService {
 
   /// Useful to understand if a user id already exists.
   async getUser(params: GetUserAsInserterInput): Promise<idOSUser> {
-    return getUserAsInserter(this.#kwilClient, this.#ensureEntityId(params));
+    const user = await getUserAsInserter(this.#kwilClient, this.#ensureEntityId(params));
+    if (!user) throw new Error("get_user_as_inserter returned no rows");
+    return user;
   }
 
   async createUser(

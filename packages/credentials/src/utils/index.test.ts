@@ -1,4 +1,9 @@
-import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import {
+  base64Decode,
+  hexEncode,
+  hexEncodeSha256Hash,
+  utf8Encode,
+} from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 
@@ -6,9 +11,13 @@ import {
   buildEphemeralSignedCredentialContentReference,
   buildPreliminaryIDOSCredential,
   buildSignedCredentialContentReference,
+  claimsFromPublicNotes,
   highestMatchingCredential,
+  localCredentialBroaderMessageFor,
+  matchClaims,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
+  prepareCredentialBroaderMessage,
   recordFilter,
   type Addon,
   type BaseLevel,
@@ -127,7 +136,78 @@ describe("pickHighestMatchingLevel", () => {
   });
 });
 
+describe("matchClaims", () => {
+  it("matches each claim against its accepted sources", () => {
+    const publicNotes = {
+      level: "basic",
+      claims: { identity: "VERIFIED", email: "MANUAL" },
+    } as const;
+
+    expect(matchClaims({ email: ["VERIFIED", "MANUAL"] }, publicNotes)).toBe(true);
+    expect(matchClaims({ email: ["VERIFIED"] }, publicNotes)).toBe(false);
+    expect(matchClaims({ identity: ["VERIFIED"], liveness: ["LIVENESS"] }, publicNotes)).toBe(
+      false,
+    );
+    expect(matchClaims({}, publicNotes)).toBe(true);
+    // @ts-expect-error - an unknown source is a type error, not a silent non-match
+    expect(matchClaims({ email: ["APPROVED"] }, publicNotes)).toBe(false);
+    // @ts-expect-error - each claim only takes its own sources: an address is never VERIFIED
+    expect(matchClaims({ address: ["VERIFIED"] }, publicNotes)).toBe(false);
+    // @ts-expect-error - onboarding is always self-attested
+    expect(matchClaims({ onboarding: ["VERIFIED"] }, publicNotes)).toBe(false);
+  });
+
+  it("derives the claims of a credential issued before claims from its level", () => {
+    expect(claimsFromPublicNotes({ level: "plus+liveness+email" })).toEqual({
+      identity: "VERIFIED",
+      address: "PROOF_OF_ADDRESS",
+      liveness: "LIVENESS",
+      email: "VERIFIED",
+    });
+    expect(claimsFromPublicNotes({ level: "unverified+phoneNumber+screening+onboarding" })).toEqual(
+      {
+        phoneNumber: "VERIFIED",
+        screening: "DB",
+        onboarding: "MANUAL",
+      },
+    );
+    expect(claimsFromPublicNotes({})).toEqual({});
+    expect(matchClaims({ liveness: ["LIVENESS"] }, { level: "basic+liveness" })).toBe(true);
+  });
+});
+
 describe("highestMatchingCredential", () => {
+  it("matches claims against the accepted sources", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness+email",
+          claims: { email: "VERIFIED" },
+        }),
+      },
+      { public_notes: JSON.stringify({ level: "basic+liveness", claims: { email: "MANUAL" } }) },
+      { public_notes: JSON.stringify({ level: "plus+liveness+phoneNumber" }) },
+    ];
+
+    expect(
+      highestMatchingCredential(credentials, "basic", { claims: { email: ["MANUAL"] } }),
+    ).toEqual(credentials[1]);
+    expect(
+      highestMatchingCredential(credentials, "basic", {
+        claims: { email: ["VERIFIED", "MANUAL"] },
+      }),
+    ).toEqual(credentials[0]);
+    expect(
+      highestMatchingCredential(credentials, "basic", { claims: { address: ["MANUAL"] } }),
+    ).toBeUndefined();
+    // The last one has no claims, so they come from its level.
+    expect(
+      highestMatchingCredential(credentials, "basic", {
+        claims: { address: ["PROOF_OF_ADDRESS"] },
+      }),
+    ).toEqual(credentials[2]);
+  });
+
   it("choose basic, because plus did not match constraints", () => {
     const credentials = [
       {
@@ -244,10 +324,79 @@ describe("highestMatchingCredential", () => {
   });
 });
 
-describe("buildSignedCredentialContentReference", () => {
-  it("derives issuer_auth_public_key from the signing secret key", () => {
+const broaderMessageFor = async () => "credential-message";
+
+describe("prepareCredentialBroaderMessage", () => {
+  it("equals idos-kwild Test_PrepareCredentialBroaderMessage (EVM recipient in EIP-55)", () => {
+    expect(
+      prepareCredentialBroaderMessage(
+        "c2ln",
+        "ipfs://cid",
+        "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed",
+        "kwil-testnet",
+      ),
+    ).toBe(
+      "operation: credential\npublic notes signature: c2ln\ncontent uri: ipfs://cid\nrecipient wallet: 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed\nchain id: kwil-testnet",
+    );
+  });
+
+  it.each([
+    ["MM base64url key", "AbC-dEf_123"],
+    ["ed25519 / NEAR hex key", "ab".repeat(32)],
+    ["NEAR ed25519: prefixed key", "ed25519:AbCdEf"],
+    ["0X prefix (not an EVM address for idos-kwild)", "0X5aaeb6053f3e94c9b9a09f33669435e7ef1beaed"],
+  ])("keeps a non-EVM recipient verbatim: %s", (_, recipient) => {
+    expect(prepareCredentialBroaderMessage("c2ln", "ipfs://cid", recipient, "c")).toContain(
+      `\nrecipient wallet: ${recipient}\n`,
+    );
+  });
+
+  it("requires a recipient and a chain id", () => {
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r", "")).toThrow();
+    expect(() => localCredentialBroaderMessageFor("r", undefined)).toThrow();
+  });
+
+  it("rejects line breaks in any field", () => {
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r", "c\nx: y")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://cid", "r\r", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2ln", "ipfs://c\nid", "r", "c")).toThrow();
+    expect(() => prepareCredentialBroaderMessage("c2\nln", "ipfs://cid", "r", "c")).toThrow();
+  });
+
+  it("signs the local message: the broader signature verifies against it", async () => {
     const keyPair = nacl.sign.keyPair();
-    const result = buildSignedCredentialContentReference("", "ipfs://cid", keyPair.secretKey);
+    const result = await buildSignedCredentialContentReference(
+      "{}",
+      "ipfs://cid",
+      keyPair.secretKey,
+      localCredentialBroaderMessageFor("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed", "chain"),
+    );
+    const expected = prepareCredentialBroaderMessage(
+      result.public_notes_signature,
+      "ipfs://cid",
+      "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed",
+      "chain",
+    );
+    expect(
+      nacl.sign.detached.verify(
+        utf8Encode(expected),
+        base64Decode(result.broader_signature),
+        keyPair.publicKey,
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("buildSignedCredentialContentReference", () => {
+  it("derives issuer_auth_public_key from the signing secret key", async () => {
+    const keyPair = nacl.sign.keyPair();
+    const result = await buildSignedCredentialContentReference(
+      "",
+      "ipfs://cid",
+      keyPair.secretKey,
+      broaderMessageFor,
+    );
 
     expect(result.public_notes).toBe("");
     expect(result.public_notes_signature).toBeTruthy();
@@ -257,8 +406,12 @@ describe("buildSignedCredentialContentReference", () => {
 });
 
 describe("buildEphemeralSignedCredentialContentReference", () => {
-  it("returns a signed reference with a public key", () => {
-    const result = buildEphemeralSignedCredentialContentReference("", "ipfs://cid");
+  it("returns a signed reference with a public key", async () => {
+    const result = await buildEphemeralSignedCredentialContentReference(
+      "",
+      "ipfs://cid",
+      broaderMessageFor,
+    );
 
     expect(result.public_notes).toBe("");
     expect(result.public_notes_signature).toBeTruthy();
@@ -275,21 +428,25 @@ describe("buildPreliminaryIDOSCredential", () => {
       publicNotes: "{}",
       plaintextContent: utf8Encode("secret"),
       recipientEncryptionPublicKey: recipient.publicKey,
+      broaderMessageFor,
     });
 
     expect(result.contentUri).toMatch(/^ipfs:\/\//);
     expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 
-  it("uses a provided contentUri instead of hashing to ipfs", async () => {
+  it("addresses ukyc content by the sha256 of the ciphertext", async () => {
     const result = await buildPreliminaryIDOSCredential({
       publicNotes: "{}",
       plaintextContent: utf8Encode("secret"),
       recipientEncryptionPublicKey: recipient.publicKey,
-      contentUri: "ukyc://storage-abc/blobs/blob-1",
+      ukycStorageId: "storage-abc",
+      broaderMessageFor,
     });
 
-    expect(result.contentUri).toBe("ukyc://storage-abc/blobs/blob-1");
+    expect(result.contentUri).toBe(
+      `ukyc://storage-abc/blobs/${hexEncodeSha256Hash(result.encryptedContent)}`,
+    );
     expect(result.contentSize).toBe(result.encryptedContent.byteLength);
   });
 });

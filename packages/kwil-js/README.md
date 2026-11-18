@@ -43,14 +43,14 @@ const kwil = new WebKwil({
 ### NodeJS
 
 ```javascript
-const { Wallet } = require("ethers");
-const kwiljs = require("@idos-network/kwil-js");
+import { Wallet } from "ethers";
+import { NodeKwil } from "@idos-network/kwil-js";
 
 // to be used for signing transactions
 // instead of a provider, nodeJS requires a wallet
 const wallet = new Wallet("my_ethereum_private_key");
 
-const kwil = new kwiljs.NodeKwil({
+const kwil = new NodeKwil({
   kwilProvider: "kwil_provider_endpoint",
   chainId: "your_kwil_chain_id",
 });
@@ -137,19 +137,19 @@ To execute an action once, pass only one tuple to the inputs array.
 
 ```javascript
 const res = await kwil.execute(
-    {
-        namespace: 'db_namespace' // e.g., 'main',
-        name: 'action_name', // e.g., 'create_user',
-        // execute the same action two times:
-        inputs: [
-            ['iter_1_value_1', 'iter_1_value_2', 'iter_1_value_3'],
-            ['iter_2_value_1', 'iter_2_value_2', 'iter_2_value_3'],
-        ],
-        description: 'Click sign to execute'
-    },
-    kwilSigner,
-    true // set to true to wait for the transaction to be confirmed
-)
+  {
+    namespace: "db_namespace", // e.g., 'main',
+    name: "action_name", // e.g., 'create_user',
+    // execute the same action two times:
+    inputs: [
+      ["iter_1_value_1", "iter_1_value_2", "iter_1_value_3"],
+      ["iter_2_value_1", "iter_2_value_2", "iter_2_value_3"],
+    ],
+    description: "Click sign to execute",
+  },
+  kwilSigner,
+  true, // set to true to wait for the transaction to be confirmed
+);
 
 /*
     res.data = {
@@ -244,18 +244,16 @@ The examples below show how to override the input types for executing an action;
 Using named inputs:
 
 ```javascript
-import { Utils } from '@idos-network/kwil-js';
+import { Utils } from "@idos-network/kwil-js";
 const { DataType } = Utils;
 
 const body = {
-    namespace: 'db_namespace',
-    name: 'action_name',
-    inputs: [
-        { $name: 'input_name', $id: 'some_uuid_value'}
-    ]
-    // optional: override input types
-    types: { $name: DataType.Text, $value: DataType.Uuid }
-}
+  namespace: "db_namespace",
+  name: "action_name",
+  inputs: [{ $name: "input_name", $id: "some_uuid_value" }],
+  // optional: override input types
+  types: { $name: DataType.Text, $value: DataType.Uuid },
+};
 
 await kwil.execute(body, kwilSigner);
 ```
@@ -263,16 +261,16 @@ await kwil.execute(body, kwilSigner);
 Using positional inputs:
 
 ```javascript
-import { Utils } from '@idos-network/kwil-js';
+import { Utils } from "@idos-network/kwil-js";
 const { DataType } = Utils;
 
 const body = {
-    namespace: 'db_namespace',
-    name: 'action_name',
-    inputs: ['some_text_value', 'some_uuid_value']
-    // optional: override input types
-    types: [DataType.Text, DataType.Uuid]
-}
+  namespace: "db_namespace",
+  name: "action_name",
+  inputs: ["some_text_value", "some_uuid_value"],
+  // optional: override input types
+  types: [DataType.Text, DataType.Uuid],
+};
 
 await kwil.execute(body, kwilSigner);
 ```

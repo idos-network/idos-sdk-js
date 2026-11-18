@@ -1,5 +1,113 @@
 # @idos-network/credentials
 
+## 4.1.0
+
+### Minor Changes
+
+- 406ea59: Build the credential `broader_signature` message locally instead of asking the node for it. The issuer key signed whatever text `credential_broader_message` returned, so a lying node could pick the recipient or get arbitrary text signed. `@idos-network/client`, `@idos-network/issuer` and `@idos-network/mm-operator` no longer call that action.
+
+  New: `prepareCredentialBroaderMessage` and `localCredentialBroaderMessageFor(recipientWallet, chainId)` in `@idos-network/credentials/utils` (byte for byte equal to idos-kwild's `PrepareCredentialBroaderMessage`), `toChecksumAddress` (EIP-55) in `@idos-network/utils/codecs`, and `KwilActionClient.chainId`. If you pass your own `broaderMessageFor`, switch to `localCredentialBroaderMessageFor`; don't sign text fetched from the network.
+
+### Patch Changes
+
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [729c7d7]
+  - @idos-network/utils@3.2.0
+
+## 4.0.0
+
+### Major Changes
+
+- 38a1991: Address new `ukyc://` blobs by the sha256 of the ciphertext, so the signed content URI pins the encrypted bytes. Reads of dev credentials whose blob id is still a UUID keep working (size check only).
+
+  `buildPreliminaryIDOSCredential` takes `ukycStorageId` instead of a finished `contentUri`. `createCredentialByDelegatedWriteGrant` drops `originalContentUri` and `copyContentUri`; pass one `ukycStorageId` (omit it to keep IPFS). `mmTokenCredentialContentUri` is removed; `mmTokenStorageId` remains.
+
+  `@idos-network/credentials` signing helpers now take a required `broaderMessageFor: (publicNotesSignature, contentUri) => Promise<string>` callback and are async: `buildSignedCredentialContentReference` and `buildEphemeralSignedCredentialContentReference` return `Promise<SignedCredentialContentReference>`, and `BuildPreliminaryIDOSCredentialArgs` requires `broaderMessageFor`. Fetch the message from the node with `credentialBroaderMessage` from `@idos-network/kwil-infra/actions` (`.then((row) => row.message)`) and `await` the result. `@idos-network/client` and `@idos-network/issuer` supply the callback themselves.
+
+### Patch Changes
+
+- e999de0: Sign credential broader signatures over the message the node returns, and reject adding an MM wallet.
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/utils@3.1.0
+
+## 3.1.0
+
+### Minor Changes
+
+- 9486131: Add optional `emailSource` / `phoneNumberSource` to the KYC v3 `contact` section. A `"MANUAL"` email or phone number no longer adds the `email` / `phoneNumber` addon to `level()`.
+- 9486131: Add a required `source` (`"LIVENESS"` | `"SELFIE"`) and `provider` to the KYC v3 `biometric` section. Only an active liveness check adds `liveness` to `level()` and reaches `kycLevel` 1; a plain selfie does not. `claims.liveness` carries the source. KYC v3 credentials with a biometric but no `source` or `provider` no longer pass validation.
+- 9486131: Add `claims` to KYC v3 public notes: what the credential claims (`identity`, `address` and each level addon) and how each claim was obtained, self-attested (`"MANUAL"`) data included. Add `matchClaims()` and `claimsFromPublicNotes()`, which derive the claims of older credentials from their level, and a `claims` option to `highestMatchingCredential()`. Deprecate `matchLevelOrHigher()`, `pickHighestMatchingLevel()` and the `addons` option of `highestMatchingCredential()`, since the level leaves out self-attested data. Export the `Claim`, `Claims`, `ClaimSource`, `ClaimSources` and `ClaimRequirements` types.
+- 9486131: Add `selfieFileType` / `selfieFileName` to the KYC v3 `biometric` section and `sourceOfWealthProofFileType` / `sourceOfWealthProofFileName` to `sourceOfWealth`. A selfie now always needs both; a source-of-wealth proof file needs both when it is set. KYC v3 credentials with a selfie but no type or name no longer pass validation.
+- 9486131: Add a required `source` (`"DB"`) to the KYC v3 `screening` section, shown as `claims.screening` in the public notes. Claims derived from the level of older credentials count `screening` as `"DB"` too. KYC v3 credentials with a screening but no `source` no longer pass validation.
+- 9486131: Add `sourceOfFundsSource` (`"MANUAL"` | `"VERIFIED"`) to the KYC v3 `edd` section, required when it has a `sourceOfFundsProofFile`. A `"MANUAL"` (self-attested) source of funds adds no `edd` to `level()` and shows up as `claims.edd` in the public notes. An `edd` without a source counts as verified, as before. KYC v3 credentials with a source-of-funds proof file but no `sourceOfFundsSource` no longer pass validation.
+- 9486131: Add a required `source` (`"MANUAL"` | `"VERIFIED"`) to the KYC v3 `sourceOfWealth` section. A `"MANUAL"` (self-attested) source of wealth is kept in the credential but adds no `sow` to `level()` and does not count towards `kycLevel` 3. KYC v3 credentials with a source of wealth but no `source` no longer pass validation.
+
+### Patch Changes
+
+- Updated dependencies [78ad0a9]
+  - @idos-network/utils@3.0.1
+
+## 3.0.0
+
+### Patch Changes
+
+- @idos-network/utils@3.0.0
+
+## 2.3.0
+
+### Minor Changes
+
+- a072d3c: Add Latin forms of KycV3 fields stored in their original script (Cyrillic, German umlauts, …). A field marked with the new `@Transliterate()` decorator gets two read-only siblings, derived on read and never serialized:
+
+  - `<field>Icao`: transliterated per ICAO 9303, as passports print names in the MRZ.
+  - `<field>Latin`: a promise of the conventional spelling, backed by the `transliteration` package.
+
+  The person's names and the address's street, additional info, region and city are marked.
+
+  `transliteration` is an optional peer dependency this package never imports, so it adds nothing to an app that does not use `<field>Latin`. An app that does installs it and registers it once at startup; without that, `<field>Latin` rejects with instructions:
+
+  ```ts
+  import { registerTransliteration } from "@idos-network/credentials/utils";
+
+  registerTransliteration(() => import("transliteration"));
+  ```
+
+### Patch Changes
+
+- @idos-network/utils@2.3.0
+
+## 2.2.2
+
+### Patch Changes
+
+- e1408a1: Publish via npm trusted publishing (OIDC) with provenance; expand `repository` field in package manifests.
+- Updated dependencies [e1408a1]
+  - @idos-network/utils@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- @idos-network/utils@2.2.1
+
+## 2.2.0
+
+### Minor Changes
+
+- f2dc464: KYC v3: replace `residentialAddress.verified` (boolean) with `residentialAddress.source` (`"MANUAL" | "GPS" | "EXTERNAL_DB" | "PROOF_OF_ADDRESS" | "PROOF_OF_IDENTITY" | "AUTO_COMPLETE"`), serialized as `residentialAddressSource`.
+
+### Patch Changes
+
+- Updated dependencies [56b18ea]
+  - @idos-network/utils@2.2.0
+
 ## 2.1.0
 
 ### Minor Changes

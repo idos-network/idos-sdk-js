@@ -1,18 +1,24 @@
-import { IsIn, IsOptional } from "class-validator";
+import { IsIn, IsMimeType, IsOptional, IsString } from "class-validator";
 
 import {
   ApproximateNetWorths,
   Currencies,
+  SourceOfWealthSources,
   SourceOfWealthTypes,
   YearlyGrossIncomes,
   type ApproximateNetWorth,
   type Currency,
+  type SourceOfWealthSource,
   type SourceOfWealthType,
   type YearlyGrossIncome,
 } from "../enums";
-import { Base85FileField, RequiredWith } from "../utils";
+import { Base85FileField, RequiredWhen, RequiredWith } from "../utils";
 
 export class SourceOfWealth {
+  /* How the source of wealth was obtained: self-attested by the person (MANUAL) or verified. A MANUAL one does not count towards the level. */
+  @IsIn(SourceOfWealthSources)
+  source: SourceOfWealthSource;
+
   /* The category of wealth source declared by the person (e.g. SALARY, INVESTMENTS). */
   @IsIn(SourceOfWealthTypes)
   type: SourceOfWealthType;
@@ -41,4 +47,15 @@ export class SourceOfWealth {
   @IsOptional()
   @Base85FileField()
   sourceOfWealthProofFile?: Buffer;
+
+  /* Type of the document provided as proof of the person's source of wealth. */
+  @RequiredWhen((sow: SourceOfWealth) => !!sow.sourceOfWealthProofFile)
+  @IsString()
+  @IsMimeType()
+  sourceOfWealthProofFileType?: string;
+
+  /* Name of the document provided as proof of the person's source of wealth. */
+  @RequiredWhen((sow: SourceOfWealth) => !!sow.sourceOfWealthProofFile)
+  @IsString()
+  sourceOfWealthProofFileName?: string;
 }

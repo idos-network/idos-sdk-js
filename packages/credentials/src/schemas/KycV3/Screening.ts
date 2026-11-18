@@ -1,8 +1,17 @@
 import { IsIn, IsNumber, IsOptional, Max, Min } from "class-validator";
 
-import { ScreeningResults, type ScreeningResult } from "../enums";
+import {
+  ScreeningResults,
+  ScreeningSources,
+  type ScreeningResult,
+  type ScreeningSource,
+} from "../enums";
 
 export class Screening {
+  /* How the screening was done: checked against sanctions and PEP databases (DB). */
+  @IsIn(ScreeningSources)
+  source: ScreeningSource;
+
   /* Whether the person appears on any sanctions lists (e.g. CLEAR, NOT_CHECKED). */
   @IsIn(ScreeningResults)
   sanctionsCheckResult: ScreeningResult;

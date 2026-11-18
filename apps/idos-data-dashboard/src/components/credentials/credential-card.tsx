@@ -2,10 +2,13 @@ import { EyeIcon, FileCheckIcon, Share2Icon, Trash2Icon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { claimRows } from "@/lib/claims";
 import { formatType, safeParse } from "@/lib/credential-utils";
 import { useFetchGrants } from "@/lib/queries/credentials";
 
 import type { idOSCredentialWithShares } from "./types";
+
+import { ClaimList } from "./claim-list";
 
 const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "default"> = {
   approved: "success",
@@ -18,7 +21,8 @@ const statusVariantMap: Record<string, "success" | "warning" | "destructive" | "
   invalid: "destructive",
 };
 
-const HEADER_FIELDS = new Set(["type", "status", "issuer", "id"]);
+// The level and claims are shown as claim badges instead of table rows.
+const HEADER_FIELDS = new Set(["type", "status", "issuer", "id", "level", "claims"]);
 
 function formatLabel(key: string): string {
   return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -44,10 +48,11 @@ export function CredentialCard({
   const issuer = typeof publicFields.issuer === "string" ? publicFields.issuer : null;
   const status = typeof publicFields.status === "string" ? publicFields.status : null;
 
+  const claims = claimRows(publicFields);
+  // Credentials without claims (e.g. FaceID, EDD) still show their level as a row.
   const detailEntries = Object.entries(publicFields)
-    .filter(([key]) => !HEADER_FIELDS.has(key))
+    .filter(([key]) => !HEADER_FIELDS.has(key) || (key === "level" && claims.length === 0))
     .map(([key, value]) => [key, typeof value === "string" ? value : String(value ?? "")] as const);
-
   const grantsCount = grants.data?.length ?? 0;
 
   return (
@@ -69,6 +74,8 @@ export function CredentialCard({
           </Badge>
         )}
       </div>
+
+      <ClaimList rows={claims} />
 
       {detailEntries.length > 0 && (
         <div className="border-border bg-muted overflow-hidden rounded-lg border">

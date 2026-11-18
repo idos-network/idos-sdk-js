@@ -31,18 +31,13 @@ export class Funder<T extends EnvironmentType> {
     signer: KwilSigner,
     synchronous?: boolean,
   ): Promise<GenericResponse<TxReceipt>> {
-    if (!payload.keyType) {
-      payload.keyType = AccountKeyType.SECP256K1;
-    }
-
-    if (payload.to instanceof Uint8Array) {
-      payload.to = bytesToHex(payload.to);
-    }
+    const keyType = payload.keyType || AccountKeyType.SECP256K1;
+    const to = payload.to instanceof Uint8Array ? bytesToHex(payload.to) : payload.to;
 
     const txPayload: TransferPayload = {
       to: {
-        identifier: payload.to,
-        key_type: payload.keyType,
+        identifier: to,
+        key_type: keyType,
       },
       amount: payload.amount.toString(),
     };

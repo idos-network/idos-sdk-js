@@ -110,31 +110,33 @@ export class Action<T extends EnvironmentType> {
     // set the actions to a special value to indicate that the transaction is being built
     this.actionInputs = TXN_BUILD_IN_PROGRESS;
 
-    const payload = await this.buildTxPayload(privateMode, cachedActionInputs);
+    try {
+      const payload = await this.buildTxPayload(privateMode, cachedActionInputs);
 
-    // throw runtime error if signer is null or undefined
-    const { signer, identifier, signatureType } = objects.validateFields(
-      {
-        signer: this.signer,
-        identifier: this.identifier,
-        signatureType: this.signatureType,
-      },
-      (fieldName: string) => `${fieldName} is required to build a transaction.`,
-    );
+      // throw runtime error if signer is null or undefined
+      const { signer, identifier, signatureType } = objects.validateFields(
+        {
+          signer: this.signer,
+          identifier: this.identifier,
+          signatureType: this.signatureType,
+        },
+        (fieldName: string) => `${fieldName} is required to build a transaction.`,
+      );
 
-    // build the transaction
-    return await PayloadTx.createTx(this.kwil, {
-      payloadType: PayloadType.EXECUTE_ACTION,
-      payload: payload,
-      signer: signer,
-      signatureType: signatureType,
-      description: this.description,
-      chainId: this.chainId,
-      identifier: identifier,
-      nonce: this.nonce,
-    })
-      .buildTx()
-      .finally(() => (this.actionInputs = cachedActionInputs));
+      // build the transaction
+      return await PayloadTx.createTx(this.kwil, {
+        payloadType: PayloadType.EXECUTE_ACTION,
+        payload: payload,
+        signer: signer,
+        signatureType: signatureType,
+        description: this.description,
+        chainId: this.chainId,
+        identifier: identifier,
+        nonce: this.nonce,
+      }).buildTx();
+    } finally {
+      this.actionInputs = cachedActionInputs;
+    }
   }
 
   /**
@@ -149,25 +151,29 @@ export class Action<T extends EnvironmentType> {
     // set the actions to a special value to indicate that the message is being built
     this.actionInputs = TXN_BUILD_IN_PROGRESS;
 
-    const payload = await this.buildMsgPayload(privateMode, cachedActionInputs);
+    try {
+      const payload = await this.buildMsgPayload(privateMode, cachedActionInputs);
 
-    // build message
-    let msg = PayloadMsg.createMsg(payload, {
-      challenge: this.challenge,
-      signature: this.signature,
-    });
+      // build message
+      const msg = PayloadMsg.createMsg(payload, {
+        challenge: this.challenge,
+        signature: this.signature,
+      });
 
-    /**
-     * if a signer is specified, add the signer, signature type, identifier, and description to the message
-     * ex => if the @caller contextual variable is present in a kuneiform block for kwil.call()
-     */
-    if (this.signer) {
-      msg.signer = this.signer;
-      msg.signatureType = this.signatureType!;
-      msg.identifier = this.identifier!;
+      /**
+       * if a signer is specified, add the signer, signature type, identifier, and description to the message
+       * ex => if the @caller contextual variable is present in a kuneiform block for kwil.call()
+       */
+      if (this.signer) {
+        msg.signer = this.signer;
+        msg.signatureType = this.signatureType!;
+        msg.identifier = this.identifier!;
+      }
+
+      return await msg.buildMsg();
+    } finally {
+      this.actionInputs = cachedActionInputs;
     }
-
-    return await msg.buildMsg().finally(() => (this.actionInputs = cachedActionInputs));
   }
 
   /**
@@ -272,8 +278,18 @@ export class Action<T extends EnvironmentType> {
     // namedParams look like { $param1: 'value1', $param2: 'value2' }
     // positionalParams look like ['value1', 'value2']
     if (isNamedParams(actionInputs)) {
-      // retrieve the schema for the database
-      const namespaceRequest = await this.kwil.getActions(this.namespace);
+      // A cached list can omit an action created after the fetch. Refetch once before failing.
+      let namespaceRequest = await this.kwil.getActions(this.namespace);
+      let selectedAction = this.findNamespaceAction(namespaceRequest);
+
+      if (!selectedAction && namespaceRequest.status === 200) {
+        this.kwil.clearActionsCache(this.namespace);
+        namespaceRequest = await this.kwil.getActions(this.namespace);
+        selectedAction = this.findNamespaceAction(namespaceRequest);
+        if (!selectedAction) {
+          this.kwil.clearActionsCache(this.namespace);
+        }
+      }
 
       // Check if the request was successful
       if (namespaceRequest.status !== 200) {
@@ -289,10 +305,6 @@ export class Action<T extends EnvironmentType> {
         );
       }
 
-      const namespaceActions = namespaceRequest.data as NamespaceAction[];
-
-      // Find the action matching the requested name
-      const selectedAction = namespaceActions.find((a) => a.name === this.actionName);
       if (!selectedAction) {
         throw new Error(`Action '${this.actionName}' not found in namespace '${this.namespace}'.`);
       }
@@ -386,6 +398,16 @@ export class Action<T extends EnvironmentType> {
     // If we reach here, all provided parameters are valid (even if some expected
     // parameters are omitted due to defaults).
     return true;
+  }
+
+  private findNamespaceAction(namespaceRequest: {
+    status: number;
+    data?: object[] | null;
+  }): NamespaceAction | undefined {
+    if (namespaceRequest.status !== 200 || !namespaceRequest.data?.length) {
+      return undefined;
+    }
+    return (namespaceRequest.data as NamespaceAction[]).find((a) => a.name === this.actionName);
   }
 
   private assertNotBuilding(): void {

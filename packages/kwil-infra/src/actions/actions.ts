@@ -12,6 +12,11 @@ export const WALLET_TYPES = ["EVM", "NEAR", "XRPL", "Stellar", "FaceSign", "MM"]
 export type WalletType = (typeof WALLET_TYPES)[number];
 
 export const walletTypeSchema: z.ZodType<WalletType> = z.enum(WALLET_TYPES);
+export const ADD_WALLET_TYPES = ["EVM", "NEAR", "XRPL", "Stellar", "FaceSign"] as const;
+
+export type AddWalletType = (typeof ADD_WALLET_TYPES)[number];
+
+export const addWalletTypeSchema: z.ZodType<AddWalletType> = z.enum(ADD_WALLET_TYPES);
 export const ENCRYPTION_PASSWORD_STORES = ["user", "mpc", "mm"] as const;
 
 export type EncryptionPasswordStore = (typeof ENCRYPTION_PASSWORD_STORES)[number];
@@ -163,6 +168,20 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     {
       name: "id",
       type: DataType.Uuid,
+    },
+  ],
+  credential_broader_message: [
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content_uri",
+      type: DataType.Text,
+    },
+    {
+      name: "recipient_wallet",
+      type: DataType.Text,
     },
   ],
   create_preliminary_credential: [
@@ -413,6 +432,100 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
   get_sibling_credential_id: [
     {
       name: "content_hash",
+      type: DataType.Text,
+    },
+  ],
+  get_user_as_mm_operator: [
+    {
+      name: "storage_token",
+      type: DataType.Text,
+    },
+  ],
+  create_user_as_mm_operator: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "recipient_encryption_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "wallet_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "storage_token",
+      type: DataType.Text,
+    },
+  ],
+  get_credentials_as_mm_operator: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "storage_token",
+      type: DataType.Text,
+    },
+  ],
+  create_preliminary_credential_as_mm_operator: [
+    {
+      name: "request_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "content_uri",
+      type: DataType.Text,
+    },
+    {
+      name: "content_size",
+      type: DataType.Int,
+    },
+    {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "storage_token",
+      type: DataType.Text,
+    },
+  ],
+  request_user_wipe_as_mm_operator: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "storage_token",
       type: DataType.Text,
     },
   ],
@@ -736,7 +849,7 @@ export type GetUserAsInserterOutput = z.infer<typeof GetUserAsInserterOutputSche
 export async function getUserAsInserter(
   kwilClient: KwilActionClient,
   params: GetUserAsInserterInput,
-): Promise<GetUserAsInserterOutput> {
+): Promise<GetUserAsInserterOutput | undefined> {
   const inputs = GetUserAsInserterInputSchema.parse(params);
   return await kwilClient
     .call<GetUserAsInserterOutput[]>({
@@ -751,33 +864,27 @@ export const UpsertWalletAsInserterInputSchema: z.ZodObject<{
   user_id: z.ZodUUID;
   address: z.ZodString;
   public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-  wallet_type: z.ZodType<WalletType>;
-  not_before: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;
-  not_after: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;
+  wallet_type: z.ZodType<AddWalletType>;
+  not_before: z.ZodISODateTime;
+  not_after: z.ZodISODateTime;
   signature: z.ZodString;
-}> = z
-  .object({
-    id: z.uuid(),
-    user_id: z.uuid(),
-    address: z.string(),
-    public_key: z.string().nullish(),
-    wallet_type: walletTypeSchema,
-    not_before: rfc3339DateTimeSchema.nullish(),
-    not_after: rfc3339DateTimeSchema.nullish(),
-    signature: z.string(),
-  })
-  .refine((v) => (v.wallet_type === "MM") === (v.not_before == null), {
-    path: ["not_before"],
-    message: "not_before must be null when wallet_type is MM, and set otherwise",
-  })
-  .refine((v) => (v.wallet_type === "MM") === (v.not_after == null), {
-    path: ["not_after"],
-    message: "not_after must be null when wallet_type is MM, and set otherwise",
-  });
+}> = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  address: z.string(),
+  public_key: z.string().nullish(),
+  wallet_type: addWalletTypeSchema,
+  not_before: rfc3339DateTimeSchema,
+  not_after: rfc3339DateTimeSchema,
+  signature: z.string(),
+});
 
 export type UpsertWalletAsInserterInput = z.infer<typeof UpsertWalletAsInserterInputSchema>;
 
-/**  WALLET ACTIONS */
+/**
+ *  WALLET ACTIONS
+ *  Existing MM wallets count too: a key can't be both an MM wallet and another wallet.
+ */
 export async function upsertWalletAsInserter(
   kwilClient: KwilActionClient,
   params: UpsertWalletAsInserterInput,
@@ -792,13 +899,13 @@ export async function upsertWalletAsInserter(
 
 export const AddWalletMessageInputSchema: z.ZodObject<{
   address: z.ZodString;
-  wallet_type: z.ZodType<WalletType>;
+  wallet_type: z.ZodType<AddWalletType>;
   user_id: z.ZodUUID;
   not_before: z.ZodISODateTime;
   not_after: z.ZodISODateTime;
 }> = z.object({
   address: z.string(),
-  wallet_type: walletTypeSchema,
+  wallet_type: addWalletTypeSchema,
   user_id: z.uuid(),
   not_before: rfc3339DateTimeSchema,
   not_after: rfc3339DateTimeSchema,
@@ -834,7 +941,7 @@ export const AddWalletInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   address: z.ZodString;
   public_key: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-  wallet_type: z.ZodType<WalletType>;
+  wallet_type: z.ZodType<AddWalletType>;
   not_before: z.ZodISODateTime;
   not_after: z.ZodISODateTime;
   signature: z.ZodString;
@@ -842,7 +949,7 @@ export const AddWalletInputSchema: z.ZodObject<{
   id: z.uuid(),
   address: z.string(),
   public_key: z.string().nullish(),
-  wallet_type: walletTypeSchema,
+  wallet_type: addWalletTypeSchema,
   not_before: rfc3339DateTimeSchema,
   not_after: rfc3339DateTimeSchema,
   signature: z.string(),
@@ -868,7 +975,7 @@ export const GetWalletsOutputSchema: z.ZodObject<{
   address: z.ZodString;
   public_key: z.ZodNullable<z.ZodString>;
   wallet_type: z.ZodType<WalletType>;
-  message: z.ZodString;
+  message: z.ZodNullable<z.ZodString>;
   signature: z.ZodString;
   inserter: z.ZodNullable<z.ZodString>;
 }> = z.object({
@@ -877,7 +984,7 @@ export const GetWalletsOutputSchema: z.ZodObject<{
   address: z.string(),
   public_key: z.string().nullable(),
   wallet_type: walletTypeSchema,
-  message: z.string(),
+  message: z.string().nullable(),
   signature: z.string(),
   inserter: z.string().nullable(),
 });
@@ -899,6 +1006,10 @@ export const RemoveWalletInputSchema: z.ZodObject<{
 
 export type RemoveWalletInput = z.infer<typeof RemoveWalletInputSchema>;
 
+/**
+ *  A user may have an MM wallet next to others (created before MM operators). Without it
+ *  the user is no longer an MM user, and its ukyc:// credentials could never be wiped.
+ */
 export async function removeWallet(
   kwilClient: KwilActionClient,
   params: RemoveWalletInput,
@@ -909,6 +1020,43 @@ export async function removeWallet(
     inputs,
     description: "Remove a wallet from idOS",
   });
+}
+
+export const CredentialBroaderMessageInputSchema: z.ZodObject<{
+  public_notes_signature: z.ZodString;
+  content_uri: z.ZodString;
+  recipient_wallet: z.ZodString;
+}> = z.object({
+  public_notes_signature: z.string(),
+  content_uri: blobContentUriSchema,
+  recipient_wallet: z.string(),
+});
+
+export type CredentialBroaderMessageInput = z.infer<typeof CredentialBroaderMessageInputSchema>;
+
+export const CredentialBroaderMessageOutputSchema: z.ZodObject<{
+  message: z.ZodString;
+}> = z.object({
+  message: z.string(),
+});
+
+export type CredentialBroaderMessageOutput = z.infer<typeof CredentialBroaderMessageOutputSchema>;
+
+/**  CREDENTIAL ACTIONS */
+export async function credentialBroaderMessage(
+  kwilClient: KwilActionClient,
+  params: CredentialBroaderMessageInput,
+): Promise<CredentialBroaderMessageOutput> {
+  const inputs = CredentialBroaderMessageInputSchema.parse(params);
+  return await kwilClient
+    .call<CredentialBroaderMessageOutput[]>({
+      name: "credential_broader_message",
+      inputs,
+    })
+    .then((result) => {
+      if (!result[0]) throw new Error("credential_broader_message returned no rows");
+      return result[0];
+    });
 }
 
 export const CreatePreliminaryCredentialInputSchema: z.ZodObject<{
@@ -939,7 +1087,10 @@ export type CreatePreliminaryCredentialInput = z.infer<
   typeof CreatePreliminaryCredentialInputSchema
 >;
 
-/**  CREDENTIAL ACTIONS */
+/**
+ *  Refused for MM users, also when signed in with another wallet: their MM operator stages
+ *  their credentials (create_preliminary_credential_as_mm_operator), with their storage token.
+ */
 export async function createPreliminaryCredential(
   kwilClient: KwilActionClient,
   params: CreatePreliminaryCredentialInput,
@@ -1139,6 +1290,7 @@ export const SharePreliminaryCredentialInputSchema: z.ZodObject<{
 
 export type SharePreliminaryCredentialInput = z.infer<typeof SharePreliminaryCredentialInputSchema>;
 
+/**  Refused for MM users, also when signed in with another wallet: their credentials can't be shared. */
 export async function sharePreliminaryCredential(
   kwilClient: KwilActionClient,
   params: SharePreliminaryCredentialInput,
@@ -1211,6 +1363,7 @@ export type CreatePreliminaryCredentialsByDwgInput = z.infer<
  *  Delegated write credential actions
  *  For access grant
  *  We will use the same ids for preliminary credentials as for credentials, so we need to check if they already exist
+ *  MM users are managed by their MM operator only.
  *  We capture gas upfront to prevent the real credential from being created if the gas is not enough
  *  The gas can be refunded fully or partially
  *  Temporary: an issuer is not an inserter/caller. A user grants a DWG to an issuer_key;
@@ -1260,7 +1413,7 @@ export type CredentialExistAsInserterOutput = z.infer<typeof CredentialExistAsIn
 export async function credentialExistAsInserter(
   kwilClient: KwilActionClient,
   params: CredentialExistAsInserterInput,
-): Promise<CredentialExistAsInserterOutput> {
+): Promise<CredentialExistAsInserterOutput | undefined> {
   const inputs = CredentialExistAsInserterInputSchema.parse(params);
   return await kwilClient
     .call<CredentialExistAsInserterOutput[]>({
@@ -1380,7 +1533,7 @@ export type GetSiblingCredentialIdOutput = z.infer<typeof GetSiblingCredentialId
 export async function getSiblingCredentialId(
   kwilClient: KwilActionClient,
   params: GetSiblingCredentialIdInput,
-): Promise<GetSiblingCredentialIdOutput> {
+): Promise<GetSiblingCredentialIdOutput | undefined> {
   const inputs = GetSiblingCredentialIdInputSchema.parse(params);
   return await kwilClient
     .call<GetSiblingCredentialIdOutput[]>({
@@ -1388,6 +1541,198 @@ export async function getSiblingCredentialId(
       inputs,
     })
     .then((result) => result[0]);
+}
+
+export const GetUserAsMmOperatorInputSchema: z.ZodObject<{
+  storage_token: z.ZodString;
+}> = z.object({
+  storage_token: z.string(),
+});
+
+export type GetUserAsMmOperatorInput = z.infer<typeof GetUserAsMmOperatorInputSchema>;
+
+export const GetUserAsMmOperatorOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  recipient_encryption_public_key: z.ZodString;
+  frozen: z.ZodBoolean;
+}> = z.object({
+  id: z.uuid(),
+  recipient_encryption_public_key: z.string(),
+  frozen: z.boolean(),
+});
+
+export type GetUserAsMmOperatorOutput = z.infer<typeof GetUserAsMmOperatorOutputSchema>;
+
+/**
+ *  MM OPERATOR ACTIONS
+ *  An MM operator (see mm_operators) creates MM users, stages their ukyc:// credentials and
+ *  freezes them for a data wipe. It only acts on the MM users it created, and every action
+ *  also needs a valid UKYC storage token ($storage_token, the bare base64url envelope) minted
+ *  by the user's app: the operator key alone can't do anything to an MM user. Tokens are
+ *  verified at @block_timestamp (the last block's time in view calls).
+ */
+export async function getUserAsMmOperator(
+  kwilClient: KwilActionClient,
+  params: GetUserAsMmOperatorInput,
+): Promise<GetUserAsMmOperatorOutput[]> {
+  const inputs = GetUserAsMmOperatorInputSchema.parse(params);
+  return await kwilClient.call<GetUserAsMmOperatorOutput[]>({
+    name: "get_user_as_mm_operator",
+    inputs,
+  });
+}
+
+export const CreateUserAsMmOperatorInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  recipient_encryption_public_key: z.ZodString;
+  wallet_id: z.ZodUUID;
+  storage_token: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  recipient_encryption_public_key: z.string(),
+  wallet_id: z.uuid(),
+  storage_token: z.string(),
+});
+
+export type CreateUserAsMmOperatorInput = z.infer<typeof CreateUserAsMmOperatorInputSchema>;
+
+/**  The MM wallet key is the storage token's signing key (write token). */
+export async function createUserAsMmOperator(
+  kwilClient: KwilActionClient,
+  params: CreateUserAsMmOperatorInput,
+): Promise<void> {
+  const inputs = CreateUserAsMmOperatorInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "create_user_as_mm_operator",
+    inputs,
+    description: "Create an MM user with its MM wallet as an MM operator",
+  });
+}
+
+export const GetCredentialsAsMmOperatorInputSchema: z.ZodObject<{
+  user_id: z.ZodUUID;
+  storage_token: z.ZodString;
+}> = z.object({
+  user_id: z.uuid(),
+  storage_token: z.string(),
+});
+
+export type GetCredentialsAsMmOperatorInput = z.infer<typeof GetCredentialsAsMmOperatorInputSchema>;
+
+export const GetCredentialsAsMmOperatorOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  user_id: z.ZodUUID;
+  public_notes: z.ZodString;
+  content_uri: z.ZodString;
+  content_size: z.ZodNumber;
+  encryptor_public_key: z.ZodString;
+  issuer_auth_public_key: z.ZodString;
+  inserter_type: z.ZodString;
+  inserter_id: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  public_notes: z.string(),
+  content_uri: z.string(),
+  content_size: z.number(),
+  encryptor_public_key: z.string(),
+  issuer_auth_public_key: z.string(),
+  inserter_type: z.string(),
+  inserter_id: z.string(),
+});
+
+export type GetCredentialsAsMmOperatorOutput = z.infer<
+  typeof GetCredentialsAsMmOperatorOutputSchema
+>;
+
+/**  Needs a read token of the user for the user's storage. */
+export async function getCredentialsAsMmOperator(
+  kwilClient: KwilActionClient,
+  params: GetCredentialsAsMmOperatorInput,
+): Promise<GetCredentialsAsMmOperatorOutput[]> {
+  const inputs = GetCredentialsAsMmOperatorInputSchema.parse(params);
+  return await kwilClient.call<GetCredentialsAsMmOperatorOutput[]>({
+    name: "get_credentials_as_mm_operator",
+    inputs,
+  });
+}
+
+export const CreatePreliminaryCredentialAsMmOperatorInputSchema: z.ZodObject<{
+  request_id: z.ZodUUID;
+  user_id: z.ZodUUID;
+  credential_id: z.ZodUUID;
+  issuer_auth_public_key: z.ZodString;
+  encryptor_public_key: z.ZodString;
+  content_uri: z.ZodString;
+  content_size: z.ZodNumber;
+  content_hash: z.ZodString;
+  public_notes: z.ZodString;
+  public_notes_signature: z.ZodString;
+  broader_signature: z.ZodString;
+  storage_token: z.ZodString;
+}> = z.object({
+  request_id: z.uuid(),
+  user_id: z.uuid(),
+  credential_id: z.uuid(),
+  issuer_auth_public_key: z.string(),
+  encryptor_public_key: z.string(),
+  content_uri: blobContentUriSchema,
+  content_size: contentSizeSchema,
+  content_hash: z.string(),
+  public_notes: z.string(),
+  public_notes_signature: z.string(),
+  broader_signature: z.string(),
+  storage_token: z.string(),
+});
+
+export type CreatePreliminaryCredentialAsMmOperatorInput = z.infer<
+  typeof CreatePreliminaryCredentialAsMmOperatorInputSchema
+>;
+
+/**
+ *  Like create_preliminary_credential, for an MM user. The issuer signs with the user's MM
+ *  wallet public key as the recipient wallet. Needs a write token of the user; the content URI's
+ *  storage must be the token's storage and the user's storage (the first credential defines it).
+ */
+export async function createPreliminaryCredentialAsMmOperator(
+  kwilClient: KwilActionClient,
+  params: CreatePreliminaryCredentialAsMmOperatorInput,
+): Promise<void> {
+  const inputs = CreatePreliminaryCredentialAsMmOperatorInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "create_preliminary_credential_as_mm_operator",
+    inputs,
+    description: "Create a preliminary ukyc:// credential for an MM user as its MM operator",
+  });
+}
+
+export const RequestUserWipeAsMmOperatorInputSchema: z.ZodObject<{
+  user_id: z.ZodUUID;
+  storage_token: z.ZodString;
+}> = z.object({
+  user_id: z.uuid(),
+  storage_token: z.string(),
+});
+
+export type RequestUserWipeAsMmOperatorInput = z.infer<
+  typeof RequestUserWipeAsMmOperatorInputSchema
+>;
+
+/**
+ *  Freezes the MM user: no new credentials, no reads, no finalize. The gateway deletes the
+ *  user once the UKYC storage is deleted (finalize_mm_user_wipe_as_gateway). No cancel.
+ *  Needs a delete token of the user for the user's storage, also when already requested.
+ */
+export async function requestUserWipeAsMmOperator(
+  kwilClient: KwilActionClient,
+  params: RequestUserWipeAsMmOperatorInput,
+): Promise<void> {
+  const inputs = RequestUserWipeAsMmOperatorInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "request_user_wipe_as_mm_operator",
+    inputs,
+    description: "Request a data wipe of an MM user as its MM operator",
+  });
 }
 
 export const AddAttributeAsInserterInputSchema: z.ZodObject<{
@@ -1573,7 +1918,7 @@ export type DwgMessageOutput = z.infer<typeof DwgMessageOutputSchema>;
 export async function dwgMessage(
   kwilClient: KwilActionClient,
   params: DwgMessageInput,
-): Promise<DwgMessageOutput> {
+): Promise<DwgMessageOutput | undefined> {
   const inputs = DwgMessageInputSchema.parse(params);
   return await kwilClient
     .call<DwgMessageOutput[]>({
@@ -1708,7 +2053,7 @@ export type GetAccessGrantsGrantedCountOutput = z.infer<
 export async function getAccessGrantsGrantedCount(
   kwilClient: KwilActionClient,
   params: GetAccessGrantsGrantedCountInput,
-): Promise<GetAccessGrantsGrantedCountOutput> {
+): Promise<GetAccessGrantsGrantedCountOutput | undefined> {
   const inputs = GetAccessGrantsGrantedCountInputSchema.parse(params);
   return await kwilClient
     .call<GetAccessGrantsGrantedCountOutput[]>({
@@ -1737,7 +2082,7 @@ export type HasLockedAccessGrantsOutput = z.infer<typeof HasLockedAccessGrantsOu
 export async function hasLockedAccessGrants(
   kwilClient: KwilActionClient,
   params: HasLockedAccessGrantsInput,
-): Promise<HasLockedAccessGrantsOutput> {
+): Promise<HasLockedAccessGrantsOutput | undefined> {
   const inputs = HasLockedAccessGrantsInputSchema.parse(params);
   return await kwilClient
     .call<HasLockedAccessGrantsOutput[]>({
@@ -1815,7 +2160,7 @@ export type HasProfileOutput = z.infer<typeof HasProfileOutputSchema>;
 export async function hasProfile(
   kwilClient: KwilActionClient,
   params: HasProfileInput,
-): Promise<HasProfileOutput> {
+): Promise<HasProfileOutput | undefined> {
   const inputs = HasProfileInputSchema.parse(params);
   return await kwilClient
     .call<HasProfileOutput[]>(
@@ -1867,7 +2212,7 @@ export type CheckCallerPayerOutput = z.infer<typeof CheckCallerPayerOutputSchema
 export async function checkCallerPayer(
   kwilClient: KwilActionClient,
   params: CheckCallerPayerInput,
-): Promise<CheckCallerPayerOutput> {
+): Promise<CheckCallerPayerOutput | undefined> {
   const inputs = CheckCallerPayerInputSchema.parse(params);
   return await kwilClient
     .call<CheckCallerPayerOutput[]>({
@@ -1918,7 +2263,7 @@ export type CheckBalanceOutput = z.infer<typeof CheckBalanceOutputSchema>;
 export async function checkBalance(
   kwilClient: KwilActionClient,
   params: CheckBalanceInput,
-): Promise<CheckBalanceOutput> {
+): Promise<CheckBalanceOutput | undefined> {
   const inputs = CheckBalanceInputSchema.parse(params);
   return await kwilClient
     .call<CheckBalanceOutput[]>({
@@ -1949,7 +2294,7 @@ export type GetWalletWithBalanceOutput = z.infer<typeof GetWalletWithBalanceOutp
 export async function getWalletWithBalance(
   kwilClient: KwilActionClient,
   params: GetWalletWithBalanceInput,
-): Promise<GetWalletWithBalanceOutput> {
+): Promise<GetWalletWithBalanceOutput | undefined> {
   const inputs = GetWalletWithBalanceInputSchema.parse(params);
   return await kwilClient
     .call<GetWalletWithBalanceOutput[]>({
@@ -1989,7 +2334,9 @@ export const GetAllowanceOutputSchema: z.ZodObject<{
 export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
 
 /**  FaceSign should not be able to call this */
-export async function getAllowance(kwilClient: KwilActionClient): Promise<GetAllowanceOutput> {
+export async function getAllowance(
+  kwilClient: KwilActionClient,
+): Promise<GetAllowanceOutput | undefined> {
   return await kwilClient
     .call<GetAllowanceOutput[]>({
       name: "get_allowance",
@@ -2045,7 +2392,7 @@ export type GetIssuerFeeOutput = z.infer<typeof GetIssuerFeeOutputSchema>;
 export async function getIssuerFee(
   kwilClient: KwilActionClient,
   params: GetIssuerFeeInput,
-): Promise<GetIssuerFeeOutput> {
+): Promise<GetIssuerFeeOutput | undefined> {
   const inputs = GetIssuerFeeInputSchema.parse(params);
   return await kwilClient
     .call<GetIssuerFeeOutput[]>({

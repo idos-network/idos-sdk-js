@@ -2,7 +2,7 @@
 
 import type { BaseProvider } from "@idos-network/enclave";
 
-import { createMmTokenAuth, KwilActionClient } from "@idos-network/kwil-infra";
+import { KwilActionClient } from "@idos-network/kwil-infra";
 import { NodeKwil } from "@idos-network/kwil-js";
 import { BlobGateway, createBlobContentReference } from "@idos-network/utils/blob-gateway";
 import { base64Encode, base64UrlEncode, utf8Encode } from "@idos-network/utils/codecs";
@@ -13,25 +13,18 @@ import {
   idOSClientConfiguration,
   idOSClientIdle,
   idOSClientLoggedIn,
-  type idOSClientWithUserSigner,
+  idOSClientWithUserSigner,
   toDelegatedWriteGrantBaseParams,
 } from "./index.js";
 
-const mmToken = base64UrlEncode(
-  utf8Encode(
-    JSON.stringify({
-      payload: {
-        signing_public_key: base64UrlEncode(new Uint8Array(32).fill(7)),
-        storage_id: "storage-abc",
-      },
-      signature: base64UrlEncode(new Uint8Array(64).fill(9)),
-    }),
-  ),
-);
-
 function idleClient(): idOSClientIdle {
   const kwilClient = {
-    setSigner: () => {},
+    signer: undefined,
+    setSigner(signer: unknown) {
+      kwilClient.signer = signer as never;
+    },
+    call: vi.fn(async () => [{ has_profile: true }]),
+    execute: vi.fn(async () => "tx-hash"),
     client: { auth: { logoutKGW: async () => {} } },
   } as unknown as KwilActionClient;
   const enclaveProvider = {
@@ -79,46 +72,262 @@ function nodeIdleClient(): idOSClientIdle {
   );
 }
 
-describe("UKYC blob authorization is scoped to the signed session", () => {
-  it("binds the MM capability when the signer is selected", async () => {
-    const idle = idleClient();
-
-    const withSigner = await idle.withUserSigner(createMmTokenAuth(mmToken));
-
-    expect(withSigner.blobGateway.hasAccessToken).toBe(true);
-    expect(idle.blobGateway.hasAccessToken).toBe(false);
-  });
-
-  it("drops the MM capability on logout", async () => {
-    const withSigner = await idleClient().withUserSigner(createMmTokenAuth(mmToken));
-
-    expect((await withSigner.logOut()).blobGateway.hasAccessToken).toBe(false);
-  });
-
+describe("logout", () => {
   it("resets the enclave on logout", async () => {
     const idle = idleClient();
     const reset = vi.fn(async () => {});
     idle.enclaveProvider.reset = reset;
-    const withSigner = await idle.withUserSigner(createMmTokenAuth(mmToken));
+    const withSigner = await idle.withUserSigner(ed25519Signer(3) as never);
 
     await withSigner.logOut();
 
     expect(reset).toHaveBeenCalledOnce();
   });
 
-  it("leaves a non-MM session without UKYC authorization", async () => {
-    const idle = idleClient();
-    const customSigner = {
-      publicAddress: "0x1234567890123456789012345678901234567890",
-      publicKey: base64UrlEncode(new Uint8Array(32).fill(3)),
-      signatureType: "ed25519",
-      walletType: "EVM",
-      signMessage: async () => new Uint8Array(64),
-    };
-
-    const withSigner = await idle.withUserSigner(customSigner as never);
+  it("never sends a UKYC storage token from a user session", async () => {
+    const withSigner = await idleClient().withUserSigner(ed25519Signer(3) as never);
 
     expect(withSigner.blobGateway.hasAccessToken).toBe(false);
+  });
+});
+
+function ed25519Signer(fill: number) {
+  return {
+    publicAddress: `0x${String(fill).repeat(40)}`,
+    publicKey: base64UrlEncode(new Uint8Array(32).fill(fill)),
+    signatureType: "ed25519",
+    walletType: "EVM",
+    signMessage: async () => new Uint8Array(64),
+  } as never;
+}
+
+describe("signer switching on a shared idle client", () => {
+  const grantId = crypto.randomUUID();
+  const user = {
+    id: crypto.randomUUID(),
+    recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+    encryption_password_store: "user" as const,
+  };
+
+  it("stops an older wrapper from reading or writing as the newer caller", async () => {
+    const idle = idleClient();
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const loggedInA = new idOSClientLoggedIn(withA, user);
+    const withB = await idle.withUserSigner(ed25519Signer(2));
+    const loggedInB = new idOSClientLoggedIn(withB, user);
+
+    await expect(withA.hasProfile()).rejects.toThrow(/stale/);
+    await expect(loggedInA.getAllCredentials()).rejects.toThrow(/stale/);
+    await expect(loggedInA.revokeAccessGrant(grantId)).rejects.toThrow(/stale/);
+    await expect(withA.createUserEncryptionProfile("user-a")).rejects.toThrow(/stale/);
+    expect(idle.kwilClient.execute).not.toHaveBeenCalled();
+
+    await expect(withB.hasProfile()).resolves.toBe(true);
+    await expect(loggedInB.revokeAccessGrant(grantId)).resolves.toEqual({ id: grantId });
+    expect(idle.kwilClient.execute).toHaveBeenCalledOnce();
+  });
+
+  it("leaves the newer session alone when an older wrapper logs out", async () => {
+    const idle = idleClient();
+    const reset = vi.fn(async () => {});
+    idle.enclaveProvider.reset = reset;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const withB = await idle.withUserSigner(ed25519Signer(2));
+
+    await withA.logOut();
+
+    expect(reset).not.toHaveBeenCalled();
+    await expect(withB.hasProfile()).resolves.toBe(true);
+
+    await withB.logOut();
+
+    expect(reset).toHaveBeenCalledOnce();
+    await expect(withB.hasProfile()).rejects.toThrow(/stale/);
+  });
+
+  it("stops a kwil client saved before the signer changed", async () => {
+    const idle = idleClient();
+    const signTypedData = vi.fn();
+    idle.enclaveProvider.signTypedData = signTypedData;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const loggedInA = new idOSClientLoggedIn(withA, user);
+    const savedWith = withA.kwilClient;
+    const savedLoggedIn = loggedInA.kwilClient;
+    const savedEnclave = withA.enclaveProvider;
+
+    await idle.withUserSigner(ed25519Signer(2));
+
+    await expect(savedWith.execute({} as never)).rejects.toThrow(/stale/);
+    await expect(savedLoggedIn.call({} as never)).rejects.toThrow(/stale/);
+    expect(() => savedEnclave.signTypedData({}, {}, {})).toThrow(/stale/);
+    expect(idle.kwilClient.execute).not.toHaveBeenCalled();
+    expect(signTypedData).not.toHaveBeenCalled();
+  });
+
+  it("does not return a client that can act as the newer signer", async () => {
+    const idle = idleClient();
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+    const loggedInA = new idOSClientLoggedIn(withA, user);
+    const withB = await idle.withUserSigner(ed25519Signer(2));
+
+    const fromWith = await withA.logOut();
+    const fromLoggedIn = await loggedInA.logOut();
+
+    await expect(fromWith.kwilClient.execute({} as never)).rejects.toThrow(/stale/);
+    await expect(fromLoggedIn.kwilClient.execute({} as never)).rejects.toThrow(/stale/);
+    expect(() => fromWith.kwilClient.setSigner(undefined)).toThrow(/stale/);
+    expect(() => fromWith.enclaveProvider.setSigner({} as never)).toThrow(/stale/);
+    await expect(fromWith.withUserSigner(ed25519Signer(3))).rejects.toThrow(/stale/);
+    await expect(withB.hasProfile()).resolves.toBe(true);
+  });
+
+  it("does not install a new signer while logout is still resetting the enclave", async () => {
+    const idle = idleClient();
+    let releaseReset = (): void => {};
+    const resetGate = new Promise<void>((resolve) => {
+      releaseReset = resolve;
+    });
+    let markResetStarted = (): void => {};
+    const resetStarted = new Promise<void>((resolve) => {
+      markResetStarted = resolve;
+    });
+    idle.enclaveProvider.reset = vi.fn(async () => {
+      markResetStarted();
+      await resetGate;
+    });
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+
+    const loggingOut = withA.logOut();
+    await resetStarted;
+    const switching = idle.withUserSigner(ed25519Signer(2));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(idle.kwilClient.signer).toBeUndefined();
+
+    releaseReset();
+    await loggingOut;
+    await switching;
+    expect(idle.kwilClient.signer).not.toBeUndefined();
+  });
+
+  it("retries enclave reset until it finishes, unless a newer signer owns the session", async () => {
+    const idle = idleClient();
+    let failReset = true;
+    const reset = vi.fn(async () => {
+      if (failReset) throw new Error("reset failed");
+    });
+    idle.enclaveProvider.reset = reset;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+
+    await expect(withA.logOut()).rejects.toThrow(/reset failed/);
+    expect(idle.kwilClient.signer).toBeUndefined();
+
+    failReset = false;
+    await withA.logOut();
+    expect(reset).toHaveBeenCalledTimes(2);
+
+    const withC = await idle.withUserSigner(ed25519Signer(3));
+    failReset = true;
+    await expect(withC.logOut()).rejects.toThrow(/reset failed/);
+    const withD = await idle.withUserSigner(ed25519Signer(4));
+    await withC.logOut();
+
+    expect(reset).toHaveBeenCalledTimes(3);
+    await expect(withD.hasProfile()).resolves.toBe(true);
+  });
+
+  it("does not reconfigure the enclave after a newer signer takes over during login", async () => {
+    const idle = idleClient();
+    let releaseGetUser = (): void => {};
+    const getUserGate = new Promise<void>((resolve) => {
+      releaseGetUser = resolve;
+    });
+    let markGetUserStarted = (): void => {};
+    const getUserStarted = new Promise<void>((resolve) => {
+      markGetUserStarted = resolve;
+    });
+    vi.spyOn(idle.kwilClient, "call").mockImplementation(async (params) => {
+      if (params?.name === "get_user") {
+        markGetUserStarted();
+        await getUserGate;
+        return [user];
+      }
+      return [{ has_profile: true }];
+    });
+    const reconfigure = vi.fn(async () => {});
+    idle.enclaveProvider.reconfigure = reconfigure;
+    const withA = await idle.withUserSigner(ed25519Signer(1));
+
+    const loggingIn = withA.logIn();
+    await getUserStarted;
+    await idle.withUserSigner(ed25519Signer(2));
+    releaseGetUser();
+
+    await expect(loggingIn).rejects.toThrow(/stale/);
+    expect(reconfigure).not.toHaveBeenCalled();
+  });
+});
+
+describe("hasProfile", () => {
+  const nearPublicKey = "ed25519:9esz1ouR3vwBwjnUjjcFB8ETfQb6cnBPtXt8v6QPM2Nf";
+
+  function clientFor(wallet: {
+    walletIdentifier: string;
+    walletPublicKey: string | undefined;
+    walletType: "NEAR" | "EVM";
+  }) {
+    const idle = idleClient();
+    const kwilSigner = {} as never;
+    idle.kwilClient.setSigner(kwilSigner);
+    return {
+      client: new idOSClientWithUserSigner(
+        idle,
+        {} as never,
+        kwilSigner,
+        wallet.walletIdentifier,
+        wallet.walletPublicKey,
+        wallet.walletType,
+        idle.blobGateway,
+      ),
+      call: idle.kwilClient.call,
+    };
+  }
+
+  it("looks up a NEAR profile by public key and an EVM profile by wallet identifier", async () => {
+    const near = clientFor({
+      walletIdentifier: "alice.near",
+      walletPublicKey: nearPublicKey,
+      walletType: "NEAR",
+    });
+
+    await expect(near.client.hasProfile()).resolves.toBe(true);
+    expect(near.call).toHaveBeenCalledWith(
+      { name: "has_profile", inputs: { address: nearPublicKey } },
+      undefined,
+    );
+
+    const evmIdentifier = "0x1234567890123456789012345678901234567890";
+    const evm = clientFor({
+      walletIdentifier: evmIdentifier,
+      walletPublicKey: undefined,
+      walletType: "EVM",
+    });
+
+    await expect(evm.client.hasProfile()).resolves.toBe(true);
+    expect(evm.call).toHaveBeenCalledWith(
+      { name: "has_profile", inputs: { address: evmIdentifier } },
+      undefined,
+    );
+  });
+
+  it("throws when a NEAR signer has no public key", async () => {
+    const near = clientFor({
+      walletIdentifier: "alice.near",
+      walletPublicKey: undefined,
+      walletType: "NEAR",
+    });
+
+    await expect(near.client.hasProfile()).rejects.toThrow("NEAR wallet public key is required");
+    expect(near.call).not.toHaveBeenCalled();
   });
 });
 
@@ -143,7 +352,7 @@ describe("Node KGW-authenticated blob sessions", () => {
     vi.unstubAllGlobals();
   });
 
-  it("sends the KGW cookie and MM AccessToken, then drops both on logout", async () => {
+  it("sends the KGW cookie without a storage token, then drops it on logout", async () => {
     const ciphertext = utf8Encode("ciphertext");
     const fetchFn = vi.fn<typeof fetch>(async () => {
       return new Response("ciphertext", {
@@ -152,8 +361,8 @@ describe("Node KGW-authenticated blob sessions", () => {
     });
     vi.stubGlobal("fetch", fetchFn);
 
-    const withSigner = await nodeIdleClient().withUserSigner(createMmTokenAuth(mmToken));
-    expect(withSigner.blobGateway.hasAccessToken).toBe(true);
+    const withSigner = await nodeIdleClient().withUserSigner(ed25519Signer(3) as never);
+    expect(withSigner.blobGateway.hasAccessToken).toBe(false);
 
     await expect(
       withSigner.blobGateway.fetchBlob({
@@ -163,7 +372,7 @@ describe("Node KGW-authenticated blob sessions", () => {
     ).resolves.toEqual(ciphertext);
 
     expect(header(fetchFn.mock.calls[0], "cookie")).toBe("kgw_session=fresh; Path=/");
-    expect(header(fetchFn.mock.calls[0], "authorization")).toBe(`AccessToken ${mmToken}`);
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBeNull();
 
     const idle = await withSigner.logOut();
     expect(idle.blobGateway.hasAccessToken).toBe(false);
@@ -189,7 +398,7 @@ describe("Node KGW-authenticated blob sessions", () => {
     });
     vi.stubGlobal("fetch", fetchFn);
 
-    const withSigner = await nodeIdleClient().withUserSigner(createMmTokenAuth(mmToken));
+    const withSigner = await nodeIdleClient().withUserSigner(ed25519Signer(3) as never);
     vi.spyOn(withSigner.kwilClient, "call").mockResolvedValue([
       {
         id: credentialId,
@@ -216,28 +425,31 @@ describe("Node KGW-authenticated blob sessions", () => {
     expect(credential.content).toBe(base64Encode(ciphertext));
     expect(credential.content_uri).toBeNull();
     expect(header(fetchFn.mock.calls[0], "cookie")).toBe("kgw_session=fresh; Path=/");
-    expect(header(fetchFn.mock.calls[0], "authorization")).toBe(`AccessToken ${mmToken}`);
+    expect(header(fetchFn.mock.calls[0], "authorization")).toBeNull();
   });
 });
 
 const NACL_BOX_ENCRYPTION_OVERHEAD_BYTES = 24 + 16; // nonce + authentication tag
 const credentialPlaintext = utf8Encode("private credential content");
 
-async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
+async function createCredentialForWallet(walletType: "EVM"): Promise<{
   credential: Awaited<ReturnType<idOSClientLoggedIn["createCredential"]>>;
   preliminaryInput: Record<string, unknown> | undefined;
   uploadedBytes: Uint8Array | undefined;
 }> {
   let preliminaryInput: Record<string, unknown> | undefined;
   let uploadedBytes: Uint8Array | undefined;
+  const kwilSigner = {};
   const kwilClient = {
+    signer: kwilSigner,
+    chainId: "test-chain",
+    call: async () => [],
     execute: async ({ inputs }: { inputs: Record<string, unknown> }) => {
       preliminaryInput = inputs;
     },
   } as unknown as KwilActionClient;
   const blobGateway = new BlobGateway({
     url: "https://blob.example",
-    accessToken: walletType === "MM" ? mmToken : undefined,
     fetchFn: async (_input, init) => {
       const body = init?.body;
       if (!(body instanceof FormData)) throw new Error("Expected multipart upload");
@@ -257,7 +469,7 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
     kwilClient,
     enclaveProvider: {},
     signer: {},
-    kwilSigner: walletType === "MM" ? createMmTokenAuth(mmToken) : {},
+    kwilSigner,
     walletIdentifier: "wallet",
     walletPublicKey: undefined,
     walletType,
@@ -277,17 +489,6 @@ async function createCredentialForWallet(walletType: "MM" | "EVM"): Promise<{
 }
 
 describe("credential blob storage", () => {
-  it("creates MM credentials with ukyc:// and the encrypted byte size", async () => {
-    const { credential, preliminaryInput, uploadedBytes } = await createCredentialForWallet("MM");
-
-    expect(credential.content_uri).toMatch(/^ukyc:\/\/storage-abc\/blobs\//);
-    expect(preliminaryInput?.content_uri).toBe(credential.content_uri);
-    expect(preliminaryInput?.content_size).toBe(
-      credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,
-    );
-    expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
-  });
-
   it("creates non-MM credentials through the IPFS CID-validation flow", async () => {
     const { credential, preliminaryInput, uploadedBytes } = await createCredentialForWallet("EVM");
 
@@ -297,6 +498,144 @@ describe("credential blob storage", () => {
       credentialPlaintext.byteLength + NACL_BOX_ENCRYPTION_OVERHEAD_BYTES,
     );
     expect(uploadedBytes?.byteLength).toBe(preliminaryInput?.content_size);
+  });
+
+  describe("when the upload outcome is unknown", () => {
+    type StoredRecord = { content_uri: string; content_size: number; blob: Uint8Array };
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    // The upload POST loses its response; blob GETs serve whatever the record says is stored.
+    function clientWithLostUpload(
+      lookup: (id: string, uploaded: Uint8Array) => Promise<StoredRecord | undefined>,
+      onRead?: (signal: AbortSignal | undefined) => Promise<Response>,
+    ): idOSClientLoggedIn {
+      let uploaded = new Uint8Array();
+      let stored: StoredRecord | undefined;
+      const kwilSigner = {};
+      const kwilClient = {
+        signer: kwilSigner,
+        chainId: "test-chain",
+        execute: async () => undefined,
+        call: async ({ name, inputs }: { name: string; inputs: { id: string } }) => {
+          if (name !== "get_credential_owned") return [];
+          stored = await lookup(inputs.id, uploaded);
+          return stored ? [{ id: inputs.id, ...stored }] : [];
+        },
+      } as unknown as KwilActionClient;
+      const blobGateway = new BlobGateway({
+        url: "https://blob.example",
+        uploadRetries: 0,
+        fetchFn: async (_input, init) => {
+          if (init?.method === "POST") {
+            const original = (init.body as FormData).get("original") as Blob;
+            uploaded = new Uint8Array(await original.arrayBuffer());
+            throw new TypeError("fetch failed");
+          }
+          if (!stored) throw new Error("unexpected blob read");
+          if (onRead) return onRead(init?.signal ?? undefined);
+          return new Response(stored.blob.slice());
+        },
+      });
+      const withSigner = {
+        store: new MemoryStore(),
+        kwilClient,
+        enclaveProvider: {},
+        signer: {},
+        kwilSigner,
+        walletIdentifier: "wallet",
+        walletPublicKey: undefined,
+        walletType: "EVM",
+        blobGateway,
+      } as unknown as idOSClientWithUserSigner;
+      return new idOSClientLoggedIn(withSigner, {
+        id: crypto.randomUUID(),
+        recipient_encryption_public_key: base64Encode(new Uint8Array(32).fill(7)),
+        encryption_password_store: "user",
+      });
+    }
+
+    it("returns the credential when it exists and its blob matches the upload", async () => {
+      const lookedUp: string[] = [];
+      const client = clientWithLostUpload(async (id, uploaded) => {
+        lookedUp.push(id);
+        const { uri } = await createBlobContentReference(uploaded);
+        return { content_uri: uri, content_size: uploaded.byteLength, blob: uploaded };
+      });
+
+      const credential = await client.createCredential("public notes", credentialPlaintext);
+
+      expect(lookedUp).toEqual([credential.id]);
+    });
+
+    it("rethrows when the stored blob differs from the upload", async () => {
+      const client = clientWithLostUpload(async (_id, uploaded) => {
+        const tampered = uploaded.slice();
+        tampered[0] ^= 1;
+        // A non-ipfs URI skips the CID check, so this exercises the byte comparison.
+        return {
+          content_uri: "ukyc://storage-abc/blobs/credential",
+          content_size: tampered.byteLength,
+          blob: tampered,
+        };
+      });
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
+
+    it("gives up on a stalled read-back after the deadline", async () => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      let readStarted!: () => void;
+      const started = new Promise<void>((resolve) => {
+        readStarted = resolve;
+      });
+      const client = clientWithLostUpload(
+        async (_id, uploaded) => {
+          const { uri } = await createBlobContentReference(uploaded);
+          return { content_uri: uri, content_size: uploaded.byteLength, blob: uploaded };
+        },
+        (signal) => {
+          readStarted();
+          // Never answers; only the abort signal can end it.
+          return new Promise((_resolve, reject) => {
+            signal?.addEventListener("abort", () => reject(signal.reason));
+          });
+        },
+      );
+
+      const creation = client.createCredential("public notes", credentialPlaintext);
+      const outcome = expect(creation).rejects.toMatchObject({
+        name: "BlobGatewayUploadOutcomeUnknownError",
+      });
+      await started;
+      await vi.advanceTimersByTimeAsync(60_000);
+      await outcome;
+    });
+
+    it("rethrows with the credential id when the credential isn't there", async () => {
+      const client = clientWithLostUpload(async () => undefined);
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({
+        name: "BlobGatewayUploadOutcomeUnknownError",
+        credentialIds: [expect.any(String)],
+      });
+    });
+
+    it("rethrows the unknown outcome when the lookup itself fails", async () => {
+      const client = clientWithLostUpload(async () => {
+        throw new Error("node unavailable");
+      });
+
+      await expect(
+        client.createCredential("public notes", credentialPlaintext),
+      ).rejects.toMatchObject({ name: "BlobGatewayUploadOutcomeUnknownError" });
+    });
   });
 
   it("returns the dwg message string and maps params via toDelegatedWriteGrantBaseParams", async () => {

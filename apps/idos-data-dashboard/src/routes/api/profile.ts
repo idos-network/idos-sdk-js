@@ -9,6 +9,7 @@ import { COMMON_ENV } from "@/core/envFlags.common";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { sessionStorage } from "@/core/sessions.server";
 import { WalletType } from "@/generated/prisma/enums";
+import { evmPublicKeyFromSignature } from "@/lib/evm-public-key";
 import { toSecondPrecisionIso } from "@/lib/rfc3339";
 
 import type { Route } from "./+types/profile";
@@ -99,15 +100,12 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
 
+  const profileUserId = session.get("profileUserId");
+  const proofMessage = session.get("proofMessage");
   const walletNotBefore = session.get("walletNotBefore");
   const walletNotAfter = session.get("walletNotAfter");
 
-  if (
-    !session.get("profileUserId") ||
-    !session.get("proofMessage") ||
-    !walletNotBefore ||
-    !walletNotAfter
-  ) {
+  if (!profileUserId || !proofMessage || !walletNotBefore || !walletNotAfter) {
     return Response.json({ error: "User ID or proof message not found" }, { status: 400 });
   }
 
@@ -123,15 +121,20 @@ export async function action({ request }: Route.ActionArgs) {
   } = profileData;
 
   try {
+    const publicKey =
+      walletType === "EVM"
+        ? await evmPublicKeyFromSignature(proofMessage, signature)
+        : walletPublicKey;
+
     await issuer.createUser(
       {
-        id: session.get("profileUserId"),
+        id: profileUserId,
         recipient_encryption_public_key: recipientEncryptionPublicKey,
         encryption_password_store: encryptionPasswordStore,
       },
       {
         address: walletAddress,
-        public_key: walletPublicKey,
+        public_key: publicKey,
         wallet_type: walletType,
         signature: signature,
         not_before: walletNotBefore,

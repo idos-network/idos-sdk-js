@@ -1,13 +1,18 @@
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { loader } from "./profile";
+import { createJsonRequest, getSetCookieHeader } from "@/test/helpers";
 
-const { init, addWalletMessage } = vi.hoisted(() => {
+import { action, loader } from "./profile";
+
+const { init, addWalletMessage, createUser } = vi.hoisted(() => {
   const addWalletMessage = vi.fn(async (params: { user_id: string; address: string }) => {
     return `msg:${params.user_id}`;
   });
-  const init = vi.fn(async () => ({ addWalletMessage }));
-  return { init, addWalletMessage };
+  const createUser = vi.fn(async () => [{}, {}]);
+  const issuer = { addWalletMessage, createUser };
+  const init = vi.fn(async () => issuer);
+  return { init, addWalletMessage, createUser };
 });
 
 vi.mock("@idos-network/issuer", () => ({
@@ -22,11 +27,16 @@ function loaderArgs(address = "0xabc", walletType = "EVM") {
   } as Parameters<typeof loader>[0];
 }
 
+function actionArgs(request: Request) {
+  return { request } as Parameters<typeof action>[0];
+}
+
 describe("/api/profile loader", () => {
   beforeEach(() => {
     init.mockReset();
     addWalletMessage.mockClear();
-    init.mockImplementation(async () => ({ addWalletMessage }));
+    createUser.mockClear();
+    init.mockImplementation(async () => ({ addWalletMessage, createUser }));
   });
 
   it("reuses one issuer and still challenges each request", async () => {
@@ -53,6 +63,78 @@ describe("/api/profile loader", () => {
     expect(addWalletMessage).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ address: "0xdef", user_id: secondBody.userId }),
+    );
+  });
+});
+
+describe("/api/profile action", () => {
+  beforeEach(() => {
+    createUser.mockClear();
+  });
+
+  it("recovers an EVM public key when the client omits one", async () => {
+    const account = privateKeyToAccount(generatePrivateKey());
+    const challengeResponse = await loader(loaderArgs(account.address));
+    const challenge = await challengeResponse.json();
+    const signature = await account.signMessage({ message: challenge.proofMessage });
+
+    const response = await action(
+      actionArgs(
+        createJsonRequest("http://localhost/api/profile", {
+          method: "POST",
+          headers: { Cookie: getSetCookieHeader(challengeResponse) },
+          body: {
+            recipientEncryptionPublicKey: "recipient-key",
+            encryptionPasswordStore: "mpc",
+            walletType: "EVM",
+            walletAddress: account.address,
+            walletPublicKey: "",
+            signature,
+          },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ id: challenge.userId }),
+      expect.objectContaining({
+        address: account.address,
+        public_key: account.publicKey,
+        wallet_type: "EVM",
+        signature,
+      }),
+    );
+  });
+
+  it("keeps a non-EVM public key from the request", async () => {
+    const challengeResponse = await loader(loaderArgs("near.testnet", "NEAR"));
+    const challenge = await challengeResponse.json();
+
+    const response = await action(
+      actionArgs(
+        createJsonRequest("http://localhost/api/profile", {
+          method: "POST",
+          headers: { Cookie: getSetCookieHeader(challengeResponse) },
+          body: {
+            recipientEncryptionPublicKey: "recipient-key",
+            encryptionPasswordStore: "user",
+            walletType: "NEAR",
+            walletAddress: "near.testnet",
+            walletPublicKey: "ed25519:NearPublicKey",
+            signature: "near-sig",
+          },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ id: challenge.userId }),
+      expect.objectContaining({
+        public_key: "ed25519:NearPublicKey",
+        wallet_type: "NEAR",
+      }),
     );
   });
 });

@@ -1,5 +1,141 @@
 # data-dashboard
 
+## 1.4.12
+
+### Patch Changes
+
+- b054e4c: Stop sending PII to sentry (ip address, etc)
+- Updated dependencies [406ea59]
+  - @idos-network/utils@3.3.0
+  - @idos-network/credentials@4.1.0
+  - @idos-network/kwil-infra@5.1.0
+  - @idos-network/client@5.0.1
+  - @idos-network/issuer@5.0.1
+  - @idos-network/consumer@5.0.1
+
+## 1.4.11
+
+### Patch Changes
+
+- Updated dependencies [729c7d7]
+- Updated dependencies [729c7d7]
+  - @idos-network/utils@3.2.0
+  - @idos-network/kwil-infra@5.0.0
+  - @idos-network/client@5.0.0
+  - @idos-network/consumer@5.0.0
+  - @idos-network/issuer@5.0.0
+  - @idos-network/credentials@4.0.1
+
+## 1.4.10
+
+### Patch Changes
+
+- Updated dependencies [e999de0]
+- Updated dependencies [1668234]
+- Updated dependencies [38a1991]
+  - @idos-network/client@4.0.0
+  - @idos-network/consumer@4.0.0
+  - @idos-network/credentials@4.0.0
+  - @idos-network/issuer@4.0.0
+  - @idos-network/kwil-infra@4.0.0
+  - @idos-network/utils@3.1.0
+
+## 1.4.9
+
+### Patch Changes
+
+- 9486131: Show a credential's claims, with how each was obtained, instead of its level on the credential card and in the developer console. Older credentials show claims derived from their level.
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [78ad0a9]
+- Updated dependencies [b1466c8]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [9486131]
+- Updated dependencies [5dac941]
+- Updated dependencies [47c1b10]
+- Updated dependencies [dc34ffe]
+  - @idos-network/client@3.1.0
+  - @idos-network/credentials@3.1.0
+  - @idos-network/utils@3.0.1
+  - @idos-network/kwil-infra@3.0.1
+  - @idos-network/consumer@3.1.0
+  - @idos-network/issuer@3.1.0
+
+## 1.4.8
+
+### Patch Changes
+
+- @idos-network/client@3.0.0
+- @idos-network/consumer@3.0.0
+- @idos-network/issuer@3.0.0
+- @idos-network/kwil-infra@3.0.0
+- @idos-network/credentials@3.0.0
+- @idos-network/utils@3.0.0
+
+## 1.4.7
+
+### Patch Changes
+
+- Updated dependencies [a072d3c]
+  - @idos-network/credentials@2.3.0
+  - @idos-network/client@2.3.0
+  - @idos-network/consumer@2.3.0
+  - @idos-network/issuer@2.3.0
+  - @idos-network/utils@2.3.0
+  - @idos-network/kwil-infra@2.3.0
+
+## 1.4.6
+
+### Patch Changes
+
+- Updated dependencies [e1408a1]
+  - @idos-network/credentials@2.2.2
+  - @idos-network/kwil-infra@2.2.2
+  - @idos-network/consumer@2.2.2
+  - @idos-network/client@2.2.2
+  - @idos-network/issuer@2.2.2
+  - @idos-network/utils@2.2.2
+
+## 1.4.5
+
+### Patch Changes
+
+- ecc9b1a: Clear the developer console session whenever the wallet disconnects or switches accounts, and expire it after 24 hours.
+- 82e7d3d: Recover the EVM public key from the profile signature so wallet creation no longer fails when the client omits it.
+- Updated dependencies [7f5a44b]
+- Updated dependencies [ed9a1ad]
+  - @idos-network/client@2.2.1
+  - @idos-network/kwil-infra@2.2.1
+  - @idos-network/consumer@2.2.1
+  - @idos-network/issuer@2.2.1
+  - @idos-network/credentials@2.2.1
+  - @idos-network/utils@2.2.1
+
+## 1.4.4
+
+### Patch Changes
+
+- 2be0e37: Stop sending default PII to Sentry and clear the Sentry user when the wallet disconnects.
+- 5c53b0f: Bind add-wallet requests to the current user and require the signed message to match that request.
+- 1ca665d: Fix new oxlint
+- Updated dependencies [5ac11a5]
+- Updated dependencies [74180e3]
+- Updated dependencies [3ae3d26]
+- Updated dependencies [c27ea68]
+- Updated dependencies [3484957]
+- Updated dependencies [f2dc464]
+- Updated dependencies [56b18ea]
+  - @idos-network/client@2.2.0
+  - @idos-network/kwil-infra@2.2.0
+  - @idos-network/consumer@2.2.0
+  - @idos-network/issuer@2.2.0
+  - @idos-network/credentials@2.2.0
+  - @idos-network/utils@2.2.0
+
 ## 1.4.3
 
 ### Patch Changes

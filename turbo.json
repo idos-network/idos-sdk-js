@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", "dist/**"]
+      "outputs": ["build/**", "dist/**", ".vercel/react-router-build-result.json"]
     },
     "data-dashboard#build": {
       "dependsOn": ["^build"],
@@ -22,7 +22,10 @@
       "persistent": true
     },
     "typecheck": {
-      "dependsOn": ["build:packages"]
+      "dependsOn": ["^build"]
+    },
+    "@idos-network/kwil-js#typecheck": {
+      "dependsOn": ["build"]
     },
     "test": {
       "dependsOn": ["^build"]

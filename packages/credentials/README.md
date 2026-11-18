@@ -171,6 +171,10 @@ const kycCredential = new VerifiableCredentialKycV3()
   })
   .addSection("biometric", {
     selfieFile: Buffer.from("Selfie"),
+    selfieFileType: "image/jpeg",
+    source: "LIVENESS",
+    provider: "FaceTec",
+    selfieFileName: "selfie.jpg",
   });
 
 // Optional: inspect the flat subject or derived level without issuing
@@ -278,8 +282,19 @@ if (parsed instanceof VerifiableCredentialKycV3) {
 
 For KYC v3, call `level()` to derive the string level from structured subject data:
 a verified address proof yields `plus`, and optional addons include `liveness`,
-`email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`. `kycLevel()`
-derives the numeric level (0–3) from the same data.
+`email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`. An email or
+phone number with `emailSource` / `phoneNumberSource` set to `"MANUAL"` (typed in,
+not verified) is kept in the credential but does not add its addon. The same goes
+for a `sourceOfWealth` whose required `source` is `"MANUAL"` (self-attested): it adds
+no `sow` and does not count towards `kycLevel` 3. An `edd` whose required
+`sourceOfFundsSource` (required with a `sourceOfFundsProofFile`) is `"MANUAL"` adds no `edd`. Only a `biometric` whose required
+`source` is `"LIVENESS"` adds `liveness` and reaches `kycLevel` 1; a plain `"SELFIE"` does
+not. `kycLevel()` derives the numeric level (0–3) from the same data.
+
+The level leaves out the `"MANUAL"` data above. The one exception is `onboarding`: the
+questionnaire is always filled in by the person, yet it still adds its addon.
+`publicNotes()` also carries `claims`, which list self-attested data too; see
+[Match claims](#match-claims).
 
 ```javascript
 import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
@@ -303,6 +318,10 @@ const kycCredential = new VerifiableCredentialKycV3()
   })
   .addSection("biometric", {
     selfieFile: Buffer.from("Selfie"),
+    selfieFileType: "image/jpeg",
+    source: "LIVENESS",
+    provider: "FaceTec",
+    selfieFileName: "selfie.jpg",
   });
 
 const level = kycCredential.level();
@@ -312,11 +331,53 @@ const kycLevel = kycCredential.kycLevel();
 // kycLevel = 1
 ```
 
-## Match levels and credentials
+## Match claims
 
-Use the matching helpers to check whether a credential level satisfies a required
-base level and set of addons, or to pick the strongest matching credential from a
-list.
+KYC v3 public notes carry `claims`: what the credential claims and how each claim was
+obtained. The keys are `identity`, `address` and the level addons (`liveness`, `email`,
+`phoneNumber`, `edd`, `sow`, `screening`, `onboarding`). The values are the sources:
+`residentialAddress.source` for `address`, `"MANUAL"` or `"VERIFIED"` for `email`,
+`phoneNumber`, `edd` and `sow`, `screening.source` (`"DB"`) for `screening`, `"MANUAL"` for
+`onboarding` (a questionnaire the person fills in), `biometric.source` (`"LIVENESS"` or
+`"SELFIE"`, a plain photo) for `liveness`, and `"VERIFIED"` for `identity`.
+Unlike the level, claims include self-attested (`"MANUAL"`) data.
+
+`matchClaims` checks that every required claim is present with one of its accepted
+sources. Credentials issued before `claims` existed only have a level, so their claims
+are derived from it: each part of the level counts as `"VERIFIED"` (`liveness` as
+`"LIVENESS"`, `screening` as `"DB"`, `onboarding` as `"MANUAL"`), and `plus` as an address
+from `"PROOF_OF_ADDRESS"`.
+
+```javascript
+import { highestMatchingCredential, matchClaims } from "@idos-network/credentials/utils";
+
+const publicNotes = kycCredential.publicNotes();
+// { type: "kyc", level: "basic", kycLevel: 0,
+//   claims: { identity: "VERIFIED", email: "MANUAL" } }
+
+matchClaims({ identity: ["VERIFIED"], email: ["VERIFIED", "MANUAL"] }, publicNotes);
+// true: a self-attested email is accepted
+
+matchClaims({ email: ["VERIFIED"] }, publicNotes);
+// false
+
+const pickedCredential = highestMatchingCredential([...idOSCredentials], "unverified", {
+  claims: { liveness: ["LIVENESS"], address: ["PROOF_OF_ADDRESS", "MANUAL"] },
+});
+// The highest-scoring credential with verified liveness and an address from a proof or typed in.
+
+await loggedInClient.filterCredentials({
+  acceptedIssuers,
+  claimsFilter: { liveness: ["LIVENESS"], email: ["VERIFIED", "MANUAL"] },
+});
+```
+
+## Match levels and credentials (deprecated)
+
+`matchLevelOrHigher`, `pickHighestMatchingLevel` and the `addons` option of
+`highestMatchingCredential` are deprecated: the level leaves out self-attested data. Use
+[`matchClaims`](#match-claims) and the `claims` option instead. They keep working, and
+issuers still write the level into public notes for consumers on older versions.
 
 ```javascript
 import {

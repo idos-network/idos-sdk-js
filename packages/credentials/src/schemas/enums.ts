@@ -23,6 +23,31 @@ export const IDDocumentTypes = [
 ] as const;
 export type IDDocumentType = (typeof IDDocumentTypes)[number];
 
+export const ResidentialAddressSources = [
+  "MANUAL",
+  "GPS",
+  "EXTERNAL_DB",
+  "PROOF_OF_ADDRESS",
+  "PROOF_OF_IDENTITY",
+  "AUTO_COMPLETE",
+] as const;
+export type ResidentialAddressSource = (typeof ResidentialAddressSources)[number];
+
+export const ContactSources = ["MANUAL", "VERIFIED"] as const;
+export type ContactSource = (typeof ContactSources)[number];
+
+export const SourceOfWealthSources = ["MANUAL", "VERIFIED"] as const;
+export type SourceOfWealthSource = (typeof SourceOfWealthSources)[number];
+
+export const SourceOfFundsSources = ["MANUAL", "VERIFIED"] as const;
+export type SourceOfFundsSource = (typeof SourceOfFundsSources)[number];
+
+export const BiometricSources = ["LIVENESS", "SELFIE"] as const;
+export type BiometricSource = (typeof BiometricSources)[number];
+
+export const ScreeningSources = ["DB"] as const;
+export type ScreeningSource = (typeof ScreeningSources)[number];
+
 export const ScreeningResults = ["CLEAR", "NOT_CHECKED"] as const;
 export type ScreeningResult = (typeof ScreeningResults)[number];
 

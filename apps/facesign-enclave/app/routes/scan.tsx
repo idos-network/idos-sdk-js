@@ -36,12 +36,9 @@ export default function Scan() {
           setMnemonic(data.entropy);
         });
       } else if (newUserConfirmationToken) {
-        const params = new URLSearchParams({
-          message: "No FaceSign profile found",
-          token: newUserConfirmationToken,
-          redirect,
-        });
-        navigate(`/error?${params}`);
+        const params = new URLSearchParams({ message: "No FaceSign profile found", redirect });
+        // In history state, not the URL: a token from a link would enrol someone else's face here.
+        navigate(`/error?${params}`, { state: { newUserConfirmationToken } });
       } else {
         console.error("Unexpected state: neither errorMessage nor token is set");
       }
