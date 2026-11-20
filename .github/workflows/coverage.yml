@@ -44,6 +44,9 @@ jobs:
           - name: idos-enclave
             filter: "idos-enclave"
             directory: apps/idos-enclave
+          - name: embedded-wallet
+            filter: "embedded-wallet"
+            directory: apps/embedded-wallet
     steps:
       - uses: actions/checkout@v6
         with:

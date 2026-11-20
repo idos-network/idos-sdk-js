@@ -3,9 +3,9 @@ import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import { hexEncode } from "@idos-network/utils/codecs";
 import { useRef, useState } from "react";
 
+import { getConfig } from "../config";
 import { requestChainSignMessage } from "../request-chain-message";
 import { useWalletState } from "../state";
-import { COMMON_ENV } from "./envFlags.common";
 import { Button } from "./ui/button";
 
 const PRIVACY_POLICY_URL = "https://www.idos.network/legal/privacy-policy";
@@ -17,12 +17,17 @@ type Step = "button" | "consent" | "running";
 async function createProvider() {
   const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
 
+  const enclaveUrl = getConfig().faceSignEnclaveUrl;
+  if (!enclaveUrl) {
+    throw new Error("FaceSign is not available. Please try again later.");
+  }
+
   return new FaceSignSignerProvider({
     metadata: {
       name: "idOS Embedded Wallet",
       description: "Add FaceSign to your idOS profile",
     },
-    enclaveUrl: COMMON_ENV.FACESIGN_ENCLAVE_URL,
+    enclaveUrl,
   });
 }
 

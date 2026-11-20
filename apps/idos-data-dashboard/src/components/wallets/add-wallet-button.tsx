@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import invariant from "tiny-invariant";
 
 import { Button } from "@/components/ui/button";
-import { COMMON_ENV } from "@/core/envFlags.common";
+import { getConfig } from "@/core/config";
 import { useIDOSClient } from "@/hooks/idOS";
 import { evmPublicKeyFromSignature } from "@/lib/evm-public-key";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
@@ -28,10 +28,8 @@ function isWalletType(value: unknown): value is WalletType {
   return typeof value === "string" && (WALLET_TYPES as readonly string[]).includes(value);
 }
 
-function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
-  const entries = COMMON_ENV.EMBEDDED_WALLET_APP_URLS.split(",")
-    .map((s: string) => s.trim())
-    .filter(Boolean);
+function parseEmbeddedWalletUrls(): { popupUrl: string; allowedOrigins: string[] } {
+  const entries = getConfig().embeddedWalletAppUrls;
   const allowedOrigins: string[] = [];
   let popupUrl: string | undefined;
   for (const entry of entries) {
@@ -42,20 +40,24 @@ function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] 
         popupUrl = entry;
       }
     } catch {
-      console.warn(
-        "[Add wallet] VITE_EMBEDDED_WALLET_APP_URLS contains invalid URL, skipping:",
-        entry,
-      );
+      console.warn("[Add wallet] embedded wallet URL is invalid, skipping:", entry);
     }
   }
   invariant(
     popupUrl !== undefined && allowedOrigins.length > 0,
-    "VITE_EMBEDDED_WALLET_APP_URLS must contain at least one valid URL",
+    "At least one valid embedded wallet URL is required",
   );
   return { popupUrl, allowedOrigins };
 }
 
-const EMBEDDED_WALLET_CONFIG = parseEmbeddedWalletEnv();
+// Resolved on first use: this module is also loaded while rendering on the server, where there is no
+// page hostname to choose the configuration from.
+let embeddedWalletConfig: ReturnType<typeof parseEmbeddedWalletUrls> | undefined;
+
+function getEmbeddedWalletConfig() {
+  embeddedWalletConfig ??= parseEmbeddedWalletUrls();
+  return embeddedWalletConfig;
+}
 
 interface AddWalletButtonProps {
   onWalletAdded?: () => void;
@@ -160,9 +162,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const handleMessage = (event: MessageEvent) => {
       const pending = pendingRequestRef.current;
       if (!pending || event.source !== pending.popup) return;
-      if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
+      const { allowedOrigins } = getEmbeddedWalletConfig();
+      if (!allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected wallet message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
+          `Rejected wallet message from unauthorized origin: ${event.origin}. Expected one of: ${allowedOrigins.join(", ")}`,
         );
         return;
       }
@@ -302,7 +305,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const top = (window.screen.height - popupHeight) / 2;
 
     const requestId = crypto.randomUUID();
-    const url = new URL(EMBEDDED_WALLET_CONFIG.popupUrl);
+    const url = new URL(getEmbeddedWalletConfig().popupUrl);
     url.searchParams.set("user_id", idOSClient.user.id);
     url.searchParams.set("request_id", requestId);
 
