@@ -47,5 +47,8 @@
     "vite-plugin-mkcert": "^1.17.12",
     "vite-plugin-node-polyfills": "catalog:build",
     "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
