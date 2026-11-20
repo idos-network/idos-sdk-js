@@ -182,7 +182,7 @@ overrides:
   # Security: decode-uri-component quadratic DoS (GHSA-qr28-fpjm-wq7f). query-string@7 (WalletConnect,
   # Meteor) asks for ^0.2.2, which has no fix. Pin the patch for the same reason as toml above.
   "decode-uri-component": "0.5.1"
-  effect: ">= 3.22.1"
+  effect: "^3.22.1"
 
   # Since version 11.0 this is ESM only, but there is a nested dependency error, which relies on commonJS import
   "chevrotain": "10.5.0"
