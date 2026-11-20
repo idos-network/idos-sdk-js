@@ -13,7 +13,7 @@ function allUrls(config: (typeof CONFIGS)[keyof typeof CONFIGS]): string[] {
   return [
     config.idosNodeUrl,
     config.idosEnclaveUrl,
-    config.faceSignEnclaveUrl ?? "",
+    ...(config.faceSignEnclaveUrl ? [config.faceSignEnclaveUrl] : []),
     ...config.embeddedWalletAppUrls,
   ];
 }
@@ -28,7 +28,6 @@ describe("resolveConfig", () => {
     expect(resolveConfig("app.idos.network", JUNK_ENV)).toEqual({
       idosNodeUrl: "https://nodes.idos.network",
       idosEnclaveUrl: "https://enclave.idos.network",
-      faceSignEnclaveUrl: "https://facesign.idos.network",
       embeddedWalletAppUrls: ["https://embedded-wallet.idos.network"],
     });
   });
@@ -108,8 +107,8 @@ describe("getConfig", () => {
 });
 
 describe("isFaceSignEnabled on the server", () => {
-  it("says yes in a production build, which only serves deployed hosts", () => {
+  it("says no in a production build, which only serves deployed hosts", () => {
     vi.stubEnv("DEV", false);
-    expect(isFaceSignEnabled()).toBe(true);
+    expect(isFaceSignEnabled()).toBe(false);
   });
 });
