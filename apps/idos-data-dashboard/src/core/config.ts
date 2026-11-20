@@ -27,19 +27,16 @@ export const CONFIGS: Record<EnvironmentName, DashboardConfig> = {
   production: {
     idosNodeUrl: "https://nodes.idos.network",
     idosEnclaveUrl: "https://enclave.idos.network",
-    faceSignEnclaveUrl: "https://facesign.idos.network",
     embeddedWalletAppUrls: ["https://embedded-wallet.idos.network"],
   },
   playground: {
     idosNodeUrl: "https://nodes.playground.idos.network",
     idosEnclaveUrl: "https://enclave.playground.idos.network",
-    faceSignEnclaveUrl: "https://facesign.playground.idos.network",
     embeddedWalletAppUrls: ["https://embedded-wallet.playground.idos.network"],
   },
   staging: {
     idosNodeUrl: "https://nodes.staging.idos.network",
     idosEnclaveUrl: "https://enclave.staging.idos.network",
-    faceSignEnclaveUrl: "https://facesign.staging.idos.network",
     embeddedWalletAppUrls: ["https://embedded-wallet.staging.idos.network"],
   },
 };
@@ -86,12 +83,13 @@ export function getConfig(): DashboardConfig {
 
 /**
  * Whether FaceSign is offered. Safe to call while rendering on the server, where it must agree with the
- * browser to avoid a hydration mismatch: every deployed environment has FaceSign, so a production build's
- * server says yes, and only local development depends on the environment.
+ * browser to avoid a hydration mismatch: FaceSign is turned off on every deployed environment (no
+ * `faceSignEnclaveUrl` in `CONFIGS`), so a production build's server says no, and only local development
+ * depends on the environment. To turn it back on, restore the URLs in `CONFIGS` and return true here.
  */
 export function isFaceSignEnabled(): boolean {
   if (typeof window !== "undefined") return !!getConfig().faceSignEnclaveUrl;
-  return import.meta.env.DEV ? !!COMMON_ENV.FACESIGN_ENCLAVE_URL : true;
+  return import.meta.env.DEV ? !!COMMON_ENV.FACESIGN_ENCLAVE_URL : false;
 }
 
 function configFromEnv(localEnv: Partial<CommonEnv>): DashboardConfig {
