@@ -4,8 +4,11 @@ const DAPP = "https://dapp.example";
 const EVIL = "https://evil.example";
 const ADDRESS = "0xabc";
 
-const env = { VITE_ALLOWED_ORIGINS: "" };
-vi.mock("@/env", () => ({ env }));
+const config = { allowedOrigins: [] as string[] };
+vi.mock("@/config", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/config")>()),
+  getConfig: () => config,
+}));
 
 const approved = new Set<string>();
 vi.mock("@/lib/keys", () => ({
@@ -14,13 +17,14 @@ vi.mock("@/lib/keys", () => ({
   isOriginApproved: async (origin: string) => approved.has(origin),
 }));
 
-const { WindowMessageHandler, parseAllowedOrigins } = await import("./window");
+const { parseAllowedOrigins } = await import("@/config");
+const { WindowMessageHandler } = await import("./window");
 
 const postMessage = vi.fn();
 let listener: (event: { origin: string; data: unknown }) => void;
 
 function setup(allowedOrigins: string) {
-  env.VITE_ALLOWED_ORIGINS = allowedOrigins;
+  config.allowedOrigins = parseAllowedOrigins(allowedOrigins);
   vi.stubGlobal("window", {
     self: {},
     top: {},
@@ -65,13 +69,6 @@ beforeEach(() => {
   vi.spyOn(console, "log").mockImplementation(() => {});
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
-});
-
-describe("parseAllowedOrigins", () => {
-  it("drops the wildcard and empty entries", () => {
-    expect(parseAllowedOrigins(` *, ${DAPP} ,,`)).toEqual([DAPP]);
-    expect(parseAllowedOrigins(undefined)).toEqual([]);
-  });
 });
 
 describe("WindowMessageHandler", () => {

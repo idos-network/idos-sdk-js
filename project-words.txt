@@ -46,6 +46,7 @@ GHSA
 heroicons
 heroui
 hexlify
+hiett
 hono
 iban
 idos
