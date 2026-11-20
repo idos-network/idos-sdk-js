@@ -1,5 +1,13 @@
 # facesign-enclave
 
+## 0.4.13
+
+### Patch Changes
+
+- 8643431: Pin the FaceSign service URLs, allowed origins, FaceTec settings and MPC configuration in source, chosen by the page's hostname, so a Vercel environment variable can no longer change them on a deployed host. The FaceSign handoff store only accepts the idOS Upstash host; the dev server may also use a Redis REST endpoint on loopback. Production FaceSign no longer accepts staging and playground origins.
+- 01af44e: Pin each app's Vercel framework, install command and build command in `vercel.json`, and its Node major version in `engines.node`, so these can't be changed in the Vercel project settings. The values are the ones Vercel uses today: `pnpm install`, then the Turborepo build it selects for monorepos, with `--force` so the build never replays cached package builds from Turborepo's shared remote cache, on Node 24 (`idos-enclave` and `embedded-wallet` move from the 22.x project setting to 24.x, the version in `.node-version` that CI runs on).
+- e51f520: Turn off FaceSign in the dashboard on every deployed environment, and show a "temporarily unavailable" message on the FaceSign enclave's home page.
+
 ## 0.4.12
 
 ### Patch Changes
