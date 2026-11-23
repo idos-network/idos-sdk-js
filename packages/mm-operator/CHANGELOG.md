@@ -1,5 +1,12 @@
 # @idos-network/mm-operator
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [247fcc7]
+  - @idos-network/credentials@4.2.0
+
 ## 0.2.2
 
 ### Patch Changes
