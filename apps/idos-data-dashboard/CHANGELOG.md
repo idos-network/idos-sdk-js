@@ -1,5 +1,18 @@
 # data-dashboard
 
+## 1.4.13
+
+### Patch Changes
+
+- 8a44ca9: Pin the dashboard's and embedded wallet's enclave URLs, idOS node URL and wallet and dashboard origins in source, chosen by the page's hostname, so a Vercel environment variable can no longer change them on a deployed host. On the server, where there is no page hostname, the dashboard still reads its node URLs and `RELAY_URL` from the environment but accepts only idOS's own hosts, and fails closed before any request otherwise.
+- 01af44e: Pin each app's Vercel framework, install command and build command in `vercel.json`, and its Node major version in `engines.node`, so these can't be changed in the Vercel project settings. The values are the ones Vercel uses today: `pnpm install`, then the Turborepo build it selects for monorepos, with `--force` so the build never replays cached package builds from Turborepo's shared remote cache, on Node 24 (`idos-enclave` and `embedded-wallet` move from the 22.x project setting to 24.x, the version in `.node-version` that CI runs on).
+- e51f520: Turn off FaceSign in the dashboard on every deployed environment, and show a "temporarily unavailable" message on the FaceSign enclave's home page.
+- Updated dependencies [247fcc7]
+  - @idos-network/credentials@4.2.0
+  - @idos-network/client@5.0.2
+  - @idos-network/consumer@5.0.2
+  - @idos-network/issuer@5.0.2
+
 ## 1.4.12
 
 ### Patch Changes
