@@ -20,7 +20,12 @@ export class ResidentialAddress {
   @IsString()
   houseNumber?: string;
 
-  /* Additional address information (e.g. apartment number). */
+  /* Flat (apartment) number. */
+  @IsOptional()
+  @IsString()
+  flatNumber?: string;
+
+  /* Additional address information (e.g. floor, building, c/o). */
   @Transliterate()
   @IsOptional()
   @IsString()
