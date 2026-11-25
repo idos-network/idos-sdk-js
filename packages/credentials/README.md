@@ -267,6 +267,13 @@ A verified credential is not yet safe to read. Always read it through
 `parseCredential()` (next section), which checks the subject context and the
 fields, never from the raw JSON.
 
+Only KYC v4 and EDD v2 bind every value to its field name. In KYC v1–v3 and EDD v1,
+fields of the same datatype share one predicate, so the proof covers their values
+but not which field holds which value. Before a decision that depends on a
+specific field of such a credential (a country, a screening result), trust it only
+when the issuer wrote the copy you read: the shared credential's `inserter_type` is
+`dwg` or `mm_operator`, not `user`. Otherwise require a KYC v4 or EDD v2 credential.
+
 ```javascript
 import { verifyCredential } from "@idos-network/credentials/verifier";
 

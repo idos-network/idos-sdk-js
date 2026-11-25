@@ -379,3 +379,5 @@ if (parsed instanceof VerifiableCredentialKycV3) {
   console.log(parsed.subject.person?.firstName);
 }
 ```
+
+Only KYC v4 and EDD v2 bind every value to its field name. In KYC v1–v3 and EDD v1, fields of the same datatype share one predicate, so the proof covers their values but not which field holds which value. Before a decision that depends on a specific field of such a credential (a country, a screening result), trust it only when the issuer wrote the copy you read: the `inserter_type` of the credential returned by `getCredentialSharedFromIDOS` is `dwg` or `mm_operator`, not `user`. Otherwise require a KYC v4 or EDD v2 credential.
