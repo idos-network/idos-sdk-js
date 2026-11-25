@@ -3,10 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { verifyCredential } from ".";
-import idosCredentialSubjectEddV1 from "../../assets/idos-credential-subject-edd-v1.json";
 import idosCredentialSubjectEddV2 from "../../assets/idos-credential-subject-edd-v2.json";
-import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
-import idosCredentialSubjectV2 from "../../assets/idos-credential-subject-v2.json";
 import idosCredentialSubjectV3 from "../../assets/idos-credential-subject-v3.json";
 import idosCredentialSubjectV4 from "../../assets/idos-credential-subject-v4.json";
 import { parseCredential } from "../parser";
@@ -19,8 +16,8 @@ import {
 
 /*
  * KYC v4 and EDD v2 give every field an explicit IRI in the idOS vocabulary, so the proof binds
- * each value to its field. Published contexts are signed into issued credentials and must keep
- * their definitions.
+ * each value to its field. That published contexts keep their definitions is checked in
+ * `published-contexts.test.ts`.
  */
 
 const ISSUER = "https://vc-issuers.cool.id/idos";
@@ -142,18 +139,6 @@ describe("per-field IRI contexts", () => {
     }
 
     expect(listed).toEqual(expected);
-  });
-
-  // These contexts are signed into issued credentials, so their term definitions never change.
-  it.each([
-    ["KYC v1", idosCredentialSubjectV1],
-    ["KYC v2", idosCredentialSubjectV2],
-    ["KYC v3", idosCredentialSubjectV3],
-    ["EDD v1", idosCredentialSubjectEddV1],
-  ])("%s keeps its published term definitions", (_name, context) => {
-    for (const [, definition] of fieldTerms(context)) {
-      expect(typeof definition).toBe("string");
-    }
   });
 });
 

@@ -62,7 +62,11 @@ lists every term in that namespace with its datatype. It is published next to th
 contexts as documentation; verifying a credential never loads it.
 
 Published contexts are signed into issued credentials. Never change an existing
-term's definition; add a new context version instead.
+term's definition; add a new context version instead. Contexts and vocabulary
+terms are append-only: `src/verifier/published-contexts.json` freezes what has
+been published, and `published-contexts.test.ts` fails if a term is removed or
+redefined. Adding a term needs no change there; a new context file must be added
+to the fixture.
 
 ```typescript
 import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
