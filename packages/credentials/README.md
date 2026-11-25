@@ -43,11 +43,22 @@ time. The package exports explicit versioned classes from
 | `VerifiableCredentialKycV1`    | `idos-credential-subject-v1.json`         |
 | `VerifiableCredentialKycV2`    | `idos-credential-subject-v2.json`         |
 | `VerifiableCredentialKycV3`    | `idos-credential-subject-v3.json`         |
+| `VerifiableCredentialKycV4`    | `idos-credential-subject-v4.json`         |
 | `VerifiableCredentialFaceIdV1` | `idos-credential-subject-face-id-v1.json` |
 | `VerifiableCredentialEddV1`    | `idos-credential-subject-edd-v1.json`     |
+| `VerifiableCredentialEddV2`    | `idos-credential-subject-edd-v2.json`     |
 
 Use explicit versioned classes when reading stored credentials with long-lived
 compatibility requirements. Use the latest version when creating new credentials.
+
+KYC v4 and EDD v2 carry the same fields as KYC v3 and EDD v1. Their subject
+contexts give every field an explicit, stable IRI in the
+`https://idos.network/vocab#` namespace. Issue new credentials as KYC v4 or
+EDD v2. `VerifiableCredentialKycV4` extends `VerifiableCredentialKycV3`, so
+code written against v3 accepts it.
+
+Published contexts are signed into issued credentials. Never change an existing
+term's definition; add a new context version instead.
 
 ```typescript
 import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";

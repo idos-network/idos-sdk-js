@@ -94,6 +94,13 @@ function contextTypeOf(cls, property, dateType) {
   return "xsd:string";
 }
 
+/*
+ * The namespace of every term in a context generated with `perFieldIri`: each field becomes
+ * `<IDOS_VOCAB><field>`. This IRI ends up in signed credentials, so never change it. It does
+ * not have to resolve.
+ */
+const IDOS_VOCAB = "https://idos.network/vocab#";
+
 const legacyCountryCodesContext =
   "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/country-codes.xml";
 
@@ -145,6 +152,22 @@ const configuration = [
     },
     fieldContextOverrides: legacyKycFieldContextOverrides,
   },
+  /*
+   * v4 and EDD v2 give every field an explicit IRI in the idOS vocabulary. The contexts above
+   * are signed into issued credentials and stay as they are.
+   */
+  {
+    version: "VerifiableCredentialKycV4",
+    jsonLd: "idos-credential-subject-v4",
+    // A subject date crosses the wire as a full ISO timestamp (`toISOString()`).
+    dateType: "xsd:dateTime",
+    perFieldIri: true,
+  },
+  {
+    version: "VerifiableCredentialEddV2",
+    jsonLd: "idos-credential-subject-edd-v2",
+    perFieldIri: true,
+  },
   {
     version: "VerifiableCredentialFaceIdV1",
     jsonLd: "idos-credential-subject-face-id-v1",
@@ -155,7 +178,10 @@ const configuration = [
   },
 ];
 
-function renderJsonLd(cls, { dateType, extraContext = {}, fieldContextOverrides = {} }) {
+function renderJsonLd(
+  cls,
+  { dateType, extraContext = {}, fieldContextOverrides = {}, perFieldIri = false },
+) {
   const context = {
     "@version": 1.1,
     "@protected": true,
@@ -169,6 +195,7 @@ function renderJsonLd(cls, { dateType, extraContext = {}, fieldContextOverrides 
    */
   const definedByJsonLd = ["id", "issued", "expirationDate"];
   const sections = sectionsOf(cls);
+  const ids = new Set();
 
   /** Records one flattened field, unless an override suppresses it with `null`. */
   const put = (field, owner, ownerField) => {
@@ -176,7 +203,19 @@ function renderJsonLd(cls, { dateType, extraContext = {}, fieldContextOverrides 
 
     if (override === null) return;
 
-    context[field] = override ?? contextTypeOf(owner, ownerField, dateType);
+    const type = override ?? contextTypeOf(owner, ownerField, dateType);
+
+    if (!perFieldIri) {
+      context[field] = type;
+      return;
+    }
+
+    const id = `${IDOS_VOCAB}${field}`;
+
+    if (ids.has(id)) throw new Error(`Two fields expand to ${id}`);
+    ids.add(id);
+
+    context[field] = { "@id": id, "@type": type };
   };
 
   for (const field of fieldsOf(cls)) {
@@ -218,6 +257,7 @@ async function main() {
     dateType,
     extraContext,
     fieldContextOverrides,
+    perFieldIri,
   } of configuration) {
     const exported = schemas[envelope ?? version];
 
@@ -243,6 +283,7 @@ async function main() {
         dateType: dateType ?? "xsd:date",
         extraContext,
         fieldContextOverrides,
+        perFieldIri,
       }),
     );
   }

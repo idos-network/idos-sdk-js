@@ -2,11 +2,13 @@ import { type JsonLDDocumentLoaderInstance, JsonLdDocumentLoader } from "jsonld-
 
 import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json";
 import idosCredentialSubjectEddV1 from "../../assets/idos-credential-subject-edd-v1.json";
+import idosCredentialSubjectEddV2 from "../../assets/idos-credential-subject-edd-v2.json";
 // Maybe we can generate those imports alongside the JSON-LD
 import idosCredentialSubjectFaceIdV1 from "../../assets/idos-credential-subject-face-id-v1.json";
 import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
 import idosCredentialSubjectV2 from "../../assets/idos-credential-subject-v2.json";
 import idosCredentialSubjectV3 from "../../assets/idos-credential-subject-v3.json";
+import idosCredentialSubjectV4 from "../../assets/idos-credential-subject-v4.json";
 import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
 import idosCredentialsV2 from "../../assets/idos-credentials-v2.json";
 import v1 from "../../assets/v1.json";
@@ -22,8 +24,10 @@ export const CONTEXT_IDOS_CREDENTIAL_V2: string = `${BASE_PUBLIC_URL}idos-creden
 export const CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v1.json`;
 export const CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v2.json`;
 export const CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v3.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V4_SUBJECT: string = `${BASE_PUBLIC_URL}idos-credential-subject-v4.json`;
 export const CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID: string = `${BASE_PUBLIC_URL}idos-credential-subject-face-id-v1.json`;
 export const CONTEXT_IDOS_CREDENTIAL_V1_EDD: string = `${BASE_PUBLIC_URL}idos-credential-subject-edd-v1.json`;
+export const CONTEXT_IDOS_CREDENTIAL_V2_EDD: string = `${BASE_PUBLIC_URL}idos-credential-subject-edd-v2.json`;
 
 export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   const loader = new JsonLdDocumentLoader();
@@ -39,12 +43,14 @@ export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT, idosCredentialSubjectV1);
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V2_SUBJECT, idosCredentialSubjectV2);
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V3_SUBJECT, idosCredentialSubjectV3);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V4_SUBJECT, idosCredentialSubjectV4);
 
   // PoP
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID, idosCredentialSubjectFaceIdV1);
 
   // EDD
   loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_EDD, idosCredentialSubjectEddV1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V2_EDD, idosCredentialSubjectEddV2);
 
   // DEPRECATED: Those should be removed
   [
