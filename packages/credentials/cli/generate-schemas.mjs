@@ -99,7 +99,7 @@ function contextTypeOf(cls, property, dateType) {
  * `<IDOS_VOCAB><field>`. This IRI ends up in signed credentials, so never change it. It does
  * not have to resolve.
  */
-const IDOS_VOCAB = "https://idos.network/vocab#";
+const IDOS_VOCAB = "https://vocab.idos.network/credentials#";
 
 const legacyCountryCodesContext =
   "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/country-codes.xml";

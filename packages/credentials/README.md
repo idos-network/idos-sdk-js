@@ -53,7 +53,7 @@ compatibility requirements. Use the latest version when creating new credentials
 
 KYC v4 and EDD v2 carry the same fields as KYC v3 and EDD v1. Their subject
 contexts give every field an explicit, stable IRI in the
-`https://idos.network/vocab#` namespace. Issue new credentials as KYC v4 or
+`https://vocab.idos.network/credentials#` namespace. Issue new credentials as KYC v4 or
 EDD v2. `VerifiableCredentialKycV4` extends `VerifiableCredentialKycV3`, so
 code written against v3 accepts it.
 

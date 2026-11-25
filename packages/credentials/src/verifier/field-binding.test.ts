@@ -24,7 +24,7 @@ import {
 
 const ISSUER = "https://vc-issuers.cool.id/idos";
 const CRED_ID = `${ISSUER}/credentials/z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3`;
-const IDOS_VOCAB = "https://idos.network/vocab#";
+const IDOS_VOCAB = "https://vocab.idos.network/credentials#";
 
 type Context = { "@context": Record<string, unknown> };
 
