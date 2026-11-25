@@ -378,13 +378,17 @@ const allowedIssuers = [
   },
 ];
 
-const verificationResults = await idosConsumer.verifyCredential(credentialContents, allowedIssuers);
+const credential = JSON.parse(credentialContents);
 
-const [verificationResult] = verificationResults;
+const [verified] = await idosConsumer.verifyCredential(credential, allowedIssuers);
 
-if (!verificationResult?.verified) {
+if (!verified) {
   throw new Error("idOS credential verification failed");
 }
+
+// Read the credential through the parser, never from the raw JSON: it checks the subject context
+// and fields. Import it from "@idos-network/credentials/parser".
+const parsed = await parseCredential(credential);
 ```
 
 - Do not continue with unverified credentials unless the user explicitly asks for a prototype-only implementation, and mark that code as unsafe for production.

@@ -2,7 +2,7 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { verifyCredential } from ".";
+import { hasOnlyContextUrls, verifyCredential } from ".";
 import idosCredentialSubjectEddV2 from "../../assets/idos-credential-subject-edd-v2.json";
 import idosCredentialSubjectV3 from "../../assets/idos-credential-subject-v3.json";
 import idosCredentialSubjectV4 from "../../assets/idos-credential-subject-v4.json";
@@ -171,6 +171,47 @@ describe("field binding", () => {
 
     const [verifiedAfterTamper] = await verifyCredential(credential, [key]);
     expect(verifiedAfterTamper).toBe(false);
+  });
+});
+
+describe("context URLs", () => {
+  it("rejects a KYC v4 credential whose subject context was replaced by an embedded copy", async () => {
+    const key = await generateKey();
+    const credential = await issueKyc(VerifiableCredentialKycV4, key);
+    const a = "screeningSanctionsCheckResult";
+    const b = "screeningPepCheckResult";
+
+    // The same context with the IRIs of two fields exchanged expands to the signed graph.
+    const embedded = structuredClone(idosCredentialSubjectV4["@context"]) as unknown as Record<
+      string,
+      { "@id": string }
+    >;
+    [embedded[a], embedded[b]] = [
+      { ...embedded[a], "@id": embedded[b]["@id"] },
+      { ...embedded[b], "@id": embedded[a]["@id"] },
+    ];
+    rearrange(credential, a, b);
+    subjectOf(credential)["@context"] = [embedded];
+
+    const [verified] = await verifyCredential(credential, [key]);
+    expect(verified).toBe(false);
+  });
+
+  it.each([
+    ["a URL", { "@context": "https://example.com/context.json" }],
+    ["a list of URLs", { "@context": ["https://a.example/c.json", "https://b.example/c.json"] }],
+    ["no context", { id: "uuid:abc" }],
+  ])("accepts %s", (_name, document) => {
+    expect(hasOnlyContextUrls(document)).toBe(true);
+  });
+
+  it.each([
+    ["an embedded context", { "@context": { name: "https://schema.org/name" } }],
+    ["an embedded context in a list", { "@context": ["https://a.example/c.json", {}] }],
+    ["a nested embedded context", { credentialSubject: { "@context": [{ "@import": "x" }] } }],
+    ["one inside an array value", { items: [{ "@context": {} }] }],
+  ])("rejects %s", (_name, document) => {
+    expect(hasOnlyContextUrls(document)).toBe(false);
   });
 });
 
