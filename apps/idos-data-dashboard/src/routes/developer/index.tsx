@@ -8,8 +8,8 @@ import { ImplementationPanel } from "@/components/developer/implementation";
 import { Journeys } from "@/components/developer/journeys";
 import { LaunchChecklist } from "@/components/developer/launch";
 import { Badge } from "@/components/ui/badge";
+import { relayUrl } from "@/core/config.server";
 import { getDb } from "@/core/db.server";
-import { SERVER_ENV } from "@/core/envFlags.server";
 import { getUserId, sessionStorage } from "@/core/sessions.server";
 import { cn } from "@/lib/utils";
 
@@ -157,8 +157,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   );
 
   return {
-    basicLiveness: `${SERVER_ENV.RELAY_URL}/kyc?token=${basicLiveness}`,
-    plusLiveness: `${SERVER_ENV.RELAY_URL}/kyc?token=${plusLiveness}`,
+    basicLiveness: `${relayUrl()}/kyc?token=${basicLiveness}`,
+    plusLiveness: `${relayUrl()}/kyc?token=${plusLiveness}`,
     relayClientId: user.relayClientId,
     consumerAuthPublicKey: user.consumerAuthPublicKey,
     consumerAuthKey: user.consumerAuthKey,

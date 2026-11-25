@@ -1,6 +1,6 @@
 {
   "name": "idos-enclave",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "private": true,
   "description": "idOS Enclave",
   "license": "MIT",
@@ -8,8 +8,10 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "coverage": "vitest run --coverage",
     "dev": "vite",
     "preview": "vite preview",
+    "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
@@ -36,12 +38,17 @@
     "@preact/preset-vite": "^2.10.6",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/vite": "^4.3.3",
+    "@vitest/coverage-v8": "catalog:testing",
     "ethers": "catalog:ethereum",
     "tailwindcss": "^4.3.3",
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.12",
-    "vite-plugin-node-polyfills": "catalog:build"
+    "vite-plugin-node-polyfills": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

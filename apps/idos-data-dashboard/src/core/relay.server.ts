@@ -1,3 +1,4 @@
+import { relayUrl } from "./config.server";
 import { SERVER_ENV } from "./envFlags.server";
 
 export interface GenerateJourneyRequest {
@@ -10,7 +11,7 @@ export interface GenerateJourneyRequest {
 }
 
 export async function createRelayClient(request: GenerateJourneyRequest): Promise<string> {
-  const response = await fetch(`${SERVER_ENV.RELAY_URL}/developer/console/clients`, {
+  const response = await fetch(`${relayUrl()}/developer/console/clients`, {
     method: "POST",
     signal: AbortSignal.timeout(10_000),
     headers: {

@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 import nacl from "tweetnacl";
 import { z } from "zod";
 
-import { COMMON_ENV } from "@/core/envFlags.common";
+import { serverIdosNodeUrl } from "@/core/config.server";
 import { SERVER_ENV } from "@/core/envFlags.server";
 import { sessionStorage } from "@/core/sessions.server";
 import { WalletType } from "@/generated/prisma/enums";
@@ -19,7 +19,7 @@ let issuerPromise: Promise<idOSIssuer> | undefined;
 function getIssuer(): Promise<idOSIssuer> {
   issuerPromise ??= idOSIssuer
     .init({
-      nodeUrl: COMMON_ENV.IDOS_NODE_URL,
+      nodeUrl: serverIdosNodeUrl(),
       signingKeyPair: nacl.sign.keyPair.fromSecretKey(hexDecode(SERVER_ENV.IDOS_ISSUER_SECRET_KEY)),
     })
     .catch((error: unknown) => {

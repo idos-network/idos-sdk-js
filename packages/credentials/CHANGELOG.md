@@ -1,5 +1,11 @@
 # @idos-network/credentials
 
+## 4.2.0
+
+### Minor Changes
+
+- 247fcc7: Add an optional `flatNumber` to the KYC v3 residential address.
+
 ## 4.1.0
 
 ### Minor Changes

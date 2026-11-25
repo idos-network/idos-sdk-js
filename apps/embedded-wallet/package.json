@@ -1,12 +1,14 @@
 {
   "name": "embedded-wallet",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "coverage": "vitest run --coverage",
     "dev": "vite",
     "preview": "vite preview",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -36,10 +38,15 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "catalog:testing",
     "tailwindcss": "^4.3.3",
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.12",
-    "vite-plugin-node-polyfills": "catalog:build"
+    "vite-plugin-node-polyfills": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

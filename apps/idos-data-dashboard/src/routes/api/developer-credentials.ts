@@ -2,8 +2,8 @@ import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
 import * as Sentry from "@sentry/react-router";
 import nacl from "tweetnacl";
 
+import { developerConsoleNodeUrl } from "@/core/config.server";
 import { getDb } from "@/core/db.server";
-import { COMMON_ENV } from "@/core/envFlags.common";
 import { getUserId, sessionStorage } from "@/core/sessions.server";
 import { claimRows } from "@/lib/claims";
 import { safeParse } from "@/lib/credential-utils";
@@ -29,7 +29,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const consumerSigner = nacl.sign.keyPair.fromSecretKey(Buffer.from(user.consumerAuthKey, "hex"));
 
   const consumer = await idOSConsumerClass.init({
-    nodeUrl: COMMON_ENV.DEVELOPER_CONSOLE_IDOS_NODE_URL,
+    nodeUrl: developerConsoleNodeUrl(),
     consumerSigner,
     recipientEncryptionPrivateKey: user.consumerEncKey,
   });

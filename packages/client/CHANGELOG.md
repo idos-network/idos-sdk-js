@@ -1,5 +1,13 @@
 # @idos-network/client
 
+## 5.0.2
+
+### Patch Changes
+
+- Updated dependencies [247fcc7]
+  - @idos-network/credentials@4.2.0
+  - @idos-network/enclave@3.0.5
+
 ## 5.0.1
 
 ### Patch Changes

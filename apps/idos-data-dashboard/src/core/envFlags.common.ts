@@ -3,10 +3,12 @@ import * as z from "zod";
 export const commonEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   PUBLIC_URL: z.string(),
+  // Read by the server (with an allowlist, see config.server.ts) and by local development.
   IDOS_NODE_URL: z.string(),
-  IDOS_ENCLAVE_URL: z.string(),
+  // Local development only: deployed hosts use the values pinned in config.ts.
+  IDOS_ENCLAVE_URL: z.string().optional(),
   FACESIGN_ENCLAVE_URL: z.string().optional(),
-  EMBEDDED_WALLET_APP_URLS: z.string(),
+  EMBEDDED_WALLET_APP_URLS: z.string().optional(),
   WALLET_CONNECT_PROJECT_ID: z.string(),
   IDOS_NEAR_DEFAULT_CONTRACT_ID: z.string(),
   STELLAR_NETWORK: z.enum(["testnet", "public"]),

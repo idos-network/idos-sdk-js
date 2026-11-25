@@ -1,7 +1,7 @@
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 
 import { isSignAddWalletForAttempt, readAddWalletRequest } from "./add-wallet-request";
-import { COMMON_ENV } from "./components/envFlags.common";
+import { getConfig } from "./config";
 
 export type ChainSignMessage = {
   message: string;
@@ -19,11 +19,12 @@ export function requestChainSignMessage(params: {
   walletType: WalletType;
 }): Promise<ChainSignMessage> {
   const request = readAddWalletRequest(window.location.search);
-  if (!request || !window.opener || !COMMON_ENV.DATA_DASHBOARD_URL) {
+  const { dataDashboardUrl } = getConfig();
+  if (!request || !window.opener || !dataDashboardUrl) {
     return Promise.reject(new Error("Add-wallet request is missing"));
   }
 
-  const dashboardOrigin = new URL(COMMON_ENV.DATA_DASHBOARD_URL).origin;
+  const dashboardOrigin = new URL(dataDashboardUrl).origin;
   const opener = window.opener as Window;
   const attemptId = crypto.randomUUID();
 

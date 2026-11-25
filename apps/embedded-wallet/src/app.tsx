@@ -3,12 +3,12 @@ import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { useEffect } from "react";
 
 import { readAddWalletRequest } from "./add-wallet-request";
-import { COMMON_ENV } from "./components/envFlags.common";
 import { EVMConnector } from "./components/evm";
 import { FaceSignConnector } from "./components/facesign";
 import { NearConnector } from "./components/near";
 import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
+import { getConfig } from "./config";
 import { useWalletState } from "./state";
 
 const getHiddenWalletTypes = (): string[] => {
@@ -51,7 +51,8 @@ export function App() {
 
   useEffect(() => {
     if (walletPayload && connectedWalletType) {
-      if (!COMMON_ENV.DATA_DASHBOARD_URL) {
+      const { dataDashboardUrl } = getConfig();
+      if (!dataDashboardUrl) {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
       }
@@ -75,7 +76,7 @@ export function App() {
                 disconnect: undefined,
               },
             },
-            COMMON_ENV.DATA_DASHBOARD_URL,
+            dataDashboardUrl,
           );
 
           // Close the popup window after sending the data

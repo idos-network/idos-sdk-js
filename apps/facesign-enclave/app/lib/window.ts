@@ -1,6 +1,6 @@
 import type { SessionProposal, SignProposal } from "@/providers/requests.provider";
 
-import { env } from "@/env";
+import { getConfig } from "@/config";
 import { approveOrigin, clearKeyMaterial, isOriginApproved } from "@/lib/keys";
 
 export class BaseHandler {
@@ -27,7 +27,7 @@ export class BaseHandler {
 export class WindowMessageHandler extends BaseHandler {
   #isIframe: boolean;
   #parentWindow: Window | null;
-  #allowedOrigins: string[];
+  #allowedOrigins: readonly string[];
   #isKeyAvailable: boolean;
   #getStoredAddress: (() => Promise<string>) | null;
 
@@ -43,7 +43,7 @@ export class WindowMessageHandler extends BaseHandler {
     this.#getStoredAddress = getStoredAddress ?? null;
     this.#isIframe = window.self !== window.top;
     this.#parentWindow = this.#isIframe ? window.parent : window.opener;
-    this.#allowedOrigins = parseAllowedOrigins(env.VITE_ALLOWED_ORIGINS);
+    this.#allowedOrigins = getConfig().allowedOrigins;
 
     console.log(`FaceSign Enclave initialized in ${this.#isIframe ? "iframe" : "popup"} mode`);
     console.log(`Allowed origins: ${this.#allowedOrigins.join(", ") || "(none)"}`);
@@ -165,20 +165,4 @@ export class WindowMessageHandler extends BaseHandler {
         });
     }
   };
-}
-
-/** Parses VITE_ALLOWED_ORIGINS. Wildcards are not supported: every origin must be listed. */
-export function parseAllowedOrigins(raw: string | undefined): string[] {
-  const origins = (raw ?? "")
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean);
-
-  if (origins.includes("*")) {
-    console.error(
-      'VITE_ALLOWED_ORIGINS: "*" is not supported and is ignored. List origins explicitly.',
-    );
-  }
-
-  return origins.filter((o) => o !== "*");
 }

@@ -1,9 +1,9 @@
-import { COMMON_ENV } from "@/core/envFlags.common";
+import { getConfig } from "@/core/config";
 
 export async function createFaceSignProvider() {
   const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
 
-  const enclaveUrl = COMMON_ENV.FACESIGN_ENCLAVE_URL;
+  const enclaveUrl = getConfig().faceSignEnclaveUrl;
   if (!enclaveUrl) {
     throw new Error("FaceSign is not available. Please try again later.");
   }
