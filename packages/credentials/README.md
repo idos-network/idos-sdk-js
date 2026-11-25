@@ -57,6 +57,10 @@ contexts give every field an explicit, stable IRI in the
 EDD v2. `VerifiableCredentialKycV4` extends `VerifiableCredentialKycV3`, so
 code written against v3 accepts it.
 
+The generator also writes `assets/idos-vocab.xml`, an RDF/XML (RDFS) document that
+lists every term in that namespace with its datatype. It is published next to the
+contexts as documentation; verifying a credential never loads it.
+
 Published contexts are signed into issued credentials. Never change an existing
 term's definition; add a new context version instead.
 

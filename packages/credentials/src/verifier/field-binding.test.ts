@@ -1,4 +1,5 @@
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { verifyCredential } from ".";
@@ -120,6 +121,27 @@ describe("per-field IRI contexts", () => {
       const expected = type === "xsd:date" ? "xsd:dateTime" : type;
       expect((v4.get(term) as { "@type": string })["@type"]).toBe(expected);
     }
+  });
+
+  it("the vocabulary document lists every per-field IRI with its type", () => {
+    const xml = readFileSync(new URL("../../assets/idos-vocab.xml", import.meta.url), "utf8");
+    const listed = new Map(
+      [
+        ...xml.matchAll(
+          /<rdf:Property rdf:about="([^"]+)">[\s\S]*?<rdfs:range rdf:resource="([^"]+)"\/>/g,
+        ),
+      ].map(([, id, range]) => [id, range]),
+    );
+
+    const expected = new Map<string, string>();
+    for (const context of [idosCredentialSubjectV4, idosCredentialSubjectEddV2]) {
+      for (const [, definition] of fieldTerms(context)) {
+        const { "@id": id, "@type": type } = definition as { "@id": string; "@type": string };
+        expected.set(id, type.replace(/^xsd:/, "http://www.w3.org/2001/XMLSchema#"));
+      }
+    }
+
+    expect(listed).toEqual(expected);
   });
 
   // These contexts are signed into issued credentials, so their term definitions never change.
