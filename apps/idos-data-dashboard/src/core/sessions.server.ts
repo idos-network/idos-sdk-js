@@ -21,7 +21,8 @@ export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24;
 
 export const sessionStorage = createCookieSessionStorage<Session>({
   cookie: {
-    name: "__session",
+    // __Host- stops sibling subdomains from planting or shadowing the cookie (session fixation); it requires Secure.
+    name: SERVER_ENV.SECURE_AUTH_COOKIE ? "__Host-session" : "__session",
     secrets: [SERVER_ENV.SECRET_KEY_BASE],
     sameSite: "lax",
     path: "/",

@@ -48,7 +48,7 @@ describe("/api/login", () => {
       expect(body.proofMessage).toMatch(
         /^Please sign this message to confirm you own this wallet address\. Nonce [0-9a-f-]{36}$/,
       );
-      expect(getSetCookieHeader(response)).toContain("__session=");
+      expect(getSetCookieHeader(response)).toContain("__Host-session=");
     });
   });
 
@@ -156,7 +156,7 @@ describe("/api/login", () => {
           walletType: evmProfile.walletType,
         },
       });
-      expect(getSetCookieHeader(response)).toContain("__session=");
+      expect(getSetCookieHeader(response)).toContain("__Host-session=");
     });
 
     it("creates a non-EVM session using the wallet public key", async () => {

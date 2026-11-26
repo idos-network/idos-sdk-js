@@ -6,7 +6,8 @@ export interface Session {
 
 export const sessionStorage = createCookieSessionStorage<Session>({
   cookie: {
-    name: "__session",
+    // __Host- stops sibling subdomains from planting or shadowing the cookie (session fixation); it requires Secure.
+    name: process.env.SECURE_AUTH_COOKIE === "true" ? "__Host-session" : "__session",
     secrets: [process.env.SECRET_KEY_BASE!],
     sameSite: "lax",
     path: "/",
