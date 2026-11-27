@@ -1,5 +1,11 @@
 # data-dashboard
 
+## 1.4.14
+
+### Patch Changes
+
+- 45d59d4: Name the session cookie `__Host-session` when it is Secure, so a sibling subdomain can no longer plant or shadow it (session fixation). Existing sessions are logged out once.
+
 ## 1.4.13
 
 ### Patch Changes
