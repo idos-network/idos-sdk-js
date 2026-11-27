@@ -244,6 +244,7 @@ export function useKycIframeRelay() {
 // =============================================================================
 
 import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+import { parseCredential } from "@idos-network/credentials/parser";
 import { hexDecode } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
 
@@ -311,16 +312,15 @@ export async function verifyCredentialExample(credentialContents: string) {
     },
   ];
 
-  const verificationResults = await idosConsumer.verifyCredential(
-    credentialContents,
-    allowedIssuers,
-  );
+  const credential = JSON.parse(credentialContents);
 
-  const [verificationResult] = verificationResults;
+  const [verified] = await idosConsumer.verifyCredential(credential, allowedIssuers);
 
-  if (!verificationResult?.verified) {
+  if (!verified) {
     throw new Error("idOS credential verification failed");
   }
 
-  return verificationResult;
+  // Read the credential through the parser, never from the raw JSON: it checks the subject
+  // context and fields.
+  return parseCredential(credential);
 }

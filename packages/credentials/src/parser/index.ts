@@ -2,10 +2,12 @@ import type { VerifiableCredential } from "../types";
 
 import {
   VerifiableCredentialEddV1,
+  VerifiableCredentialEddV2,
   VerifiableCredentialFaceIdV1,
   VerifiableCredentialKycV1,
   VerifiableCredentialKycV2,
   VerifiableCredentialKycV3,
+  VerifiableCredentialKycV4,
 } from "../schemas";
 
 type CredentialWithContext = VerifiableCredential<unknown>;
@@ -13,10 +15,12 @@ type CredentialWithContext = VerifiableCredential<unknown>;
 /** Every version `parseCredential` can return. */
 export type ParsedCredential =
   | VerifiableCredentialEddV1
+  | VerifiableCredentialEddV2
   | VerifiableCredentialFaceIdV1
   | VerifiableCredentialKycV1
   | VerifiableCredentialKycV2
-  | VerifiableCredentialKycV3;
+  | VerifiableCredentialKycV3
+  | VerifiableCredentialKycV4;
 
 /*
  * Matched on the subject `@context`, which is unique per version — several versions share an
@@ -24,10 +28,12 @@ export type ParsedCredential =
  */
 const VERSIONS: { readonly subjectContext: string; new (): ParsedCredential }[] = [
   VerifiableCredentialEddV1,
+  VerifiableCredentialEddV2,
   VerifiableCredentialFaceIdV1,
   VerifiableCredentialKycV1,
   VerifiableCredentialKycV2,
   VerifiableCredentialKycV3,
+  VerifiableCredentialKycV4,
 ];
 
 function hasContext(input: CredentialWithContext, context: string): boolean {

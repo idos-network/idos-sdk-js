@@ -109,6 +109,7 @@ pstn
 publint
 qrcode
 rawstatement
+rdfs
 Reown
 resreq
 Revalidator

@@ -352,11 +352,14 @@ const credentialContents: string =
   await idOSConsumer.getCredentialSharedContentDecrypted("GRANT_DATA_ID");
 ```
 
-## Verify credentials signature
+## Verify and read credentials
 
-It's strongly recommended to verify signature, before you use credentials! If you need a helper to verify that the W3C VC is something you want to trust, here's an example:
+Verify the signature before you use a credential, then read it with `parseCredential` from `@idos-network/credentials`, never from the raw JSON. The proof covers the credential's RDF graph, not its JSON: `parseCredential` checks that the subject uses the context of a known credential version and that its fields match that version.
 
 ```js
+import { parseCredential } from "@idos-network/credentials/parser";
+import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
+
 const allowedIssuers = [
   {
     issuer: "https://kyc-provider.example.com/idos",
@@ -364,7 +367,17 @@ const allowedIssuers = [
   },
 ];
 
-const [verificationResult] = await idOSConsumer.verifyCredential(credentials, allowedIssuers);
+const credential = JSON.parse(credentialContents);
 
-console.log("Result: ", verificationResult);
+const [verified] = await idOSConsumer.verifyCredential(credential, allowedIssuers);
+if (!verified) throw new Error("idOS credential verification failed");
+
+const parsed = await parseCredential(credential);
+
+// KYC v3 and v4 (v4 extends v3).
+if (parsed instanceof VerifiableCredentialKycV3) {
+  console.log(parsed.subject.person?.firstName);
+}
 ```
+
+Only KYC v4 and EDD v2 bind every value to its field name. In KYC v1–v3 and EDD v1, fields of the same datatype share one predicate, so the proof covers their values but not which field holds which value. Before a decision that depends on a specific field of such a credential (a country, a screening result), trust it only when the issuer wrote the copy you read: the `inserter_type` of the credential returned by `getCredentialSharedFromIDOS` is `dwg` or `mm_operator`, not `user`. Otherwise require a KYC v4 or EDD v2 credential.

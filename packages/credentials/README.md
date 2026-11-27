@@ -43,14 +43,35 @@ time. The package exports explicit versioned classes from
 | `VerifiableCredentialKycV1`    | `idos-credential-subject-v1.json`         |
 | `VerifiableCredentialKycV2`    | `idos-credential-subject-v2.json`         |
 | `VerifiableCredentialKycV3`    | `idos-credential-subject-v3.json`         |
+| `VerifiableCredentialKycV4`    | `idos-credential-subject-v4.json`         |
 | `VerifiableCredentialFaceIdV1` | `idos-credential-subject-face-id-v1.json` |
 | `VerifiableCredentialEddV1`    | `idos-credential-subject-edd-v1.json`     |
+| `VerifiableCredentialEddV2`    | `idos-credential-subject-edd-v2.json`     |
 
 Use explicit versioned classes when reading stored credentials with long-lived
 compatibility requirements. Use the latest version when creating new credentials.
 
+KYC v4 and EDD v2 carry the same fields as KYC v3 and EDD v1. Their subject
+contexts give every field an explicit, stable IRI in the
+`https://vocab.idos.network/credentials#` namespace. Issue new credentials as KYC v4 or
+EDD v2. `VerifiableCredentialKycV4` extends `VerifiableCredentialKycV3`, so
+code written against v3 accepts it. Code that treats the versions differently must
+check `VerifiableCredentialKycV4` first, since a v4 credential is also an instance of v3.
+
+The generator also writes `assets/idos-vocab.xml`, an RDF/XML (RDFS) document that
+lists every term in that namespace with its datatype. It is published next to the
+contexts as documentation; verifying a credential never loads it.
+
+Published contexts are signed into issued credentials. Never change an existing
+term's definition or a context directive; add a new context version instead.
+`src/verifier/published-contexts.json` records every published context and
+vocabulary term, and `published-contexts.test.ts` fails if a file differs from it.
+The record is append-only: a new term in KYC v4 or EDD v2 is added to it in the same
+change, and a new context file gets its own entry. Contexts whose terms map to
+datatypes (KYC v1–v3, EDD v1, the envelopes) are closed: don't add terms to them.
+
 ```typescript
-import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
+import { VerifiableCredentialKycV4 } from "@idos-network/credentials/schemas";
 import type { VerifiableCredential } from "@idos-network/credentials/types";
 ```
 
@@ -135,18 +156,18 @@ const trustedIssuer = {
 ## Build a KYC credential
 
 Each section is validated as it is added, and `issue()` builds and signs the full
-verifiable credential. For KYC v3, `level` and `kycLevel` can be omitted from the
+verifiable credential. For KYC v3 and v4, `level` and `kycLevel` can be omitted from the
 envelope: they are derived from the subject data during `serializeSubject()` /
 `issue()`. `expirationDate` is derived only when `subject.idDocument.dateOfExpiry`
 exists; otherwise it remains absent.
 
 ```typescript
-import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
+import { VerifiableCredentialKycV4 } from "@idos-network/credentials/schemas";
 import type { AvailableIssuerType, VerifiableCredential } from "@idos-network/credentials/types";
 
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 
-const kycCredential = new VerifiableCredentialKycV3()
+const kycCredential = new VerifiableCredentialKycV4()
   .setEnvelope({
     id: `${issuer}/credentials/${id}`,
     issued: new Date("2022-01-01"),
@@ -214,13 +235,13 @@ Use `serializeSubject()` when you need the flat credential subject. Use
 access to its fields.
 
 ```typescript
-import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
+import { VerifiableCredentialKycV4 } from "@idos-network/credentials/schemas";
 
 const flatSubject = kycCredential.serializeSubject();
 // Dates -> ISO strings, Buffers -> base85, sections -> prefixed keys
 // e.g. person.firstName -> personFirstName
 
-const roundTrip = new VerifiableCredentialKycV3();
+const roundTrip = new VerifiableCredentialKycV4();
 await roundTrip.deserialize(credential);
 
 console.log(roundTrip.envelope.id);
@@ -237,7 +258,21 @@ the lenient half — the credential's own W3C fields (`proof`, `issuanceDate`,
 ## Verify a credential
 
 `verifyCredential` checks a credential against a list of trusted issuers. It
-returns as soon as one issuer verifies the credential successfully.
+returns as soon as one issuer verifies the credential successfully. A credential
+whose `@context` is not made only of URLs is reported as not verified: the proof
+covers the RDF graph, and an embedded context could map the JSON fields onto that
+graph differently.
+
+A verified credential is not yet safe to read. Always read it through
+`parseCredential()` (next section), which checks the subject context and the
+fields, never from the raw JSON.
+
+Only KYC v4 and EDD v2 bind every value to its field name. In KYC v1–v3 and EDD v1,
+fields of the same datatype share one predicate, so the proof covers their values
+but not which field holds which value. Before a decision that depends on a
+specific field of such a credential (a country, a screening result), trust it only
+when the issuer wrote the copy you read: the shared credential's `inserter_type` is
+`dwg` or `mm_operator`, not `user`. Otherwise require a KYC v4 or EDD v2 credential.
 
 ```javascript
 import { verifyCredential } from "@idos-network/credentials/verifier";
@@ -264,15 +299,21 @@ callers can handle unsupported versions explicitly.
 
 Parsing does **not** verify the signature — the result reflects whatever was in the
 input, signed or forged. For untrusted input call `verifyCredential()` first, and
-only parse once it reports verified.
+only parse once it reports verified. Use both: verifying alone doesn't check which
+context the JSON fields were read with, and parsing alone doesn't check the proof.
 
 ```typescript
+import { verifyCredential } from "@idos-network/credentials/verifier";
 import { parseCredential } from "@idos-network/credentials/parser";
 import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
+
+const [verified] = await verifyCredential(credential, allowedIssuers);
+if (!verified) throw new Error("Credential is not verified");
 
 const parsed = await parseCredential(credential);
 
 if (parsed instanceof VerifiableCredentialKycV3) {
+  // KYC v3 and v4: v4 extends v3
   console.log(parsed.subject.person?.firstName);
   console.log(parsed.level());
 }
@@ -280,7 +321,7 @@ if (parsed instanceof VerifiableCredentialKycV3) {
 
 ## Derive a level
 
-For KYC v3, call `level()` to derive the string level from structured subject data:
+For KYC v3 and v4, call `level()` to derive the string level from structured subject data:
 a verified address proof yields `plus`, and optional addons include `liveness`,
 `email`, `phoneNumber`, `edd`, `sow`, `screening`, and `onboarding`. An email or
 phone number with `emailSource` / `phoneNumberSource` set to `"MANUAL"` (typed in,
@@ -297,9 +338,9 @@ questionnaire is always filled in by the person, yet it still adds its addon.
 [Match claims](#match-claims).
 
 ```javascript
-import { VerifiableCredentialKycV3 } from "@idos-network/credentials/schemas";
+import { VerifiableCredentialKycV4 } from "@idos-network/credentials/schemas";
 
-const kycCredential = new VerifiableCredentialKycV3()
+const kycCredential = new VerifiableCredentialKycV4()
   .setSubject({ id: "uuid:1234" })
   .addSection("person", {
     firstName: "John",
